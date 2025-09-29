@@ -1,0 +1,29 @@
+server:
+  forward-headers-strategy: native
+spring:
+  application:
+    name: back
+  config:
+    import: optional:file:.env[.properties]
+  profiles:
+    active: dev
+    include: secret
+  output:
+    ansi:
+      enabled: always
+  datasource:
+    hikari:
+      auto-commit: false
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
