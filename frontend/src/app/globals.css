@@ -1,7 +1,10 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* 라이트 모드 전용 CSS 변수 */
 :root {
-  /* 메인 */
+  /* 기본 색상 */
   --background: #fbf8f1;
   --foreground: #252525;
   --card: #ffffff;
@@ -9,13 +12,13 @@
   --popover: #ffffff;
   --popover-foreground: #252525;
 
-  /* 버튼 */
+  /* 버튼 색상 */
   --primary: #006a20;
   --primary-foreground: #ffffff;
   --secondary: #f1eadc;
   --secondary-foreground: #252525;
 
-  /* 강조 및 상태 */
+  /* 강조 및 상태 색상 */
   --muted: #f1eadc;
   --muted-foreground: #5a5549;
   --accent: #fcc800;
@@ -28,14 +31,14 @@
   --input: #ffffff;
   --ring: #006a20;
 
-  /* 차트 */
+  /* 차트 색상 */
   --chart-1: #006a20;
   --chart-2: #fcc800;
   --chart-3: #0f0a03;
   --chart-4: #016830;
   --chart-5: #00c950;
 
-  /* 사이드바 */
+  /* 사이드바 색상 */
   --sidebar: #ffffff;
   --sidebar-foreground: #252525;
   --sidebar-primary: #006a20;
@@ -46,15 +49,83 @@
   --sidebar-ring: #006a20;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* 글로벌 기본 스타일 */
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.card {
+  background: var(--card);
+  color: var(--card-foreground);
+}
+
+.popover {
+  background: var(--popover);
+  color: var(--popover-foreground);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.btn-secondary {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+.btn-accent {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.btn-destructive {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+}
+
+.input {
+  background: var(--input);
+  border: 1px solid var(--border);
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.sidebar {
+  background: var(--sidebar);
+  color: var(--sidebar-foreground);
+  border: 1px solid var(--sidebar-border);
+}
+
+.sidebar-primary {
+  background: var(--sidebar-primary);
+  color: var(--sidebar-primary-foreground);
+}
+
+.sidebar-accent {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+/* 차트 색상 예시 */
+.chart-1 {
+  color: var(--chart-1);
+}
+.chart-2 {
+  color: var(--chart-2);
+}
+.chart-3 {
+  color: var(--chart-3);
+}
+.chart-4 {
+  color: var(--chart-4);
+}
+.chart-5 {
+  color: var(--chart-5);
 }
