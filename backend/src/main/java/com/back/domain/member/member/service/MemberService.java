@@ -41,4 +41,14 @@ public class MemberService {
     public Optional<Member> findById(long id) {
         return memberRepository.findById(id);
     }
+
+    public Optional<Member> findByEmail(String email) {
+        return memberRepository.findByEmail(email);
+    }
+
+    public void updatePassword(Member member, String newPassword) {
+        member.changePassword(newPassword, passwordEncoder);
+        memberRepository.save(member);
+    }
+
 }
