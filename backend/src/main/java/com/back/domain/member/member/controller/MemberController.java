@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+
 @RequiredArgsConstructor
 @RequestMapping("/member")
 @Tag(name = "MemberController", description = "API 멤버 컨트롤러")
@@ -28,6 +29,7 @@ public class MemberController {
     @Operation(summary = "회원가입")
     public RsData<MemberDto> join(@Valid @RequestBody MemberJoinReq req) {
         Member member = memberService.join(req.getUsername(), req.getNickname(), req.getPassword(), req.getEmail());
+
         return new RsData<>("200-1", "%s 님 환영합니다. 회원가입이 완료 되었습니다.".formatted(member.getUsername()), new MemberDto(member));
 
     }
@@ -49,7 +51,17 @@ public class MemberController {
     @DeleteMapping("logout")
     @Operation(summary = "로그아웃")
     public RsData<Void> logout() {
+
         return new RsData<>("200-1", "로그아웃 되었습니다.");
+    }
+
+    @Transactional(readOnly = true)
+    @GetMapping("/me/{id}")
+    @Operation(summary = "내 정보")
+    public RsData<MemberDto> me(@PathVariable long id) {
+        Member member = memberService.findById(id).orElseThrow(() -> new ServiceException("400-3", "존재하지 않는 회원입니다."));
+
+        return new RsData<>("200-1", "%s 님의 정보입니다.".formatted(member.getUsername()), new MemberDto(member));
     }
 }
 

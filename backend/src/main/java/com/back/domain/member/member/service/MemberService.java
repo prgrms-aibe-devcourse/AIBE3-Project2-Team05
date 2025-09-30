@@ -37,4 +37,8 @@ public class MemberService {
             throw new ServiceException("400-3", "비밀번호가 일치하지 않습니다.");
         }
     }
+
+    public Optional<Member> findById(long id) {
+        return memberRepository.findById(id);
+    }
 }
