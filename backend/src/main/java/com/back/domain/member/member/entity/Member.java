@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,14 +33,21 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private List<Role> roles = new ArrayList<>();
 
+    private String refreshToken;
+
     public Member(String username, String nickname, String password, String email) {
         this.username = username;
         this.nickname = nickname;
         this.password = password;
         this.email = email;
+        this.refreshToken = UUID.randomUUID().toString(); //랜덤한 refreshToken 생성
     }
 
     public void changePassword(String newPassword, PasswordEncoder passwordEncoder) {
         this.password = passwordEncoder.encode(newPassword);
+    }
+
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }

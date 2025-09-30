@@ -5,8 +5,10 @@ import com.back.domain.member.member.dto.MemberJoinReq;
 import com.back.domain.member.member.dto.MemberLoginReq;
 import com.back.domain.member.member.dto.MemberLoginRes;
 import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.service.AuthTokenService;
 import com.back.domain.member.member.service.MemberService;
 import com.back.global.exception.ServiceException;
+import com.back.global.rq.Rq;
 import com.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,6 +25,8 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     private final MemberService memberService;
+    private final AuthTokenService authTokenService;
+    private final Rq rq;
 
     @Transactional
     @PostMapping
@@ -43,7 +47,12 @@ public class MemberController {
 
         memberService.checkPassword(member, req.getPassword());
 
-        return new RsData<>("200-1", "%s 님 환영합니다.".formatted(req.getUsername()), new MemberLoginRes(new MemberDto(member)));
+        String accessToken = authTokenService.genAccessToken(member);
+
+        rq.setCookie("refreshToken", member.getRefreshToken());
+        rq.setCookie("accessToken", accessToken);
+
+        return new RsData<>("200-1", "%s 님 환영합니다.".formatted(req.getUsername()), new MemberLoginRes(new MemberDto(member), member.getRefreshToken(), accessToken));
 
     }
 
@@ -51,6 +60,9 @@ public class MemberController {
     @DeleteMapping("logout")
     @Operation(summary = "로그아웃")
     public RsData<Void> logout() {
+
+        rq.deleteCookie("refreshToken");
+        rq.deleteCookie("accessToken");
 
         return new RsData<>("200-1", "로그아웃 되었습니다.");
     }
