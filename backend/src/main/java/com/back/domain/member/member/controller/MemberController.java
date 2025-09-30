@@ -11,10 +11,8 @@ import com.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RequestMapping("/member")
@@ -23,6 +21,7 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    @Transactional
     @PostMapping
     @Operation(summary = "회원가입")
     public RsData<MemberDto> join(@Valid @RequestBody MemberJoinReq req) {
@@ -31,6 +30,7 @@ public class MemberController {
 
     }
 
+    @Transactional
     @PostMapping("login")
     @Operation(summary = "로그인")
     public RsData<MemberLoginRes> login(@Valid @RequestBody MemberLoginReq req) {
@@ -43,5 +43,11 @@ public class MemberController {
 
     }
 
+    @Transactional
+    @DeleteMapping("logout")
+    @Operation(summary = "로그아웃")
+    public RsData<Void> logout() {
+        return new RsData<>("200-1", "로그아웃 되었습니다.");
+    }
 }
 

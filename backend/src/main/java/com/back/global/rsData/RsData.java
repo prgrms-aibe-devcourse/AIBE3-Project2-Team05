@@ -10,6 +10,10 @@ public record RsData<T>(
         this(resultCode, Integer.parseInt(resultCode.split("-", 2)[0]), msg, data);
     }
 
+    public RsData(String resultCode, String msg) {
+        this(resultCode, msg, null);
+    }
+
 }
 /*
      <결과 코드 정리>
