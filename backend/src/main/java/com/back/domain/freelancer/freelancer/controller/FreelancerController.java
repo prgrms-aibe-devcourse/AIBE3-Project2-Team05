@@ -29,8 +29,15 @@ public class FreelancerController {
 
     @PostMapping
     public long create(@RequestBody FreelancerCreateDto dto) {
+        //===================임시 Member 생성===================
         Member member = new Member("user1", "1234", "유저1", "user1@user");
+        //======================================================
         Freelancer freelancer = freelancerService.create(member, dto);
         return freelancer.getId();
+    }
+
+    @DeleteMapping("/{id}")
+    public long delete(@PathVariable long id) {
+        return freelancerService.delete(id);
     }
 }

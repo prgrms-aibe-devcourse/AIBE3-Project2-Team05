@@ -6,10 +6,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @NoArgsConstructor
 @Entity
 @Getter
+@Setter
 public class Freelancer extends BaseEntity {
 
     @OneToOne
