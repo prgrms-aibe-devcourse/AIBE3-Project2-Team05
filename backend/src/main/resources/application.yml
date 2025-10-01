@@ -21,7 +21,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
@@ -31,4 +31,4 @@ custom:
   jwt:
     secretKey: ${CUSTOM__JWT__SECRET_KEY}
   accessToken:
-    expireSeconds: "#{60 * 10}"
+    expireSeconds: "#{60 * 15}"

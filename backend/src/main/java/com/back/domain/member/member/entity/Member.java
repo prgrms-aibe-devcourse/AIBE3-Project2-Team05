@@ -43,11 +43,22 @@ public class Member extends BaseEntity {
         this.refreshToken = UUID.randomUUID().toString(); //랜덤한 refreshToken 생성
     }
 
+    public Member (long id, String username, String nickname) {
+        this.id = id;
+        this.username = username;
+        this.nickname = nickname;
+    }
+
     public void changePassword(String newPassword, PasswordEncoder passwordEncoder) {
         this.password = passwordEncoder.encode(newPassword);
     }
 
-    public void updateRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
+    public void updateEmail(String email) {
+        this.email = email;
+    }
+
+
+    public void updateNickName(String nickname) {
+        this.nickname = nickname;
     }
 }

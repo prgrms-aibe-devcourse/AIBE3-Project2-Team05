@@ -19,7 +19,7 @@ public class AuthTokenService {
     @Value("${custom.accessToken.expireSeconds}")
     private int accessTokenExpireSeconds;
 
-    public String genAccessToken(Member member) {
+     public String genAccessToken(Member member) {
         long id = member.getId();
         String username = member.getUsername();
         String nickname = member.getNickname();
@@ -38,4 +38,17 @@ public class AuthTokenService {
         );
     }
 
+    public Map<String, Object> payload(String assessToken) {
+        Map<String, Object> parsedPayload = JWTUt.jwt.payload(jwtSecretKey, assessToken);
+
+        if (parsedPayload == null) return null;
+
+        long id = ((Number) parsedPayload.get("id")).longValue();
+
+        String username = (String) parsedPayload.get("username");
+
+        String nickname = (String) parsedPayload.get("nickname");
+
+        return Map.of("id", id, "username", username, "nickname", nickname);
+    }
 }

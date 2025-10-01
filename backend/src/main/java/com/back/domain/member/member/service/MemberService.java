@@ -1,5 +1,6 @@
 package com.back.domain.member.member.service;
 
+import com.back.domain.member.member.dto.UpdateMemberReq;
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.entity.Role;
 import com.back.domain.member.member.repository.MemberRepository;
@@ -49,6 +50,24 @@ public class MemberService {
     public void updatePassword(Member member, String newPassword) {
         member.changePassword(newPassword, passwordEncoder);
         memberRepository.save(member);
+    }
+
+    public Member updateMember(long id, UpdateMemberReq req) {
+        Member member = memberRepository.findById(id).orElseThrow(() -> new ServiceException("400-3", "회원을 찾을 수 없습니다."));
+
+        if (req.getEmail() != null && !req.getEmail().equals(member.getEmail())) {
+            member.updateEmail(req.getEmail());
+        }
+
+        if (req.getNickname() != null && !req.getNickname().equals(member.getNickname())) {
+            member.updateNickName(req.getNickname());
+        }
+
+        return memberRepository.save(member);
+    }
+
+    public Optional<Member> findByRefreshToken(String refreshToken) {
+        return memberRepository.findByRefreshToken(refreshToken);
     }
 
 }
