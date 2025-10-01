@@ -3,3 +3,6 @@ spring:
     name: back
   profiles:
     active: dev
+  jpa:
+    hibernate:
+      ddl-auto: update
