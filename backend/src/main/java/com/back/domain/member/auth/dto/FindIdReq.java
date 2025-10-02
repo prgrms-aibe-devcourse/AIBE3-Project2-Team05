@@ -8,4 +8,6 @@ public class FindIdReq {
 
     @NotBlank(message = "이메일은 필수 항목입니다.")
     private String email;
+
+    private String verifyCode;
 }

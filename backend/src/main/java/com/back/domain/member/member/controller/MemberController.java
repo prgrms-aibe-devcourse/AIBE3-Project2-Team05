@@ -2,7 +2,6 @@ package com.back.domain.member.member.controller;
 
 import com.back.domain.member.member.dto.*;
 import com.back.domain.member.member.entity.Member;
-import com.back.domain.member.member.service.AuthTokenService;
 import com.back.domain.member.member.service.JwtBlacklistService;
 import com.back.domain.member.member.service.MemberService;
 import com.back.global.exception.ServiceException;
@@ -59,7 +58,6 @@ public class MemberController {
         if (!accessToken.isBlank()) {
             jwtBlacklistService.addBlackList(accessToken);
         }
-
 
         memberService.logout(member);
 

@@ -5,15 +5,13 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
 public class JwtBlacklistService {
 
-    private final RedisTemplate<String, Object> stringRedisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
     private final AuthTokenService authTokenService;
 
     //블랙리스트 등록
@@ -28,12 +26,12 @@ public class JwtBlacklistService {
         long remainExpiration = exp - now;
 
         if (remainExpiration > 0) {
-            stringRedisTemplate.opsForValue().set(accessToken, "logout 후 들어온 토큰", Duration.ofSeconds(remainExpiration));
+            redisTemplate.opsForValue().set(accessToken, "logout 후 들어온 토큰", Duration.ofSeconds(remainExpiration));
         }
 
     }
 
     public boolean isBlacklisted(String accessToken) {
-        return stringRedisTemplate.hasKey(accessToken);
+        return redisTemplate.hasKey(accessToken);
     }
 }
