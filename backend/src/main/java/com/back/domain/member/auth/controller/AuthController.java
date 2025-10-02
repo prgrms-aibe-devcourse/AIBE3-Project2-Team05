@@ -3,6 +3,7 @@ package com.back.domain.member.auth.controller;
 import com.back.domain.member.auth.dto.FindIdReq;
 import com.back.domain.member.auth.dto.FindIdRes;
 import com.back.domain.member.auth.dto.FindPassWordReq;
+import com.back.domain.member.email.service.EmailService;
 import com.back.domain.member.member.dto.MemberDto;
 import com.back.domain.member.member.dto.MemberLoginRes;
 import com.back.domain.member.member.entity.Member;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.FileNameMap;
 import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ import java.time.LocalDateTime;
 public class AuthController {
     private final MemberService memberService;
     private final AuthTokenService authTokenService;
+    private final EmailService emailService;
     private final Rq rq;
 
     @Transactional
@@ -37,6 +40,13 @@ public class AuthController {
         String inputEmail = req.getEmail();
 
         Member member = memberService.findByEmail(inputEmail).orElseThrow(() -> new ServiceException("400-3", "존재하지 않는 회원입니다."));
+
+        String code = emailService.createCode();
+
+        emailService.saveCode(inputEmail, code);
+
+        emailService.send(req.getEmail(), "[FIT] 이메일 인증 코드 안내", code);
+
 
         return new RsData<>("200-1", "회원님의 아이디는 %s 입니다.".formatted(member.getUsername()));
     }
@@ -75,5 +85,14 @@ public class AuthController {
         rq.setCookie("refreshToken", member.getRefreshToken());
 
         return new RsData<>("200-6", "AccessToken & RefreshToken 재발급 완료", new MemberLoginRes(new MemberDto(member), member.getRefreshToken(), accessToken));
+    }
+
+    @PostMapping("/email")
+    public RsData<Void> sendEmail(@Valid @RequestBody FindIdReq req) {
+        String code = emailService.createCode();
+
+        emailService.send(req.getEmail(), "[FIT] 이메일 테스트", code);
+
+        return new RsData<>("200-1", "이메일이 발송되었습니다.");
     }
 }

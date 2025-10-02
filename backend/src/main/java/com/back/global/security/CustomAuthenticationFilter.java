@@ -3,7 +3,6 @@ package com.back.global.security;
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.service.AuthTokenService;
 import com.back.domain.member.member.service.JwtBlacklistService;
-import com.back.domain.member.member.service.MemberService;
 import com.back.global.exception.UnauthorizedException;
 import com.back.global.rq.Rq;
 import jakarta.servlet.FilterChain;
@@ -33,7 +32,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         // 로그인/회원가입 등은 필터 통과
-        if (List.of("/member/login", "/member", "/auth/findId", "/auth/refresh").contains(request.getRequestURI())) {
+        if (List.of("/member/login", "/member", "/auth/findId", "/auth/refresh", "/auth/email").contains(request.getRequestURI())) {
             filterChain.doFilter(request, response);
             return;
         }
