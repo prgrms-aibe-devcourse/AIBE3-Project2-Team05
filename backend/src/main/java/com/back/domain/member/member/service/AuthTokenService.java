@@ -6,6 +6,7 @@ import com.back.global.standard.util.JWTUt;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,8 @@ public class AuthTokenService {
 
         String nickname = (String) parsedPayload.get("nickname");
 
-        return Map.of("id", id, "username", username, "nickname", nickname);
+        long exp = ((Number) parsedPayload.get("exp")).longValue();
+
+        return Map.of("id", id, "username", username, "nickname", nickname, "exp", exp );
     }
 }

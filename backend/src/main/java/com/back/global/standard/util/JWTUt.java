@@ -43,8 +43,8 @@ public class JWTUt {
                         .parser()
                         .verifyWith(secretKey)
                         .build()
-                        .parse(jwtStr)
-                        .getPayload();
+                        .parseClaimsJws(jwtStr)
+                        .getBody();
             } catch (ExpiredJwtException e) {
                 throw new TokenExpiredException("401-1", "Token 시간이 만료되었습니다.");
             } catch (MalformedJwtException | UnsupportedJwtException |
