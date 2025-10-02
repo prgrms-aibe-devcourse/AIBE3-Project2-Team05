@@ -28,7 +28,7 @@ public class Rq {
         if (value.isBlank()) {
             cookie.setMaxAge(0);
         } else {
-            cookie.setMaxAge(60 * 60 * 24 * 365);
+            cookie.setMaxAge(60 * 60 * 24 * 30); //30일
         }
         res.addCookie(cookie);
     }

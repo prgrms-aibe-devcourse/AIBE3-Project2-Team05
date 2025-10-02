@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,20 +41,10 @@ public class MemberController {
     @PostMapping("login")
     @Operation(summary = "로그인")
     public RsData<MemberLoginRes> login(@Valid @RequestBody MemberLoginReq req) {
-        Member member = memberService.findByUsername(req.getUsername())
-                .orElseThrow(() -> new ServiceException("400-3", "존재하지 않는 회원입니다."));
 
-        memberService.checkPassword(member, req.getPassword());
+        MemberLoginRes res = memberService.login(req);
 
-        String accessToken = authTokenService.genAccessToken(member);
-
-        rq.setCookie("refreshToken", member.getRefreshToken());
-        rq.setCookie("accessToken", accessToken);
-
-        System.out.println("refreshToken = " + member.getRefreshToken());
-        System.out.println("accessToken = " + accessToken);
-
-        return new RsData<>("200-2", "%s 님 환영합니다.".formatted(req.getUsername()), new MemberLoginRes(new MemberDto(member), member.getRefreshToken(), accessToken));
+        return new RsData<>("200-2", "%s 님 환영합니다.".formatted(req.getUsername()), res);
 
     }
 
@@ -63,6 +52,8 @@ public class MemberController {
     @DeleteMapping("logout")
     @Operation(summary = "로그아웃")
     public RsData<Void> logout(@AuthenticationPrincipal SecurityUser securityUser) {
+        Member member = memberService.findById(securityUser.getId()).orElseThrow(() -> new ServiceException("400-3", "존재하지 않는 회원입니다."));
+        memberService.logout(member);
 
         rq.deleteCookie("refreshToken");
         rq.deleteCookie("accessToken");
@@ -85,6 +76,5 @@ public class MemberController {
         Member member = memberService.updateMember(securityUser.getId(), req);
         return new RsData<>("200-4", "회원 정보가 수정되었습니다.", new MemberDto(member));
     }
-
 }
 

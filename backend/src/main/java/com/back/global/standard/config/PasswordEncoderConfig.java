@@ -1,4 +1,4 @@
-package com.back.global.security;
+package com.back.global.standard.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

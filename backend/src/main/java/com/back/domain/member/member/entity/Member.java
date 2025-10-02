@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -35,12 +36,13 @@ public class Member extends BaseEntity {
 
     private String refreshToken;
 
+    private LocalDateTime refreshTokenExpiry;  // 만료 시간
+
     public Member(String username, String nickname, String password, String email) {
         this.username = username;
         this.nickname = nickname;
         this.password = password;
         this.email = email;
-        this.refreshToken = UUID.randomUUID().toString(); //랜덤한 refreshToken 생성
     }
 
     public Member (long id, String username, String nickname) {
@@ -57,8 +59,15 @@ public class Member extends BaseEntity {
         this.email = email;
     }
 
-
     public void updateNickName(String nickname) {
         this.nickname = nickname;
+    }
+    public void issueRefreshToken() {
+        this.refreshToken = UUID.randomUUID().toString();
+        this.refreshTokenExpiry = LocalDateTime.now().plusDays(14);
+    }
+    public void logout() {
+        this.refreshToken = null;
+        this.refreshTokenExpiry = null;
     }
 }

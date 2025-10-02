@@ -19,7 +19,7 @@ public class AuthTokenService {
     @Value("${custom.accessToken.expireSeconds}")
     private int accessTokenExpireSeconds;
 
-     public String genAccessToken(Member member) {
+    public String genAccessToken(Member member) {
         long id = member.getId();
         String username = member.getUsername();
         String nickname = member.getNickname();

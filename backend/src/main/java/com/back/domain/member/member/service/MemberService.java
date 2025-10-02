@@ -1,10 +1,15 @@
 package com.back.domain.member.member.service;
 
+import com.back.domain.member.member.dto.MemberDto;
+import com.back.domain.member.member.dto.MemberLoginReq;
+import com.back.domain.member.member.dto.MemberLoginRes;
 import com.back.domain.member.member.dto.UpdateMemberReq;
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.entity.Role;
 import com.back.domain.member.member.repository.MemberRepository;
 import com.back.global.exception.ServiceException;
+import com.back.global.rq.Rq;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,6 +22,8 @@ import java.util.Optional;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthTokenService authTokenService;
+    private final Rq rq;
 
     public Member join(String username, String nickname, String password, String email) {
 
@@ -28,6 +35,29 @@ public class MemberService {
         return memberRepository.save(member);
 
     }
+    @Transactional
+    public MemberLoginRes login(MemberLoginReq req) {
+        Member member = memberRepository.findByUsername(req.getUsername())
+                .orElseThrow(() -> new ServiceException("400-3", "존재하지 않는 회원입니다."));
+
+        checkPassword(member, req.getPassword());
+
+        member.issueRefreshToken();
+        memberRepository.save(member);
+
+        String accessToken = authTokenService.genAccessToken(member);
+
+        rq.setCookie("refreshToken", member.getRefreshToken());
+        rq.setCookie("accessToken", accessToken);
+
+
+        System.out.println("refreshToken = " + member.getRefreshToken());
+        System.out.println("accessToken = " + accessToken);
+
+        return new MemberLoginRes(new MemberDto(member), member.getRefreshToken(), accessToken);
+
+    }
+
 
     public Optional<Member> findByUsername(String username) {
         return memberRepository.findByUsername(username);
@@ -70,4 +100,12 @@ public class MemberService {
         return memberRepository.findByRefreshToken(refreshToken);
     }
 
+    public void save(Member member) {
+        memberRepository.save(member);
+    }
+
+    public void logout(Member member) {
+        member.logout();
+        memberRepository.save(member);
+    }
 }

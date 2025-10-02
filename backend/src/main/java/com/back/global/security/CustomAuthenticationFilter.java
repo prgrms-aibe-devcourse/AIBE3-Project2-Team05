@@ -30,44 +30,28 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        if (List.of("/member/login", "/member", "/auth/findId").contains(request.getRequestURI())) {
+        // 로그인/회원가입 등은 필터 통과
+        if (List.of("/member/login", "/member", "/auth/findId", "/auth/refresh").contains(request.getRequestURI())) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String refreshToken = rq.getCookieValue("refreshToken", "");
         String accessToken = rq.getCookieValue("accessToken", "");
-
-        if (refreshToken.isBlank() && accessToken.isBlank()) {
+        if (accessToken.isBlank()) {
             throw new UnauthorizedException("401-2", "로그인 후 사용하세요.");
         }
 
-        Member member = null;
-        boolean isAccessTokenExists = !accessToken.isBlank();
-        boolean isAccessTokenValid = false;
-
-        if (isAccessTokenExists) {
-            Map<String, Object> payload = authTokenService.payload(accessToken);
-
-            if (payload != null) {
-                long id = ((Number) payload.get("id")).longValue();
-                String username = (String) payload.get("username");
-                String nickname = (String) payload.get("nickname");
-                member = new Member(id, username, nickname);
-
-                //토큰 검증
-                isAccessTokenValid = true;
-            }
+        Map<String, Object> payload = authTokenService.payload(accessToken);
+        if (payload == null) {
+            throw new UnauthorizedException("401-3", "AccessToken이 유효하지 않습니다.");
         }
-        if (member == null) {
-            member = memberService.findByRefreshToken(refreshToken)
-                    .orElseThrow(() -> new UnauthorizedException("401-3", "리프레시 토큰이 없습니다."));
-        }
-        if (isAccessTokenExists && !isAccessTokenValid) {
-            String newAccessToken = authTokenService.genAccessToken(member);
 
-            rq.setCookie("accessToken", newAccessToken);
-        }
+        long id = ((Number) payload.get("id")).longValue();
+        String username = (String) payload.get("username");
+        String nickname = (String) payload.get("nickname");
+
+        Member member = new Member(id, username, nickname);
+
         UserDetails userDetails = new SecurityUser(
                 member.getId(),
                 member.getUsername(),
@@ -76,13 +60,13 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
                 member.getRoles()
         );
 
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
-        SecurityContextHolder
-                .getContext()
-                .setAuthentication(authentication);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         filterChain.doFilter(request, response);
     }
+
 }
 
