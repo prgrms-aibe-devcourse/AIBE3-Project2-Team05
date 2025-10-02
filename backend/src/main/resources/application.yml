@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: back
+  profiles:
+    active: dev
+  output:
+    ansi:
+      enabled: always
+
+  # ===== JSON 설정 =====
+  jackson:
+    time-zone: Asia/Seoul
+    serialization:
+      write-dates-as-timestamps: false
+
+  # ===== 파일 업로드 설정 =====
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 200MB
+
+# ===== Swagger =====
+springdoc:
+  default-produces-media-type: application/json;charset=UTF-8
