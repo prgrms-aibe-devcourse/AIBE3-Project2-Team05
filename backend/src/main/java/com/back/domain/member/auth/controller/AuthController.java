@@ -3,15 +3,23 @@ package com.back.domain.member.auth.controller;
 import com.back.domain.member.auth.dto.FindIdReq;
 import com.back.domain.member.auth.dto.FindIdRes;
 import com.back.domain.member.auth.dto.FindPassWordReq;
+import com.back.domain.member.member.dto.MemberDto;
+import com.back.domain.member.member.dto.MemberLoginRes;
 import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.service.AuthTokenService;
 import com.back.domain.member.member.service.MemberService;
 import com.back.global.exception.ServiceException;
+import com.back.global.exception.UnauthorizedException;
+import com.back.global.rq.Rq;
 import com.back.global.rsData.RsData;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 @RequestMapping("/auth")
@@ -19,8 +27,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class AuthController {
     private final MemberService memberService;
+    private final AuthTokenService authTokenService;
+    private final Rq rq;
 
     @Transactional
+    @Operation(summary = "아이디 찾기")
     @PostMapping("findId")
     public RsData<FindIdRes> findId(@Valid @RequestBody FindIdReq req) {
         String inputEmail = req.getEmail();
@@ -31,6 +42,7 @@ public class AuthController {
     }
 
     @Transactional
+    @Operation(summary = "비밀번호 찾기")
     @PutMapping("updatePassword")
     public RsData<Void> updatePassword(@Valid @RequestBody FindPassWordReq req) {
 
@@ -45,4 +57,23 @@ public class AuthController {
         return new RsData<>("200-1", "%s 님의 비밀번호가 변경되었습니다.".formatted(req.getUsername()));
     }
 
+    @Transactional
+    @Operation(summary = "AccessToken 재발급")
+    @PostMapping("refresh")
+    public RsData<MemberLoginRes> refreshAccessToken() {
+        String refreshToken = rq.getCookieValue("refreshToken", "");
+        Member member = memberService.findByRefreshToken(refreshToken).orElseThrow(() -> new UnauthorizedException("401-3", "리프레시 토큰이 없습니다."));
+        if (member.getRefreshTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new UnauthorizedException("401-3", "리프레시 토큰이 만료되었습니다.");
+        }
+
+        String accessToken = authTokenService.genAccessToken(member);
+        member.issueRefreshToken();
+        memberService.save(member);
+
+        rq.setCookie("accessToken", accessToken);
+        rq.setCookie("refreshToken", member.getRefreshToken());
+
+        return new RsData<>("200-6", "AccessToken & RefreshToken 재발급 완료", new MemberLoginRes(new MemberDto(member), member.getRefreshToken(), accessToken));
+    }
 }

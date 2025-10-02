@@ -42,6 +42,9 @@ dependencies {
 
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
+
+	//redis
+	implementation("org.springframework.boot:spring-boot-starter-data-redis")
 }
 
 tasks.withType<Test> {

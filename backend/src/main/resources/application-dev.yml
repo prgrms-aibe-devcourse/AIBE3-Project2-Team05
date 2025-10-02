@@ -9,3 +9,7 @@ spring:
     password: 1111
     hikari:
       auto-commit: false
+
+    redis:
+      host: localhost
+      port: 6379
