@@ -2,6 +2,7 @@ package com.back.global.security;
 
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.service.AuthTokenService;
+import com.back.domain.member.member.service.JwtBlacklistService;
 import com.back.domain.member.member.service.MemberService;
 import com.back.global.exception.UnauthorizedException;
 import com.back.global.rq.Rq;
@@ -25,7 +26,8 @@ import java.util.Map;
 public class CustomAuthenticationFilter extends OncePerRequestFilter {
     private final Rq rq;
     private final AuthTokenService authTokenService;
-    private final MemberService memberService;
+    private final JwtBlacklistService jwtBlacklistService;
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -39,6 +41,10 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         String accessToken = rq.getCookieValue("accessToken", "");
         if (accessToken.isBlank()) {
             throw new UnauthorizedException("401-2", "로그인 후 사용하세요.");
+        }
+
+        if (jwtBlacklistService.isBlacklisted(accessToken)) {
+            throw new UnauthorizedException("401-4", "로그아웃된 토큰입니다.");
         }
 
         Map<String, Object> payload = authTokenService.payload(accessToken);

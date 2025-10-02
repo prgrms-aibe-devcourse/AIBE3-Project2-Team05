@@ -3,6 +3,7 @@ package com.back.domain.member.member.controller;
 import com.back.domain.member.member.dto.*;
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.service.AuthTokenService;
+import com.back.domain.member.member.service.JwtBlacklistService;
 import com.back.domain.member.member.service.MemberService;
 import com.back.global.exception.ServiceException;
 import com.back.global.rq.Rq;
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     private final MemberService memberService;
-    private final AuthTokenService authTokenService;
+    private final JwtBlacklistService jwtBlacklistService;
     private final Rq rq;
 
     @Transactional
@@ -53,6 +54,13 @@ public class MemberController {
     @Operation(summary = "로그아웃")
     public RsData<Void> logout(@AuthenticationPrincipal SecurityUser securityUser) {
         Member member = memberService.findById(securityUser.getId()).orElseThrow(() -> new ServiceException("400-3", "존재하지 않는 회원입니다."));
+
+        String accessToken = rq.getCookieValue("accessToken", "");
+        if (!accessToken.isBlank()) {
+            jwtBlacklistService.addBlackList(accessToken);
+        }
+
+
         memberService.logout(member);
 
         rq.deleteCookie("refreshToken");
