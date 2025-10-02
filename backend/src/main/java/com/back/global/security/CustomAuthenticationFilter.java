@@ -32,7 +32,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         // 로그인/회원가입 등은 필터 통과
-        if (List.of("/member/login", "/member", "/auth/findId", "/auth/refresh", "/auth/email").contains(request.getRequestURI())) {
+        if (List.of("/member/login", "/member", "/auth/findId/verify", "/auth/refresh", "/auth/findId/sendCode","/auth/updatePassword/verify","/auth/updatePassword/sendCode").contains(request.getRequestURI())) {
             filterChain.doFilter(request, response);
             return;
         }

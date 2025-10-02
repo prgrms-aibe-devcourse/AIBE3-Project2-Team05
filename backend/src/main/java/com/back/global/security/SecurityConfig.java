@@ -19,9 +19,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/member/login", "/auth/findId", "/member", "/auth/refresh","/auth/email", "/").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/member/login", "/auth/findId/verify", "/member", "/auth/refresh", "/auth/findId/sendCode", "/auth/updatePassword/sendCode", "/").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/member/logout").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/auth/updatePassword").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/auth/updatePassword/verify").permitAll()
                         .anyRequest().authenticated()
                 )
 

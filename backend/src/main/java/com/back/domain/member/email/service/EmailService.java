@@ -24,7 +24,7 @@ public class EmailService {
 
         String content = String.format("안녕하세요, [FIT]입니다.\n" +
                 "\n" +
-                "요청하신 이메일 인증을 위해 아래 인증번호를 입력해주세요." +
+                "요청하신 이메일 인증을 위해 아래 5분 안에 인증번호를 입력해주세요." +
                 "\n" +
                 "인증번호: %s", code);
 
@@ -37,7 +37,7 @@ public class EmailService {
             mailSender.send(mimeMessage);
 
         } catch (MessagingException e) {
-            throw new ServiceException("500-1", "메일 메시지 생성 실패");
+            throw new ServiceException("500-1", "메일 전송 실패");
         }
     }
 
