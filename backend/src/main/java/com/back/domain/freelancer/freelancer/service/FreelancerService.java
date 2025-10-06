@@ -34,7 +34,7 @@ public class FreelancerService {
     @Transactional(readOnly = true)
     public FreelancerDetailResponseDto findById(Long id) {
         Freelancer freelancer = freelancerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("%d번 게시글이 존재하지 않습니다.".formatted(id)));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 id 입니다."));
         Member member = freelancer.getMember();
         return new FreelancerDetailResponseDto(member.getNickname(), freelancer);
     }

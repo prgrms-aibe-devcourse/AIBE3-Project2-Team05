@@ -1,4 +1,4 @@
-package com.back.domain.freelancer.tech.freelancerTech.entity;
+package com.back.domain.freelancer.freelancerTech.entity;
 
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.tech.entity.Tech;
@@ -18,4 +18,12 @@ public class FreelancerTech extends BaseEntity {
 
     @ManyToOne
     private Tech tech;
+
+    private String techLevel;
+
+    public FreelancerTech(Freelancer freelancer, Tech tech, String techLevel) {
+        this.freelancer = freelancer;
+        this.tech = tech;
+        this.techLevel = techLevel;
+    }
 }

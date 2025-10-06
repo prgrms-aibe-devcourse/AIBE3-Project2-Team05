@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 public class Tech extends BaseEntity {
-    private String tech_category;
-    private String tech_name;
+    private String techCategory;
+    private String techName;
 }
