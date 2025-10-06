@@ -1,8 +1,10 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 // app/sign-up/page.tsx
 export default function SignUp() {
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [nickname, setNickname] = useState("");
@@ -179,15 +181,31 @@ export default function SignUp() {
             {/* 가입 버튼 */}
             <button
               type="submit"
-              className="w-full h-[36px] bg-[var(--primary)] text-[var(--primary-foreground)] rounded-[10px]"
+              className="w-full h-[36px] bg-[var(--primary)] text-[var(--primary-foreground)] rounded-[10px] cursor-pointer"
             >
               회원가입
             </button>
 
             {/* 로그인 링크 */}
-            <p className="text-[14px] font-light text-[var(--muted-foreground)] text-center">
+            <p className="text-[14px] font-light text-[var(--muted-foreground)] text-center cursor-pointer">
               이미 계정이 있으신가요?{" "}
               <span className="text-[var(--primary)]">로그인</span>
+            </p>
+
+            <p className="text-[14px] font-light text-[var(--muted-foreground)] text-center mt-1">
+              <span
+                className="text-[var(--primary)] cursor-pointer"
+                onClick={() => router.push("/members/findid")}
+              >
+                아이디 찾기
+              </span>
+              {" / "}
+              <span
+                className="text-[var(--primary)] cursor-pointer"
+                onClick={() => router.push("/members/updatePassword")}
+              >
+                비밀번호 재설정
+              </span>
             </p>
           </form>
         </div>

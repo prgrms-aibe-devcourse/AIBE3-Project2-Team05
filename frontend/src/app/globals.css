@@ -69,6 +69,7 @@ body {
 .btn-primary {
   background: var(--primary);
   color: var(--primary-foreground);
+  cursor: pointer;
 }
 
 .btn-secondary {
