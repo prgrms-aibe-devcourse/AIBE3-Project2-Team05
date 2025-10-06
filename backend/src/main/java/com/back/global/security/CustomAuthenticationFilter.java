@@ -17,26 +17,36 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
 public class CustomAuthenticationFilter extends OncePerRequestFilter {
+
     private final Rq rq;
     private final AuthTokenService authTokenService;
     private final JwtBlacklistService jwtBlacklistService;
 
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        // 로그인/회원가입 등은 필터 통과
-        if (List.of("/member/login", "/member", "/auth/findId/verify", "/auth/refresh", "/auth/findId/sendCode","/auth/updatePassword/verify","/auth/updatePassword/sendCode").contains(request.getRequestURI())) {
+        String uri = request.getRequestURI();
+        String method = request.getMethod();
+
+        // 허용 URI/메서드 체크
+        if ((uri.equals("/member") && method.equals("POST")) ||  // 회원가입
+                (uri.equals("/member/login") && method.equals("POST")) || // 로그인
+                (uri.equals("/auth/findId/verify") && method.equals("POST")) ||
+                (uri.equals("/auth/findId/sendCode") && method.equals("POST")) ||
+                (uri.equals("/auth/updatePassword/sendCode") && method.equals("POST")) ||
+                (uri.equals("/auth/updatePassword/verify") && method.equals("PUT")) ||
+                (uri.equals("/auth/refresh") && method.equals("POST"))) {
+
             filterChain.doFilter(request, response);
             return;
         }
 
+        // JWT 체크
         String accessToken = rq.getCookieValue("accessToken", "");
         if (accessToken.isBlank()) {
             throw new UnauthorizedException("401-2", "로그인 후 사용하세요.");
@@ -72,6 +82,4 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
-
 }
-

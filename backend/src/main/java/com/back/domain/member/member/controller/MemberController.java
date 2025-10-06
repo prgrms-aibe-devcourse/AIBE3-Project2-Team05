@@ -33,7 +33,7 @@ public class MemberController {
     public RsData<MemberDto> join(@Valid @RequestBody MemberJoinReq req) {
 
         if (!req.isPasswordMatch()) {
-            throw new ServiceException("400-2", "비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+            throw new ServiceException("400-1", "비밀번호와 비밀번호 확인이 일치하지 않습니다.");
         }
 
         Member member = memberService.join(req.getUsername(), req.getNickname(), req.getPassword(), req.getEmail());

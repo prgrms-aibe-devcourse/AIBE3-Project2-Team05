@@ -17,5 +17,12 @@ public class UpdatePasswordReq {
     @NotBlank(message = "비밀번호는 필수 항목입니다.")
     private String newPassword;
 
+    @NotBlank(message = "비밀번호 확인은 필수 항목입니다.")
+    private String newPasswordCheck;
+
     private String verifyCode;
+
+    public boolean isNewPasswordCheck() {
+       return newPassword != null && newPassword.equals(newPasswordCheck);
+    }
 }

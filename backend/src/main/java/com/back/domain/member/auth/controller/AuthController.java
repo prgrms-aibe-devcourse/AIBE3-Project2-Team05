@@ -44,8 +44,6 @@ public class AuthController {
 
         emailService.verifyCode(inputEmail, inputCode);
 
-
-
         return new RsData<>("200-1", "회원님의 아이디는 %s 입니다.".formatted(member.getUsername()));
     }
 
@@ -68,6 +66,10 @@ public class AuthController {
     @Operation(summary = "비밀번호 인증 코드 검증")
     @PutMapping("updatePassword/verify")
     public RsData<Void> updatePassword(@Valid @RequestBody UpdatePasswordReq req) {
+
+        if (!req.isNewPasswordCheck()) {
+                throw new ServiceException("400-1", "비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+        }
         String inputEmail = req.getEmail();
         String inputCode = req.getVerifyCode();
 
@@ -88,7 +90,6 @@ public class AuthController {
     @PostMapping("updatePassword/sendCode")
     public RsData<Void> sendResetPasswordCode(@Valid @RequestBody SendUpdatePasswordCodeReq req) {
         String email = req.getEmail();
-
 
         memberService.findByEmail(email)
                 .orElseThrow(() -> new ServiceException("400-3", "존재하지 않는 회원입니다."));
