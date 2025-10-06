@@ -31,11 +31,20 @@ public class MemberController {
     @PostMapping
     @Operation(summary = "회원가입")
     public RsData<MemberDto> join(@Valid @RequestBody MemberJoinReq req) {
+
+        if (!req.isPasswordMatch()) {
+            throw new ServiceException("400-2", "비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+        }
+
         Member member = memberService.join(req.getUsername(), req.getNickname(), req.getPassword(), req.getEmail());
 
-        return new RsData<>("200-1", "%s 님 환영합니다. 회원가입이 완료 되었습니다.".formatted(member.getUsername()), new MemberDto(member));
-
+        return new RsData<>(
+                "200-1",
+                "%s 님 환영합니다. 회원가입이 완료되었습니다.".formatted(member.getUsername()),
+                new MemberDto(member)
+        );
     }
+
 
     @Transactional
     @PostMapping("login")

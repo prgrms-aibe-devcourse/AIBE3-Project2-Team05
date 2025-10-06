@@ -23,9 +23,13 @@ public class MemberJoinReq {
     @Size(min = 8, max = 20)
     @NotBlank(message = "비밀번호는 필수 항목입니다.")
     private String password;
-//
-//    @Size(min = 8, max = 20)
-//    @NotBlank(message = "비밀번호 확인은 필수 항목입니다.")
-//    private String passwordCheck;
+
+    @Size(min = 8, max = 20)
+    @NotBlank(message = "비밀번호 확인은 필수 항목입니다.")
+    private String passwordCheck;
+
+    public boolean isPasswordMatch() {
+        return password != null && password.equals(passwordCheck);
+    }
 
 }

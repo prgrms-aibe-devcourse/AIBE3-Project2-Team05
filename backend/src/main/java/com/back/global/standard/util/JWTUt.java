@@ -39,7 +39,7 @@ public class JWTUt {
             SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes());
 
             try {
-                return (Map<String, Object>) Jwts
+                return Jwts
                         .parser()
                         .verifyWith(secretKey)
                         .build()
