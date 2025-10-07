@@ -5,6 +5,7 @@ import com.back.domain.tech.entity.Tech;
 import com.back.domain.tech.repository.TechRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import java.util.List;
 public class TechService {
     private final TechRepository techRepository;
 
+    @Transactional(readOnly = true)
     public List<FreelancerTechListResponseDto> searchAvailableTechs(String keyword) {
         List<Tech> teches = techRepository.findByTechNameContainingIgnoreCase(keyword);
         return teches.stream()

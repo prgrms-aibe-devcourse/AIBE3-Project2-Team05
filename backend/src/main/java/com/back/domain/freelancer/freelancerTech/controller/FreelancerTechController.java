@@ -29,8 +29,7 @@ public class FreelancerTechController {
     @PostMapping
     public long addMyTech(@RequestBody FreelancerTechAddDto dto) {
 
-        //todo 인증정보로 수정
-        Optional<Freelancer> freelancer = freelancerRepository.findById(27L);
+        Optional<Freelancer> freelancer = freelancerRepository.findById(27L); //todo 인증정보로 수정
 
         return freelancerTechService.addMyTech(freelancer, dto);
     }
@@ -38,8 +37,7 @@ public class FreelancerTechController {
     @GetMapping
     public List<MyTechListResponseDto> getMyTechs() {
 
-        //todo 인증정보로 수정
-        Optional<Freelancer> freelancer = freelancerRepository.findById(27L);
+        Optional<Freelancer> freelancer = freelancerRepository.findById(27L); //todo 인증정보로 수정
 
         return freelancerTechService.findTechsByFreelancer(freelancer);
     }
@@ -48,7 +46,6 @@ public class FreelancerTechController {
     public long deleteTech(@PathVariable long id) {
 
         //todo 인증 검증 추가
-
 
         return freelancerTechService.deleteTechById(id);
     }

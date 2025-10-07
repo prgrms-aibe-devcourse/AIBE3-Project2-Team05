@@ -9,6 +9,7 @@ import com.back.domain.tech.entity.Tech;
 import com.back.domain.tech.repository.TechRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +20,7 @@ public class FreelancerTechService {
     private final FreelancerTechRepository freelancerTechRepository;
     private final TechRepository techRepository;
 
+    @Transactional
     public long addMyTech(Optional<Freelancer> freelancer, FreelancerTechAddDto dto) {
         Tech tech = techRepository.findById(dto.id()).get();
         FreelancerTech freelancerTech = new FreelancerTech(freelancer.get(), tech, dto.techLevel());
@@ -26,6 +28,7 @@ public class FreelancerTechService {
         return freelancerTech.getId();
     }
 
+    @Transactional(readOnly = true)
     public List<MyTechListResponseDto> findTechsByFreelancer(Optional<Freelancer> freelancer) {
         List<FreelancerTech> freelancerTechs = freelancerTechRepository.findFreelancerTechByFreelancer(freelancer);
         return freelancerTechs.stream()
@@ -33,6 +36,7 @@ public class FreelancerTechService {
                 .toList();
     }
 
+    @Transactional
     public long deleteTechById(long id) {
         FreelancerTech tech = freelancerTechRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 기술입니다"));
