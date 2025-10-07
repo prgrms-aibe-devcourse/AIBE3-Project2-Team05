@@ -1,7 +1,7 @@
 package com.back.domain.freelancer.portfolio.entity;
 
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
-import com.back.domain.freelancer.portfolio.dto.PortfolioRequestDto;
+import com.back.domain.freelancer.portfolio.dto.PortfolioUpdateRequestDto;
 import com.back.global.jpa.entity.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -37,13 +37,13 @@ public class Portfolio extends BaseEntity {
         this.externalUrl = externalUrl;
     }
 
-    public void update(PortfolioRequestDto dto) {
+    public void update(PortfolioUpdateRequestDto dto, String imageUrl) {
         this.title = dto.title();
         this.summary = dto.summary();
         this.startDate = dto.startDate();
         this.endDate = dto.endDate();
         this.contribution = dto.contribution();
-        this.imageUrl = dto.imageUrl();
         this.externalUrl = dto.externalUrl();
+        this.imageUrl = imageUrl;
     }
 }

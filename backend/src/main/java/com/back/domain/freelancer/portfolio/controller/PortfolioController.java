@@ -4,9 +4,11 @@ import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
 import com.back.domain.freelancer.portfolio.dto.PortfolioRequestDto;
 import com.back.domain.freelancer.portfolio.dto.PortfolioResponseDto;
+import com.back.domain.freelancer.portfolio.dto.PortfolioUpdateRequestDto;
 import com.back.domain.freelancer.portfolio.service.PortfolioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,11 +22,18 @@ public class PortfolioController {
     private final Long freelancerId = 27L;
 
     @PostMapping
-    public Long savePortfolio(@RequestBody PortfolioRequestDto dto) {
+    public Long savePortfolioWithImage(@RequestPart PortfolioRequestDto dto, @RequestPart MultipartFile imageFile) {
         Freelancer freelancer = freelancerRepository.findById(freelancerId).get();
 
-        return portfolioService.save(freelancer, dto);
+        return portfolioService.saveWithImage(freelancer, dto, imageFile);
     }
+
+//    @PostMapping
+//    public Long savePortfolio(@RequestPart PortfolioRequestDto dto) {
+//        Freelancer freelancer = freelancerRepository.findById(freelancerId).get();
+//
+//        return portfolioService.save(freelancer, dto);
+//    }
 
     @GetMapping
     public List<PortfolioResponseDto> getPortfolios() {
@@ -38,8 +47,8 @@ public class PortfolioController {
     }
 
     @PutMapping("/{id}")
-    public Long update(@PathVariable Long id, @RequestBody PortfolioRequestDto dto) {
-        return portfolioService.update(id, dto);
+    public Long update(@PathVariable Long id, @RequestPart PortfolioUpdateRequestDto dto, @RequestPart MultipartFile imageFile) {
+        return portfolioService.update(id, dto, imageFile);
     }
 
     @DeleteMapping("/{id}")
