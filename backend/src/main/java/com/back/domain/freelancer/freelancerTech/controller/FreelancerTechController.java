@@ -6,6 +6,7 @@ import com.back.domain.freelancer.freelancerTech.dto.FreelancerTechAddDto;
 import com.back.domain.freelancer.freelancerTech.dto.FreelancerTechListResponseDto;
 import com.back.domain.freelancer.freelancerTech.dto.MyTechListResponseDto;
 import com.back.domain.freelancer.freelancerTech.service.FreelancerTechService;
+import com.back.domain.tech.service.TechService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,12 +17,13 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/freelancers/techs")
 public class FreelancerTechController {
+    private final TechService techService;
     private final FreelancerTechService freelancerTechService;
     private final FreelancerRepository freelancerRepository;
 
     @GetMapping("/search")
     public List<FreelancerTechListResponseDto> searchAvailableTechs(@RequestParam String keyword) {
-        return freelancerTechService.searchAvailableTechs(keyword);
+        return techService.searchAvailableTechs(keyword);
     }
 
     @PostMapping
