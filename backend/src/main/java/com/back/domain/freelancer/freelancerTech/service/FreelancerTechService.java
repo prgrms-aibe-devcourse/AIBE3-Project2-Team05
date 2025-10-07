@@ -3,6 +3,7 @@ package com.back.domain.freelancer.freelancerTech.service;
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancerTech.dto.FreelancerTechAddDto;
 import com.back.domain.freelancer.freelancerTech.dto.FreelancerTechListResponseDto;
+import com.back.domain.freelancer.freelancerTech.dto.MyTechListResponseDto;
 import com.back.domain.freelancer.freelancerTech.entity.FreelancerTech;
 import com.back.domain.freelancer.freelancerTech.repository.FreelancerTechRepository;
 import com.back.domain.tech.entity.Tech;
@@ -31,5 +32,20 @@ public class FreelancerTechService {
         FreelancerTech freelancerTech = new FreelancerTech(freelancer.get(), tech, dto.techLevel());
         freelancerTechRepository.save(freelancerTech);
         return freelancerTech.getId();
+    }
+
+    public List<MyTechListResponseDto> findTechsByFreelancer(Optional<Freelancer> freelancer) {
+        List<FreelancerTech> freelancerTechs = freelancerTechRepository.findFreelancerTechByFreelancer(freelancer);
+        return freelancerTechs.stream()
+                .map(MyTechListResponseDto::new)
+                .toList();
+    }
+
+    public long deleteTechById(long id) {
+        FreelancerTech tech = freelancerTechRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 기술입니다"));
+
+        freelancerTechRepository.deleteById(id);
+        return tech.getId();
     }
 }

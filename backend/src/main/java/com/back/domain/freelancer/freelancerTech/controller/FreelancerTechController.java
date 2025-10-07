@@ -2,9 +2,9 @@ package com.back.domain.freelancer.freelancerTech.controller;
 
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
-import com.back.domain.freelancer.freelancer.service.FreelancerService;
 import com.back.domain.freelancer.freelancerTech.dto.FreelancerTechAddDto;
 import com.back.domain.freelancer.freelancerTech.dto.FreelancerTechListResponseDto;
+import com.back.domain.freelancer.freelancerTech.dto.MyTechListResponseDto;
 import com.back.domain.freelancer.freelancerTech.service.FreelancerTechService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +17,6 @@ import java.util.Optional;
 @RequestMapping("/api/v1/freelancers/techs")
 public class FreelancerTechController {
     private final FreelancerTechService freelancerTechService;
-    private final FreelancerService freelancerService;
     private final FreelancerRepository freelancerRepository;
 
     @GetMapping("/search")
@@ -27,18 +26,29 @@ public class FreelancerTechController {
 
     @PostMapping
     public long addMyTech(@RequestBody FreelancerTechAddDto dto) {
+
+        //todo 인증정보로 수정
         Optional<Freelancer> freelancer = freelancerRepository.findById(27L);
+
         return freelancerTechService.addMyTech(freelancer, dto);
     }
 
     @GetMapping
-    public void getMyTechs() {
+    public List<MyTechListResponseDto> getMyTechs() {
 
+        //todo 인증정보로 수정
+        Optional<Freelancer> freelancer = freelancerRepository.findById(27L);
+
+        return freelancerTechService.findTechsByFreelancer(freelancer);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteTech(@PathVariable long id) {
+    public long deleteTech(@PathVariable long id) {
 
+        //todo 인증 검증 추가
+
+
+        return freelancerTechService.deleteTechById(id);
     }
 
 }
