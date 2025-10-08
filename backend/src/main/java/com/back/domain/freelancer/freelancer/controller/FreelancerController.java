@@ -1,6 +1,6 @@
 package com.back.domain.freelancer.freelancer.controller;
 
-import com.back.domain.freelancer.freelancer.dto.FreelancerCreateDto;
+import com.back.domain.freelancer.freelancer.dto.FreelancerRequestDto;
 import com.back.domain.freelancer.freelancer.dto.FreelancerDetailResponseDto;
 import com.back.domain.freelancer.freelancer.dto.FreelancerListResponseDto;
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
@@ -28,7 +28,7 @@ public class FreelancerController {
     }
 
     @PostMapping
-    public long create(@RequestBody FreelancerCreateDto dto) {
+    public long create(@RequestBody FreelancerRequestDto dto) {
 
         //todo 인증정보로 수정
         Member member = new Member("user1", "1234", "유저1", "user1@user");
@@ -38,7 +38,12 @@ public class FreelancerController {
     }
 
     @DeleteMapping("/{id}")
-    public long delete(@PathVariable long id) {
+    public Long delete(@PathVariable long id) {
         return freelancerService.delete(id);
+    }
+
+    @PutMapping("/{id}")
+    public Long update(@PathVariable Long id, @RequestBody FreelancerRequestDto dto) {
+        return freelancerService.update(id, dto);
     }
 }

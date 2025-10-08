@@ -2,7 +2,7 @@ package com.back.domain.freelancer.portfolio.controller;
 
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
-import com.back.domain.freelancer.portfolio.dto.PortfolioRequestDto;
+import com.back.domain.freelancer.portfolio.dto.PortfolioSaveRequestDto;
 import com.back.domain.freelancer.portfolio.dto.PortfolioResponseDto;
 import com.back.domain.freelancer.portfolio.dto.PortfolioUpdateRequestDto;
 import com.back.domain.freelancer.portfolio.service.PortfolioService;
@@ -22,7 +22,7 @@ public class PortfolioController {
     private final Long freelancerId = 27L;
 
     @PostMapping
-    public Long savePortfolioWithImage(@RequestPart PortfolioRequestDto dto, @RequestPart MultipartFile imageFile) {
+    public Long savePortfolioWithImage(@RequestPart PortfolioSaveRequestDto dto, @RequestPart MultipartFile imageFile) {
         Freelancer freelancer = freelancerRepository.findById(freelancerId).get();
 
         return portfolioService.saveWithImage(freelancer, dto, imageFile);

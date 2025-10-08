@@ -43,4 +43,14 @@ public class Freelancer extends BaseEntity {
         this.favoritesCount = 1;
     }
 
+    public void update(String type, String content, Boolean isOnSite,
+                       String location, int minMonthlyRate, int maxMonthlyRate) {
+        this.type = type;
+        this.content = content;
+        this.isOnSite = isOnSite;
+        this.location = location;
+        this.minMonthlyRate = minMonthlyRate;
+        this.maxMonthlyRate = maxMonthlyRate;
+    }
+
 }

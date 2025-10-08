@@ -1,7 +1,7 @@
 package com.back.domain.freelancer.portfolio.service;
 
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
-import com.back.domain.freelancer.portfolio.dto.PortfolioRequestDto;
+import com.back.domain.freelancer.portfolio.dto.PortfolioSaveRequestDto;
 import com.back.domain.freelancer.portfolio.dto.PortfolioResponseDto;
 import com.back.domain.freelancer.portfolio.dto.PortfolioUpdateRequestDto;
 import com.back.domain.freelancer.portfolio.entity.Portfolio;
@@ -22,7 +22,7 @@ public class PortfolioService {
     private final FileStorageService fileStorageService;
 
     @Transactional
-    public Long saveWithImage(Freelancer freelancer, PortfolioRequestDto dto, MultipartFile imageFile) {
+    public Long saveWithImage(Freelancer freelancer, PortfolioSaveRequestDto dto, MultipartFile imageFile) {
         String imageUrl = null;
         try {
             imageUrl = fileStorageService.saveFile(imageFile);

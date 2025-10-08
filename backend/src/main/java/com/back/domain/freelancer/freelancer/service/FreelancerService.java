@@ -1,6 +1,6 @@
 package com.back.domain.freelancer.freelancer.service;
 
-import com.back.domain.freelancer.freelancer.dto.FreelancerCreateDto;
+import com.back.domain.freelancer.freelancer.dto.FreelancerRequestDto;
 import com.back.domain.freelancer.freelancer.dto.FreelancerDetailResponseDto;
 import com.back.domain.freelancer.freelancer.dto.FreelancerListResponseDto;
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
@@ -40,7 +40,7 @@ public class FreelancerService {
     }
 
     @Transactional
-    public Freelancer create(Member member, FreelancerCreateDto dto) {
+    public Freelancer create(Member member, FreelancerRequestDto dto) {
         memberRepository.save(member);
         Freelancer freelancer = new Freelancer(
                 member, dto.type(), dto.content(), dto.isOnSite(), dto.location(),
@@ -55,6 +55,15 @@ public class FreelancerService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 id 입니다."));
 
         freelancerRepository.delete(freelancer);
+        return freelancer.getId();
+    }
+
+    @Transactional
+    public Long update(Long id, FreelancerRequestDto dto) {
+        Freelancer freelancer = freelancerRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 id 입니다."));
+        freelancer.update(dto.type(), dto.content(), dto.isOnSite(), dto.location(),
+                dto.minMonthlyRate(), dto.maxMonthlyRate());
         return freelancer.getId();
     }
 }

@@ -3,7 +3,7 @@ package com.back.domain.freelancer.freelancer.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record FreelancerCreateDto(
+public record FreelancerRequestDto(
         @NotBlank String type,
         @NotBlank String content,
         @NotBlank Boolean isOnSite,

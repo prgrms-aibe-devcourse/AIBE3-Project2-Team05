@@ -2,7 +2,7 @@ package com.back.domain.freelancer.portfolio.dto;
 
 import java.time.LocalDate;
 
-public record PortfolioRequestDto(
+public record PortfolioSaveRequestDto(
         String title,
         String summary,
         LocalDate startDate,
