@@ -27,3 +27,8 @@ logging:
   level:
     com.back: DEBUG
     org.hibernate.orm.jdbc.bind: DEBUG
+
+# ===== OpenAPI 스키마 생성 설정 (개발환경) =====
+openapi:
+  schema:
+    enabled: true
