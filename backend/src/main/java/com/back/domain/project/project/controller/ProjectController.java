@@ -30,13 +30,13 @@ public class ProjectController {
      * 프로젝트 목록 조회 (페이징)
      */
     @GetMapping
-    public ResponseEntity<Page<Project>> getAllProjects(
+    public ResponseEntity<Page<ProjectResponse>> getAllProjects(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
         log.info("프로젝트 목록 조회 요청 - page: {}, size: {}", page, size);
 
-        Page<Project> projects = projectService.getAllProjects(page, size);
+        Page<ProjectResponse> projects = projectService.getAllProjects(page, size);
         return ResponseEntity.ok(projects);
     }
 
@@ -57,10 +57,10 @@ public class ProjectController {
      * 사용자별 프로젝트 목록 조회
      */
     @GetMapping("/manager/{managerId}")
-    public ResponseEntity<List<Project>> getProjectsByManagerId(@PathVariable Long managerId) {
+    public ResponseEntity<List<ProjectResponse>> getProjectsByManagerId(@PathVariable Long managerId) {
         log.info("사용자 프로젝트 목록 조회 요청 - managerId: {}", managerId);
 
-        List<Project> projects = projectService.getProjectsByManagerId(managerId);
+        List<ProjectResponse> projects = projectService.getProjectsByManagerId(managerId);
         return ResponseEntity.ok(projects);
     }
 

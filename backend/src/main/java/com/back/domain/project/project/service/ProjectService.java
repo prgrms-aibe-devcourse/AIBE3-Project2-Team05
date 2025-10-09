@@ -11,6 +11,7 @@ import com.back.domain.project.project.repository.ProjectTechRepository;
 import com.back.global.exception.ProjectAccessDeniedException;
 import com.back.global.exception.ProjectNotFoundException;
 import com.back.global.exception.ValidationException;
+import com.back.global.util.EntityDtoMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -76,20 +77,10 @@ public class ProjectService {
     public ProjectResponse createBasicProject(ProjectRequest request) {
         log.info("프로젝트 기본 생성 - title: {}, managerId: {}", request.title(), request.managerId());
 
-        // 기본 프로젝트 엔티티 생성
-        Project project = Project.builder()
-                .title(request.title())
-                .description(request.description())
-                .projectField(request.projectField())
-                .recruitmentType(request.recruitmentType())
-                .budgetType(request.budgetType())
-                .startDate(request.startDate())
-                .endDate(request.endDate())
-                .managerId(request.managerId())
-                .status(ProjectStatus.RECRUITING)
-                .viewCount(0)
-                .createDate(LocalDateTime.now())
-                .build();
+        // DTO → Entity 변환 (매핑 유틸리티 사용)
+        Project project = EntityDtoMapper.toEntity(request);
+        project.setStatus(ProjectStatus.RECRUITING);
+        project.setViewCount(0);
 
         validateProject(project);
 
@@ -115,25 +106,10 @@ public class ProjectService {
     public ProjectResponse createCompleteProject(ProjectRequest request) {
         log.info("프로젝트 완전 생성 - title: {}, managerId: {}", request.title(), request.managerId());
 
-        // 완전한 프로젝트 엔티티 생성
-        Project project = Project.builder()
-                .title(request.title())
-                .description(request.description())
-                .projectField(request.projectField())
-                .recruitmentType(request.recruitmentType())
-                .budgetType(request.budgetType())
-                .startDate(request.startDate())
-                .endDate(request.endDate())
-                .managerId(request.managerId())
-                .partnerType(request.partnerType())
-                .budgetAmount(request.budgetAmount())
-                .progressStatus(request.progressStatus())
-                .companyLocation(request.companyLocation())
-                .partnerEtcDescription(request.partnerEtcDescription())
-                .status(ProjectStatus.RECRUITING)
-                .viewCount(0)
-                .createDate(LocalDateTime.now())
-                .build();
+        // DTO → Entity 변환 (매핑 유틸리티 사용)
+        Project project = EntityDtoMapper.toEntity(request);
+        project.setStatus(ProjectStatus.RECRUITING);
+        project.setViewCount(0);
 
         validateProject(project);
 
@@ -162,12 +138,8 @@ public class ProjectService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException(projectId));
 
-        // 추가 정보 업데이트
-        updateFieldIfNotNull(request.partnerType(), project::setPartnerType);
-        updateFieldIfNotNull(request.budgetAmount(), project::setBudgetAmount);
-        updateFieldIfNotNull(request.progressStatus(), project::setProgressStatus);
-        updateFieldIfNotNull(request.companyLocation(), project::setCompanyLocation);
-        updateFieldIfNotNull(request.partnerEtcDescription(), project::setPartnerEtcDescription);
+        // DTO → Entity 업데이트 적용 (매핑 유틸리티 사용)
+        EntityDtoMapper.updateEntity(project, request);
 
         // 기술 스택 업데이트
         if (request.techNames() != null && !request.techNames().isEmpty()) {
@@ -180,8 +152,6 @@ public class ProjectService {
         if (request.attachmentFileIds() != null && !request.attachmentFileIds().isEmpty()) {
             projectFileService.attachFilesToProject(projectId, request.attachmentFileIds());
         }
-
-        project.setModifyDate(LocalDateTime.now());
 
         Project updatedProject = projectRepository.save(project);
 
@@ -598,49 +568,29 @@ public class ProjectService {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ProjectNotFoundException(id));
 
-        // 기본 정보 업데이트
-        updateFieldIfNotNull(request.title(), project::setTitle);
-        updateFieldIfNotNull(request.description(), project::setDescription);
-        updateFieldIfNotNull(request.projectField(), project::setProjectField);
-        updateFieldIfNotNull(request.recruitmentType(), project::setRecruitmentType);
-        updateFieldIfNotNull(request.budgetType(), project::setBudgetType);
-        updateFieldIfNotNull(request.startDate(), project::setStartDate);
-        updateFieldIfNotNull(request.endDate(), project::setEndDate);
-
-        // 추가 정보 업데이트
-        updateFieldIfNotNull(request.partnerType(), project::setPartnerType);
-        updateFieldIfNotNull(request.budgetAmount(), project::setBudgetAmount);
-        updateFieldIfNotNull(request.progressStatus(), project::setProgressStatus);
-        updateFieldIfNotNull(request.companyLocation(), project::setCompanyLocation);
-        updateFieldIfNotNull(request.partnerEtcDescription(), project::setPartnerEtcDescription);
-
-        project.setModifyDate(LocalDateTime.now());
-
-        validateProject(project);
-        Project updatedProject = projectRepository.save(project);
+        // DTO → Entity 업데이트 적용 (매핑 유틸리티 사용)
+        EntityDtoMapper.updateEntity(project, request);
 
         // 기술 스택 업데이트
-        if (request.techNames() != null) {
-            // 기존 기술스택 삭제
+        if (request.techNames() != null && !request.techNames().isEmpty()) {
+            // 기존 기술스택 삭제 후 새로 추가
             projectTechRepository.deleteByProjectId(id);
-
-            if (!request.techNames().isEmpty()) {
-                saveTechStacks(id, request.techNames());
-            }
+            saveTechStacks(id, request.techNames());
         }
 
-        // 파일 처리 (삭제할 파일들)
-        if (request.filesToDelete() != null && !request.filesToDelete().isEmpty()) {
-            projectFileService.deleteFiles(request.filesToDelete());
-        }
-
-        // 새로운 파일들 연결
+        // 파일 첨부
         if (request.attachmentFileIds() != null && !request.attachmentFileIds().isEmpty()) {
             projectFileService.attachFilesToProject(id, request.attachmentFileIds());
         }
 
-        // 상세 정보 조회해서 반환
-        return getProjectDetailById(id).orElseThrow(() ->
-                new IllegalStateException("수정된 프로젝트 정보를 조회할 수 없습니다."));
+        Project updatedProject = projectRepository.save(project);
+
+        // 업데이트된 기술 스택 조회
+        List<ProjectTech> existingTechs = getProjectTechs(id);
+        List<String> techNames = existingTechs.stream()
+                .map(ProjectTech::getTechName)
+                .collect(Collectors.toList());
+
+        return ProjectResponse.from(updatedProject, techNames);
     }
 }
