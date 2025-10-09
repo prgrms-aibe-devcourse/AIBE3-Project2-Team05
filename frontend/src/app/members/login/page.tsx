@@ -2,11 +2,10 @@
 import { useUser } from "@/app/context/UserContext";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-// UserContext import
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setUsername } = useUser(); // Context에서 setUsername 가져오기
+  const { setUsername } = useUser();
 
   const [usernameInput, setUsernameInput] = useState("");
   const [password, setPassword] = useState("");
@@ -43,12 +42,11 @@ export default function LoginPage() {
 
       setSuccessMsg(data.msg || "로그인 성공");
 
-      // 로그인 성공 시 username Context에 저장 + 브라우저 쿠키에도 저장
-      document.cookie = `username=${usernameInput}; path=/`;
-      setUsername(usernameInput);
+      // DTO에서 닉네임 가져와 Context에 저장
+      const usernameFromDto = data.Data?.MemberDto?.nickname ?? null;
+      setUsername(usernameFromDto);
 
-      // 로그인 후 메인 페이지 이동
-      router.push("/");
+      router.push("/"); // 메인 페이지 이동
     } catch (err) {
       console.error(err);
       setErrorMsg("로그인 중 오류가 발생했습니다.");
@@ -57,23 +55,16 @@ export default function LoginPage() {
 
   return (
     <main className="relative w-screen h-screen bg-[var(--background)] flex justify-center items-center overflow-y-auto">
-      {/* Overlay */}
       <div className="absolute inset-0 bg-[rgba(241,234,220,0.3)] z-0"></div>
-
-      {/* 중앙 컨테이너 */}
       <div className="relative z-10 w-[448px] h-[400px] flex flex-col items-center">
-        {/* Header */}
         <div className="flex flex-col items-center mt-4">
           <h1 className="text-[30px] font-bold text-[var(--primary)]">FIT</h1>
           <p className="text-[16px] font-normal text-[var(--muted-foreground)] mt-2">
             로그인
           </p>
         </div>
-
-        {/* Form Background */}
         <div className="mt-6 w-full bg-[#FDFCF8] shadow-lg rounded-[16px] flex-1 p-6">
           <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-            {/* 아이디 */}
             <div className="flex flex-col">
               <label className="text-[14px] font-medium text-[var(--foreground)]">
                 아이디
@@ -86,8 +77,6 @@ export default function LoginPage() {
                 className="mt-2 h-[36px] rounded-[10px] border border-[var(--border)] bg-[var(--input)] px-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
               />
             </div>
-
-            {/* 비밀번호 */}
             <div className="flex flex-col">
               <label className="text-[14px] font-medium text-[var(--foreground)]">
                 비밀번호
@@ -104,7 +93,6 @@ export default function LoginPage() {
             {errorMsg && <p className="text-red-500">{errorMsg}</p>}
             {successMsg && <p className="text-green-500">{successMsg}</p>}
 
-            {/* 로그인 버튼 */}
             <button
               type="submit"
               className="w-full h-[36px] bg-[var(--primary)] text-[var(--primary-foreground)] rounded-[10px] cursor-pointer"
@@ -112,7 +100,6 @@ export default function LoginPage() {
               로그인
             </button>
 
-            {/* 회원가입 / 아이디/비밀번호 찾기 링크 */}
             <p className="text-[14px] font-light text-[var(--muted-foreground)] text-center cursor-pointer">
               계정이 없으신가요?{" "}
               <span
