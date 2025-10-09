@@ -3,6 +3,7 @@ package com.back.domain.project.project.service;
 import com.back.domain.project.project.entity.ProjectFile;
 import com.back.domain.project.project.repository.ProjectFileRepository;
 import com.back.domain.project.project.repository.ProjectRepository;
+import com.back.domain.project.project.validator.FileValidator;
 import com.back.global.exception.FileUploadException;
 import com.back.global.exception.ProjectNotFoundException;
 import com.back.global.exception.ValidationException;
@@ -23,7 +24,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +35,7 @@ public class ProjectFileService {
 
     private final ProjectFileRepository projectFileRepository;
     private final ProjectRepository projectRepository;
+    private final FileValidator fileValidator;
 
     @Value("${project.file.upload-dir:uploads/projects}")
     private String uploadDir;
@@ -111,11 +112,13 @@ public class ProjectFileService {
             throw new ProjectNotFoundException(projectId);
         }
 
-        // 파일 검증
-        validateFile(file);
+        // 파일 검증 (FileValidator 사용)
+        fileValidator.validateFile(file, allowedExtensionsStr);
+        fileValidator.validateMimeType(file);
 
         // 프로젝트별 파일 크기 제한 검증
-        validateProjectFileSize(projectId, file.getSize());
+        long currentTotalSize = getProjectFilesTotalSize(projectId);
+        fileValidator.validateProjectFileSize(currentTotalSize, file.getSize());
 
         try {
             // 파일 저장
@@ -148,17 +151,13 @@ public class ProjectFileService {
     public List<ProjectFile> uploadFiles(Long projectId, List<MultipartFile> files) {
         log.info("파일 일괄 업로드 - projectId: {}, fileCount: {}", projectId, files.size());
 
-        if (files.isEmpty()) {
-            throw new ValidationException("업로드할 파일이 없습니다.", "NO_FILES_TO_UPLOAD");
-        }
-
-        if (files.size() > 10) {
-            throw new ValidationException("한 번에 업로드할 수 있는 파일은 최대 10개입니다.", "TOO_MANY_FILES");
-        }
+        // 여러 파일 검증 (FileValidator 사용)
+        fileValidator.validateFiles(files, allowedExtensionsStr);
 
         // 전체 파일 크기 검증
         long totalSize = files.stream().mapToLong(MultipartFile::getSize).sum();
-        validateProjectFileSize(projectId, totalSize);
+        long currentTotalSize = getProjectFilesTotalSize(projectId);
+        fileValidator.validateProjectFileSize(currentTotalSize, totalSize);
 
         return files.stream()
                 .map(file -> uploadFile(projectId, file))
@@ -279,6 +278,9 @@ public class ProjectFileService {
     public ProjectFile updateFileName(Long fileId, String newOriginalName) {
         log.info("파일명 수정 - fileId: {}, newName: {}", fileId, newOriginalName);
 
+        // 파일명 검증 (FileValidator 사용)
+        fileValidator.validateFileName(newOriginalName);
+
         ProjectFile file = getProjectFile(fileId);
         file.setOriginalName(newOriginalName);
 
@@ -317,93 +319,6 @@ public class ProjectFileService {
         return projectFileRepository.existsByProjectIdAndOriginalName(projectId, originalName);
     }
 
-    /**
-     * 파일 검증 메서드
-     */
-    private void validateFile(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            throw new ValidationException("파일이 비어있습니다.", "EMPTY_FILE");
-        }
-
-        if (file.getOriginalFilename() == null || file.getOriginalFilename().trim().isEmpty()) {
-            throw new ValidationException("파일명이 없습니다.", "NO_FILENAME");
-        }
-
-        // 파일 크기 검증
-        if (file.getSize() > MAX_FILE_SIZE) {
-            throw new ValidationException("파일 크기가 50MB를 초과합니다.", "FILE_SIZE_EXCEEDED");
-        }
-
-        // 파일 확장자 검증
-        String fileName = file.getOriginalFilename().toLowerCase();
-        String[] allowedExtensions = allowedExtensionsStr.split(",");
-
-        boolean isValidExtension = Arrays.stream(allowedExtensions)
-                .anyMatch(ext -> fileName.endsWith("." + ext.trim()));
-
-        if (!isValidExtension) {
-            throw new ValidationException("허용되지 않는 파일 확장자입니다. 허용 확장자: " + allowedExtensionsStr, "INVALID_FILE_EXTENSION");
-        }
-
-        // MIME 타입 검증
-        validateMimeType(file);
-    }
-
-
-    /**
-     * MIME 타입 검증
-     */
-    private void validateMimeType(MultipartFile file) {
-        String contentType = file.getContentType();
-        String fileName = file.getOriginalFilename().toLowerCase();
-
-        if (contentType == null || contentType.trim().isEmpty()) {
-            throw new ValidationException("파일의 MIME 타입을 확인할 수 없습니다.", "UNKNOWN_MIME_TYPE");
-        }
-
-        // 확장자별 허용된 MIME 타입 매핑
-        String extension = getFileExtension(fileName);
-        String[] allowedMimeTypes = getAllowedMimeTypesForExtension(extension);
-
-        if (allowedMimeTypes.length == 0) {
-            // 확장자가 허용 목록에 없는 경우는 이미 위에서 검증됨
-            return;
-        }
-
-        boolean isValidMimeType = Arrays.stream(allowedMimeTypes)
-                .anyMatch(mimeType -> contentType.toLowerCase().startsWith(mimeType.toLowerCase()));
-
-        if (!isValidMimeType) {
-            throw new ValidationException(
-                String.format("파일 확장자(%s)와 MIME 타입(%s)이 일치하지 않습니다.", extension, contentType),
-                "MIME_TYPE_MISMATCH"
-            );
-        }
-    }
-
-    /**
-     * 확장자별 허용된 MIME 타입 반환
-     */
-    private String[] getAllowedMimeTypesForExtension(String extension) {
-        return switch (extension.toLowerCase()) {
-            case "pdf" -> new String[]{"application/pdf"};
-            case "doc" -> new String[]{"application/msword"};
-            case "docx" -> new String[]{"application/vnd.openxmlformats-officedocument.wordprocessingml.document"};
-            case "xls" -> new String[]{"application/vnd.ms-excel"};
-            case "xlsx" -> new String[]{"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"};
-            case "ppt" -> new String[]{"application/vnd.ms-powerpoint"};
-            case "pptx" -> new String[]{"application/vnd.openxmlformats-officedocument.presentationml.presentation"};
-            case "txt" -> new String[]{"text/plain"};
-            case "md" -> new String[]{"text/markdown", "text/plain"};
-            case "zip" -> new String[]{"application/zip", "application/x-zip-compressed"};
-            case "rar" -> new String[]{"application/vnd.rar", "application/x-rar-compressed"};
-            case "jpg", "jpeg" -> new String[]{"image/jpeg"};
-            case "png" -> new String[]{"image/png"};
-            case "gif" -> new String[]{"image/gif"};
-            default -> new String[]{};
-        };
-    }
-
     private String generateStoredFileName(String originalFilename) {
         String extension = getFileExtension(originalFilename);
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
@@ -436,24 +351,6 @@ public class ProjectFileService {
         Path path = Paths.get(filePath);
         if (Files.exists(path)) {
             Files.delete(path);
-        }
-    }
-
-    /**
-     * 프로젝트별 파일 크기 제한 검증
-     */
-    private void validateProjectFileSize(Long projectId, long additionalSize) {
-        long currentTotalSize = getProjectFilesTotalSize(projectId);
-        long newTotalSize = currentTotalSize + additionalSize;
-
-        // 프로젝트당 최대 500MB 제한
-        long maxProjectSize = 500 * 1024 * 1024L;
-        if (newTotalSize > maxProjectSize) {
-            throw new ValidationException(
-                String.format("프로젝트 총 파일 크기가 500MB를 초과합니다. 현재: %dMB, 추가: %dMB",
-                    currentTotalSize / (1024 * 1024), additionalSize / (1024 * 1024)),
-                "PROJECT_SIZE_EXCEEDED"
-            );
         }
     }
 }

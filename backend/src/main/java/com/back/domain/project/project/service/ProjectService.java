@@ -1,6 +1,7 @@
 package com.back.domain.project.project.service;
 
-import com.back.domain.project.project.dto.*;
+import com.back.domain.project.project.dto.ProjectRequest;
+import com.back.domain.project.project.dto.ProjectResponse;
 import com.back.domain.project.project.entity.Project;
 import com.back.domain.project.project.entity.ProjectFile;
 import com.back.domain.project.project.entity.ProjectStatusHistory;
@@ -8,9 +9,9 @@ import com.back.domain.project.project.entity.ProjectTech;
 import com.back.domain.project.project.entity.enums.*;
 import com.back.domain.project.project.repository.ProjectRepository;
 import com.back.domain.project.project.repository.ProjectTechRepository;
+import com.back.domain.project.project.validator.ProjectValidator;
 import com.back.global.exception.ProjectAccessDeniedException;
 import com.back.global.exception.ProjectNotFoundException;
-import com.back.global.exception.ValidationException;
 import com.back.global.util.EntityDtoMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,7 @@ public class ProjectService {
     private final ProjectTechRepository projectTechRepository;
     private final ProjectStatusHistoryService statusHistoryService;
     private final ProjectFileService projectFileService;
+    private final ProjectValidator projectValidator;
 
     /**
      * 프로젝트 목록 조회 (페이징) - 기술스택 제외
@@ -82,7 +84,7 @@ public class ProjectService {
         project.setStatus(ProjectStatus.RECRUITING);
         project.setViewCount(0);
 
-        validateProject(project);
+        projectValidator.validateProject(project);
 
         Project savedProject = projectRepository.save(project);
 
@@ -111,7 +113,7 @@ public class ProjectService {
         project.setStatus(ProjectStatus.RECRUITING);
         project.setViewCount(0);
 
-        validateProject(project);
+        projectValidator.validateProject(project);
 
         Project savedProject = projectRepository.save(project);
 
@@ -172,7 +174,7 @@ public class ProjectService {
         log.info("프로젝트 생성 - title: {}, managerId: {}",
                 project.getTitle(), project.getManagerId());
 
-        validateProject(project);
+        projectValidator.validateProject(project);
 
         project.setStatus(ProjectStatus.RECRUITING);
         project.setViewCount(0);
@@ -197,8 +199,8 @@ public class ProjectService {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ProjectNotFoundException(id));
 
-        validateProjectOwnership(project, updateData.getManagerId());
-        validateProject(updateData);
+        projectValidator.validateProjectOwnership(project, updateData.getManagerId());
+        projectValidator.validateProject(updateData);
 
         updateProjectFields(project, updateData);
         project.setModifyDate(LocalDateTime.now());
@@ -216,10 +218,10 @@ public class ProjectService {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ProjectNotFoundException(id));
 
-        validateStatusChangePermission(project, changedById);
+        projectValidator.validateStatusChangePermission(project, changedById);
 
         ProjectStatus previousStatus = project.getStatus();
-        validateStatusTransition(previousStatus, newStatus);
+        projectValidator.validateStatusTransition(previousStatus, newStatus);
 
         project.setStatus(newStatus);
         project.setModifyDate(LocalDateTime.now());
@@ -241,7 +243,7 @@ public class ProjectService {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ProjectNotFoundException(id));
 
-        validateProjectOwnership(project, requesterId);
+        projectValidator.validateProjectOwnership(project, requesterId);
 
         // 관련 기술스택 먼저 삭제
         projectTechRepository.deleteByProjectId(id);
@@ -263,7 +265,7 @@ public class ProjectService {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ProjectNotFoundException(id));
 
-        validateProjectOwnership(project, managerId);
+        projectValidator.validateProjectOwnership(project, managerId);
 
         // 추가 정보 업데이트
         updateFieldIfNotNull(partnerType, project::setPartnerType);
@@ -289,7 +291,7 @@ public class ProjectService {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ProjectNotFoundException(id));
 
-        validateProjectOwnership(project, managerId);
+        projectValidator.validateProjectOwnership(project, managerId);
 
         // 추가 정보 업데이트
         updateFieldIfNotNull(partnerType, project::setPartnerType);
@@ -337,6 +339,10 @@ public class ProjectService {
                                         Pageable pageable) {
         log.debug("프로젝트 검색 및 필터링 - keyword: {}, status: {}", keyword, status);
 
+        // 검색 조건 검증
+        projectValidator.validateSearchKeyword(keyword);
+        projectValidator.validateBudgetRange(minBudget, maxBudget);
+
         // 정렬 처리
         Pageable sortedPageable = createSortedPageable(pageable, sortBy);
 
@@ -368,59 +374,6 @@ public class ProjectService {
         return techNames;
     }
 
-    private void validateProject(Project project) {
-        // Null 체크
-        validateNotNull(project.getTitle(), "프로젝트 제목은 필수입니다.");
-        validateNotNull(project.getDescription(), "프로젝트 설명은 필수입니다.");
-        validateNotNull(project.getProjectField(), "프로젝트 분야는 필수입니다.");
-        validateNotNull(project.getRecruitmentType(), "모집 형태는 필수입니다.");
-        validateNotNull(project.getBudgetType(), "예산 유형은 필수입니다.");
-        validateNotNull(project.getStartDate(), "시작일은 필수입니다.");
-        validateNotNull(project.getEndDate(), "종료일은 필수입니다.");
-        validateNotNull(project.getManagerId(), "프로젝트 관리자는 필수입니다.");
-
-        // 길이 검증
-        validateStringLength(project.getTitle(), 200, "프로젝트 제목은 200자를 초과할 수 없습니다.");
-        validateStringLength(project.getDescription(), 5000, "프로젝트 설명은 5000자를 초과할 수 없습니다.");
-
-        // 엔티티 자체 검증
-        project.validateDates();
-        project.validateBudget();
-    }
-
-    private void validateNotNull(Object value, String message) {
-        if (value == null || (value instanceof String && ((String) value).trim().isEmpty())) {
-            throw new IllegalArgumentException(message);
-        }
-    }
-
-    private void validateStringLength(String value, int maxLength, String message) {
-        if (value != null && value.length() > maxLength) {
-            throw new IllegalArgumentException(message);
-        }
-    }
-
-    private void validateProjectOwnership(Project project, Long requesterId) {
-        if (!project.getManagerId().equals(requesterId)) {
-            throw new ProjectAccessDeniedException();
-        }
-    }
-
-    private void validateStatusChangePermission(Project project, Long requesterId) {
-        if (!project.getManagerId().equals(requesterId)) {
-            throw new ProjectAccessDeniedException();
-        }
-    }
-
-    private void validateStatusTransition(ProjectStatus from, ProjectStatus to) {
-        if (from == ProjectStatus.COMPLETED && to == ProjectStatus.RECRUITING) {
-            throw new ValidationException("완료된 프로젝트는 모집중으로 변경할 수 없습니다.", "INVALID_STATUS_TRANSITION");
-        }
-
-        if (from == ProjectStatus.CANCELLED && to == ProjectStatus.IN_PROGRESS) {
-            throw new ValidationException("중단된 프로젝트는 진행중으로 직접 변경할 수 없습니다.", "INVALID_STATUS_TRANSITION");
-        }
-    }
 
     private void updateProjectFields(Project project, Project updateData) {
         updateFieldIfNotNull(updateData.getTitle(), project::setTitle);
