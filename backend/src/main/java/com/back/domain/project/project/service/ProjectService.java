@@ -37,25 +37,36 @@ public class ProjectService {
     private final ProjectFileService projectFileService;
 
     /**
-     * 프로젝트 목록 조회 (페이징)
+     * 프로젝트 목록 조회 (페이징) - 기술스택 제외
      */
     @Transactional(readOnly = true)
-    public Page<Project> getAllProjects(int page, int size) {
+    public Page<ProjectResponse> getAllProjects(int page, int size) {
         log.debug("프로젝트 목록 조회 - page: {}, size: {}", page, size);
 
         Pageable pageable = PageRequest.of(page, size,
                 Sort.by(Sort.Direction.DESC, "createDate"));
 
-        return projectRepository.findAll(pageable);
+        // 기술스택 없이 프로젝트만 조회 (목록에서는 기술스택 표시 안함)
+        Page<Project> projects = projectRepository.findAll(pageable);
+
+        // 기술스택 없이 ProjectResponse로 변환
+        return projects.map(project -> ProjectResponse.from(project, null));
     }
 
     /**
-     * 사용자별 프로젝트 목록 조회
+     * 사용자별 프로젝트 목록 조회 - 기술스택 제외
      */
     @Transactional(readOnly = true)
-    public List<Project> getProjectsByManagerId(Long managerId) {
+    public List<ProjectResponse> getProjectsByManagerId(Long managerId) {
         log.debug("사용자 프로젝트 목록 조회 - managerId: {}", managerId);
-        return projectRepository.findByManagerIdOrderByCreateDateDesc(managerId);
+
+        // 기술스택 없이 프로젝트만 조회
+        List<Project> projects = projectRepository.findByManagerIdOrderByCreateDateDesc(managerId);
+
+        // 기술스택 없이 ProjectResponse로 변환
+        return projects.stream()
+                .map(project -> ProjectResponse.from(project, null))
+                .collect(Collectors.toList());
     }
 
     /**
