@@ -24,6 +24,7 @@ public class ProjectStatusHistoryService {
     /**
      * 프로젝트의 상태 변경 이력 조회
      */
+    @Transactional(readOnly = true)
     public List<ProjectStatusHistory> getProjectStatusHistory(Long projectId) {
         log.debug("프로젝트 상태 이력 조회 - projectId: {}", projectId);
         return statusHistoryRepository.findByProjectIdOrderByChangeDateDesc(projectId);

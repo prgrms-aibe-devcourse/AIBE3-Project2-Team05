@@ -26,6 +26,7 @@ public class ProjectFavoriteService {
     /**
      * 사용자의 즐겨찾기 목록 조회 (페이징)
      */
+    @Transactional(readOnly = true)
     public Page<ProjectFavorite> getUserFavorites(Long userId, Pageable pageable) {
         log.debug("사용자 즐겨찾기 페이징 조회 - userId: {}", userId);
 
@@ -35,6 +36,7 @@ public class ProjectFavoriteService {
     /**
      * 사용자의 즐겨찾기 목록 조회 (전체)
      */
+    @Transactional(readOnly = true)
     public List<ProjectFavorite> getUserFavorites(Long userId) {
         log.debug("사용자 즐겨찾기 전체 조회 - userId: {}", userId);
 
@@ -45,6 +47,7 @@ public class ProjectFavoriteService {
     /**
      * 즐겨찾기 상세 조회
      */
+    @Transactional(readOnly = true)
     public Optional<ProjectFavorite> getFavorite(Long userId, Long projectId) {
         log.debug("즐겨찾기 상세 조회 - userId: {}, projectId: {}", userId, projectId);
 
@@ -54,6 +57,7 @@ public class ProjectFavoriteService {
     /**
      * 즐겨찾기 여부 확인
      */
+    @Transactional(readOnly = true)
     public boolean isFavorite(Long userId, Long projectId) {
         log.debug("즐겨찾기 여부 확인 - userId: {}, projectId: {}", userId, projectId);
 
@@ -122,6 +126,7 @@ public class ProjectFavoriteService {
     /**
      * 프로젝트의 즐겨찾기 수 조회
      */
+    @Transactional(readOnly = true)
     public long getFavoriteCount(Long projectId) {
         log.debug("프로젝트 즐겨찾기 수 조회 - projectId: {}", projectId);
 
@@ -131,6 +136,7 @@ public class ProjectFavoriteService {
     /**
      * 사용자의 즐겨찾기 수 조회
      */
+    @Transactional(readOnly = true)
     public long getUserFavoriteCount(Long userId) {
         log.debug("사용자 즐겨찾기 수 조회 - userId: {}", userId);
 

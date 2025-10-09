@@ -67,6 +67,7 @@ public class ProjectFileService {
     /**
      * 파일 상세 정보 조회
      */
+    @Transactional(readOnly = true)
     public ProjectFile getProjectFile(Long fileId) {
         log.debug("파일 상세 조회 - fileId: {}", fileId);
         return projectFileRepository.findById(fileId)
@@ -76,6 +77,7 @@ public class ProjectFileService {
     /**
      * 파일 다운로드를 위한 Resource 조회
      */
+    @Transactional(readOnly = true)
     public Resource getFileAsResource(Long fileId) {
         log.debug("파일 리소스 조회 - fileId: {}", fileId);
 
@@ -254,6 +256,7 @@ public class ProjectFileService {
     /**
      * 프로젝트 파일 통계 조회
      */
+    @Transactional(readOnly = true)
     public FileStatistics getProjectFileStatistics(Long projectId) {
         log.debug("프로젝트 파일 통계 조회 - projectId: {}", projectId);
 
@@ -285,6 +288,7 @@ public class ProjectFileService {
     /**
      * 프로젝트의 총 파일 크기 조회
      */
+    @Transactional(readOnly = true)
     public long getProjectFilesTotalSize(Long projectId) {
         log.debug("프로젝트 총 파일 크기 조회 - projectId: {}", projectId);
 
@@ -306,6 +310,7 @@ public class ProjectFileService {
     /**
      * 파일명 중복 검사
      */
+    @Transactional(readOnly = true)
     public boolean isDuplicateFile(Long projectId, String originalName) {
         log.debug("파일명 중복 검사 - projectId: {}, originalName: {}", projectId, originalName);
 
