@@ -90,25 +90,57 @@ public class ProjectValidator {
 
     /**
      * 프로젝트 상태 전환 검증
+     * 새로운 상태 흐름: 모집중 → 계약중 → 진행중 → 완료/보류/취소
      */
     public void validateStatusTransition(ProjectStatus from, ProjectStatus to) {
         if (from == null || to == null) {
             throw new ValidationException("상태 정보가 누락되었습니다.", "MISSING_STATUS_INFO");
         }
 
-        // 완료된 프로젝트는 모집중으로 변경 불가
-        if (from == ProjectStatus.COMPLETED && to == ProjectStatus.RECRUITING) {
-            throw new ValidationException("완료된 프로젝트는 모집중으로 변경할 수 없습니다.", "INVALID_STATUS_TRANSITION");
+        // 같은 상태로 변경하는 경우는 허용
+        if (from == to) {
+            return;
         }
 
-        // 중단된 프로젝트는 진행중으로 직접 변경 불가
-        if (from == ProjectStatus.CANCELLED && to == ProjectStatus.IN_PROGRESS) {
-            throw new ValidationException("중단된 프로젝트는 진행중으로 직접 변경할 수 없습니다.", "INVALID_STATUS_TRANSITION");
-        }
+        switch (from) {
+            case RECRUITING:
+                // 모집중에서는 계약중, 취소로만 변경 가능
+                if (to != ProjectStatus.CONTRACTING && to != ProjectStatus.CANCELLED) {
+                    throw new ValidationException("모집중 상태에서는 계약중 또는 취소로만 변경할 수 있습니다.", "INVALID_STATUS_TRANSITION");
+                }
+                break;
 
-        // 취소된 프로젝트는 완료로 변경 불가
-        if (from == ProjectStatus.CANCELLED && to == ProjectStatus.COMPLETED) {
-            throw new ValidationException("취소된 프로젝트는 완료로 변경할 수 없습니다.", "INVALID_STATUS_TRANSITION");
+            case CONTRACTING:
+                // 계약중에서는 진행중, 보류, 취소로만 변경 가능
+                if (to != ProjectStatus.IN_PROGRESS && to != ProjectStatus.SUSPENDED && to != ProjectStatus.CANCELLED) {
+                    throw new ValidationException("계약중 상태에서는 진행중, 보류 또는 취소로만 변경할 수 있습니다.", "INVALID_STATUS_TRANSITION");
+                }
+                break;
+
+            case IN_PROGRESS:
+                // 진행중에서는 완료, 보류, 취소로만 변경 가능
+                if (to != ProjectStatus.COMPLETED && to != ProjectStatus.SUSPENDED && to != ProjectStatus.CANCELLED) {
+                    throw new ValidationException("진행중 상태에서는 완료, 보류 또는 취소로만 변경할 수 있습니다.", "INVALID_STATUS_TRANSITION");
+                }
+                break;
+
+            case SUSPENDED:
+                // 보류에서는 진행중, 취소로만 변경 가능 (재개 또는 최종 취소)
+                if (to != ProjectStatus.IN_PROGRESS && to != ProjectStatus.CANCELLED) {
+                    throw new ValidationException("보류 상태에서는 진행중(재개) 또는 취소로만 변경할 수 있습니다.", "INVALID_STATUS_TRANSITION");
+                }
+                break;
+
+            case COMPLETED:
+                // 완료된 프로젝트는 상태 변경 불가
+                throw new ValidationException("완료된 프로젝트의 상태는 변경할 수 없습니다.", "INVALID_STATUS_TRANSITION");
+
+            case CANCELLED:
+                // 취소된 프로젝트는 상태 변경 불가
+                throw new ValidationException("취소된 프로젝트의 상태는 변경할 수 없습니다.", "INVALID_STATUS_TRANSITION");
+
+            default:
+                throw new ValidationException("알 수 없는 프로젝트 상태입니다.", "UNKNOWN_STATUS");
         }
 
         log.debug("상태 전환 검증 통과 - from: {}, to: {}", from, to);

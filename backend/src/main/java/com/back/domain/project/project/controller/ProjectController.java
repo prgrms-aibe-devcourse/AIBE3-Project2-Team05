@@ -1,9 +1,10 @@
 package com.back.domain.project.project.controller;
 
-import com.back.domain.project.project.dto.*;
+import com.back.domain.project.project.dto.ProjectRequest;
+import com.back.domain.project.project.dto.ProjectResponse;
 import com.back.domain.project.project.entity.Project;
 import com.back.domain.project.project.entity.enums.*;
-import com.back.domain.project.project.service.ProjectService;
+import com.back.domain.project.project.service.ProjectManagementService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -24,7 +24,7 @@ import java.util.Optional;
 @CrossOrigin(origins = "*")
 public class ProjectController {
 
-    private final ProjectService projectService;
+    private final ProjectManagementService projectManagementService;
 
     /**
      * 프로젝트 목록 조회 (페이징)
@@ -36,7 +36,7 @@ public class ProjectController {
 
         log.info("프로젝트 목록 조회 요청 - page: {}, size: {}", page, size);
 
-        Page<ProjectResponse> projects = projectService.getAllProjects(page, size);
+        Page<ProjectResponse> projects = projectManagementService.getAllProjects(page, size);
         return ResponseEntity.ok(projects);
     }
 
@@ -47,10 +47,12 @@ public class ProjectController {
     public ResponseEntity<ProjectResponse> getProjectById(@PathVariable Long id) {
         log.info("프로젝트 상세 조회 요청 (통합) - id: {}", id);
 
-        Optional<ProjectResponse> projectDetail = projectService.getProjectDetailById(id);
-
-        return projectDetail.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            ProjectResponse projectDetail = projectManagementService.getProjectDetail(id);
+            return ResponseEntity.ok(projectDetail);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     /**
@@ -60,7 +62,7 @@ public class ProjectController {
     public ResponseEntity<List<ProjectResponse>> getProjectsByManagerId(@PathVariable Long managerId) {
         log.info("사용자 프로젝트 목록 조회 요청 - managerId: {}", managerId);
 
-        List<ProjectResponse> projects = projectService.getProjectsByManagerId(managerId);
+        List<ProjectResponse> projects = projectManagementService.getProjectsByManagerId(managerId);
         return ResponseEntity.ok(projects);
     }
 
@@ -75,9 +77,11 @@ public class ProjectController {
         log.info("사용자 프로젝트 상세 조회 요청 (통합) - managerId: {}, projectId: {}", managerId, id);
 
         try {
-            Optional<ProjectResponse> projectDetail = projectService.getProjectDetailByIdForManager(id, managerId);
-            return projectDetail.map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
+            ProjectResponse projectDetail = projectManagementService.getProjectDetail(id);
+            // TODO: 매니저 권한 체크 로직 필요시 추가
+            return ResponseEntity.ok(projectDetail);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
         } catch (SecurityException e) {
             log.error("프로젝트 접근 권한 없음 - {}", e.getMessage());
             return ResponseEntity.status(403).build();
@@ -93,7 +97,7 @@ public class ProjectController {
         log.info("프로젝트 기본 생성 요청 - title: {}, managerId: {}", request.title(), request.managerId());
 
         try {
-            ProjectResponse createdProject = projectService.createBasicProject(request);
+            ProjectResponse createdProject = projectManagementService.createBasicProject(request);
             return ResponseEntity.ok(createdProject);
         } catch (IllegalArgumentException e) {
             log.error("프로젝트 기본 생성 실패 - 입력값 오류: {}", e.getMessage());
@@ -110,7 +114,7 @@ public class ProjectController {
         log.info("프로젝트 완전 생성 요청 - title: {}, managerId: {}", request.title(), request.managerId());
 
         try {
-            ProjectResponse createdProject = projectService.createCompleteProject(request);
+            ProjectResponse createdProject = projectManagementService.createCompleteProject(request);
             return ResponseEntity.ok(createdProject);
         } catch (IllegalArgumentException e) {
             log.error("프로젝트 완전 생성 실패 - 입력값 오류: {}", e.getMessage());
@@ -129,7 +133,7 @@ public class ProjectController {
         log.info("프로젝트 추가 정보로 완성 요청 - id: {}", id);
 
         try {
-            ProjectResponse updatedProject = projectService.completeProjectWithAdditionalInfo(id, request);
+            ProjectResponse updatedProject = projectManagementService.completeProjectWithAdditionalInfo(id, request);
             return ResponseEntity.ok(updatedProject);
         } catch (IllegalArgumentException e) {
             log.error("프로젝트 추가 정보 완성 실패 - {}", e.getMessage());
@@ -148,7 +152,7 @@ public class ProjectController {
         log.info("프로젝트 생성 요청 - title: {}", project.getTitle());
 
         try {
-            Project createdProject = projectService.createProject(project);
+            Project createdProject = projectManagementService.createProject(project);
             return ResponseEntity.ok(createdProject);
         } catch (IllegalArgumentException e) {
             log.error("프로젝트 생성 실패 - 입력값 오류: {}", e.getMessage());
@@ -164,7 +168,7 @@ public class ProjectController {
         log.info("프로젝트 수정 요청 - id: {}", id);
 
         try {
-            Project updatedProject = projectService.updateProject(id, project);
+            Project updatedProject = projectManagementService.updateProject(id, project);
             return ResponseEntity.ok(updatedProject);
         } catch (IllegalArgumentException e) {
             log.error("프로젝트 수정 실패 - {}", e.getMessage());
@@ -186,7 +190,7 @@ public class ProjectController {
         log.info("프로젝트 통합 수정 요청 - id: {}", id);
 
         try {
-            ProjectResponse updatedProject = projectService.updateProjectComplete(id, request);
+            ProjectResponse updatedProject = projectManagementService.completeProjectWithAdditionalInfo(id, request);
             return ResponseEntity.ok(updatedProject);
         } catch (IllegalArgumentException e) {
             log.error("프로젝트 통합 수정 실패 - {}", e.getMessage());
@@ -209,7 +213,7 @@ public class ProjectController {
         log.info("프로젝트 상태 변경 요청 - id: {}, status: {}", id, status);
 
         try {
-            Project updatedProject = projectService.updateProjectStatus(id, status, changedById);
+            Project updatedProject = projectManagementService.updateProjectStatus(id, status, changedById);
             return ResponseEntity.ok(updatedProject);
         } catch (IllegalArgumentException e) {
             log.error("상태 변경 실패 - {}", e.getMessage());
@@ -221,20 +225,111 @@ public class ProjectController {
     }
 
     /**
-     * 프로젝트 삭제
+     * 프로젝트 계약 시작 (모집중 → 계약중)
      */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProject(@PathVariable Long id, @RequestParam Long requesterId) {
-        log.info("프로젝트 삭제 요청 - id: {}, requesterId: {}", id, requesterId);
+    @PatchMapping("/{id}/start-contracting")
+    public ResponseEntity<Project> startContracting(
+            @PathVariable Long id,
+            @RequestParam Long managerId) {
+
+        log.info("프로젝트 계약 시작 요청 - id: {}, managerId: {}", id, managerId);
 
         try {
-            projectService.deleteProject(id, requesterId);
-            return ResponseEntity.ok().build();
+            Project updatedProject = projectManagementService.startContracting(id, managerId);
+            return ResponseEntity.ok(updatedProject);
         } catch (IllegalArgumentException e) {
-            log.error("프로젝트 삭제 실패 - {}", e.getMessage());
+            log.error("계약 시작 실패 - {}", e.getMessage());
             return ResponseEntity.badRequest().build();
         } catch (SecurityException e) {
-            log.error("프로젝트 삭제 권한 없음 - {}", e.getMessage());
+            log.error("계약 시작 권한 없음 - {}", e.getMessage());
+            return ResponseEntity.status(403).build();
+        }
+    }
+
+    /**
+     * 프로젝트 시작 (계약중 → 진행중)
+     */
+    @PatchMapping("/{id}/start")
+    public ResponseEntity<Project> startProject(
+            @PathVariable Long id,
+            @RequestParam Long managerId) {
+
+        log.info("프로젝트 시작 요청 - id: {}, managerId: {}", id, managerId);
+
+        try {
+            Project updatedProject = projectManagementService.startProject(id, managerId);
+            return ResponseEntity.ok(updatedProject);
+        } catch (IllegalArgumentException e) {
+            log.error("프로젝트 시작 실패 - {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        } catch (SecurityException e) {
+            log.error("프로젝트 시작 권한 없음 - {}", e.getMessage());
+            return ResponseEntity.status(403).build();
+        }
+    }
+
+    /**
+     * 프로젝트 완료 (진행중 → 완료)
+     */
+    @PatchMapping("/{id}/mark-complete")
+    public ResponseEntity<Project> completeProject(
+            @PathVariable Long id,
+            @RequestParam Long managerId) {
+
+        log.info("프로젝트 완료 요청 - id: {}, managerId: {}", id, managerId);
+
+        try {
+            Project updatedProject = projectManagementService.completeProject(id, managerId);
+            return ResponseEntity.ok(updatedProject);
+        } catch (IllegalArgumentException e) {
+            log.error("프로젝트 완료 실패 - {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        } catch (SecurityException e) {
+            log.error("프로젝트 완료 권한 없음 - {}", e.getMessage());
+            return ResponseEntity.status(403).build();
+        }
+    }
+
+    /**
+     * 프로젝트 보류 (계약중/진행중 → 보류)
+     */
+    @PatchMapping("/{id}/suspend")
+    public ResponseEntity<Project> suspendProject(
+            @PathVariable Long id,
+            @RequestParam Long managerId) {
+
+        log.info("프로젝트 보류 요청 - id: {}, managerId: {}", id, managerId);
+
+        try {
+            Project updatedProject = projectManagementService.suspendProject(id, managerId);
+            return ResponseEntity.ok(updatedProject);
+        } catch (IllegalArgumentException e) {
+            log.error("프로젝트 보류 실패 - {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        } catch (SecurityException e) {
+            log.error("프로젝트 보류 권한 없음 - {}", e.getMessage());
+            return ResponseEntity.status(403).build();
+        }
+    }
+
+    /**
+     * 프로젝트 취소 (모든 상태 → 취소)
+     */
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<Project> cancelProject(
+            @PathVariable Long id,
+            @RequestParam Long managerId) {
+
+        log.info("프로젝트 취소 요청 - id: {}, managerId: {}", id, managerId);
+
+        try {
+            Project updatedProject = projectManagementService.cancelProject(id, managerId);
+            return ResponseEntity.ok(updatedProject);
+        } catch (IllegalArgumentException e) {
+            log.error("프로젝트 취소 실패 - {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        } catch (SecurityException e) {
+            log.error("프로젝트 취소 권한 없음 - {}", e.getMessage());
             return ResponseEntity.status(403).build();
         }
     }
@@ -261,7 +356,7 @@ public class ProjectController {
         log.info("프로젝트 검색 요청 - keyword: {}, status: {}", keyword, status);
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<Project> projects = projectService.searchProjects(
+        Page<Project> projects = projectManagementService.searchProjects(
                 keyword, status, projectField, recruitmentType, partnerType,
                 budgetType, minBudget, maxBudget, location, techNames, sortBy, pageable);
 
