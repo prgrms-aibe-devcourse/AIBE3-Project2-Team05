@@ -339,21 +339,64 @@ public class ProjectFileService {
         if (!isValidExtension) {
             throw new ValidationException("허용되지 않는 파일 확장자입니다. 허용 확장자: " + allowedExtensionsStr, "INVALID_FILE_EXTENSION");
         }
+
+        // MIME 타입 검증
+        validateMimeType(file);
+    }
+
+
+    /**
+     * MIME 타입 검증
+     */
+    private void validateMimeType(MultipartFile file) {
+        String contentType = file.getContentType();
+        String fileName = file.getOriginalFilename().toLowerCase();
+
+        if (contentType == null || contentType.trim().isEmpty()) {
+            throw new ValidationException("파일의 MIME 타입을 확인할 수 없습니다.", "UNKNOWN_MIME_TYPE");
+        }
+
+        // 확장자별 허용된 MIME 타입 매핑
+        String extension = getFileExtension(fileName);
+        String[] allowedMimeTypes = getAllowedMimeTypesForExtension(extension);
+
+        if (allowedMimeTypes.length == 0) {
+            // 확장자가 허용 목록에 없는 경우는 이미 위에서 검증됨
+            return;
+        }
+
+        boolean isValidMimeType = Arrays.stream(allowedMimeTypes)
+                .anyMatch(mimeType -> contentType.toLowerCase().startsWith(mimeType.toLowerCase()));
+
+        if (!isValidMimeType) {
+            throw new ValidationException(
+                String.format("파일 확장자(%s)와 MIME 타입(%s)이 일치하지 않습니다.", extension, contentType),
+                "MIME_TYPE_MISMATCH"
+            );
+        }
     }
 
     /**
-     * 프로젝트별 파일 크기 제한 검증
+     * 확장자별 허용된 MIME 타입 반환
      */
-    private void validateProjectFileSize(Long projectId, long additionalSize) {
-        long currentTotalSize = getProjectFilesTotalSize(projectId);
-        long newTotalSize = currentTotalSize + additionalSize;
-
-        // 프로젝트당 최대 500MB 제한
-        long maxProjectSize = 500 * 1024 * 1024L;
-
-        if (newTotalSize > maxProjectSize) {
-            throw new ValidationException("프로젝트 파일 총 크기가 500MB를 초과합니다.", "PROJECT_FILE_SIZE_EXCEEDED");
-        }
+    private String[] getAllowedMimeTypesForExtension(String extension) {
+        return switch (extension.toLowerCase()) {
+            case "pdf" -> new String[]{"application/pdf"};
+            case "doc" -> new String[]{"application/msword"};
+            case "docx" -> new String[]{"application/vnd.openxmlformats-officedocument.wordprocessingml.document"};
+            case "xls" -> new String[]{"application/vnd.ms-excel"};
+            case "xlsx" -> new String[]{"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"};
+            case "ppt" -> new String[]{"application/vnd.ms-powerpoint"};
+            case "pptx" -> new String[]{"application/vnd.openxmlformats-officedocument.presentationml.presentation"};
+            case "txt" -> new String[]{"text/plain"};
+            case "md" -> new String[]{"text/markdown", "text/plain"};
+            case "zip" -> new String[]{"application/zip", "application/x-zip-compressed"};
+            case "rar" -> new String[]{"application/vnd.rar", "application/x-rar-compressed"};
+            case "jpg", "jpeg" -> new String[]{"image/jpeg"};
+            case "png" -> new String[]{"image/png"};
+            case "gif" -> new String[]{"image/gif"};
+            default -> new String[]{};
+        };
     }
 
     private String generateStoredFileName(String originalFilename) {
@@ -388,6 +431,24 @@ public class ProjectFileService {
         Path path = Paths.get(filePath);
         if (Files.exists(path)) {
             Files.delete(path);
+        }
+    }
+
+    /**
+     * 프로젝트별 파일 크기 제한 검증
+     */
+    private void validateProjectFileSize(Long projectId, long additionalSize) {
+        long currentTotalSize = getProjectFilesTotalSize(projectId);
+        long newTotalSize = currentTotalSize + additionalSize;
+
+        // 프로젝트당 최대 500MB 제한
+        long maxProjectSize = 500 * 1024 * 1024L;
+        if (newTotalSize > maxProjectSize) {
+            throw new ValidationException(
+                String.format("프로젝트 총 파일 크기가 500MB를 초과합니다. 현재: %dMB, 추가: %dMB",
+                    currentTotalSize / (1024 * 1024), additionalSize / (1024 * 1024)),
+                "PROJECT_SIZE_EXCEEDED"
+            );
         }
     }
 }
