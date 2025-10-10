@@ -13,6 +13,7 @@ const UserProjectDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [activeTab, setActiveTab] = useState('summary');
+  const [statusChangeLoading, setStatusChangeLoading] = useState(false);
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -202,6 +203,99 @@ const UserProjectDetailPage = () => {
       'DETAILED_PLAN': '상세 기획서가 있어요.'
     };
     return statusMap[status || ''] || status || '';
+  };
+
+  // 프로젝트 상태 변경 함수
+  const handleStatusChange = async (newStatus: 'RECRUITING' | 'CONTRACTING' | 'IN_PROGRESS' | 'COMPLETED' | 'SUSPENDED' | 'CANCELLED') => {
+    if (!project) return;
+
+    const confirmMessage = getStatusChangeMessage(newStatus);
+    if (!window.confirm(confirmMessage)) return;
+
+    setStatusChangeLoading(true);
+    try {
+      // 실제 API 호출로 상태 변경
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${project.id}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          status: newStatus,
+          changedById: Number(params?.managerId) // 현재 사용자(매니저)의 ID 추가
+        }),
+      });
+
+      if (response.ok) {
+        const updatedProject: ProjectResponse = await response.json();
+        setProject(updatedProject);
+        alert(`프로젝트 상태가 "${getStatusText(newStatus)}"로 변경되었습니다.`);
+        
+        // 상태 변경 성공 후 내 프로젝트 관리 페이지로 이동
+        router.push(`/user-projects/${params?.managerId}`);
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('상태 변경 실패:', response.status, errorData);
+        alert('상태 변경에 실패했습니다. 다시 시도해주세요.');
+      }
+    } catch (error) {
+      console.error('상태 변경 실패:', error);
+      alert('상태 변경에 실패했습니다. 네트워크 연결을 확인해주세요.');
+    } finally {
+      setStatusChangeLoading(false);
+    }
+  };
+
+  // 상태 변경 확인 메시지
+  const getStatusChangeMessage = (newStatus: string) => {
+    const statusMessages: Record<string, string> = {
+      'CONTRACTING': '계약 단계로 변경하시겠습니까?\n선택된 지원자와의 계약을 시작합니다.',
+      'IN_PROGRESS': '프로젝트를 시작하시겠습니까?\n프로젝트가 진행 중 상태로 변경됩니다.',
+      'COMPLETED': '프로젝트를 완료 처리하시겠습니까?\n완료 후에는 상태 변경이 불가능합니다.',
+      'SUSPENDED': '프로젝트를 일시 보류하시겠습니까?\n나중에 다시 재개할 수 있습니다.',
+      'CANCELLED': '프로젝트를 취소하시겠습니까?\n취소 후에는 상태 변경이 불가능합니다.'
+    };
+    return statusMessages[newStatus] || '상태를 변경하시겠습니까?';
+  };
+
+  // 현재 상태별 가능한 상태 변경 버튼들
+  const getAvailableStatusButtons = () => {
+    if (!project) return [];
+
+    switch (project.status) {
+      case 'RECRUITING':
+        return [
+          { status: 'CONTRACTING', label: '계약 시작', color: 'blue', icon: '🤝' },
+          { status: 'CANCELLED', label: '모집 취소', color: 'red', icon: '❌' }
+        ];
+
+      case 'CONTRACTING':
+        return [
+          { status: 'IN_PROGRESS', label: '프로젝트 시작', color: 'green', icon: '▶️' },
+          { status: 'SUSPENDED', label: '일시 보류', color: 'orange', icon: '⏸️' },
+          { status: 'CANCELLED', label: '계약 취소', color: 'red', icon: '❌' }
+        ];
+
+      case 'IN_PROGRESS':
+        return [
+          { status: 'COMPLETED', label: '프로젝트 완료', color: 'purple', icon: '✅' },
+          { status: 'SUSPENDED', label: '일시 보류', color: 'orange', icon: '⏸️' },
+          { status: 'CANCELLED', label: '프로젝트 중단', color: 'red', icon: '❌' }
+        ];
+
+      case 'SUSPENDED':
+        return [
+          { status: 'IN_PROGRESS', label: '프로젝트 재개', color: 'green', icon: '▶️' },
+          { status: 'CANCELLED', label: '프로젝트 취소', color: 'red', icon: '❌' }
+        ];
+
+      case 'COMPLETED':
+      case 'CANCELLED':
+        return []; // 상태 변경 불가
+
+      default:
+        return [];
+    }
   };
 
   if (loading) {
@@ -524,6 +618,63 @@ const UserProjectDetailPage = () => {
 
         {/* 관리 버튼들 */}
         <div className="bg-white rounded-xl shadow-sm p-6" style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', padding: '24px' }}>
+          {/* 프로젝트 상태 변경 */}
+          {(() => {
+            const availableButtons = getAvailableStatusButtons();
+            if (availableButtons.length > 0) {
+              return (
+                <div className="mb-6" style={{ marginBottom: '24px' }}>
+                  <h4 className="text-lg font-semibold mb-3 text-gray-900" style={{ fontSize: '18px', fontWeight: '600', marginBottom: '12px', color: '#111827' }}>
+                    프로젝트 상태 변경
+                  </h4>
+                  <div className="flex gap-3 flex-wrap" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                    {availableButtons.map((button) => (
+                      <button
+                        key={button.status}
+                        onClick={() => handleStatusChange(button.status as 'RECRUITING' | 'CONTRACTING' | 'IN_PROGRESS' | 'COMPLETED' | 'SUSPENDED' | 'CANCELLED')}
+                        disabled={statusChangeLoading}
+                        className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 transition-all duration-200 ${
+                          button.color === 'blue' ? 'bg-blue-500 hover:bg-blue-600 text-white' :
+                          button.color === 'green' ? 'bg-green-500 hover:bg-green-600 text-white' :
+                          button.color === 'orange' ? 'bg-orange-500 hover:bg-orange-600 text-white' :
+                          button.color === 'purple' ? 'bg-purple-500 hover:bg-purple-600 text-white' :
+                          button.color === 'red' ? 'bg-red-500 hover:bg-red-600 text-white' :
+                          'bg-gray-500 hover:bg-gray-600 text-white'
+                        } ${statusChangeLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        style={{
+                          padding: '8px 16px',
+                          borderRadius: '8px',
+                          fontWeight: '500',
+                          fontSize: '14px',
+                          border: 'none',
+                          cursor: statusChangeLoading ? 'not-allowed' : 'pointer',
+                          transition: 'all 0.2s',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          opacity: statusChangeLoading ? 0.5 : 1
+                        }}
+                      >
+                        <span>{button.icon}</span>
+                        <span>{button.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            } else if (project.status === 'COMPLETED' || project.status === 'CANCELLED') {
+              return (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg" style={{ marginBottom: '24px', padding: '16px', backgroundColor: '#f9fafb', borderRadius: '8px' }}>
+                  <p className="text-gray-600 text-center" style={{ color: '#4b5563', textAlign: 'center' }}>
+                    {project.status === 'COMPLETED' ? '✅ 완료된 프로젝트입니다.' : '❌ 취소된 프로젝트입니다.'}
+                  </p>
+                </div>
+              );
+            }
+            return null;
+          })()}
+
+          {/* 기본 관리 버튼들 */}
           <div className="flex flex-col sm:flex-row gap-4" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <button
               onClick={() => router.push(`/projects/${project.id}/edit`)}
@@ -544,30 +695,29 @@ const UserProjectDetailPage = () => {
             >
               프로젝트 수정
             </button>
-            {project.status === 'RECRUITING' && (
-              <button
-                onClick={() => {
-                  if (window.confirm('프로젝트 모집을 마감하시겠습니까?')) {
-                    console.log('프로젝트 모집 마감:', project.id);
-                  }
-                }}
-                className="px-6 py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors"
-                style={{ 
-                  padding: '12px 24px', 
-                  backgroundColor: '#ef4444', 
-                  color: 'white', 
-                  fontWeight: '600', 
-                  borderRadius: '8px', 
-                  border: 'none', 
-                  cursor: 'pointer', 
-                  transition: 'background-color 0.2s' 
-                }}
-                onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#dc2626'}
-                onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#ef4444'}
-              >
-                모집마감
-              </button>
-            )}
+            <button
+              onClick={() => {
+                if (window.confirm(`"${project.title}" 프로젝트를 정말 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) {
+                  console.log('프로젝트 삭제:', project.id);
+                  alert('프로젝트 삭제 기능은 백엔드 연동 후 구현됩니다.');
+                }
+              }}
+              className="px-6 py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors"
+              style={{ 
+                padding: '12px 24px', 
+                backgroundColor: '#ef4444', 
+                color: 'white', 
+                fontWeight: '600', 
+                borderRadius: '8px', 
+                border: 'none', 
+                cursor: 'pointer', 
+                transition: 'background-color 0.2s' 
+              }}
+              onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#dc2626'}
+              onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#ef4444'}
+            >
+              프로젝트 삭제
+            </button>
           </div>
         </div>
       </div>
