@@ -416,7 +416,7 @@ const UserProjectsPage = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            router.push(`/projects/${project.id}/edit`);
+                            router.push(`/user-projects/${managerId}/${project.id}/edit`);
                           }}
                           className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
                           style={{ 
@@ -437,12 +437,70 @@ const UserProjectsPage = () => {
                           수정
                         </button>
                         <button
-                          onClick={(e) => {
+                          onClick={async (e) => {
                             e.stopPropagation();
                             if (window.confirm(`"${project.title}" 프로젝트를 정말 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) {
-                              // TODO: 삭제 API 호출
-                              console.log('프로젝트 삭제:', project.id);
-                              alert('프로젝트 삭제 기능은 백엔드 연동 후 구현됩니다.');
+                              try {
+                                console.log('프로젝트 삭제 시작:', project.id);
+                                console.log('managerId:', managerId);
+                                
+                                // 먼저 DELETE API 시도
+                                const deleteUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${project.id}?requesterId=${managerId}`;
+                                console.log('삭제 API URL:', deleteUrl);
+                                
+                                const response = await fetch(deleteUrl, {
+                                  method: 'DELETE',
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                  },
+                                });
+                                
+                                console.log('삭제 API 응답 상태:', response.status);
+                                
+                                if (response.ok) {
+                                  console.log('삭제 성공');
+                                  alert('프로젝트가 삭제되었습니다.');
+                                  // 로컬 상태에서 프로젝트 제거
+                                  setProjects(prevProjects => prevProjects.filter(p => p.id !== project.id));
+                                } else if (response.status === 404 || response.status === 405) {
+                                  // DELETE API가 없는 경우, 상태를 CANCELLED로 변경하는 방식으로 시도
+                                  console.log('DELETE API가 없음, 상태 변경으로 시도');
+                                  
+                                  const statusResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${project.id}/status`, {
+                                    method: 'PATCH',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({ 
+                                      status: 'CANCELLED',
+                                      changedById: Number(managerId)
+                                    }),
+                                  });
+                                  
+                                  if (statusResponse.ok) {
+                                    console.log('프로젝트 취소 성공');
+                                    alert('프로젝트가 취소되었습니다.');
+                                    // 로컬 상태에서 프로젝트 상태 업데이트
+                                    setProjects(prevProjects => 
+                                      prevProjects.map(p => 
+                                        p.id === project.id ? { ...p, status: 'CANCELLED' } : p
+                                      )
+                                    );
+                                  } else {
+                                    const errorData = await statusResponse.json().catch(() => ({}));
+                                    console.error('상태 변경 실패:', errorData);
+                                    alert(errorData.message || '프로젝트 삭제에 실패했습니다.');
+                                  }
+                                } else {
+                                  const errorText = await response.text();
+                                  console.error('삭제 실패:', errorText);
+                                  alert(`프로젝트 삭제에 실패했습니다. (상태: ${response.status})`);
+                                }
+                              } catch (error) {
+                                console.error('삭제 오류:', error);
+                                const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+                                alert('프로젝트 삭제 중 오류가 발생했습니다: ' + errorMessage);
+                              }
                             }
                           }}
                           className="px-3 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors"

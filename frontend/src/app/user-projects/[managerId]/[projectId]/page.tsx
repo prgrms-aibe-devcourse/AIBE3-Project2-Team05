@@ -39,6 +39,17 @@ const UserProjectDetailPage = () => {
     };
 
     fetchProject();
+
+    // 윈도우 포커스 시 데이터 새로고침 (편집 페이지에서 돌아왔을 때)
+    const handleWindowFocus = () => {
+      console.log('윈도우 포커스: 프로젝트 데이터 새로고침');
+      fetchProject();
+    };
+
+    window.addEventListener('focus', handleWindowFocus);
+    return () => {
+      window.removeEventListener('focus', handleWindowFocus);
+    };
   }, [params?.projectId]);
 
   // 예산 타입을 한국어로 변환
@@ -625,7 +636,15 @@ const UserProjectDetailPage = () => {
                     onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#3b82f6'}
                     onClick={() => {
                       console.log('파일 다운로드:', file.id);
-                      // window.open(`/api/projects/${project.id}/files/${file.id}/download`);
+                      try {
+                        // 백엔드 파일 다운로드 API 호출
+                        const downloadUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${project.id}/files/${file.id}/download`;
+                        console.log('다운로드 URL:', downloadUrl);
+                        window.open(downloadUrl, '_blank');
+                      } catch (error) {
+                        console.error('파일 다운로드 오류:', error);
+                        alert('파일 다운로드 중 오류가 발생했습니다.');
+                      }
                     }}
                   >
                     다운로드
@@ -702,7 +721,7 @@ const UserProjectDetailPage = () => {
           {/* 기본 관리 버튼들 */}
           <div className="flex flex-col sm:flex-row gap-4" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <button
-              onClick={() => router.push(`/projects/${project.id}/edit`)}
+              onClick={() => router.push(`/user-projects/${params.managerId}/${params.projectId}/edit`)}
               className="flex-1 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors"
               style={{ 
                 flex: 1,
@@ -721,10 +740,63 @@ const UserProjectDetailPage = () => {
               프로젝트 수정
             </button>
             <button
-              onClick={() => {
+              onClick={async () => {
                 if (window.confirm(`"${project.title}" 프로젝트를 정말 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) {
-                  console.log('프로젝트 삭제:', project.id);
-                  alert('프로젝트 삭제 기능은 백엔드 연동 후 구현됩니다.');
+                  try {
+                    console.log('프로젝트 삭제 시작:', project.id);
+                    console.log('managerId:', params.managerId);
+                    
+                    // 먼저 DELETE API 시도
+                    const deleteUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${project.id}?requesterId=${params.managerId}`;
+                    console.log('삭제 API URL:', deleteUrl);
+                    
+                    const response = await fetch(deleteUrl, {
+                      method: 'DELETE',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                    });
+                    
+                    console.log('삭제 API 응답 상태:', response.status);
+                    
+                    if (response.ok) {
+                      console.log('삭제 성공');
+                      alert('프로젝트가 삭제되었습니다.');
+                      router.push(`/user-projects/${params.managerId}`);
+                    } else if (response.status === 404 || response.status === 405) {
+                      // DELETE API가 없는 경우, 상태를 CANCELLED로 변경하는 방식으로 시도
+                      console.log('DELETE API가 없음, 상태 변경으로 시도');
+                      
+                      const statusResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${project.id}/status`, {
+                        method: 'PATCH',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ 
+                          status: 'CANCELLED',
+                          changedById: Number(params?.managerId)
+                        }),
+                      });
+                      
+                      if (statusResponse.ok) {
+                        console.log('프로젝트 취소 성공');
+                        alert('프로젝트가 취소되었습니다.');
+                        router.push(`/user-projects/${params.managerId}`);
+                      } else {
+                        const errorData = await statusResponse.json().catch(() => ({}));
+                        console.error('상태 변경 실패:', errorData);
+                        alert(errorData.message || '프로젝트 삭제에 실패했습니다.');
+                      }
+                    } else {
+                      const errorText = await response.text();
+                      console.error('삭제 실패:', errorText);
+                      alert(`프로젝트 삭제에 실패했습니다. (상태: ${response.status})`);
+                    }
+                  } catch (error) {
+                    console.error('삭제 오류:', error);
+                    const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+                    alert('프로젝트 삭제 중 오류가 발생했습니다: ' + errorMessage);
+                  }
                 }
               }}
               className="px-6 py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors"
