@@ -67,6 +67,10 @@ public class Project {
     @Builder.Default
     private Integer viewCount = 0;
 
+    @Column(name = "applicant_count", nullable = false)
+    @Builder.Default
+    private Integer applicantCount = 0;
+
     @Column(name = "manager_id", nullable = false)
     private Long managerId;
 

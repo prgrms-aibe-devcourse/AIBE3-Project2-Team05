@@ -35,6 +35,7 @@ public record ProjectResponse(
     // 상태 정보
     ProjectStatus status,
     Integer viewCount,
+    Integer applicantCount,
     Long managerId,
     LocalDateTime createDate,
     LocalDateTime modifyDate,
@@ -65,6 +66,7 @@ public record ProjectResponse(
                 project.getCompanyLocation(),
                 project.getStatus(),
                 project.getViewCount(),
+                project.getApplicantCount(),
                 project.getManagerId(),
                 project.getCreateDate(),
                 project.getModifyDate(),
@@ -112,6 +114,7 @@ public record ProjectResponse(
                 project.getCompanyLocation(),
                 project.getStatus(),
                 project.getViewCount(),
+                project.getApplicantCount(),
                 project.getManagerId(),
                 project.getCreateDate(),
                 project.getModifyDate(),
