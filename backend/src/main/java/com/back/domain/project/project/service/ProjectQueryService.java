@@ -35,16 +35,34 @@ public class ProjectQueryService {
     private final ProjectValidator projectValidator;
 
     /**
-     * 프로젝트 목록 조회 (페이징)
+     * 프로젝트 목록 조회 (페이징) - 통합된 검색/필터링 포함
+     */
+    public Page<ProjectResponse> getAllProjects(int page, int size, String keyword,
+                                                ProjectStatus status, ProjectField projectField,
+                                                RecruitmentType recruitmentType, PartnerType partnerType,
+                                                BudgetRange budgetType, Long minBudget, Long maxBudget,
+                                                String location, List<String> techNames, String sortBy) {
+        log.debug("프로젝트 목록 조회 - page: {}, size: {}, keyword: {}, status: {}", page, size, keyword, status);
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 필터링 조건이 있으면 검색, 없으면 전체 조회
+        if (hasFilterConditions(keyword, status, projectField, recruitmentType, partnerType, budgetType, location, techNames)) {
+            Page<Project> projects = searchProjects(keyword, status, projectField, recruitmentType, partnerType,
+                    budgetType, minBudget, maxBudget, location, techNames, sortBy, pageable);
+            return projects.map(project -> ProjectResponse.from(project, null));
+        } else {
+            Pageable sortedPageable = createSortedPageable(pageable, sortBy);
+            Page<Project> projects = projectRepository.findAll(sortedPageable);
+            return projects.map(project -> ProjectResponse.from(project, null));
+        }
+    }
+
+    /**
+     * 프로젝트 목록 조회 (페이징) - 기존 메서드 (호환성 유지)
      */
     public Page<ProjectResponse> getAllProjects(int page, int size) {
-        log.debug("프로젝트 목록 조회 - page: {}, size: {}", page, size);
-
-        Pageable pageable = PageRequest.of(page, size,
-                Sort.by(Sort.Direction.DESC, "createDate"));
-
-        Page<Project> projects = projectRepository.findAll(pageable);
-        return projects.map(project -> ProjectResponse.from(project, null));
+        return getAllProjects(page, size, null, null, null, null, null, null, null, null, null, null, "recent");
     }
 
     /**
@@ -112,11 +130,7 @@ public class ProjectQueryService {
         // 정렬 처리
         Pageable sortedPageable = createSortedPageable(pageable, sortBy);
 
-        // 빈 검색 조건 확인
-        if (isEmptySearchCondition(keyword, status, projectField, recruitmentType, partnerType, budgetType, location, techNames)) {
-            return projectRepository.findAll(sortedPageable);
-        }
-
+        // 항상 필터링 쿼리 실행 (null 값들은 쿼리에서 자동으로 처리됨)
         return projectRepository.findProjectsWithFilters(
                 status, projectField, recruitmentType, partnerType, budgetType,
                 minBudget, maxBudget, location, keyword, techNames, sortedPageable);
@@ -148,16 +162,19 @@ public class ProjectQueryService {
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
     }
 
-    private boolean isEmptySearchCondition(String keyword, ProjectStatus status, ProjectField projectField,
-                                           RecruitmentType recruitmentType, PartnerType partnerType,
-                                           BudgetRange budgetType, String location, List<String> techNames) {
-        return (keyword == null || keyword.trim().isEmpty()) &&
-                status == null &&
-                projectField == null &&
-                recruitmentType == null &&
-                partnerType == null &&
-                budgetType == null &&
-                (location == null || location.trim().isEmpty()) &&
-                (techNames == null || techNames.isEmpty());
+    /**
+     * 필터링 조건 존재 여부 확인
+     */
+    private boolean hasFilterConditions(String keyword, ProjectStatus status, ProjectField projectField,
+                                      RecruitmentType recruitmentType, PartnerType partnerType,
+                                      BudgetRange budgetType, String location, List<String> techNames) {
+        return (keyword != null && !keyword.trim().isEmpty()) ||
+               status != null ||
+               projectField != null ||
+               recruitmentType != null ||
+               partnerType != null ||
+               budgetType != null ||
+               (location != null && !location.trim().isEmpty()) ||
+               (techNames != null && !techNames.isEmpty());
     }
 }

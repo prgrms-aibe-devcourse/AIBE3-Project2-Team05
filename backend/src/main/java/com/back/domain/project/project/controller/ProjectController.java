@@ -5,6 +5,7 @@ import com.back.domain.project.project.dto.ProjectResponse;
 import com.back.domain.project.project.entity.Project;
 import com.back.domain.project.project.entity.enums.*;
 import com.back.domain.project.project.service.ProjectManagementService;
+import com.back.domain.project.project.service.ProjectQueryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,18 +26,45 @@ import java.util.List;
 public class ProjectController {
 
     private final ProjectManagementService projectManagementService;
+    private final ProjectQueryService projectQueryService;
 
     /**
-     * 프로젝트 목록 조회 (페이징)
+     * 프로젝트 목록 조회 (페이징 + 필터링)
      */
     @GetMapping
     public ResponseEntity<Page<ProjectResponse>> getAllProjects(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) ProjectStatus status,
+            @RequestParam(required = false) ProjectField projectField,
+            @RequestParam(required = false) RecruitmentType recruitmentType,
+            @RequestParam(required = false) PartnerType partnerType,
+            @RequestParam(required = false) BudgetRange budgetType,
+            @RequestParam(required = false) Long minBudget,
+            @RequestParam(required = false) Long maxBudget,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) List<String> techNames,
+            @RequestParam(defaultValue = "recent") String sortBy) {
 
-        log.info("프로젝트 목록 조회 요청 - page: {}, size: {}", page, size);
+        log.info("프로젝트 목록 조회 요청 - page: {}, size: {}, search: {}, status: {}, projectField: {}",
+                page, size, search, status, projectField);
 
-        Page<ProjectResponse> projects = projectManagementService.getAllProjects(page, size);
+        // 상태 필터링 디버깅을 위한 상세 로그
+        if (status != null) {
+            log.info("=== 상태 필터링 디버그 ===");
+            log.info("받은 status 값: {}", status);
+            log.info("status enum name: {}", status.name());
+            log.info("status description: {}", status.getDescription());
+        }
+
+        // ProjectQueryService의 통합된 메서드 사용
+        Page<ProjectResponse> projects = projectQueryService.getAllProjects(
+                page, size, search, status, projectField, recruitmentType, partnerType,
+                budgetType, minBudget, maxBudget, location, techNames, sortBy);
+
+        log.info("필터링 결과: {} 건의 프로젝트 반환", projects.getTotalElements());
+
         return ResponseEntity.ok(projects);
     }
 
