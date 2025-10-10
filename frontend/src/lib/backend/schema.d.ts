@@ -774,10 +774,10 @@ export interface components {
             added?: boolean;
         };
         PageProjectResponse: {
-            /** Format: int32 */
-            totalPages?: number;
             /** Format: int64 */
             totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
             first?: boolean;
             last?: boolean;
             /** Format: int32 */
@@ -808,10 +808,10 @@ export interface components {
             unsorted?: boolean;
         };
         PageProject: {
-            /** Format: int32 */
-            totalPages?: number;
             /** Format: int64 */
             totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
             first?: boolean;
             last?: boolean;
             /** Format: int32 */
@@ -826,10 +826,10 @@ export interface components {
             empty?: boolean;
         };
         PageProjectFavorite: {
-            /** Format: int32 */
-            totalPages?: number;
             /** Format: int64 */
             totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
             first?: boolean;
             last?: boolean;
             /** Format: int32 */
@@ -1043,6 +1043,17 @@ export interface operations {
             query?: {
                 page?: number;
                 size?: number;
+                search?: string;
+                status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
+                projectField?: "PLANNING" | "DESIGN" | "DEVELOPMENT";
+                recruitmentType?: "PROJECT_CONTRACT" | "PERSONAL_CONTRACT";
+                partnerType?: "INDIVIDUAL_FREELANCER" | "INDIVIDUAL_OR_TEAM_FREELANCER" | "BUSINESS_TEAM_OR_COMPANY" | "ANY_TYPE" | "ETC";
+                budgetType?: "RANGE_1_100" | "RANGE_100_200" | "RANGE_200_300" | "RANGE_300_500" | "RANGE_500_1000" | "RANGE_1000_2000" | "RANGE_2000_3000" | "RANGE_3000_5000" | "RANGE_5000_OVER" | "OVER_1_EUK" | "NEGOTIABLE";
+                minBudget?: number;
+                maxBudget?: number;
+                location?: string;
+                techNames?: string[];
+                sortBy?: string;
             };
             header?: never;
             path?: never;
