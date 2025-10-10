@@ -363,31 +363,61 @@ public class BaseInitData implements CommandLineRunner {
         createProjectTech(project1.getId(), TechCategory.BACKEND, "SPRING_BOOT");
         createProjectTech(project1.getId(), TechCategory.BACKEND, "JAVA");
         createProjectTech(project1.getId(), TechCategory.DATABASE, "MYSQL");
-        createProjectTech(project1.getId(), TechCategory.FRONTEND, "DOCKER");
 
-        // 프로젝트 2: 모바일 앱 UI/UX 디자인
-        createProjectTech(project2.getId(), TechCategory.FRONTEND, "FIGMA");
-        createProjectTech(project2.getId(), TechCategory.FRONTEND, "ADOBE_XD");
-        createProjectTech(project2.getId(), TechCategory.FRONTEND, "PHOTOSHOP");
+        // 프로젝트 2: 모바일 앱 UI/UX 디자인 (웹 기반 디자인 도구로 변경)
+        createProjectTech(project2.getId(), TechCategory.FRONTEND, "HTML");
+        createProjectTech(project2.getId(), TechCategory.FRONTEND, "CSS");
+        createProjectTech(project2.getId(), TechCategory.FRONTEND, "JAVASCRIPT");
 
         // 프로젝트 3: AI 기반 데이터 분석
         createProjectTech(project3.getId(), TechCategory.BACKEND, "PYTHON");
-        createProjectTech(project3.getId(), TechCategory.BACKEND, "TENSORFLOW");
-        createProjectTech(project3.getId(), TechCategory.BACKEND, "PANDAS");
-        createProjectTech(project3.getId(), TechCategory.BACKEND, "JUPYTER");
+        createProjectTech(project3.getId(), TechCategory.BACKEND, "DJANGO");
+        createProjectTech(project3.getId(), TechCategory.BACKEND, "FAST_API");
         createProjectTech(project3.getId(), TechCategory.DATABASE, "POSTGRESQL");
 
-        // 프로젝트 4: 블록체인 NFT 마켓플레이스
-        createProjectTech(project4.getId(), TechCategory.BACKEND, "SOLIDITY");
-        createProjectTech(project4.getId(), TechCategory.BACKEND, "WEB3");
+        // 프로젝트 4: 블록체인 NFT 마켓플레이스 (웹 기반으로 변경)
         createProjectTech(project4.getId(), TechCategory.FRONTEND, "REACT");
         createProjectTech(project4.getId(), TechCategory.FRONTEND, "JAVASCRIPT");
+        createProjectTech(project4.getId(), TechCategory.BACKEND, "NODE_JS");
+        createProjectTech(project4.getId(), TechCategory.DATABASE, "MONGODB");
 
         // 프로젝트 5: Vue.js 전자상거래
         createProjectTech(project5.getId(), TechCategory.FRONTEND, "VUE");
         createProjectTech(project5.getId(), TechCategory.FRONTEND, "JAVASCRIPT");
         createProjectTech(project5.getId(), TechCategory.BACKEND, "NODE_JS");
         createProjectTech(project5.getId(), TechCategory.DATABASE, "MONGODB");
+
+        // 나머지 프로젝트들도 기술스택 추가
+        Project project6 = projectRepository.findAll().get(5); // 게임 캐릭터 일러스트
+        Project project7 = projectRepository.findAll().get(6); // IoT 스마트홈
+        Project project8 = projectRepository.findAll().get(7); // 마케팅 자동화
+        Project project9 = projectRepository.findAll().get(8); // 오픈소스 LMS
+        Project project10 = projectRepository.findAll().get(9); // Figma 플러그인
+
+        // 프로젝트 6: 게임 캐릭터 일러스트 디자인
+        createProjectTech(project6.getId(), TechCategory.FRONTEND, "HTML");
+        createProjectTech(project6.getId(), TechCategory.FRONTEND, "CSS");
+        createProjectTech(project6.getId(), TechCategory.FRONTEND, "JAVASCRIPT");
+
+        // 프로젝트 7: IoT 스마트홈 시스템
+        createProjectTech(project7.getId(), TechCategory.BACKEND, "PYTHON");
+        createProjectTech(project7.getId(), TechCategory.BACKEND, "NODE_JS");
+        createProjectTech(project7.getId(), TechCategory.DATABASE, "MYSQL");
+
+        // 프로젝트 8: 마케팅 자동화 도구
+        createProjectTech(project8.getId(), TechCategory.BACKEND, "NODE_JS");
+        createProjectTech(project8.getId(), TechCategory.BACKEND, "EXPRESS");
+        createProjectTech(project8.getId(), TechCategory.DATABASE, "POSTGRESQL");
+
+        // 프로젝트 9: 오픈소스 LMS
+        createProjectTech(project9.getId(), TechCategory.FRONTEND, "REACT");
+        createProjectTech(project9.getId(), TechCategory.BACKEND, "SPRING_BOOT");
+        createProjectTech(project9.getId(), TechCategory.BACKEND, "JAVA");
+        createProjectTech(project9.getId(), TechCategory.DATABASE, "MYSQL");
+
+        // 프로젝트 10: Figma 플러그인
+        createProjectTech(project10.getId(), TechCategory.FRONTEND, "TYPESCRIPT");
+        createProjectTech(project10.getId(), TechCategory.FRONTEND, "JAVASCRIPT");
 
         log.info("프로젝트 기술스택 데이터가 생성되었습니다.");
     }
