@@ -150,6 +150,7 @@ public class BaseInitData implements CommandLineRunner {
                 .endDate(LocalDate.of(2025, 12, 31))
                 .status(ProjectStatus.RECRUITING)
                 .viewCount(1245)
+                .applicantCount(15)
                 .createDate(LocalDateTime.of(2025, 9, 15, 9, 30, 0))
                 .modifyDate(LocalDateTime.of(2025, 9, 28, 14, 20, 0))
                 .build();
@@ -168,6 +169,7 @@ public class BaseInitData implements CommandLineRunner {
                 .endDate(LocalDate.of(2025, 11, 30))
                 .status(ProjectStatus.RECRUITING)
                 .viewCount(892)
+                .applicantCount(8)
                 .createDate(LocalDateTime.of(2025, 9, 20, 11, 15, 0))
                 .modifyDate(LocalDateTime.of(2025, 9, 30, 16, 45, 0))
                 .build();
@@ -186,6 +188,7 @@ public class BaseInitData implements CommandLineRunner {
                 .endDate(LocalDate.of(2026, 1, 31))
                 .status(ProjectStatus.CONTRACTING)
                 .viewCount(654)
+                .applicantCount(23)
                 .createDate(LocalDateTime.of(2025, 9, 25, 13, 45, 0))
                 .modifyDate(LocalDateTime.of(2025, 10, 1, 10, 30, 0))
                 .build();
@@ -204,6 +207,7 @@ public class BaseInitData implements CommandLineRunner {
                 .endDate(LocalDate.of(2025, 9, 30))
                 .status(ProjectStatus.COMPLETED)
                 .viewCount(2341)
+                .applicantCount(47)
                 .createDate(LocalDateTime.of(2025, 5, 15, 8, 0, 0))
                 .modifyDate(LocalDateTime.of(2025, 9, 30, 18, 0, 0))
                 .build();
@@ -223,6 +227,7 @@ public class BaseInitData implements CommandLineRunner {
                 .endDate(LocalDate.of(2026, 2, 28))
                 .status(ProjectStatus.CONTRACTING)
                 .viewCount(1876)
+                .applicantCount(31)
                 .createDate(LocalDateTime.of(2025, 9, 28, 10, 20, 0))
                 .modifyDate(LocalDateTime.of(2025, 9, 30, 9, 15, 0))
                 .build();
@@ -241,6 +246,7 @@ public class BaseInitData implements CommandLineRunner {
                 .endDate(LocalDate.of(2025, 11, 20))
                 .status(ProjectStatus.IN_PROGRESS)
                 .viewCount(567)
+                .applicantCount(12)
                 .createDate(LocalDateTime.of(2025, 9, 22, 14, 30, 0))
                 .modifyDate(LocalDateTime.of(2025, 9, 29, 11, 45, 0))
                 .build();
@@ -259,6 +265,7 @@ public class BaseInitData implements CommandLineRunner {
                 .endDate(LocalDate.of(2025, 12, 15))
                 .status(ProjectStatus.IN_PROGRESS)
                 .viewCount(789)
+                .applicantCount(19)
                 .createDate(LocalDateTime.of(2025, 9, 26, 16, 0, 0))
                 .modifyDate(LocalDateTime.of(2025, 9, 30, 13, 20, 0))
                 .build();
@@ -277,6 +284,7 @@ public class BaseInitData implements CommandLineRunner {
                 .endDate(LocalDate.of(2025, 12, 20))
                 .status(ProjectStatus.SUSPENDED)
                 .viewCount(432)
+                .applicantCount(5)
                 .createDate(LocalDateTime.of(2025, 9, 24, 12, 10, 0))
                 .modifyDate(LocalDateTime.of(2025, 9, 28, 15, 30, 0))
                 .build();
@@ -295,6 +303,7 @@ public class BaseInitData implements CommandLineRunner {
                 .endDate(LocalDate.of(2026, 3, 31))
                 .status(ProjectStatus.SUSPENDED)
                 .viewCount(1123)
+                .applicantCount(3)
                 .createDate(LocalDateTime.of(2025, 9, 18, 9, 45, 0))
                 .modifyDate(LocalDateTime.of(2025, 9, 27, 17, 0, 0))
                 .build();
@@ -313,6 +322,7 @@ public class BaseInitData implements CommandLineRunner {
                 .endDate(LocalDate.of(2025, 12, 10))
                 .status(ProjectStatus.CANCELLED)
                 .viewCount(345)
+                .applicantCount(2)
                 .createDate(LocalDateTime.of(2025, 9, 30, 11, 30, 0))
                 .modifyDate(LocalDateTime.of(2025, 9, 30, 11, 30, 0))
                 .build();
