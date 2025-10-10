@@ -73,7 +73,11 @@ public class ProjectQueryService {
 
         List<Project> projects = projectRepository.findByManagerIdOrderByCreateDateDesc(managerId);
         return projects.stream()
-                .map(project -> ProjectResponse.from(project, null))
+                .map(project -> {
+                    // 각 프로젝트의 기술스택도 함께 조회
+                    List<String> techNames = projectTechService.getProjectTechNames(project.getId());
+                    return ProjectResponse.from(project, techNames);
+                })
                 .collect(Collectors.toList());
     }
 

@@ -41,7 +41,7 @@ public record ProjectResponse(
     LocalDateTime modifyDate,
 
     // 관련 데이터 (상세 조회 시에만)
-    List<String> techNames,
+    List<TechInfo> techStacks,
     List<ProjectFileInfo> projectFiles,
     List<ProjectStatusHistory> statusHistories
 ) {
@@ -50,6 +50,12 @@ public record ProjectResponse(
      * 기본 프로젝트 정보로부터 생성 (목록 조회, 생성 응답용)
      */
     public static ProjectResponse from(Project project, List<String> techNames) {
+        // String 리스트를 TechInfo 리스트로 변환 (카테고리 정보 없이)
+        List<TechInfo> techInfos = techNames != null ?
+            techNames.stream()
+                .map(techName -> new TechInfo(techName, null))
+                .toList() : null;
+
         return new ProjectResponse(
                 project.getId(),
                 project.getTitle(),
@@ -70,7 +76,7 @@ public record ProjectResponse(
                 project.getManagerId(),
                 project.getCreateDate(),
                 project.getModifyDate(),
-                techNames,
+                techInfos,
                 null, // 파일 정보는 상세 조회 시에만
                 null  // 이력 정보는 상세 조회 시에만
         );
@@ -84,8 +90,8 @@ public record ProjectResponse(
                                            List<ProjectFile> projectFiles,
                                            List<ProjectStatusHistory> statusHistories) {
 
-        List<String> techNames = techStacks.stream()
-                .map(ProjectTech::getTechName)
+        List<TechInfo> techInfos = techStacks.stream()
+                .map(tech -> new TechInfo(tech.getTechName(), tech.getTechCategory()))
                 .toList();
 
         List<ProjectFileInfo> fileInfos = projectFiles.stream()
@@ -118,11 +124,19 @@ public record ProjectResponse(
                 project.getManagerId(),
                 project.getCreateDate(),
                 project.getModifyDate(),
-                techNames,
+                techInfos,
                 fileInfos,
                 statusHistories
         );
     }
+
+    /**
+     * 기술스택 정보
+     */
+    public record TechInfo(
+            String techName,
+            TechCategory techCategory
+    ) {}
 
     /**
      * 프로젝트 파일 정보
