@@ -1,12 +1,14 @@
 "use client";
 
 import { components } from '@/lib/backend/schema';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 type ProjectResponse = components['schemas']['ProjectResponse'];
 type PageProjectResponse = components['schemas']['PageProjectResponse'];
 
 const ProjectsPage = () => {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [projects, setProjects] = useState<ProjectResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -719,7 +721,12 @@ const ProjectsPage = () => {
             )}
 
             {!loading && projects.map((project) => (
-              <div key={project.id} className="bg-white shadow-md rounded-lg p-6 mb-4 hover:shadow-lg transition-shadow" style={{ backgroundColor: 'white', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', borderRadius: '8px', padding: '24px', marginBottom: '16px', cursor: 'pointer', transition: 'box-shadow 0.3s' }}>
+              <div 
+                key={project.id} 
+                className="bg-white shadow-md rounded-lg p-6 mb-4 hover:shadow-lg transition-shadow" 
+                style={{ backgroundColor: 'white', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', borderRadius: '8px', padding: '24px', marginBottom: '16px', cursor: 'pointer', transition: 'box-shadow 0.3s' }}
+                onClick={() => router.push(`/projects/${project.id}`)}
+              >
                 <div className="flex justify-between items-start mb-2" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                   <h3 className="text-lg font-bold text-gray-800 mb-2" style={{ fontSize: '18px', fontWeight: 'bold', color: '#374151', marginBottom: '8px' }}>{project.title}</h3>
                   <div className="flex space-x-2" style={{ display: 'flex', gap: '8px' }}>
@@ -742,9 +749,6 @@ const ProjectsPage = () => {
                 <div className="mb-3" style={{ marginBottom: '12px' }}>
                   <span className="text-sm text-gray-600" style={{ fontSize: '14px', color: '#4b5563' }}>
                     {getProjectFieldText(project.projectField)}
-                    {project.techNames && project.techNames.length > 0 && (
-                      <span> | {project.techNames.join(', ')}</span>
-                    )}
                   </span>
                 </div>
 
@@ -756,7 +760,7 @@ const ProjectsPage = () => {
                     </div>
                   )}
                   <div className="flex items-center space-x-4" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <span>조회수: {project.viewCount || 0}회</span>
+                    <span>지원자수: {project.applicantCount || 0}명</span>
                     {project.companyLocation && (
                       <span>지역: {project.companyLocation}</span>
                     )}

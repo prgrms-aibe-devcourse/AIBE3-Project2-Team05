@@ -484,6 +484,102 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/projects/enums/regions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getRegionOptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/enums/recruitment-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getRecruitmentTypeOptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/enums/project-fields": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getProjectFieldOptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/enums/progress-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getProgressStatusOptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/enums/partner-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getPartnerTypeOptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/enums/budget-ranges": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getBudgetRangeOptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/favorites/users/{userId}": {
         parameters: {
             query?: never;
@@ -630,12 +726,16 @@ export interface components {
             startDate?: string;
             /** Format: date */
             endDate?: string;
-            progressStatus?: string;
-            companyLocation?: string;
+            /** @enum {string} */
+            progressStatus?: "IDEA_STAGE" | "CONTENT_ORGANIZED" | "DETAILED_PLAN";
+            /** @enum {string} */
+            companyLocation?: "SEOUL" | "GYEONGGI" | "INCHEON" | "GANGWON" | "CHUNGNAM" | "DAEJEON" | "CHUNGBUK" | "SEJONG" | "BUSAN" | "ULSAN" | "DAEGU" | "GYEONGBUK" | "GYEONGNAM" | "JEONNAM" | "GWANGJU" | "JEONBUK" | "JEJU" | "OVERSEAS";
             /** @enum {string} */
             status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
             /** Format: int32 */
             viewCount?: number;
+            /** Format: int32 */
+            applicantCount?: number;
             /** Format: int64 */
             managerId?: number;
             /** Format: date-time */
@@ -716,8 +816,10 @@ export interface components {
             partnerType?: "INDIVIDUAL_FREELANCER" | "INDIVIDUAL_OR_TEAM_FREELANCER" | "BUSINESS_TEAM_OR_COMPANY" | "ANY_TYPE" | "ETC";
             /** Format: int64 */
             budgetAmount?: number;
-            progressStatus?: string;
-            companyLocation?: string;
+            /** @enum {string} */
+            progressStatus?: "IDEA_STAGE" | "CONTENT_ORGANIZED" | "DETAILED_PLAN";
+            /** @enum {string} */
+            companyLocation?: "SEOUL" | "GYEONGGI" | "INCHEON" | "GANGWON" | "CHUNGNAM" | "DAEJEON" | "CHUNGBUK" | "SEJONG" | "BUSAN" | "ULSAN" | "DAEGU" | "GYEONGBUK" | "GYEONGNAM" | "JEONNAM" | "GWANGJU" | "JEONBUK" | "JEJU" | "OVERSEAS";
             partnerEtcDescription?: string;
             techNames?: string[];
             attachmentFileIds?: number[];
@@ -753,21 +855,30 @@ export interface components {
             /** @enum {string} */
             partnerType?: "INDIVIDUAL_FREELANCER" | "INDIVIDUAL_OR_TEAM_FREELANCER" | "BUSINESS_TEAM_OR_COMPANY" | "ANY_TYPE" | "ETC";
             partnerEtcDescription?: string;
-            progressStatus?: string;
-            companyLocation?: string;
+            /** @enum {string} */
+            progressStatus?: "IDEA_STAGE" | "CONTENT_ORGANIZED" | "DETAILED_PLAN";
+            /** @enum {string} */
+            companyLocation?: "SEOUL" | "GYEONGGI" | "INCHEON" | "GANGWON" | "CHUNGNAM" | "DAEJEON" | "CHUNGBUK" | "SEJONG" | "BUSAN" | "ULSAN" | "DAEGU" | "GYEONGBUK" | "GYEONGNAM" | "JEONNAM" | "GWANGJU" | "JEONBUK" | "JEJU" | "OVERSEAS";
             /** @enum {string} */
             status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
             /** Format: int32 */
             viewCount?: number;
+            /** Format: int32 */
+            applicantCount?: number;
             /** Format: int64 */
             managerId?: number;
             /** Format: date-time */
             createDate?: string;
             /** Format: date-time */
             modifyDate?: string;
-            techNames?: string[];
+            techStacks?: components["schemas"]["TechInfo"][];
             projectFiles?: components["schemas"]["ProjectFileInfo"][];
             statusHistories?: components["schemas"]["ProjectStatusHistory"][];
+        };
+        TechInfo: {
+            techName?: string;
+            /** @enum {string} */
+            techCategory?: "FRONTEND" | "BACKEND" | "DATABASE";
         };
         FavoriteToggleResult: {
             favorite?: components["schemas"]["ProjectFavorite"];
@@ -778,14 +889,14 @@ export interface components {
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
-            first?: boolean;
-            last?: boolean;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["ProjectResponse"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
             pageable?: components["schemas"]["PageableObject"];
@@ -795,11 +906,11 @@ export interface components {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
-            paged?: boolean;
             /** Format: int32 */
             pageSize?: number;
             /** Format: int32 */
             pageNumber?: number;
+            paged?: boolean;
             unpaged?: boolean;
         };
         SortObject: {
@@ -812,32 +923,56 @@ export interface components {
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
-            first?: boolean;
-            last?: boolean;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["Project"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
             pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
+        };
+        RegionResponse: {
+            value?: string;
+            description?: string;
+        };
+        RecruitmentTypeResponse: {
+            value?: string;
+            description?: string;
+        };
+        ProjectFieldResponse: {
+            value?: string;
+            description?: string;
+        };
+        ProgressStatusResponse: {
+            value?: string;
+            description?: string;
+        };
+        PartnerTypeResponse: {
+            value?: string;
+            description?: string;
+        };
+        BudgetRangeResponse: {
+            value?: string;
+            description?: string;
         };
         PageProjectFavorite: {
             /** Format: int64 */
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
-            first?: boolean;
-            last?: boolean;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["ProjectFavorite"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
             pageable?: components["schemas"]["PageableObject"];
@@ -1760,6 +1895,126 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["ProjectResponse"];
+                };
+            };
+        };
+    };
+    getRegionOptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RegionResponse"][];
+                };
+            };
+        };
+    };
+    getRecruitmentTypeOptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RecruitmentTypeResponse"][];
+                };
+            };
+        };
+    };
+    getProjectFieldOptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["ProjectFieldResponse"][];
+                };
+            };
+        };
+    };
+    getProgressStatusOptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["ProgressStatusResponse"][];
+                };
+            };
+        };
+    };
+    getPartnerTypeOptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["PartnerTypeResponse"][];
+                };
+            };
+        };
+    };
+    getBudgetRangeOptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["BudgetRangeResponse"][];
                 };
             };
         };
