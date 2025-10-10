@@ -90,6 +90,31 @@ const UserProjectDetailPage = () => {
     return partnerMap[partnerType || ''] || '';
   };
 
+  // 지역을 한국어로 변환
+  const getLocationText = (location?: string) => {
+    const locationMap: Record<string, string> = {
+      'SEOUL': '서울',
+      'BUSAN': '부산',
+      'DAEGU': '대구',
+      'INCHEON': '인천',
+      'GWANGJU': '광주',
+      'DAEJEON': '대전',
+      'ULSAN': '울산',
+      'SEJONG': '세종',
+      'GYEONGGI': '경기',
+      'GANGWON': '강원',
+      'CHUNGBUK': '충북',
+      'CHUNGNAM': '충남',
+      'JEONBUK': '전북',
+      'JEONNAM': '전남',
+      'GYEONGBUK': '경북',
+      'GYEONGNAM': '경남',
+      'JEJU': '제주',
+      'OVERSEAS': '해외'
+    };
+    return locationMap[location || ''] || location || '';
+  };
+
   // 프로젝트 상태를 한국어로 변환
   const getStatusText = (status?: string) => {
     const statusMap: Record<string, string> = {
@@ -509,7 +534,7 @@ const UserProjectDetailPage = () => {
             {project.companyLocation && (
               <div className="bg-gray-50 p-4 rounded-lg" style={{ backgroundColor: '#f9fafb', padding: '16px', borderRadius: '8px' }}>
                 <span className="text-gray-600 text-sm block mb-1" style={{ color: '#4b5563', fontSize: '14px', display: 'block', marginBottom: '4px' }}>지역</span>
-                <span className="font-semibold text-gray-900 text-lg" style={{ fontWeight: '600', color: '#111827', fontSize: '18px' }}>{project.companyLocation}</span>
+                <span className="font-semibold text-gray-900 text-lg" style={{ fontWeight: '600', color: '#111827', fontSize: '18px' }}>{getLocationText(project.companyLocation)}</span>
               </div>
             )}
             {project.startDate && project.endDate && (

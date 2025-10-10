@@ -35,7 +35,7 @@ const ProjectsPage = () => {
           ...(search && { search }),
           ...(currentFilters.projectField && { projectField: currentFilters.projectField }),
           ...(currentFilters.recruitmentType && { recruitmentType: currentFilters.recruitmentType }),
-          ...(currentFilters.location && { location: currentFilters.location }),
+          ...(currentFilters.location && { location: getLocationCodeFromText(currentFilters.location) }),
           ...(currentFilters.budgetRange && { budgetType: currentFilters.budgetRange })
         });
 
@@ -79,7 +79,7 @@ const ProjectsPage = () => {
         ...(search && { search }),
         ...(currentFilters.projectField && { projectField: currentFilters.projectField }),
         ...(currentFilters.recruitmentType && { recruitmentType: currentFilters.recruitmentType }),
-        ...(currentFilters.location && { location: currentFilters.location }),
+        ...(currentFilters.location && { location: getLocationCodeFromText(currentFilters.location) }),
         ...(currentFilters.budgetRange && { budgetType: currentFilters.budgetRange })
       });
 
@@ -165,6 +165,57 @@ const ProjectsPage = () => {
       'CANCELLED': '취소'
     };
     return statusMap[status || ''] || status || '';
+  };
+
+  // 지역을 한국어로 변환
+  const getLocationText = (location?: string) => {
+    const locationMap: Record<string, string> = {
+      'SEOUL': '서울',
+      'BUSAN': '부산',
+      'DAEGU': '대구',
+      'INCHEON': '인천',
+      'GWANGJU': '광주',
+      'DAEJEON': '대전',
+      'ULSAN': '울산',
+      'SEJONG': '세종',
+      'GYEONGGI': '경기',
+      'GANGWON': '강원',
+      'CHUNGBUK': '충북',
+      'CHUNGNAM': '충남',
+      'JEONBUK': '전북',
+      'JEONNAM': '전남',
+      'GYEONGBUK': '경북',
+      'GYEONGNAM': '경남',
+      'JEJU': '제주',
+      'OVERSEAS': '해외'
+    };
+    return locationMap[location || ''] || location || '';
+  };
+
+  // 한글 지역명을 영어 코드로 변환
+  const getLocationCodeFromText = (locationText: string) => {
+    const locationCodeMap: Record<string, string> = {
+      '서울': 'SEOUL',
+      '부산': 'BUSAN',
+      '대구': 'DAEGU',
+      '인천': 'INCHEON',
+      '광주': 'GWANGJU',
+      '대전': 'DAEJEON',
+      '울산': 'ULSAN',
+      '세종': 'SEJONG',
+      '경기': 'GYEONGGI',
+      '강원': 'GANGWON',
+      '충북': 'CHUNGBUK',
+      '충남': 'CHUNGNAM',
+      '전북': 'JEONBUK',
+      '전남': 'JEONNAM',
+      '경북': 'GYEONGBUK',
+      '경남': 'GYEONGNAM',
+      '제주': 'JEJU',
+      '해외': 'OVERSEAS',
+      '국외': 'OVERSEAS'
+    };
+    return locationCodeMap[locationText] || locationText;
   };
 
   // D-day 계산
@@ -762,7 +813,7 @@ const ProjectsPage = () => {
                   <div className="flex items-center space-x-4" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <span>지원자수: {project.applicantCount || 0}명</span>
                     {project.companyLocation && (
-                      <span>지역: {project.companyLocation}</span>
+                      <span>지역: {getLocationText(project.companyLocation)}</span>
                     )}
                   </div>
                 </div>
