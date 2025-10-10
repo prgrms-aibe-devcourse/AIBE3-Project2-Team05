@@ -29,7 +29,7 @@ public record ProjectResponse(
     // 추가 정보
     PartnerType partnerType,
     String partnerEtcDescription,
-    String progressStatus,
+    ProgressStatus progressStatus,
     String companyLocation,
 
     // 상태 정보

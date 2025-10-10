@@ -4,6 +4,7 @@ import com.back.domain.project.project.entity.enums.BudgetRange;
 import com.back.domain.project.project.entity.enums.PartnerType;
 import com.back.domain.project.project.entity.enums.ProjectField;
 import com.back.domain.project.project.entity.enums.RecruitmentType;
+import com.back.domain.project.project.entity.enums.ProgressStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -45,8 +46,7 @@ public record ProjectUpdateRequest(
 
         Long budgetAmount,
 
-        @Size(max = 100, message = PROGRESS_STATUS_MAX_LENGTH)
-        String progressStatus,
+        ProgressStatus progressStatus,
 
         @Size(max = 100, message = COMPANY_LOCATION_MAX_LENGTH)
         String companyLocation,

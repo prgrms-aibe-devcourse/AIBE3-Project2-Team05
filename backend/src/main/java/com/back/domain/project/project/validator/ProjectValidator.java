@@ -35,7 +35,7 @@ public class ProjectValidator {
         validateStringLength(project.getDescription(), 5000, "프로젝트 설명은 5000자를 초과할 수 없습니다.");
 
         // 선택적 필드 길이 검증
-        validateStringLength(project.getProgressStatus(), 1000, "진행 상황은 1000자를 초과할 수 없습니다.");
+        validateEnumValue(project.getProgressStatus(), "진행 상황");
         validateStringLength(project.getCompanyLocation(), 200, "회사 위치는 200자를 초과할 수 없습니다.");
         validateStringLength(project.getPartnerEtcDescription(), 2000, "기타 설명은 2000자를 초과할 수 없습니다.");
 
@@ -62,6 +62,15 @@ public class ProjectValidator {
         if (value != null && value.length() > maxLength) {
             throw new IllegalArgumentException(message);
         }
+    }
+
+    /**
+     * Enum 값 검증 (선택적 필드)
+     */
+    public void validateEnumValue(Enum<?> value, String fieldName) {
+        // Enum은 null이어도 되는 선택적 필드로 처리
+        // 값이 있다면 유효한 enum 값인지는 Java 컴파일러가 보장
+        log.debug("{} 검증 완료 - value: {}", fieldName, value);
     }
 
     /**

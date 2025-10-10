@@ -52,8 +52,9 @@ public class Project {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
-    @Column(name = "progress_status", length = 100)
-    private String progressStatus;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "progress_status", length = 50)
+    private ProgressStatus progressStatus;
 
     @Column(name = "company_location", length = 100)
     private String companyLocation;
