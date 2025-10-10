@@ -11,7 +11,7 @@ public enum BudgetRange {
     RANGE_3000_5000("3000만원 ~ 5000만원"),
     RANGE_5000_OVER("5000만원 ~ 1억"),
     OVER_1_EUK("1억 이상"),
-    NEGOTIABLE("직접 작성");
+    NEGOTIABLE("협의");
 
     private final String description;
 
