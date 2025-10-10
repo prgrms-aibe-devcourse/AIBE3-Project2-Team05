@@ -2,6 +2,7 @@ package com.back.domain.project.project.controller;
 
 import com.back.domain.project.project.dto.ProjectRequest;
 import com.back.domain.project.project.dto.ProjectResponse;
+import com.back.domain.project.project.dto.ProjectStatusChangeRequest;
 import com.back.domain.project.project.entity.Project;
 import com.back.domain.project.project.entity.enums.*;
 import com.back.domain.project.project.service.ProjectManagementService;
@@ -274,22 +275,52 @@ public class ProjectController {
      * 프로젝트 상태 변경
      */
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Project> updateProjectStatus(
+    public ResponseEntity<?> updateProjectStatus(
             @PathVariable Long id,
-            @RequestParam ProjectStatus status,
-            @RequestParam Long changedById) {
+            @Valid @RequestBody ProjectStatusChangeRequest request) {
 
-        log.info("프로젝트 상태 변경 요청 - id: {}, status: {}", id, status);
+        log.info("프로젝트 상태 변경 요청 - id: {}, status: {}, changedById: {}",
+                id, request.status(), request.changedById());
+
+        try {
+            Project updatedProject = projectManagementService.updateProjectStatus(id, request.status(), request.changedById());
+            return ResponseEntity.ok(updatedProject);
+        } catch (IllegalArgumentException e) {
+            log.error("상태 변경 실패 - {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (SecurityException e) {
+            log.error("상태 변경 권한 없음 - {}", e.getMessage());
+            return ResponseEntity.status(403).body(e.getMessage());
+        }
+    }
+
+    /**
+     * 프로젝트 상태 변경 (기존 방식 - 호환성 유지)
+     */
+    @PatchMapping("/{id}/status/legacy")
+    public ResponseEntity<?> updateProjectStatusLegacy(
+            @PathVariable Long id,
+            @RequestParam(required = false) ProjectStatus status,
+            @RequestParam(required = false) Long changedById) {
+
+        log.info("프로젝트 상태 변경 요청 (레거시) - id: {}, status: {}, changedById: {}", id, status, changedById);
+
+        if (status == null) {
+            return ResponseEntity.badRequest().body("프로젝트 상태(status)는 필수 파라미터입니다.");
+        }
+        if (changedById == null) {
+            return ResponseEntity.badRequest().body("변경자 ID(changedById)는 필수 파라미터입니다.");
+        }
 
         try {
             Project updatedProject = projectManagementService.updateProjectStatus(id, status, changedById);
             return ResponseEntity.ok(updatedProject);
         } catch (IllegalArgumentException e) {
             log.error("상태 변경 실패 - {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (SecurityException e) {
             log.error("상태 변경 권한 없음 - {}", e.getMessage());
-            return ResponseEntity.status(403).build();
+            return ResponseEntity.status(403).body(e.getMessage());
         }
     }
 
