@@ -84,11 +84,52 @@ public class ProjectController {
     }
 
     /**
-     * 사용자별 프로젝트 목록 조회
+     * 사용자별 프로젝트 목록 조회 (페이징 + 필터링)
      */
     @GetMapping("/manager/{managerId}")
-    public ResponseEntity<List<ProjectResponse>> getProjectsByManagerId(@PathVariable Long managerId) {
-        log.info("사용자 프로젝트 목록 조회 요청 - managerId: {}", managerId);
+    public ResponseEntity<Page<ProjectResponse>> getProjectsByManagerId(
+            @PathVariable Long managerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) ProjectStatus status,
+            @RequestParam(required = false) ProjectField projectField,
+            @RequestParam(required = false) RecruitmentType recruitmentType,
+            @RequestParam(required = false) PartnerType partnerType,
+            @RequestParam(required = false) BudgetRange budgetType,
+            @RequestParam(required = false) Long minBudget,
+            @RequestParam(required = false) Long maxBudget,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) List<String> techNames,
+            @RequestParam(defaultValue = "recent") String sortBy) {
+
+        log.info("사용자 프로젝트 목록 조회 요청 (페이징+필터링) - managerId: {}, page: {}, size: {}, search: {}, status: {}, projectField: {}",
+                managerId, page, size, search, status, projectField);
+
+        // 상태 필터링 디버깅을 위한 상세 로그
+        if (status != null) {
+            log.info("=== 사용자별 상태 필터링 디버그 ===");
+            log.info("받은 status 값: {}", status);
+            log.info("status enum name: {}", status.name());
+            log.info("status description: {}", status.getDescription());
+        }
+
+        // ProjectManagementService의 페이징+필터링 메서드 사용
+        Page<ProjectResponse> projects = projectManagementService.getProjectsByManagerId(
+                managerId, page, size, search, status, projectField, recruitmentType, partnerType,
+                budgetType, minBudget, maxBudget, location, techNames, sortBy);
+
+        log.info("사용자별 필터링 결과: {} 건의 프로젝트 반환", projects.getTotalElements());
+
+        return ResponseEntity.ok(projects);
+    }
+
+    /**
+     * 사용자별 프로젝트 목록 조회 (기존 방식 - 호환성 유지)
+     */
+    @GetMapping("/manager/{managerId}/simple")
+    public ResponseEntity<List<ProjectResponse>> getProjectsByManagerIdSimple(@PathVariable Long managerId) {
+        log.info("사용자 프로젝트 목록 조회 요청 (기존 방식) - managerId: {}", managerId);
 
         List<ProjectResponse> projects = projectManagementService.getProjectsByManagerId(managerId);
         return ResponseEntity.ok(projects);

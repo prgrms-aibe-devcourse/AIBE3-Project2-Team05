@@ -74,6 +74,18 @@ public class ProjectManagementService {
     }
 
     /**
+     * 사용자별 프로젝트 목록 조회 (페이징 + 필터링)
+     */
+    public Page<ProjectResponse> getProjectsByManagerId(Long managerId, int page, int size, String search,
+                                                       ProjectStatus status, ProjectField projectField,
+                                                       RecruitmentType recruitmentType, PartnerType partnerType,
+                                                       BudgetRange budgetType, Long minBudget, Long maxBudget,
+                                                       String location, List<String> techNames, String sortBy) {
+        return projectQueryService.getProjectsByManagerId(managerId, page, size, search, status, projectField,
+                recruitmentType, partnerType, budgetType, minBudget, maxBudget, location, techNames, sortBy);
+    }
+
+    /**
      * 프로젝트 상세 조회 (기술스택 포함)
      */
     public ProjectResponse getProjectDetail(Long id) {

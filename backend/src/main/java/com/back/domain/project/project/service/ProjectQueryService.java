@@ -82,6 +82,45 @@ public class ProjectQueryService {
     }
 
     /**
+     * 사용자별 프로젝트 목록 조회 (페이징 + 필터링)
+     */
+    public Page<ProjectResponse> getProjectsByManagerId(Long managerId, int page, int size, String keyword,
+                                                       ProjectStatus status, ProjectField projectField,
+                                                       RecruitmentType recruitmentType, PartnerType partnerType,
+                                                       BudgetRange budgetType, Long minBudget, Long maxBudget,
+                                                       String location, List<String> techNames, String sortBy) {
+        log.debug("사용자 프로젝트 목록 조회 (페이징+필터링) - managerId: {}, page: {}, size: {}, keyword: {}, status: {}",
+                managerId, page, size, keyword, status);
+
+        // 검색 조건 검증
+        projectValidator.validateSearchKeyword(keyword);
+        projectValidator.validateBudgetRange(minBudget, maxBudget);
+
+        // 정렬 처리
+        Pageable pageable = PageRequest.of(page, size);
+        Pageable sortedPageable = createSortedPageable(pageable, sortBy);
+
+        // 필터링 조건이 있으면 필터링 쿼리 사용, 없으면 기본 조회
+        Page<Project> projects;
+        if (hasFilterConditions(keyword, status, projectField, recruitmentType, partnerType, budgetType, location, techNames)) {
+            projects = projectRepository.findProjectsByManagerIdWithFilters(
+                    managerId, status, projectField, recruitmentType, partnerType,
+                    budgetType, minBudget, maxBudget, location, keyword, techNames, sortedPageable);
+        } else {
+            // 필터링 조건이 없으면 managerId만으로 조회하는 간단한 쿼리 필요
+            projects = projectRepository.findProjectsByManagerIdWithFilters(
+                    managerId, null, null, null, null,
+                    null, null, null, null, null, null, sortedPageable);
+        }
+
+        return projects.map(project -> {
+            // 각 프로젝트의 기술스택도 함께 조회
+            List<String> projectTechNames = projectTechService.getProjectTechNames(project.getId());
+            return ProjectResponse.from(project, projectTechNames);
+        });
+    }
+
+    /**
      * 프로젝트 단건 조회 (상세정보)
      */
     public Optional<Project> getProjectById(Long id) {
