@@ -1,7 +1,9 @@
 package com.back.domain.project.project.service;
 
 import com.back.domain.project.project.entity.ProjectTech;
+import com.back.domain.project.project.entity.enums.TechCategory;
 import com.back.domain.project.project.repository.ProjectTechRepository;
+import com.back.domain.project.project.util.TechCategoryMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -49,11 +51,17 @@ public class ProjectTechService {
         log.debug("프로젝트 기술스택 저장 - projectId: {}, count: {}", projectId, techNames.size());
 
         List<ProjectTech> projectTechs = techNames.stream()
-                .map(techName -> ProjectTech.builder()
-                        .projectId(projectId)
-                        .techName(techName)
-                        .createDate(LocalDateTime.now())
-                        .build())
+                .map(techName -> {
+                    TechCategory category = TechCategoryMapper.getCategoryByTechName(techName);
+                    log.debug("기술스택 매핑 - techName: {}, category: {}", techName, category);
+
+                    return ProjectTech.builder()
+                            .projectId(projectId)
+                            .techName(techName)
+                            .techCategory(category) // 카테고리 자동 설정
+                            .createDate(LocalDateTime.now())
+                            .build();
+                })
                 .collect(Collectors.toList());
 
         projectTechRepository.saveAll(projectTechs);
@@ -67,17 +75,30 @@ public class ProjectTechService {
      */
     @Transactional
     public List<String> updateTechStacks(Long projectId, List<String> techNames) {
-        log.debug("프로젝트 기술스택 업데이트 - projectId: {}, count: {}", projectId, techNames.size());
+        log.info("프로젝트 기술스택 업데이트 시작 - projectId: {}, 새로운 기술스택: {}", projectId, techNames);
 
-        // 기존 기술스택 삭제
-        deleteTechStacks(projectId);
+        try {
+            // 기존 기술스택 조회 (디버깅용)
+            List<String> existingTechs = getProjectTechNames(projectId);
+            log.info("기존 기술스택: {}", existingTechs);
 
-        // 새로운 기술스택 추가
-        if (!techNames.isEmpty()) {
-            return saveTechStacks(projectId, techNames);
+            // 기존 기술스택 삭제
+            deleteTechStacks(projectId);
+            log.info("기존 기술스택 삭제 완료 - projectId: {}", projectId);
+
+            // 새로운 기술스택 추가
+            if (!techNames.isEmpty()) {
+                List<String> savedTechs = saveTechStacks(projectId, techNames);
+                log.info("새로운 기술스택 저장 완료 - projectId: {}, 저장된 기술스택: {}", projectId, savedTechs);
+                return savedTechs;
+            } else {
+                log.info("새로운 기술스택이 비어있음 - projectId: {}", projectId);
+                return techNames;
+            }
+        } catch (Exception e) {
+            log.error("기술스택 업데이트 중 오류 발생 - projectId: {}, error: {}", projectId, e.getMessage(), e);
+            throw e; // 트랜잭션 롤백을 위해 예외 재발생
         }
-
-        return techNames;
     }
 
     /**
@@ -87,9 +108,13 @@ public class ProjectTechService {
     public void addTechStack(Long projectId, String techName) {
         log.debug("기술스택 추가 - projectId: {}, techName: {}", projectId, techName);
 
+        TechCategory category = TechCategoryMapper.getCategoryByTechName(techName);
+        log.debug("기술스택 매핑 - techName: {}, category: {}", techName, category);
+
         ProjectTech projectTech = ProjectTech.builder()
                 .projectId(projectId)
                 .techName(techName)
+                .techCategory(category) // 카테고리 자동 설정
                 .createDate(LocalDateTime.now())
                 .build();
 
