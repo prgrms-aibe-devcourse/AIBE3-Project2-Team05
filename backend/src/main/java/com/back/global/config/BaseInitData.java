@@ -14,6 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 @Component
 @Profile("dev") // 개발 환경에서만 실행
@@ -27,6 +30,14 @@ public class BaseInitData implements CommandLineRunner {
     private final ProjectFavoriteRepository projectFavoriteRepository;
     private final ProjectStatusHistoryRepository projectStatusHistoryRepository;
     private final ProjectFileRepository projectFileRepository;
+
+    // 지역 목록
+    private final List<String> regions = Arrays.asList(
+        "서울", "경기", "인천", "강원", "충남", "대전", "충북", "세종",
+        "부산", "울산", "대구", "경북", "경남", "전남", "광주", "전북", "제주", "국외"
+    );
+
+    private final Random random = new Random();
 
     @Override
     @Transactional
@@ -134,6 +145,7 @@ public class BaseInitData implements CommandLineRunner {
                 .partnerType(PartnerType.INDIVIDUAL_OR_TEAM_FREELANCER)
                 .budgetType(BudgetRange.RANGE_300_500)
                 .budgetAmount(4000000L)
+                .companyLocation(getRandomRegion())
                 .startDate(LocalDate.of(2025, 11, 1))
                 .endDate(LocalDate.of(2025, 12, 31))
                 .status(ProjectStatus.RECRUITING)
@@ -151,6 +163,7 @@ public class BaseInitData implements CommandLineRunner {
                 .partnerType(PartnerType.INDIVIDUAL_FREELANCER)
                 .budgetType(BudgetRange.RANGE_200_300)
                 .budgetAmount(2500000L)
+                .companyLocation(getRandomRegion())
                 .startDate(LocalDate.of(2025, 10, 15))
                 .endDate(LocalDate.of(2025, 11, 30))
                 .status(ProjectStatus.RECRUITING)
@@ -168,9 +181,10 @@ public class BaseInitData implements CommandLineRunner {
                 .partnerType(PartnerType.INDIVIDUAL_OR_TEAM_FREELANCER)
                 .budgetType(BudgetRange.RANGE_500_1000)
                 .budgetAmount(8000000L)
+                .companyLocation(getRandomRegion())
                 .startDate(LocalDate.of(2025, 10, 20))
                 .endDate(LocalDate.of(2026, 1, 31))
-                .status(ProjectStatus.RECRUITING)
+                .status(ProjectStatus.CONTRACTING)
                 .viewCount(654)
                 .createDate(LocalDateTime.of(2025, 9, 25, 13, 45, 0))
                 .modifyDate(LocalDateTime.of(2025, 10, 1, 10, 30, 0))
@@ -185,6 +199,7 @@ public class BaseInitData implements CommandLineRunner {
                 .partnerType(PartnerType.BUSINESS_TEAM_OR_COMPANY)
                 .budgetType(BudgetRange.RANGE_1000_2000)
                 .budgetAmount(15000000L)
+                .companyLocation(getRandomRegion())
                 .startDate(LocalDate.of(2025, 6, 1))
                 .endDate(LocalDate.of(2025, 9, 30))
                 .status(ProjectStatus.COMPLETED)
@@ -203,9 +218,10 @@ public class BaseInitData implements CommandLineRunner {
                 .partnerType(PartnerType.INDIVIDUAL_OR_TEAM_FREELANCER)
                 .budgetType(BudgetRange.RANGE_500_1000)
                 .budgetAmount(7500000L)
+                .companyLocation(getRandomRegion())
                 .startDate(LocalDate.of(2025, 11, 15))
                 .endDate(LocalDate.of(2026, 2, 28))
-                .status(ProjectStatus.RECRUITING)
+                .status(ProjectStatus.CONTRACTING)
                 .viewCount(1876)
                 .createDate(LocalDateTime.of(2025, 9, 28, 10, 20, 0))
                 .modifyDate(LocalDateTime.of(2025, 9, 30, 9, 15, 0))
@@ -220,9 +236,10 @@ public class BaseInitData implements CommandLineRunner {
                 .partnerType(PartnerType.INDIVIDUAL_FREELANCER)
                 .budgetType(BudgetRange.RANGE_100_200)
                 .budgetAmount(1500000L)
+                .companyLocation(getRandomRegion())
                 .startDate(LocalDate.of(2025, 10, 10))
                 .endDate(LocalDate.of(2025, 11, 20))
-                .status(ProjectStatus.RECRUITING)
+                .status(ProjectStatus.IN_PROGRESS)
                 .viewCount(567)
                 .createDate(LocalDateTime.of(2025, 9, 22, 14, 30, 0))
                 .modifyDate(LocalDateTime.of(2025, 9, 29, 11, 45, 0))
@@ -237,9 +254,10 @@ public class BaseInitData implements CommandLineRunner {
                 .partnerType(PartnerType.INDIVIDUAL_OR_TEAM_FREELANCER)
                 .budgetType(BudgetRange.RANGE_300_500)
                 .budgetAmount(4500000L)
+                .companyLocation(getRandomRegion())
                 .startDate(LocalDate.of(2025, 11, 1))
                 .endDate(LocalDate.of(2025, 12, 15))
-                .status(ProjectStatus.RECRUITING)
+                .status(ProjectStatus.IN_PROGRESS)
                 .viewCount(789)
                 .createDate(LocalDateTime.of(2025, 9, 26, 16, 0, 0))
                 .modifyDate(LocalDateTime.of(2025, 9, 30, 13, 20, 0))
@@ -254,9 +272,10 @@ public class BaseInitData implements CommandLineRunner {
                 .partnerType(PartnerType.INDIVIDUAL_OR_TEAM_FREELANCER)
                 .budgetType(BudgetRange.RANGE_200_300)
                 .budgetAmount(2800000L)
+                .companyLocation(getRandomRegion())
                 .startDate(LocalDate.of(2025, 10, 25))
                 .endDate(LocalDate.of(2025, 12, 20))
-                .status(ProjectStatus.RECRUITING)
+                .status(ProjectStatus.SUSPENDED)
                 .viewCount(432)
                 .createDate(LocalDateTime.of(2025, 9, 24, 12, 10, 0))
                 .modifyDate(LocalDateTime.of(2025, 9, 28, 15, 30, 0))
@@ -271,9 +290,10 @@ public class BaseInitData implements CommandLineRunner {
                 .partnerType(PartnerType.ANY_TYPE)
                 .budgetType(BudgetRange.NEGOTIABLE)
                 .budgetAmount(null)
+                .companyLocation(getRandomRegion())
                 .startDate(LocalDate.of(2025, 10, 20))
                 .endDate(LocalDate.of(2026, 3, 31))
-                .status(ProjectStatus.RECRUITING)
+                .status(ProjectStatus.SUSPENDED)
                 .viewCount(1123)
                 .createDate(LocalDateTime.of(2025, 9, 18, 9, 45, 0))
                 .modifyDate(LocalDateTime.of(2025, 9, 27, 17, 0, 0))
@@ -288,9 +308,10 @@ public class BaseInitData implements CommandLineRunner {
                 .partnerType(PartnerType.INDIVIDUAL_FREELANCER)
                 .budgetType(BudgetRange.RANGE_100_200)
                 .budgetAmount(1200000L)
+                .companyLocation(getRandomRegion())
                 .startDate(LocalDate.of(2025, 11, 5))
                 .endDate(LocalDate.of(2025, 12, 10))
-                .status(ProjectStatus.RECRUITING)
+                .status(ProjectStatus.CANCELLED)
                 .viewCount(345)
                 .createDate(LocalDateTime.of(2025, 9, 30, 11, 30, 0))
                 .modifyDate(LocalDateTime.of(2025, 9, 30, 11, 30, 0))
@@ -308,6 +329,11 @@ public class BaseInitData implements CommandLineRunner {
         projectRepository.save(project10);
 
         log.info("프로젝트 데이터 {} 건이 생성되었습니다.", 10);
+    }
+
+    // 랜덤 지역 선택 메서드 추가
+    private String getRandomRegion() {
+        return regions.get(random.nextInt(regions.size()));
     }
 
     private void createProjectTechs() {
