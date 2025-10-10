@@ -28,7 +28,6 @@ public class BaseInitData implements CommandLineRunner {
     private final ProjectRepository projectRepository;
     private final ProjectTechRepository projectTechRepository;
     private final ProjectFavoriteRepository projectFavoriteRepository;
-    private final ProjectStatusHistoryRepository projectStatusHistoryRepository;
     private final ProjectFileRepository projectFileRepository;
 
     // 지역 목록 - Region enum으로 변경
@@ -64,9 +63,6 @@ public class BaseInitData implements CommandLineRunner {
 
         // 프로젝트 즐겨찾기 데이터 생성
         createProjectFavorites();
-
-        // 프로젝트 상태 변경 이력 데이터 생성
-        createProjectStatusHistories();
 
         // 프로젝트 파일 데이터 생성
         createProjectFiles();
@@ -487,61 +483,6 @@ public class BaseInitData implements CommandLineRunner {
                 .createDate(createDate)
                 .build();
         projectFavoriteRepository.save(favorite);
-    }
-
-    private void createProjectStatusHistories() {
-        // 사용자들 조회
-        User parkSeungg = userRepository.findByUsername("Park-seungg").orElseThrow();
-        User developer1 = userRepository.findByUsername("developer1").orElseThrow();
-        User designer1 = userRepository.findByUsername("designer1").orElseThrow();
-        User iotExpert = userRepository.findByUsername("iot_expert").orElseThrow();
-        User marketer1 = userRepository.findByUsername("marketer1").orElseThrow();
-        User opensourceDev = userRepository.findByUsername("opensource_dev").orElseThrow();
-        User pluginDev = userRepository.findByUsername("plugin_dev").orElseThrow();
-
-        // 프로젝트들 조회
-        Project project1 = projectRepository.findAll().get(0);
-        Project project2 = projectRepository.findAll().get(1);
-        Project project3 = projectRepository.findAll().get(2);
-        Project project4 = projectRepository.findAll().get(3);
-        Project project5 = projectRepository.findAll().get(4);
-        Project project6 = projectRepository.findAll().get(5);
-        Project project7 = projectRepository.findAll().get(6);
-        Project project8 = projectRepository.findAll().get(7);
-        Project project9 = projectRepository.findAll().get(8);
-        Project project10 = projectRepository.findAll().get(9);
-
-        // Park-seungg의 프로젝트 상태 변경 이력
-        createStatusHistory(project1.getId(), null, ProjectStatus.RECRUITING, parkSeungg.getId(), LocalDateTime.of(2025, 9, 15, 9, 30, 0));
-        createStatusHistory(project2.getId(), null, ProjectStatus.RECRUITING, parkSeungg.getId(), LocalDateTime.of(2025, 9, 20, 11, 15, 0));
-        createStatusHistory(project3.getId(), null, ProjectStatus.RECRUITING, parkSeungg.getId(), LocalDateTime.of(2025, 9, 25, 13, 45, 0));
-
-        // 프로젝트 4 이력 (완료된 프로젝트)
-        createStatusHistory(project4.getId(), null, ProjectStatus.RECRUITING, parkSeungg.getId(), LocalDateTime.of(2025, 5, 15, 8, 0, 0));
-        createStatusHistory(project4.getId(), ProjectStatus.RECRUITING, ProjectStatus.IN_PROGRESS, parkSeungg.getId(), LocalDateTime.of(2025, 6, 1, 9, 0, 0));
-        createStatusHistory(project4.getId(), ProjectStatus.IN_PROGRESS, ProjectStatus.COMPLETED, parkSeungg.getId(), LocalDateTime.of(2025, 9, 30, 18, 0, 0));
-
-        // 다른 프로젝트들 초기 상태
-        createStatusHistory(project5.getId(), null, ProjectStatus.RECRUITING, developer1.getId(), LocalDateTime.of(2025, 9, 28, 10, 20, 0));
-        createStatusHistory(project6.getId(), null, ProjectStatus.RECRUITING, designer1.getId(), LocalDateTime.of(2025, 9, 22, 14, 30, 0));
-        createStatusHistory(project7.getId(), null, ProjectStatus.RECRUITING, iotExpert.getId(), LocalDateTime.of(2025, 9, 26, 16, 0, 0));
-        createStatusHistory(project8.getId(), null, ProjectStatus.RECRUITING, marketer1.getId(), LocalDateTime.of(2025, 9, 24, 12, 10, 0));
-        createStatusHistory(project9.getId(), null, ProjectStatus.RECRUITING, opensourceDev.getId(), LocalDateTime.of(2025, 9, 18, 9, 45, 0));
-        createStatusHistory(project10.getId(), null, ProjectStatus.RECRUITING, pluginDev.getId(), LocalDateTime.of(2025, 9, 30, 11, 30, 0));
-
-        log.info("프로젝트 상태 변경 이력 데이터가 생성되었습니다.");
-    }
-
-    // 수정된 메서드: ProjectStatus enum 타입으로 직접 저장
-    private void createStatusHistory(Long projectId, ProjectStatus previousStatus, ProjectStatus currentStatus, Long changedById, LocalDateTime changeDate) {
-        ProjectStatusHistory history = ProjectStatusHistory.builder()
-                .projectId(projectId)
-                .previousStatus(previousStatus) // enum 직접 저장
-                .currentStatus(currentStatus)   // enum 직접 저장
-                .changedById(changedById)
-                .changeDate(changeDate)
-                .build();
-        projectStatusHistoryRepository.save(history);
     }
 
     private void createProjectFiles() {

@@ -3,7 +3,9 @@ package com.back.domain.project.project.service;
 import com.back.domain.project.project.dto.ProjectRequest;
 import com.back.domain.project.project.dto.ProjectResponse;
 import com.back.domain.project.project.entity.Project;
-import com.back.domain.project.project.entity.enums.*;
+import com.back.domain.project.project.entity.enums.PartnerType;
+import com.back.domain.project.project.entity.enums.ProgressStatus;
+import com.back.domain.project.project.entity.enums.ProjectStatus;
 import com.back.domain.project.project.repository.ProjectRepository;
 import com.back.domain.project.project.validator.ProjectValidator;
 import com.back.global.exception.ProjectNotFoundException;
@@ -17,8 +19,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 프로젝트 핵심 CRUD 서비스
- * 단일 책임: 프로젝트 생성, 수정, 삭제
+ * 프로젝트 핵심 서비스
+ * 단일 책임: 프로젝트 CRUD 작업
  */
 @Slf4j
 @Service
@@ -28,8 +30,6 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final ProjectTechService projectTechService;
-    private final ProjectStatusHistoryService statusHistoryService;
-    private final ProjectFileService projectFileService;
     private final ProjectValidator projectValidator;
 
     /**
@@ -46,10 +46,6 @@ public class ProjectService {
         projectValidator.validateProject(project);
 
         Project savedProject = projectRepository.save(project);
-
-        // 상태 이력 생성
-        statusHistoryService.createStatusHistory(
-                savedProject.getId(), null, ProjectStatus.RECRUITING, savedProject.getManagerId());
 
         // 기술 스택 저장 (있는 경우)
         List<String> techNames = null;
@@ -74,10 +70,6 @@ public class ProjectService {
         projectValidator.validateProject(project);
 
         Project savedProject = projectRepository.save(project);
-
-        // 상태 이력 생성
-        statusHistoryService.createStatusHistory(
-                savedProject.getId(), null, ProjectStatus.RECRUITING, savedProject.getManagerId());
 
         // 기술 스택 저장 (있는 경우)
         List<String> techNames = null;
@@ -134,9 +126,6 @@ public class ProjectService {
         project.setModifyDate(LocalDateTime.now());
 
         Project savedProject = projectRepository.save(project);
-
-        statusHistoryService.createStatusHistory(
-                savedProject.getId(), null, ProjectStatus.RECRUITING, savedProject.getManagerId());
 
         return savedProject;
     }

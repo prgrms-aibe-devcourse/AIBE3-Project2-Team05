@@ -23,7 +23,6 @@ import java.time.LocalDateTime;
 public class ProjectStatusService {
 
     private final ProjectRepository projectRepository;
-    private final ProjectStatusHistoryService statusHistoryService;
     private final ProjectValidator projectValidator;
 
     /**
@@ -46,8 +45,8 @@ public class ProjectStatusService {
 
         Project updatedProject = projectRepository.save(project);
 
-        // 상태 변경 이력 저장
-        statusHistoryService.createStatusHistory(projectId, previousStatus, newStatus, changedById);
+        log.info("프로젝트 상태 변경 완료 - projectId: {}, {} → {}", 
+                projectId, previousStatus.getDescription(), newStatus.getDescription());
 
         return updatedProject;
     }

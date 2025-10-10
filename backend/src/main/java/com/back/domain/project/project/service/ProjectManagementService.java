@@ -3,7 +3,6 @@ package com.back.domain.project.project.service;
 import com.back.domain.project.project.dto.ProjectRequest;
 import com.back.domain.project.project.dto.ProjectResponse;
 import com.back.domain.project.project.entity.Project;
-import com.back.domain.project.project.entity.ProjectStatusHistory;
 import com.back.domain.project.project.entity.ProjectTech;
 import com.back.domain.project.project.entity.enums.*;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +28,6 @@ public class ProjectManagementService {
     private final ProjectQueryService projectQueryService;
     private final ProjectTechService projectTechService;
     private final ProjectStatusService projectStatusService;
-    private final ProjectStatusHistoryService statusHistoryService;
 
     // === 프로젝트 생성 관련 ===
 
@@ -217,15 +215,6 @@ public class ProjectManagementService {
     @Transactional
     public void addProjectTechStack(Long projectId, String techName) {
         projectTechService.addTechStack(projectId, techName);
-    }
-
-    // === 상태 이력 관리 ===
-
-    /**
-     * 프로젝트 상태 변경 이력 조회
-     */
-    public List<ProjectStatusHistory> getProjectStatusHistory(Long projectId) {
-        return statusHistoryService.getProjectStatusHistory(projectId);
     }
 
     // === 프로젝트 삭제 ===
