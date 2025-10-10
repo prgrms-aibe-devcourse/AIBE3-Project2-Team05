@@ -47,7 +47,7 @@ const ProjectsPage = () => {
         console.log('API 호출 URL:', `/api/projects?${params}`);
         console.log('현재 필터:', currentFilters);
 
-        const response = await fetch(`/api/projects?${params}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects?${params}`);
         if (response.ok) {
           const data: PageProjectResponse = await response.json();
           console.log('API 응답 데이터:', data);
