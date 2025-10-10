@@ -6,6 +6,7 @@ import com.back.domain.project.project.entity.Project;
 import com.back.domain.project.project.entity.enums.PartnerType;
 import com.back.domain.project.project.entity.enums.ProgressStatus;
 import com.back.domain.project.project.entity.enums.ProjectStatus;
+import com.back.domain.project.project.entity.enums.Region;
 import com.back.domain.project.project.repository.ProjectRepository;
 import com.back.domain.project.project.validator.ProjectValidator;
 import com.back.global.exception.ProjectNotFoundException;
@@ -30,6 +31,7 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final ProjectTechService projectTechService;
+    private final ProjectFileService projectFileService;
     private final ProjectValidator projectValidator;
 
     /**

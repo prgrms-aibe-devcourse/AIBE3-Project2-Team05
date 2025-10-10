@@ -2,7 +2,6 @@ package com.back.domain.project.project.dto;
 
 import com.back.domain.project.project.entity.Project;
 import com.back.domain.project.project.entity.ProjectFile;
-import com.back.domain.project.project.entity.ProjectStatusHistory;
 import com.back.domain.project.project.entity.ProjectTech;
 import com.back.domain.project.project.entity.enums.*;
 
@@ -42,8 +41,7 @@ public record ProjectResponse(
 
     // 관련 데이터 (상세 조회 시에만)
     List<TechInfo> techStacks,
-    List<ProjectFileInfo> projectFiles,
-    List<ProjectStatusHistory> statusHistories
+    List<ProjectFileInfo> projectFiles
 ) {
 
     /**
@@ -77,8 +75,7 @@ public record ProjectResponse(
                 project.getCreateDate(),
                 project.getModifyDate(),
                 techInfos,
-                null, // 파일 정보는 상세 조회 시에만
-                null  // 이력 정보는 상세 조회 시에만
+                null // 파일 정보는 상세 조회 시에만
         );
     }
 
@@ -87,8 +84,7 @@ public record ProjectResponse(
      */
     public static ProjectResponse fromDetail(Project project,
                                            List<ProjectTech> techStacks,
-                                           List<ProjectFile> projectFiles,
-                                           List<ProjectStatusHistory> statusHistories) {
+                                           List<ProjectFile> projectFiles) {
 
         List<TechInfo> techInfos = techStacks.stream()
                 .map(tech -> new TechInfo(tech.getTechName(), tech.getTechCategory()))
@@ -125,8 +121,7 @@ public record ProjectResponse(
                 project.getCreateDate(),
                 project.getModifyDate(),
                 techInfos,
-                fileInfos,
-                statusHistories
+                fileInfos
         );
     }
 
