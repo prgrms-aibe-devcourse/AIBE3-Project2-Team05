@@ -184,7 +184,7 @@ public class ProjectService {
      */
     @Transactional
     public Project updateAdditionalInfo(Long id, Long managerId, PartnerType partnerType,
-                                        ProgressStatus progressStatus, String companyLocation,
+                                        ProgressStatus progressStatus, Region companyLocation,
                                         String partnerEtcDescription) {
         log.info("프로젝트 추가 정보 수정 - id: {}, managerId: {}", id, managerId);
 
@@ -209,7 +209,7 @@ public class ProjectService {
      */
     @Transactional
     public Project updateAdditionalInfoWithTech(Long id, Long managerId, PartnerType partnerType,
-                                                ProgressStatus progressStatus, String companyLocation,
+                                                ProgressStatus progressStatus, Region companyLocation,
                                                 String partnerEtcDescription, List<String> techNames) {
         log.info("프로젝트 추가 정보 수정 (기술스택 포함) - id: {}, managerId: {}, techCount: {}",
                 id, managerId, techNames != null ? techNames.size() : 0);

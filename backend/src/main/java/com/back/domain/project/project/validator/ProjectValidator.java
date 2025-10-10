@@ -36,7 +36,7 @@ public class ProjectValidator {
 
         // 선택적 필드 길이 검증
         validateEnumValue(project.getProgressStatus(), "진행 상황");
-        validateStringLength(project.getCompanyLocation(), 200, "회사 위치는 200자를 초과할 수 없습니다.");
+        validateEnumValue(project.getCompanyLocation(), "회사 위치");
         validateStringLength(project.getPartnerEtcDescription(), 2000, "기타 설명은 2000자를 초과할 수 없습니다.");
 
         // 엔티티 자체 검증

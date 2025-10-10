@@ -390,4 +390,27 @@ public class ProjectController {
 
         return ResponseEntity.ok(projects);
     }
-}
+
+    /**
+     * Region enum 값 목록 조회
+     */
+    @GetMapping("/enums/regions")
+    public ResponseEntity<List<RegionResponse>> getRegionOptions() {
+        log.info("지역 옵션 조회 요청");
+
+        List<RegionResponse> regionOptions = java.util.Arrays.stream(Region.values())
+                .map(region -> new RegionResponse(region.name(), region.getDescription()))
+                .toList();
+
+        return ResponseEntity.ok(regionOptions);
+    }
+
+    /**
+     * Region 응답 DTO
+     */
+    public record RegionResponse(String value, String description) {}
+
+    /**
+     * ProgressStatus 응답 DTO
+     */
+

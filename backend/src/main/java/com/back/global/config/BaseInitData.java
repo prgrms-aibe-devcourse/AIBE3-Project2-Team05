@@ -31,10 +31,13 @@ public class BaseInitData implements CommandLineRunner {
     private final ProjectStatusHistoryRepository projectStatusHistoryRepository;
     private final ProjectFileRepository projectFileRepository;
 
-    // 지역 목록
-    private final List<String> regions = Arrays.asList(
-        "서울", "경기", "인천", "강원", "충남", "대전", "충북", "세종",
-        "부산", "울산", "대구", "경북", "경남", "전남", "광주", "전북", "제주", "국외"
+    // 지역 목록 - Region enum으로 변경
+    private final List<Region> regions = Arrays.asList(
+        Region.SEOUL, Region.GYEONGGI, Region.INCHEON, Region.GANGWON,
+        Region.CHUNGNAM, Region.DAEJEON, Region.CHUNGBUK, Region.SEJONG,
+        Region.BUSAN, Region.ULSAN, Region.DAEGU, Region.GYEONGBUK,
+        Region.GYEONGNAM, Region.JEONNAM, Region.GWANGJU, Region.JEONBUK,
+        Region.JEJU, Region.OVERSEAS
     );
 
     private final Random random = new Random();
@@ -352,7 +355,7 @@ public class BaseInitData implements CommandLineRunner {
     }
 
     // 랜덤 지역 선택 메서드 추가
-    private String getRandomRegion() {
+    private Region getRandomRegion() {
         return regions.get(random.nextInt(regions.size()));
     }
 

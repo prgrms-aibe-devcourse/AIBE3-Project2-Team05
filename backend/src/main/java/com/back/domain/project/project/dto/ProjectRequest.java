@@ -5,6 +5,7 @@ import com.back.domain.project.project.entity.enums.PartnerType;
 import com.back.domain.project.project.entity.enums.ProjectField;
 import com.back.domain.project.project.entity.enums.RecruitmentType;
 import com.back.domain.project.project.entity.enums.ProgressStatus;
+import com.back.domain.project.project.entity.enums.Region;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -54,8 +55,7 @@ public record ProjectRequest(
 
         ProgressStatus progressStatus,
 
-        @Size(max = 100, message = COMPANY_LOCATION_MAX_LENGTH)
-        String companyLocation,
+        Region companyLocation,
 
         String partnerEtcDescription,
 
@@ -89,7 +89,7 @@ public record ProjectRequest(
                                                  ProjectField projectField, RecruitmentType recruitmentType,
                                                  BudgetRange budgetType, LocalDate startDate, LocalDate endDate,
                                                  Long managerId, PartnerType partnerType, Long budgetAmount,
-                                                 ProgressStatus progressStatus, String companyLocation,
+                                                 ProgressStatus progressStatus, Region companyLocation,
                                                  String partnerEtcDescription, List<String> techNames) {
         return new ProjectRequest(title, description, projectField, recruitmentType, budgetType,
                 startDate, endDate, managerId, partnerType, budgetAmount, progressStatus,
@@ -100,7 +100,7 @@ public record ProjectRequest(
      * 추가 정보만 (기본 생성 후 추가 정보 입력용)
      */
     public static ProjectRequest forAdditionalInfo(PartnerType partnerType, Long budgetAmount,
-                                                 ProgressStatus progressStatus, String companyLocation,
+                                                 ProgressStatus progressStatus, Region companyLocation,
                                                  String partnerEtcDescription, List<String> techNames,
                                                  List<Long> attachmentFileIds) {
         return new ProjectRequest(null, null, null, null, null, null, null, null,

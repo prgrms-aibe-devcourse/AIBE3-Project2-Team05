@@ -56,8 +56,9 @@ public class Project {
     @Column(name = "progress_status", length = 50)
     private ProgressStatus progressStatus;
 
-    @Column(name = "company_location", length = 100)
-    private String companyLocation;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "company_location", length = 20)
+    private Region companyLocation;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
