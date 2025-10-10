@@ -18,6 +18,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -461,5 +462,102 @@ public class ProjectController {
                 budgetType, minBudget, maxBudget, location, techNames, sortBy, pageable);
 
         return ResponseEntity.ok(projects);
+    }
+
+    /**
+     * 프로젝트 삭제
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteProject(
+            @PathVariable Long id,
+            @RequestParam Long requesterId) {
+
+        log.info("프로젝트 삭제 요청 - id: {}, requesterId: {}", id, requesterId);
+
+        try {
+            projectManagementService.deleteProject(id, requesterId);
+            log.info("프로젝트 삭제 성공 - projectId: {}", id);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "프로젝트가 성공적으로 삭제되었습니다.",
+                "projectId", id
+            ));
+        } catch (IllegalArgumentException e) {
+            log.error("프로젝트 삭제 실패 - projectId: {}, error: {}", id, e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "error", "VALIDATION_ERROR",
+                "message", e.getMessage(),
+                "projectId", id
+            ));
+        } catch (SecurityException e) {
+            log.error("프로젝트 삭제 권한 없음 - projectId: {}, error: {}", id, e.getMessage());
+            return ResponseEntity.status(403).body(Map.of(
+                "success", false,
+                "error", "PERMISSION_DENIED",
+                "message", e.getMessage(),
+                "projectId", id
+            ));
+        } catch (Exception e) {
+            log.error("프로젝트 삭제 중 예상치 못한 오류 - projectId: {}, error: {}", id, e.getMessage(), e);
+            return ResponseEntity.status(500).body(Map.of(
+                "success", false,
+                "error", "INTERNAL_ERROR",
+                "message", "서버 내부 오류가 발생했습니다.",
+                "projectId", id
+            ));
+        }
+    }
+
+    /**
+     * 사용자 프로젝트 삭제 (매니저 ID가 URL에 포함된 버전)
+     */
+    @DeleteMapping("/manager/{managerId}/project/{id}")
+    public ResponseEntity<?> deleteProjectForManager(
+            @PathVariable Long managerId,
+            @PathVariable Long id) {
+
+        log.info("사용자 프로젝트 삭제 요청 - managerId: {}, id: {}", managerId, id);
+
+        try {
+            projectManagementService.deleteProject(id, managerId);
+            log.info("사용자 프로젝트 삭제 성공 - managerId: {}, projectId: {}", managerId, id);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "프로젝트가 성공적으로 삭제되었습니다.",
+                "projectId", id,
+                "managerId", managerId
+            ));
+        } catch (IllegalArgumentException e) {
+            log.error("사용자 프로젝트 삭제 실패 - managerId: {}, projectId: {}, error: {}",
+                    managerId, id, e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "error", "VALIDATION_ERROR",
+                "message", e.getMessage(),
+                "projectId", id,
+                "managerId", managerId
+            ));
+        } catch (SecurityException e) {
+            log.error("사용자 프로젝트 삭제 권한 없음 - managerId: {}, projectId: {}, error: {}",
+                    managerId, id, e.getMessage());
+            return ResponseEntity.status(403).body(Map.of(
+                "success", false,
+                "error", "PERMISSION_DENIED",
+                "message", e.getMessage(),
+                "projectId", id,
+                "managerId", managerId
+            ));
+        } catch (Exception e) {
+            log.error("사용자 프로젝트 삭제 중 예상치 못한 오류 - managerId: {}, projectId: {}, error: {}",
+                    managerId, id, e.getMessage(), e);
+            return ResponseEntity.status(500).body(Map.of(
+                "success", false,
+                "error", "INTERNAL_ERROR",
+                "message", "서버 내부 오류가 발생했습니다.",
+                "projectId", id,
+                "managerId", managerId
+            ));
+        }
     }
 }
