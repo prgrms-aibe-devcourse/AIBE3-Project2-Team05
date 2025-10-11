@@ -1,8 +1,8 @@
 package com.back.domain.project.project.controller;
 
-import com.back.domain.project.project.dto.ApiResponse;
 import com.back.domain.project.project.entity.ProjectFile;
 import com.back.domain.project.project.service.ProjectFileService;
+import com.back.global.RsData.RsData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -118,7 +118,7 @@ public class ProjectFileController {
      * 파일 업로드 (단일)
      */
     @PostMapping("/upload")
-    public ResponseEntity<ApiResponse<ProjectFile>> uploadFile(
+    public ResponseEntity<RsData<ProjectFile>> uploadFile(
             @PathVariable Long projectId,
             @RequestParam("file") MultipartFile file) {
 
@@ -128,15 +128,15 @@ public class ProjectFileController {
         try {
             validateFile(file);
             ProjectFile uploadedFile = fileService.uploadFile(projectId, file);
-            return ResponseEntity.ok(ApiResponse.success("파일이 성공적으로 업로드되었습니다.", uploadedFile));
+            return ResponseEntity.ok(RsData.success("파일이 성공적으로 업로드되었습니다.", uploadedFile));
         } catch (IllegalArgumentException e) {
             log.error("파일 업로드 실패 - 입력값 오류: {}", e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("파일 업로드 실패", e.getMessage()));
+                    .body(RsData.error("파일 업로드 실패", e.getMessage()));
         } catch (Exception e) {
             log.error("파일 업로드 실패 - {}", e.getMessage());
             return ResponseEntity.internalServerError()
-                    .body(ApiResponse.error("파일 업로드 중 오류가 발생했습니다.", "UPLOAD_ERROR"));
+                    .body(RsData.error("파일 업로드 중 오류가 발생했습니다.", "UPLOAD_ERROR"));
         }
     }
 
@@ -144,7 +144,7 @@ public class ProjectFileController {
      * 파일 업로드 (다중)
      */
     @PostMapping("/upload/batch")
-    public ResponseEntity<ApiResponse<List<ProjectFile>>> uploadFiles(
+    public ResponseEntity<RsData<List<ProjectFile>>> uploadFiles(
             @PathVariable Long projectId,
             @RequestParam("files") List<MultipartFile> files) {
 
@@ -153,42 +153,15 @@ public class ProjectFileController {
         try {
             validateFiles(files);
             List<ProjectFile> uploadedFiles = fileService.uploadFiles(projectId, files);
-            return ResponseEntity.ok(ApiResponse.success("파일들이 성공적으로 업로드되었습니다.", uploadedFiles));
+            return ResponseEntity.ok(RsData.success("파일들이 성공적으로 업로드되었습니다.", uploadedFiles));
         } catch (IllegalArgumentException e) {
             log.error("파일 일괄 업로드 실패 - 입력값 오류: {}", e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("파일 업로드 실패", e.getMessage()));
+                    .body(RsData.error("파일 업로드 실패", e.getMessage()));
         } catch (Exception e) {
             log.error("파일 일괄 업로드 실패 - {}", e.getMessage());
             return ResponseEntity.internalServerError()
-                    .body(ApiResponse.error("파일 업로드 중 오류가 발생했습니다.", "UPLOAD_ERROR"));
-        }
-    }
-
-    /**
-     * 파일명 변경
-     */
-    @PatchMapping("/{fileId}/name")
-    public ResponseEntity<ApiResponse<ProjectFile>> updateFileName(
-            @PathVariable Long projectId,
-            @PathVariable Long fileId,
-            @RequestParam String newOriginalName) {
-
-        log.info("파일명 변경 요청 - projectId: {}, fileId: {}, newName: {}",
-                projectId, fileId, newOriginalName);
-
-        try {
-            validateFileName(newOriginalName);
-            ProjectFile updatedFile = fileService.updateFileName(fileId, newOriginalName);
-            return ResponseEntity.ok(ApiResponse.success("파일명이 성공적으로 변경되었습니다.", updatedFile));
-        } catch (IllegalArgumentException e) {
-            log.error("파일명 변경 실패 - {}", e.getMessage());
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("파일명 변경 실패", e.getMessage()));
-        } catch (Exception e) {
-            log.error("파일명 변경 실패 - {}", e.getMessage());
-            return ResponseEntity.internalServerError()
-                    .body(ApiResponse.error("파일명 변경 중 오류가 발생했습니다.", "UPDATE_ERROR"));
+                    .body(RsData.error("파일 업로드 중 오류가 발생했습니다.", "UPLOAD_ERROR"));
         }
     }
 
@@ -196,7 +169,7 @@ public class ProjectFileController {
      * 파일 삭제
      */
     @DeleteMapping("/{fileId}")
-    public ResponseEntity<ApiResponse<Void>> deleteFile(
+    public ResponseEntity<RsData<Void>> deleteFile(
             @PathVariable Long projectId,
             @PathVariable Long fileId) {
 
@@ -204,67 +177,15 @@ public class ProjectFileController {
 
         try {
             fileService.deleteFile(fileId);
-            return ResponseEntity.ok(ApiResponse.success("파일이 성공적으로 삭제되었습니다.", null));
+            return ResponseEntity.ok(RsData.success("파일이 성공적으로 삭제되었습니다.", null));
         } catch (IllegalArgumentException e) {
             log.error("파일 삭제 실패 - {}", e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("파일 삭제 실패", e.getMessage()));
+                    .body(RsData.error("파일 삭제 실패", e.getMessage()));
         } catch (RuntimeException e) {
             log.error("파일 삭제 실패 - {}", e.getMessage());
             return ResponseEntity.internalServerError()
-                    .body(ApiResponse.error("파일 삭제 중 오류가 발생했습니다.", "DELETE_ERROR"));
-        }
-    }
-
-    /**
-     * 프로젝트의 모든 파일 삭제
-     */
-    @DeleteMapping("/all")
-    public ResponseEntity<ApiResponse<Void>> deleteAllProjectFiles(@PathVariable Long projectId) {
-        log.info("프로젝트 파일 전체 삭제 요청 - projectId: {}", projectId);
-
-        try {
-            fileService.deleteAllProjectFiles(projectId);
-            return ResponseEntity.ok(ApiResponse.success("프로젝트의 모든 파일이 삭제되었습니다.", null));
-        } catch (IllegalArgumentException e) {
-            log.error("프로젝트 파일 전체 삭제 실패 - {}", e.getMessage());
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("파일 전체 삭제 실패", e.getMessage()));
-        }
-    }
-
-    /**
-     * 프로젝트 파일 총 크기 조회
-     */
-    @GetMapping("/size")
-    public ResponseEntity<Long> getProjectFilesTotalSize(@PathVariable Long projectId) {
-        log.info("프로젝트 파일 총 크기 조회 요청 - projectId: {}", projectId);
-
-        try {
-            long totalSize = fileService.getProjectFilesTotalSize(projectId);
-            return ResponseEntity.ok(totalSize);
-        } catch (IllegalArgumentException e) {
-            log.error("파일 총 크기 조회 실패 - {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    /**
-     * 파일 중복 검사
-     */
-    @GetMapping("/check-duplicate")
-    public ResponseEntity<Boolean> checkDuplicate(
-            @PathVariable Long projectId,
-            @RequestParam String originalName) {
-
-        log.info("파일 중복 검사 요청 - projectId: {}, originalName: {}", projectId, originalName);
-
-        try {
-            boolean isDuplicate = fileService.isDuplicateFile(projectId, originalName);
-            return ResponseEntity.ok(isDuplicate);
-        } catch (IllegalArgumentException e) {
-            log.error("파일 중복 검사 실패 - {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
+                    .body(RsData.error("파일 삭제 중 오류가 발생했습니다.", "DELETE_ERROR"));
         }
     }
 
@@ -298,18 +219,6 @@ public class ProjectFileController {
         }
         for (MultipartFile file : files) {
             validateFile(file);
-        }
-    }
-
-    /**
-     * 파일명 검증
-     */
-    private void validateFileName(String fileName) {
-        if (fileName == null || fileName.trim().isEmpty()) {
-            throw new IllegalArgumentException("파일명은 비어있을 수 없습니다.");
-        }
-        if (fileName.length() > 255) {
-            throw new IllegalArgumentException("파일명이 너무 깁니다. (최대 255자)");
         }
     }
 }

@@ -6,7 +6,6 @@ import com.back.domain.project.project.repository.ProjectRepository;
 import com.back.domain.project.project.validator.FileValidator;
 import com.back.global.exception.FileUploadException;
 import com.back.global.exception.ProjectNotFoundException;
-import com.back.global.exception.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -187,27 +186,6 @@ public class ProjectFileService {
     }
 
     /**
-     * 프로젝트의 모든 파일 삭제
-     */
-    @Transactional
-    public void deleteAllProjectFiles(Long projectId) {
-        log.info("프로젝트 파일 전체 삭제 - projectId: {}", projectId);
-
-        List<ProjectFile> files = getProjectFiles(projectId);
-
-        for (ProjectFile file : files) {
-            try {
-                deleteFileFromStorage(file.getFilePath());
-            } catch (IOException e) {
-                log.warn("파일 삭제 실패 - fileId: {}, 계속 진행", file.getId(), e);
-            }
-        }
-
-        // DB에서 일괄 삭제
-        projectFileRepository.deleteByProjectId(projectId);
-    }
-
-    /**
      * 여러 파일 삭제 (ID 목록으로)
      */
     @Transactional
@@ -253,41 +231,6 @@ public class ProjectFileService {
     }
 
     /**
-     * 프로젝트 파일 통계 조회
-     */
-    @Transactional(readOnly = true)
-    public FileStatistics getProjectFileStatistics(Long projectId) {
-        log.debug("프로젝트 파일 통계 조회 - projectId: {}", projectId);
-
-        List<ProjectFile> files = getProjectFiles(projectId);
-
-        long totalSize = files.stream().mapToLong(ProjectFile::getFileSize).sum();
-        int fileCount = files.size();
-
-        return FileStatistics.builder()
-                .totalFileCount(fileCount)
-                .totalFileSize(totalSize)
-                .averageFileSize(fileCount > 0 ? totalSize / fileCount : 0)
-                .build();
-    }
-
-    /**
-     * 파일명 수정
-     */
-    @Transactional
-    public ProjectFile updateFileName(Long fileId, String newOriginalName) {
-        log.info("파일명 수정 - fileId: {}, newName: {}", fileId, newOriginalName);
-
-        // 파일명 검증 (FileValidator 사용)
-        fileValidator.validateFileName(newOriginalName);
-
-        ProjectFile file = getProjectFile(fileId);
-        file.setOriginalName(newOriginalName);
-
-        return projectFileRepository.save(file);
-    }
-
-    /**
      * 프로젝트의 총 파일 크기 조회
      */
     @Transactional(readOnly = true)
@@ -296,27 +239,6 @@ public class ProjectFileService {
 
         Long totalSize = projectFileRepository.getTotalFileSizeByProjectId(projectId);
         return totalSize != null ? totalSize : 0L;
-    }
-
-    /**
-     * 파일 통계 정보를 담는 내부 클래스
-     */
-    @lombok.Builder
-    @lombok.Data
-    public static class FileStatistics {
-        private int totalFileCount;
-        private long totalFileSize;
-        private long averageFileSize;
-    }
-
-    /**
-     * 파일명 중복 검사
-     */
-    @Transactional(readOnly = true)
-    public boolean isDuplicateFile(Long projectId, String originalName) {
-        log.debug("파일명 중복 검사 - projectId: {}, originalName: {}", projectId, originalName);
-
-        return projectFileRepository.existsByProjectIdAndOriginalName(projectId, originalName);
     }
 
     private String generateStoredFileName(String originalFilename) {

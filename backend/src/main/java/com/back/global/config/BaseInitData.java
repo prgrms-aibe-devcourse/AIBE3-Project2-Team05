@@ -61,11 +61,12 @@ public class BaseInitData implements CommandLineRunner {
         // 프로젝트 기술스택 데이터 생성
         createProjectTechs();
 
-        // 프로젝트 즐겨찾기 데이터 생성
-        createProjectFavorites();
 
         // 프로젝트 파일 데이터 생성
         createProjectFiles();
+
+        // 즐겨찾기 데이터 생성
+        createProjectFavorites();
 
         log.info("초기 데이터 삽입이 완료되었습니다.");
     }
@@ -441,50 +442,6 @@ public class BaseInitData implements CommandLineRunner {
         projectTechRepository.save(projectTech);
     }
 
-    private void createProjectFavorites() {
-        // 사용자들 조회
-        User parkSeungg = userRepository.findByUsername("Park-seungg").orElseThrow();
-        User developer1 = userRepository.findByUsername("developer1").orElseThrow();
-        User designer1 = userRepository.findByUsername("designer1").orElseThrow();
-        User iotExpert = userRepository.findByUsername("iot_expert").orElseThrow();
-        User marketer1 = userRepository.findByUsername("marketer1").orElseThrow();
-        User opensourceDev = userRepository.findByUsername("opensource_dev").orElseThrow();
-        User pluginDev = userRepository.findByUsername("plugin_dev").orElseThrow();
-
-        // 프로젝트들 조회
-        Project project1 = projectRepository.findAll().get(0);
-        Project project2 = projectRepository.findAll().get(1);
-        Project project3 = projectRepository.findAll().get(2);
-        Project project4 = projectRepository.findAll().get(3);
-        Project project5 = projectRepository.findAll().get(4);
-        Project project7 = projectRepository.findAll().get(6);
-        Project project9 = projectRepository.findAll().get(8);
-
-        // Park-seungg이 다른 프로젝트들을 즐겨찾기
-        createProjectFavorite(parkSeungg.getId(), project5.getId(), LocalDateTime.of(2025, 9, 28, 15, 30, 0));
-        createProjectFavorite(parkSeungg.getId(), project7.getId(), LocalDateTime.of(2025, 9, 26, 20, 15, 0));
-        createProjectFavorite(parkSeungg.getId(), project9.getId(), LocalDateTime.of(2025, 9, 27, 18, 30, 0));
-
-        // 다른 사용자들이 Park-seungg의 프로젝트를 즐겨찾기
-        createProjectFavorite(developer1.getId(), project1.getId(), LocalDateTime.of(2025, 9, 16, 10, 20, 0));
-        createProjectFavorite(designer1.getId(), project1.getId(), LocalDateTime.of(2025, 9, 18, 14, 45, 0));
-        createProjectFavorite(iotExpert.getId(), project1.getId(), LocalDateTime.of(2025, 9, 20, 9, 30, 0));
-        createProjectFavorite(marketer1.getId(), project2.getId(), LocalDateTime.of(2025, 9, 21, 11, 15, 0));
-        createProjectFavorite(opensourceDev.getId(), project3.getId(), LocalDateTime.of(2025, 9, 26, 16, 20, 0));
-        createProjectFavorite(pluginDev.getId(), project4.getId(), LocalDateTime.of(2025, 9, 30, 13, 40, 0));
-
-        log.info("프로젝트 즐겨찾기 데이터가 생성되었습니다.");
-    }
-
-    private void createProjectFavorite(Long userId, Long projectId, LocalDateTime createDate) {
-        ProjectFavorite favorite = ProjectFavorite.builder()
-                .userId(userId)
-                .projectId(projectId)
-                .createDate(createDate)
-                .build();
-        projectFavoriteRepository.save(favorite);
-    }
-
     private void createProjectFiles() {
         // Park-seungg의 프로젝트들만 파일 추가
         Project project1 = projectRepository.findAll().get(0); // React + Spring Boot
@@ -526,5 +483,42 @@ public class BaseInitData implements CommandLineRunner {
                 .uploadDate(uploadDate)
                 .build();
         projectFileRepository.save(projectFile);
+    }
+
+    private void createProjectFavorites() {
+        log.info("프로젝트 즐겨찾기 데이터를 생성합니다.");
+
+        // 사용자들을 조회
+        User parkSeungg = userRepository.findByUsername("Park-seungg").orElseThrow();
+        User developer1 = userRepository.findByUsername("developer1").orElseThrow();
+        User designer1 = userRepository.findByUsername("designer1").orElseThrow();
+        User iotExpert = userRepository.findByUsername("iot_expert").orElseThrow();
+        User marketer1 = userRepository.findByUsername("marketer1").orElseThrow();
+        User opensourceDev = userRepository.findByUsername("opensource_dev").orElseThrow();
+        User pluginDev = userRepository.findByUsername("plugin_dev").orElseThrow();
+
+        // 프로젝트들을 조회
+        List<Project> projects = projectRepository.findAll();
+
+        // 각 사용자에 대해 무작위로 프로젝트 즐겨찾기 생성
+        createProjectFavorite(parkSeungg.getId(), projects.get(0).getId()); // Park-seungg이 프로젝트 1을 즐겨찾기
+        createProjectFavorite(parkSeungg.getId(), projects.get(1).getId()); // Park-seungg이 프로젝트 2을 즐겨찾기
+        createProjectFavorite(developer1.getId(), projects.get(2).getId()); // developer1이 프로젝트 3을 즐겨찾기
+        createProjectFavorite(designer1.getId(), projects.get(3).getId()); // designer1이 프로젝트 4을 즐겨찾기
+        createProjectFavorite(iotExpert.getId(), projects.get(4).getId()); // iotExpert이 프로젝트 5을 즐겨찾기
+        createProjectFavorite(marketer1.getId(), projects.get(5).getId()); // marketer1이 프로젝트 6을 즐겨찾기
+        createProjectFavorite(opensourceDev.getId(), projects.get(6).getId()); // opensourceDev이 프로젝트 7을 즐겨찾기
+        createProjectFavorite(pluginDev.getId(), projects.get(7).getId()); // pluginDev이 프로젝트 8을 즐겨찾기
+
+        log.info("프로젝트 즐겨찾기 데이터가 생성되었습니다.");
+    }
+
+    private void createProjectFavorite(Long userId, Long projectId) {
+        ProjectFavorite projectFavorite = ProjectFavorite.builder()
+                .userId(userId)
+                .projectId(projectId)
+                .createDate(LocalDateTime.now())
+                .build();
+        projectFavoriteRepository.save(projectFavorite);
     }
 }
