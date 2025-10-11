@@ -1,6 +1,5 @@
 package com.back.domain.project.project.controller;
 
-import com.back.domain.project.project.dto.ApiResponse;
 import com.back.domain.project.project.dto.ProjectRequest;
 import com.back.domain.project.project.dto.ProjectResponse;
 import com.back.domain.project.project.dto.ProjectStatusChangeRequest;
@@ -8,6 +7,7 @@ import com.back.domain.project.project.entity.Project;
 import com.back.domain.project.project.entity.enums.*;
 import com.back.domain.project.project.service.ProjectManagementService;
 import com.back.domain.project.project.service.ProjectQueryService;
+import com.back.global.RsData.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -122,17 +122,17 @@ public class ProjectController {
      * 프로젝트 완전 생성 (기본 정보 + 추가 정보 모두 포함)
      */
     @PostMapping("/complete")
-    public ResponseEntity<ApiResponse<ProjectResponse>> createCompleteProject(
+    public ResponseEntity<RsData<ProjectResponse>> createCompleteProject(
             @Validated(ProjectRequest.CreateValidation.class) @RequestBody ProjectRequest request) {
         log.info("프로젝트 완전 생성 요청 - title: {}, managerId: {}", request.title(), request.managerId());
 
         try {
             ProjectResponse createdProject = projectManagementService.createCompleteProject(request);
-            return ResponseEntity.ok(ApiResponse.success("프로젝트가 성공적으로 생성되었습니다.", createdProject));
+            return ResponseEntity.ok(RsData.success("프로젝트가 성공적으로 생성되었습니다.", createdProject));
         } catch (IllegalArgumentException e) {
             log.error("프로젝트 완전 생성 실패 - {}", e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("프로젝트 생성 실패", e.getMessage()));
+                    .body(RsData.error("프로젝트 생성 실패", e.getMessage()));
         }
     }
 
@@ -142,7 +142,7 @@ public class ProjectController {
      * 프로젝트 통합 수정 (모든 정보를 한번에 수정)
      */
     @PutMapping("/{id}/complete")
-    public ResponseEntity<ApiResponse<ProjectResponse>> updateProjectComplete(
+    public ResponseEntity<RsData<ProjectResponse>> updateProjectComplete(
             @PathVariable Long id,
             @Validated(ProjectRequest.UpdateValidation.class) @RequestBody ProjectRequest request) {
 
@@ -150,15 +150,15 @@ public class ProjectController {
 
         try {
             ProjectResponse updatedProject = projectManagementService.completeProjectWithAdditionalInfo(id, request);
-            return ResponseEntity.ok(ApiResponse.success("프로젝트가 성공적으로 수정되었습니다.", updatedProject));
+            return ResponseEntity.ok(RsData.success("프로젝트가 성공적으로 수정되었습니다.", updatedProject));
         } catch (IllegalArgumentException e) {
             log.error("프로젝트 통합 수정 실패 - {}", e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("프로젝트 수정 실패", e.getMessage()));
+                    .body(RsData.error("프로젝트 수정 실패", e.getMessage()));
         } catch (SecurityException e) {
             log.error("프로젝트 수정 권한 없음 - {}", e.getMessage());
             return ResponseEntity.status(403)
-                    .body(ApiResponse.error("권한이 없습니다.", "PERMISSION_DENIED"));
+                    .body(RsData.error("권한이 없습니다.", "PERMISSION_DENIED"));
         }
     }
 
@@ -168,7 +168,7 @@ public class ProjectController {
      * 프로젝트 상태 변경
      */
     @PatchMapping("/{id}/status")
-    public ResponseEntity<ApiResponse<Project>> updateProjectStatus(
+    public ResponseEntity<RsData<Project>> updateProjectStatus(
             @PathVariable Long id,
             @Valid @RequestBody ProjectStatusChangeRequest request) {
 
@@ -177,15 +177,15 @@ public class ProjectController {
 
         try {
             Project updatedProject = projectManagementService.updateProjectStatus(id, request.status(), request.changedById());
-            return ResponseEntity.ok(ApiResponse.success("프로젝트 상태가 성공적으로 변경되었습니다.", updatedProject));
+            return ResponseEntity.ok(RsData.success("프로젝트 상태가 성공적으로 변경되었습니다.", updatedProject));
         } catch (IllegalArgumentException e) {
             log.error("상태 변경 실패 - {}", e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("상태 변경 실패", e.getMessage()));
+                    .body(RsData.error("상태 변경 실패", e.getMessage()));
         } catch (SecurityException e) {
             log.error("상태 변경 권한 없음 - {}", e.getMessage());
             return ResponseEntity.status(403)
-                    .body(ApiResponse.error("권한이 없습니다.", "PERMISSION_DENIED"));
+                    .body(RsData.error("권한이 없습니다.", "PERMISSION_DENIED"));
         }
     }
 
@@ -195,7 +195,7 @@ public class ProjectController {
      * 프로젝트 삭제
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteProject(
+    public ResponseEntity<RsData<Void>> deleteProject(
             @PathVariable Long id,
             @RequestParam Long requesterId) {
 
@@ -204,19 +204,19 @@ public class ProjectController {
         try {
             projectManagementService.deleteProject(id, requesterId);
             log.info("프로젝트 삭제 성공 - projectId: {}", id);
-            return ResponseEntity.ok(ApiResponse.success("프로젝트가 성공적으로 삭제되었습니다.", null));
+            return ResponseEntity.ok(RsData.success("프로젝트가 성공적으로 삭제되었습니다.", null));
         } catch (IllegalArgumentException e) {
             log.error("프로젝트 삭제 실패 - {}", e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("프로젝트 삭제 실패", e.getMessage()));
+                    .body(RsData.error("프로젝트 삭제 실패", e.getMessage()));
         } catch (SecurityException e) {
             log.error("프로젝트 삭제 권한 없음 - {}", e.getMessage());
             return ResponseEntity.status(403)
-                    .body(ApiResponse.error("권한이 없습니다.", "PERMISSION_DENIED"));
+                    .body(RsData.error("권한이 없습니다.", "PERMISSION_DENIED"));
         } catch (Exception e) {
             log.error("프로젝트 삭제 중 예상치 못한 오류 - {}", e.getMessage(), e);
             return ResponseEntity.internalServerError()
-                    .body(ApiResponse.error("서버 내부 오류가 발생했습니다.", "INTERNAL_ERROR"));
+                    .body(RsData.error("서버 내부 오류가 발생했습니다.", "INTERNAL_ERROR"));
         }
     }
 }
