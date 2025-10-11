@@ -2,10 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 전역 리셋 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 /* 라이트 모드 전용 CSS 변수 */
 :root {
   /* 기본 색상 */
-  --background: #fbf8f1;
+  --background: #f1eadc;
   --foreground: #252525;
   --card: #ffffff;
   --card-foreground: #252525;
@@ -54,6 +61,8 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 .card {

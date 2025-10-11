@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 
 import { UserProvider } from "./context/UserContext";
@@ -16,12 +17,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body className="antialiased">
+      <body className="antialiased min-h-screen flex flex-col">
         <UserProvider>
           <Header />
-          <main>{children}</main>
+          <main className="flex-1 w-full pt-[68px] pb-[180px] bg-[#F1EADC]">
+            {children}
+          </main>
+          <Footer />
         </UserProvider>
-        <footer />
       </body>
     </html>
   );

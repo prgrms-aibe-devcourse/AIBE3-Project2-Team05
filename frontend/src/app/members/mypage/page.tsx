@@ -62,11 +62,6 @@ export default function MyPage() {
           <div className="bg-[#FDFCF8] border border-[#DDD7C9] rounded-2xl p-6 relative shadow-sm">
             {msg && <p className="text-red-500 text-sm mb-4">{msg}</p>}
 
-            {/* 편집 버튼 */}
-            <button className="absolute top-6 right-6 h-9 px-4 bg-[#006A20] text-white rounded-lg text-sm font-medium cursor-not-allowed opacity-50">
-              편집
-            </button>
-
             <div className="flex flex-col gap-5 mt-8">
               {/* 닉네임 */}
               <div className="flex flex-col">
