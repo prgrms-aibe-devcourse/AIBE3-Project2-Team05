@@ -524,13 +524,21 @@ const UserProjectEditPage = () => {
 
             {/* 첨부파일 */}
             <div>
-              <ProjectFileManager
-                projectId={params?.projectId as string}
-                projectFiles={projectFiles}
-                onFilesChange={handleFilesChange}
-                disabled={saving}
-                mode="edit"
-              />
+              <label className="block text-sm font-semibold text-gray-700 mb-3" style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '12px' }}>
+                참고파일 관리
+                <span className="text-xs text-gray-500 font-normal ml-2" style={{ fontSize: '12px', color: '#6b7280', fontWeight: '400', marginLeft: '8px' }}>
+                  (드래그 앤 드롭 또는 클릭하여 파일을 추가/삭제할 수 있습니다)
+                </span>
+              </label>
+              <div className="bg-gray-50 p-4 rounded-lg" style={{ backgroundColor: '#f9fafb', padding: '16px', borderRadius: '8px' }}>
+                <ProjectFileManager
+                  projectId={params?.projectId as string}
+                  projectFiles={projectFiles}
+                  onFilesChange={handleFilesChange}
+                  disabled={saving}
+                  mode="edit"
+                />
+              </div>
             </div>
 
           </div>

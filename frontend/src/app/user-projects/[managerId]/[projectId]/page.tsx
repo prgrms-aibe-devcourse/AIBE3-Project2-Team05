@@ -2,10 +2,17 @@
 
 import ErrorDisplay from '@/components/ErrorDisplay';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import ProjectFileManager from '@/components/ProjectFileManager';
+
 import { components } from '@/lib/backend/schema';
 import {
+    canPreviewFile,
+    getFileIcon,
+    handleFileDownload,
+    handleFilePreview
+} from '@/utils/filePreviewUtils';
+import {
     calculateDday,
+    formatFileSize,
     getBudgetTypeText,
     getLocationText,
     getPartnerTypeText,
@@ -127,17 +134,7 @@ const UserProjectDetailPage = () => {
         };
     }, [params?.projectId]);
 
-    // 파일 변경 핸들러 추가
-    const handleFilesChange = (files: FileItem[]) => {
-        setProjectFiles(files);
-        // 프로젝트 객체도 업데이트
-        if (project) {
-            setProject({
-                ...project,
-                projectFiles: files
-            });
-        }
-    };
+
 
 
 
@@ -496,13 +493,62 @@ const UserProjectDetailPage = () => {
 
                 {/* 첨부파일 */}
                 <div id="files" className="bg-white rounded-xl shadow-sm mb-8 p-8" style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', marginBottom: '32px', padding: '32px' }}>
-                    <ProjectFileManager
-                        projectId={params?.projectId as string}
-                        projectFiles={projectFiles}
-                        onFilesChange={handleFilesChange}
-                        disabled={true}
-                        mode="view"
-                    />
+                    <h2 className="text-xl font-bold mb-6 text-gray-900" style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '24px', color: '#111827' }}>참고파일</h2>
+                    {projectFiles && projectFiles.length > 0 ? (
+                        <div className="space-y-4" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            {projectFiles.map((file) => (
+                                <div key={file.id} className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors" style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', border: '1px solid #e5e7eb', borderRadius: '12px', transition: 'background-color 0.2s' }}>
+                                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl" style={{ width: '48px', height: '48px', backgroundColor: '#dbeafe', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
+                                        {getFileIcon(file.originalName || '')}
+                                    </div>
+                                    <div className="flex-1" style={{ flex: 1 }}>
+                                        <div className="font-semibold text-gray-900 mb-1" style={{ fontWeight: '600', color: '#111827', marginBottom: '4px' }}>{file.originalName}</div>
+                                        <div className="text-sm text-gray-500" style={{ fontSize: '14px', color: '#6b7280' }}>
+                                            {file.fileSize && formatFileSize(file.fileSize)}
+                                            {file.uploadDate && (
+                                                <span> • {new Date(file.uploadDate).toLocaleDateString()}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2" style={{ display: 'flex', gap: '8px' }}>
+                                        {file.originalName && canPreviewFile(file.originalName) && (
+                                            <button
+                                                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors"
+                                                style={{ padding: '8px 16px', backgroundColor: '#f3f4f6', color: '#374151', borderRadius: '8px', fontWeight: '500', border: 'none', cursor: 'pointer', transition: 'background-color 0.2s' }}
+                                                onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#e5e7eb'}
+                                                onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#f3f4f6'}
+                                                onClick={() => {
+                                                    if (file.id) {
+                                                        handleFilePreview(params?.projectId as string, file.id);
+                                                    }
+                                                }}
+                                            >
+                                                미리보기
+                                            </button>
+                                        )}
+                                        <button
+                                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium transition-colors"
+                                            style={{ padding: '8px 16px', backgroundColor: '#3b82f6', color: 'white', borderRadius: '8px', fontWeight: '500', border: 'none', cursor: 'pointer', transition: 'background-color 0.2s' }}
+                                            onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#2563eb'}
+                                            onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#3b82f6'}
+                                            onClick={() => {
+                                                if (file.id && file.originalName) {
+                                                    handleFileDownload(params?.projectId as string, file.id, file.originalName);
+                                                }
+                                            }}
+                                        >
+                                            다운로드
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-gray-500 text-center py-12" style={{ color: '#6b7280', textAlign: 'center', padding: '48px 0' }}>
+                            <div className="text-4xl mb-4" style={{ fontSize: '36px', marginBottom: '16px' }}>📁</div>
+                            <div className="text-lg" style={{ fontSize: '18px' }}>참고파일이 없습니다.</div>
+                        </div>
+                    )}
                 </div>
 
                 {/* 관리 버튼들 */}
