@@ -33,7 +33,7 @@ const ProjectsPage = () => {
   const [filters, setFilters] = useState({
     projectField: '',
     recruitmentType: '',
-    status: '',
+    status: 'RECRUITING', // 기본적으로 모집중 프로젝트만 노출
     location: '',
     budgetRange: ''
   });
@@ -849,3 +849,4 @@ const ProjectsPage = () => {
 };
 
 export default ProjectsPage;
+
