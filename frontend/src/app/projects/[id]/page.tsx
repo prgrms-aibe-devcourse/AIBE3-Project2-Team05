@@ -13,6 +13,12 @@ const ProjectDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [activeTab, setActiveTab] = useState('summary');
+  
+  // TODO: 실제 사용자 인증 시스템과 연동
+  const getCurrentUserId = () => {
+    // 현재는 하드코딩된 값 사용 (추후 실제 인증 시스템과 연동 필요)
+    return 1;
+  };
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -553,8 +559,8 @@ const ProjectDetailPage = () => {
           )}
         </div>
 
-        {/* 지원하기 버튼 */}
-        {project.status === 'RECRUITING' && (
+        {/* 지원하기 버튼 - 자신의 프로젝트가 아닌 경우에만 표시 */}
+        {project.status === 'RECRUITING' && project.managerId !== getCurrentUserId() && (
           <div className="bg-white rounded-xl shadow-sm p-6" style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', padding: '24px' }}>
             <button 
               className="w-full py-4 bg-blue-500 text-white font-semibold rounded-xl hover:bg-blue-600 transition-colors text-lg"
