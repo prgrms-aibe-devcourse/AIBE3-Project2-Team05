@@ -1,8 +1,10 @@
 "use client";
 
 import ErrorDisplay from '@/components/ErrorDisplay';
+import FavoriteButton from '@/components/FavoriteButton';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { components } from '@/lib/backend/schema';
+import { getFavoriteStatus } from '@/utils/favoriteUtils';
 import {
   canPreviewFile,
   getFileIcon,
@@ -41,6 +43,8 @@ const ProjectDetailPage = () => {
   const [error, setError] = useState<string>('');
   const [activeTab, setActiveTab] = useState('summary');
   const [alternativeFiles, setAlternativeFiles] = useState<ProjectFile[]>([]);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
   
   // TODO: 실제 사용자 인증 시스템과 연동
   const getCurrentUserId = () => {
@@ -69,12 +73,19 @@ const ProjectDetailPage = () => {
       if (!params?.id) return;
       
       setLoading(true);
+      setFavoriteLoading(true);
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.id}`);
         
         if (response.ok) {
           const data: ProjectResponse = await response.json();
           setProject(data);
+          
+          // 즐겨찾기 상태 로드
+          if (data.id) {
+            const favoriteStatus = await getFavoriteStatus(data.id, getCurrentUserId());
+            setIsFavorite(favoriteStatus);
+          }
           
           // 대안 파일 로딩 로직
           let altFiles: ProjectFile[] = [];
@@ -96,6 +107,7 @@ const ProjectDetailPage = () => {
         setError('프로젝트를 불러오는 중 오류가 발생했습니다.');
       } finally {
         setLoading(false);
+        setFavoriteLoading(false);
       }
     };
 
@@ -174,9 +186,19 @@ const ProjectDetailPage = () => {
         <div className="bg-white rounded-xl shadow-sm mb-8 overflow-hidden" style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', marginBottom: '32px', overflow: 'hidden' }}>
           <div className="p-8 border-b border-gray-100" style={{ padding: '32px', borderBottom: '1px solid #f3f4f6' }}>
             <div className="flex justify-between items-start mb-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-              <h1 className="text-3xl font-bold text-gray-900 flex-1 mr-4" style={{ fontSize: '28px', fontWeight: 'bold', color: '#111827', flex: 1, marginRight: '16px' }}>
-                {project.title}
-              </h1>
+              <div className="flex items-center gap-3 flex-1 mr-4" style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, marginRight: '16px' }}>
+                <h1 className="text-3xl font-bold text-gray-900" style={{ fontSize: '28px', fontWeight: 'bold', color: '#111827' }}>
+                  {project.title}
+                </h1>
+                {project.id && !favoriteLoading && (
+                  <FavoriteButton
+                    projectId={project.id}
+                    isFavorite={isFavorite}
+                    userId={getCurrentUserId()}
+                    onToggle={(newState) => setIsFavorite(newState)}
+                  />
+                )}
+              </div>
               <span className={`px-4 py-2 rounded-full text-sm font-medium ${
                 project.status === 'RECRUITING' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
                 project.status === 'CONTRACTING' ? 'bg-orange-100 text-orange-700 border border-orange-200' :

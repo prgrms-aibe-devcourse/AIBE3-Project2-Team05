@@ -20,22 +20,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/projects/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getProjectById"];
-        put: operations["updateProject"];
-        post?: never;
-        delete: operations["deleteProject"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/projects/{id}/complete": {
         parameters: {
             query?: never;
@@ -62,22 +46,6 @@ export interface paths {
         get: operations["getAllUsers"];
         put?: never;
         post: operations["createUser"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/projects": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getAllProjects"];
-        put?: never;
-        post: operations["createProject"];
         delete?: never;
         options?: never;
         head?: never;
@@ -116,6 +84,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/projects/favorites/{projectId}/toggle": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["toggleFavorite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/projects/complete": {
         parameters: {
             query?: never;
@@ -132,86 +116,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/projects/basic": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["createBasicProject"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/favorites/users/{userId}/projects/{projectId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getFavorite"];
-        put?: never;
-        post: operations["addFavorite"];
-        delete: operations["removeFavorite"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/favorites/users/{userId}/projects/{projectId}/toggle": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["toggleFavorite"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/projects/{projectId}/files/{fileId}/name": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch: operations["updateFileName"];
-        trace?: never;
-    };
-    "/api/projects/{id}/suspend": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch: operations["suspendProject"];
-        trace?: never;
-    };
     "/api/projects/{id}/status": {
         parameters: {
             query?: never;
@@ -226,102 +130,6 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["updateProjectStatus"];
-        trace?: never;
-    };
-    "/api/projects/{id}/status/legacy": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch: operations["updateProjectStatusLegacy"];
-        trace?: never;
-    };
-    "/api/projects/{id}/start": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch: operations["startProject"];
-        trace?: never;
-    };
-    "/api/projects/{id}/start-contracting": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch: operations["startContracting"];
-        trace?: never;
-    };
-    "/api/projects/{id}/mark-complete": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch: operations["completeProject"];
-        trace?: never;
-    };
-    "/api/projects/{id}/cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch: operations["cancelProject"];
-        trace?: never;
-    };
-    "/api/projects/{id}/additional-info": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch: operations["completeProjectWithAdditionalInfo"];
         trace?: never;
     };
     "/api/users/username/{username}": {
@@ -348,6 +156,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["existsByUsername"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getAllProjects"];
         put?: never;
         post?: never;
         delete?: never;
@@ -420,49 +244,17 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/projects/{projectId}/files/size": {
+    "/api/projects/{id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["getProjectFilesTotalSize"];
+        get: operations["getProjectById"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/projects/{projectId}/files/check-duplicate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["checkDuplicate"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/projects/search": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["searchProjects"];
-        put?: never;
-        post?: never;
-        delete?: never;
+        delete: operations["deleteProject"];
         options?: never;
         head?: never;
         patch?: never;
@@ -484,14 +276,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/projects/manager/{managerId}/simple": {
+    "/api/projects/favorites/{projectId}/status": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["getProjectsByManagerIdSimple"];
+        get: operations["getFavoriteStatus"];
         put?: never;
         post?: never;
         delete?: never;
@@ -500,225 +292,17 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/projects/manager/{managerId}/project/{id}": {
+    "/api/projects/favorites/user/{userId}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["getProjectByIdForManager"];
-        put?: never;
-        post?: never;
-        delete: operations["deleteProjectForManager"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/projects/enums/regions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getRegionOptions"];
+        get: operations["getUserFavoriteProjectIds"];
         put?: never;
         post?: never;
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/projects/enums/recruitment-types": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getRecruitmentTypeOptions"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/projects/enums/project-fields": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getProjectFieldOptions"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/projects/enums/progress-status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getProgressStatusOptions"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/projects/enums/partner-types": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getPartnerTypeOptions"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/projects/enums/budget-ranges": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getBudgetRangeOptions"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/favorites/users/{userId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getUserFavorites"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/favorites/users/{userId}/projects/{projectId}/check": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["isFavorite"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/favorites/users/{userId}/count": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getUserFavoriteCount"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/favorites/projects/{projectId}/count": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getFavoriteCount"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/projects/{projectId}/files/all": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete: operations["deleteAllProjectFiles"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/favorites/users/{userId}/all": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete: operations["removeAllUserFavorites"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/favorites/projects/{projectId}/all": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete: operations["removeAllProjectFavorites"];
         options?: never;
         head?: never;
         patch?: never;
@@ -738,87 +322,6 @@ export interface components {
             username?: string;
             password?: string;
             email?: string;
-        };
-        Project: {
-            /** Format: int64 */
-            id?: number;
-            title?: string;
-            description?: string;
-            /** @enum {string} */
-            projectField?: "PLANNING" | "DESIGN" | "DEVELOPMENT";
-            /** @enum {string} */
-            recruitmentType?: "PROJECT_CONTRACT" | "PERSONAL_CONTRACT";
-            /** @enum {string} */
-            partnerType?: "INDIVIDUAL_FREELANCER" | "INDIVIDUAL_OR_TEAM_FREELANCER" | "BUSINESS_TEAM_OR_COMPANY" | "ANY_TYPE" | "ETC";
-            /** @enum {string} */
-            budgetType?: "RANGE_1_100" | "RANGE_100_200" | "RANGE_200_300" | "RANGE_300_500" | "RANGE_500_1000" | "RANGE_1000_2000" | "RANGE_2000_3000" | "RANGE_3000_5000" | "RANGE_5000_OVER" | "OVER_1_EUK" | "NEGOTIABLE";
-            /** Format: int64 */
-            budgetAmount?: number;
-            /** Format: date */
-            startDate?: string;
-            /** Format: date */
-            endDate?: string;
-            /** @enum {string} */
-            progressStatus?: "IDEA_STAGE" | "CONTENT_ORGANIZED" | "DETAILED_PLAN";
-            /** @enum {string} */
-            companyLocation?: "SEOUL" | "GYEONGGI" | "INCHEON" | "GANGWON" | "CHUNGNAM" | "DAEJEON" | "CHUNGBUK" | "SEJONG" | "BUSAN" | "ULSAN" | "DAEGU" | "GYEONGBUK" | "GYEONGNAM" | "JEONNAM" | "GWANGJU" | "JEONBUK" | "JEJU" | "OVERSEAS";
-            /** @enum {string} */
-            status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
-            /** Format: int32 */
-            viewCount?: number;
-            /** Format: int32 */
-            applicantCount?: number;
-            /** Format: int64 */
-            managerId?: number;
-            /** Format: date-time */
-            createDate?: string;
-            /** Format: date-time */
-            modifyDate?: string;
-            partnerEtcDescription?: string;
-            projectTechs?: components["schemas"]["ProjectTech"][];
-            projectFiles?: components["schemas"]["ProjectFile"][];
-            projectFavorites?: components["schemas"]["ProjectFavorite"][];
-        };
-        ProjectFavorite: {
-            /** Format: int64 */
-            id?: number;
-            /** Format: int64 */
-            userId?: number;
-            /** Format: int64 */
-            projectId?: number;
-            /** Format: date-time */
-            createDate?: string;
-        };
-        ProjectFile: {
-            /** Format: int64 */
-            id?: number;
-            /** Format: int64 */
-            projectId?: number;
-            originalName?: string;
-            storedName?: string;
-            filePath?: string;
-            /** Format: int64 */
-            fileSize?: number;
-            fileType?: string;
-            /** Format: date-time */
-            uploadDate?: string;
-        };
-        ProjectTech: {
-            /** Format: int64 */
-            id?: number;
-            /** Format: int64 */
-            projectId?: number;
-            /** @enum {string} */
-            techCategory?: "FRONTEND" | "BACKEND" | "DATABASE";
-            techName?: string;
-            /** Format: date-time */
-            createDate?: string;
-        };
-        ApiResponseProject: {
-            success?: boolean;
-            message?: string;
-            data?: components["schemas"]["Project"];
-            error?: string;
         };
         ProjectRequest: {
             title?: string;
@@ -908,39 +411,118 @@ export interface components {
             /** @enum {string} */
             techCategory?: "FRONTEND" | "BACKEND" | "DATABASE";
         };
-        ApiResponseProjectFile: {
+        ProjectFile: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: int64 */
+            projectId?: number;
+            originalName?: string;
+            storedName?: string;
+            filePath?: string;
+            /** Format: int64 */
+            fileSize?: number;
+            fileType?: string;
+            /** Format: date-time */
+            uploadDate?: string;
+        };
+        RsDataProjectFile: {
             success?: boolean;
             message?: string;
             data?: components["schemas"]["ProjectFile"];
-            error?: string;
+            errorCode?: string;
+            /** Format: date-time */
+            timestamp?: string;
         };
-        ApiResponseListProjectFile: {
+        RsDataListProjectFile: {
             success?: boolean;
             message?: string;
             data?: components["schemas"]["ProjectFile"][];
-            error?: string;
+            errorCode?: string;
+            /** Format: date-time */
+            timestamp?: string;
         };
-        ApiResponseProjectFavorite: {
+        RsDataMapStringObject: {
             success?: boolean;
             message?: string;
-            data?: components["schemas"]["ProjectFavorite"];
-            error?: string;
-        };
-        ApiResponseFavoriteToggleResult: {
-            success?: boolean;
-            message?: string;
-            data?: components["schemas"]["FavoriteToggleResult"];
-            error?: string;
-        };
-        FavoriteToggleResult: {
-            favorite?: components["schemas"]["ProjectFavorite"];
-            added?: boolean;
+            data?: {
+                [key: string]: unknown;
+            };
+            errorCode?: string;
+            /** Format: date-time */
+            timestamp?: string;
         };
         ProjectStatusChangeRequest: {
             /** @enum {string} */
             status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
             /** Format: int64 */
             changedById?: number;
+        };
+        ApiResponseProject: {
+            success?: boolean;
+            message?: string;
+            data?: components["schemas"]["Project"];
+            error?: string;
+        };
+        Project: {
+            /** Format: int64 */
+            id?: number;
+            title?: string;
+            description?: string;
+            /** @enum {string} */
+            projectField?: "PLANNING" | "DESIGN" | "DEVELOPMENT";
+            /** @enum {string} */
+            recruitmentType?: "PROJECT_CONTRACT" | "PERSONAL_CONTRACT";
+            /** @enum {string} */
+            partnerType?: "INDIVIDUAL_FREELANCER" | "INDIVIDUAL_OR_TEAM_FREELANCER" | "BUSINESS_TEAM_OR_COMPANY" | "ANY_TYPE" | "ETC";
+            /** @enum {string} */
+            budgetType?: "RANGE_1_100" | "RANGE_100_200" | "RANGE_200_300" | "RANGE_300_500" | "RANGE_500_1000" | "RANGE_1000_2000" | "RANGE_2000_3000" | "RANGE_3000_5000" | "RANGE_5000_OVER" | "OVER_1_EUK" | "NEGOTIABLE";
+            /** Format: int64 */
+            budgetAmount?: number;
+            /** Format: date */
+            startDate?: string;
+            /** Format: date */
+            endDate?: string;
+            /** @enum {string} */
+            progressStatus?: "IDEA_STAGE" | "CONTENT_ORGANIZED" | "DETAILED_PLAN";
+            /** @enum {string} */
+            companyLocation?: "SEOUL" | "GYEONGGI" | "INCHEON" | "GANGWON" | "CHUNGNAM" | "DAEJEON" | "CHUNGBUK" | "SEJONG" | "BUSAN" | "ULSAN" | "DAEGU" | "GYEONGBUK" | "GYEONGNAM" | "JEONNAM" | "GWANGJU" | "JEONBUK" | "JEJU" | "OVERSEAS";
+            /** @enum {string} */
+            status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
+            /** Format: int32 */
+            viewCount?: number;
+            /** Format: int32 */
+            applicantCount?: number;
+            /** Format: int64 */
+            managerId?: number;
+            /** Format: date-time */
+            createDate?: string;
+            /** Format: date-time */
+            modifyDate?: string;
+            partnerEtcDescription?: string;
+            projectTechs?: components["schemas"]["ProjectTech"][];
+            projectFiles?: components["schemas"]["ProjectFile"][];
+            projectFavorites?: components["schemas"]["ProjectFavorite"][];
+        };
+        ProjectFavorite: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: int64 */
+            userId?: number;
+            /** Format: int64 */
+            projectId?: number;
+            /** Format: date-time */
+            createDate?: string;
+        };
+        ProjectTech: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: int64 */
+            projectId?: number;
+            /** @enum {string} */
+            techCategory?: "FRONTEND" | "BACKEND" | "DATABASE";
+            techName?: string;
+            /** Format: date-time */
+            createDate?: string;
         };
         PageProjectResponse: {
             /** Format: int64 */
@@ -950,13 +532,13 @@ export interface components {
             first?: boolean;
             last?: boolean;
             /** Format: int32 */
+            numberOfElements?: number;
+            /** Format: int32 */
             size?: number;
             content?: components["schemas"]["ProjectResponse"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            /** Format: int32 */
-            numberOfElements?: number;
             pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
@@ -964,77 +546,33 @@ export interface components {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
+            unpaged?: boolean;
             /** Format: int32 */
             pageNumber?: number;
             /** Format: int32 */
             pageSize?: number;
             paged?: boolean;
-            unpaged?: boolean;
         };
         SortObject: {
             empty?: boolean;
             sorted?: boolean;
             unsorted?: boolean;
         };
-        PageProject: {
-            /** Format: int64 */
-            totalElements?: number;
-            /** Format: int32 */
-            totalPages?: number;
-            first?: boolean;
-            last?: boolean;
-            /** Format: int32 */
-            size?: number;
-            content?: components["schemas"]["Project"][];
-            /** Format: int32 */
-            number?: number;
-            sort?: components["schemas"]["SortObject"];
-            /** Format: int32 */
-            numberOfElements?: number;
-            pageable?: components["schemas"]["PageableObject"];
-            empty?: boolean;
+        RsDataListLong: {
+            success?: boolean;
+            message?: string;
+            data?: number[];
+            errorCode?: string;
+            /** Format: date-time */
+            timestamp?: string;
         };
-        RegionResponse: {
-            value?: string;
-            description?: string;
-        };
-        RecruitmentTypeResponse: {
-            value?: string;
-            description?: string;
-        };
-        ProjectFieldResponse: {
-            value?: string;
-            description?: string;
-        };
-        ProgressStatusResponse: {
-            value?: string;
-            description?: string;
-        };
-        PartnerTypeResponse: {
-            value?: string;
-            description?: string;
-        };
-        BudgetRangeResponse: {
-            value?: string;
-            description?: string;
-        };
-        PageProjectFavorite: {
-            /** Format: int64 */
-            totalElements?: number;
-            /** Format: int32 */
-            totalPages?: number;
-            first?: boolean;
-            last?: boolean;
-            /** Format: int32 */
-            size?: number;
-            content?: components["schemas"]["ProjectFavorite"][];
-            /** Format: int32 */
-            number?: number;
-            sort?: components["schemas"]["SortObject"];
-            /** Format: int32 */
-            numberOfElements?: number;
-            pageable?: components["schemas"]["PageableObject"];
-            empty?: boolean;
+        RsDataVoid: {
+            success?: boolean;
+            message?: string;
+            data?: unknown;
+            errorCode?: string;
+            /** Format: date-time */
+            timestamp?: string;
         };
         ApiResponseVoid: {
             success?: boolean;
@@ -1119,78 +657,6 @@ export interface operations {
             };
         };
     };
-    getProjectById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ProjectResponse"];
-                };
-            };
-        };
-    };
-    updateProject: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Project"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProject"];
-                };
-            };
-        };
-    };
-    deleteProject: {
-        parameters: {
-            query: {
-                requesterId: number;
-            };
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseVoid"];
-                };
-            };
-        };
-    };
     updateProjectComplete: {
         parameters: {
             query?: never;
@@ -1261,64 +727,6 @@ export interface operations {
             };
         };
     };
-    getAllProjects: {
-        parameters: {
-            query?: {
-                page?: number;
-                size?: number;
-                search?: string;
-                status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
-                projectField?: "PLANNING" | "DESIGN" | "DEVELOPMENT";
-                recruitmentType?: "PROJECT_CONTRACT" | "PERSONAL_CONTRACT";
-                partnerType?: "INDIVIDUAL_FREELANCER" | "INDIVIDUAL_OR_TEAM_FREELANCER" | "BUSINESS_TEAM_OR_COMPANY" | "ANY_TYPE" | "ETC";
-                budgetType?: "RANGE_1_100" | "RANGE_100_200" | "RANGE_200_300" | "RANGE_300_500" | "RANGE_500_1000" | "RANGE_1000_2000" | "RANGE_2000_3000" | "RANGE_3000_5000" | "RANGE_5000_OVER" | "OVER_1_EUK" | "NEGOTIABLE";
-                minBudget?: number;
-                maxBudget?: number;
-                location?: string;
-                techNames?: string[];
-                sortBy?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["PageProjectResponse"];
-                };
-            };
-        };
-    };
-    createProject: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Project"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProject"];
-                };
-            };
-        };
-    };
     uploadFile: {
         parameters: {
             query?: never;
@@ -1343,7 +751,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProjectFile"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataProjectFile"];
                 };
             };
         };
@@ -1367,7 +775,31 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseListProjectFile"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataListProjectFile"];
+                };
+            };
+        };
+    };
+    toggleFavorite: {
+        parameters: {
+            query: {
+                userId: number;
+            };
+            header?: never;
+            path: {
+                projectId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataMapStringObject"];
                 };
             };
         };
@@ -1396,171 +828,6 @@ export interface operations {
             };
         };
     };
-    createBasicProject: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProjectRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProjectResponse"];
-                };
-            };
-        };
-    };
-    getFavorite: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                userId: number;
-                projectId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ProjectFavorite"];
-                };
-            };
-        };
-    };
-    addFavorite: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                userId: number;
-                projectId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProjectFavorite"];
-                };
-            };
-        };
-    };
-    removeFavorite: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                userId: number;
-                projectId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseVoid"];
-                };
-            };
-        };
-    };
-    toggleFavorite: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                userId: number;
-                projectId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseFavoriteToggleResult"];
-                };
-            };
-        };
-    };
-    updateFileName: {
-        parameters: {
-            query: {
-                newOriginalName: string;
-            };
-            header?: never;
-            path: {
-                projectId: number;
-                fileId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProjectFile"];
-                };
-            };
-        };
-    };
-    suspendProject: {
-        parameters: {
-            query: {
-                managerId: number;
-            };
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProject"];
-                };
-            };
-        };
-    };
     updateProjectStatus: {
         parameters: {
             query?: never;
@@ -1583,153 +850,6 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["ApiResponseProject"];
-                };
-            };
-        };
-    };
-    updateProjectStatusLegacy: {
-        parameters: {
-            query?: {
-                status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
-                changedById?: number;
-            };
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProject"];
-                };
-            };
-        };
-    };
-    startProject: {
-        parameters: {
-            query: {
-                managerId: number;
-            };
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProject"];
-                };
-            };
-        };
-    };
-    startContracting: {
-        parameters: {
-            query: {
-                managerId: number;
-            };
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProject"];
-                };
-            };
-        };
-    };
-    completeProject: {
-        parameters: {
-            query: {
-                managerId: number;
-            };
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProject"];
-                };
-            };
-        };
-    };
-    cancelProject: {
-        parameters: {
-            query: {
-                managerId: number;
-            };
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProject"];
-                };
-            };
-        };
-    };
-    completeProjectWithAdditionalInfo: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProjectRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProjectResponse"];
                 };
             };
         };
@@ -1774,6 +894,40 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": boolean;
+                };
+            };
+        };
+    };
+    getAllProjects: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+                search?: string;
+                status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
+                projectField?: "PLANNING" | "DESIGN" | "DEVELOPMENT";
+                recruitmentType?: "PROJECT_CONTRACT" | "PERSONAL_CONTRACT";
+                partnerType?: "INDIVIDUAL_FREELANCER" | "INDIVIDUAL_OR_TEAM_FREELANCER" | "BUSINESS_TEAM_OR_COMPANY" | "ANY_TYPE" | "ETC";
+                budgetType?: "RANGE_1_100" | "RANGE_100_200" | "RANGE_200_300" | "RANGE_300_500" | "RANGE_500_1000" | "RANGE_1000_2000" | "RANGE_2000_3000" | "RANGE_3000_5000" | "RANGE_5000_OVER" | "OVER_1_EUK" | "NEGOTIABLE";
+                minBudget?: number;
+                maxBudget?: number;
+                location?: string;
+                techNames?: string[];
+                sortBy?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["PageProjectResponse"];
                 };
             };
         };
@@ -1841,7 +995,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseVoid"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
                 };
             };
         };
@@ -1892,12 +1046,12 @@ export interface operations {
             };
         };
     };
-    getProjectFilesTotalSize: {
+    getProjectById: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                projectId: number;
+                id: number;
             };
             cookie?: never;
         };
@@ -1909,19 +1063,19 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": number;
+                    "application/json;charset=UTF-8": components["schemas"]["ProjectResponse"];
                 };
             };
         };
     };
-    checkDuplicate: {
+    deleteProject: {
         parameters: {
             query: {
-                originalName: string;
+                requesterId: number;
             };
             header?: never;
             path: {
-                projectId: number;
+                id: number;
             };
             cookie?: never;
         };
@@ -1933,41 +1087,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": boolean;
-                };
-            };
-        };
-    };
-    searchProjects: {
-        parameters: {
-            query?: {
-                keyword?: string;
-                status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
-                projectField?: "PLANNING" | "DESIGN" | "DEVELOPMENT";
-                recruitmentType?: "PROJECT_CONTRACT" | "PERSONAL_CONTRACT";
-                partnerType?: "INDIVIDUAL_FREELANCER" | "INDIVIDUAL_OR_TEAM_FREELANCER" | "BUSINESS_TEAM_OR_COMPANY" | "ANY_TYPE" | "ETC";
-                budgetType?: "RANGE_1_100" | "RANGE_100_200" | "RANGE_200_300" | "RANGE_300_500" | "RANGE_500_1000" | "RANGE_1000_2000" | "RANGE_2000_3000" | "RANGE_3000_5000" | "RANGE_5000_OVER" | "OVER_1_EUK" | "NEGOTIABLE";
-                minBudget?: number;
-                maxBudget?: number;
-                location?: string;
-                techNames?: string[];
-                sortBy?: string;
-                page?: number;
-                size?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["PageProject"];
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseVoid"];
                 };
             };
         };
@@ -2008,225 +1128,13 @@ export interface operations {
             };
         };
     };
-    getProjectsByManagerIdSimple: {
+    getFavoriteStatus: {
         parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                managerId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ProjectResponse"][];
-                };
-            };
-        };
-    };
-    getProjectByIdForManager: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                managerId: number;
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ProjectResponse"];
-                };
-            };
-        };
-    };
-    deleteProjectForManager: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                managerId: number;
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseVoid"];
-                };
-            };
-        };
-    };
-    getRegionOptions: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RegionResponse"][];
-                };
-            };
-        };
-    };
-    getRecruitmentTypeOptions: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RecruitmentTypeResponse"][];
-                };
-            };
-        };
-    };
-    getProjectFieldOptions: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ProjectFieldResponse"][];
-                };
-            };
-        };
-    };
-    getProgressStatusOptions: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ProgressStatusResponse"][];
-                };
-            };
-        };
-    };
-    getPartnerTypeOptions: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["PartnerTypeResponse"][];
-                };
-            };
-        };
-    };
-    getBudgetRangeOptions: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["BudgetRangeResponse"][];
-                };
-            };
-        };
-    };
-    getUserFavorites: {
-        parameters: {
-            query?: {
-                page?: number;
-                size?: number;
-            };
-            header?: never;
-            path: {
+            query: {
                 userId: number;
             };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["PageProjectFavorite"];
-                };
-            };
-        };
-    };
-    isFavorite: {
-        parameters: {
-            query?: never;
             header?: never;
             path: {
-                userId: number;
                 projectId: number;
             };
             cookie?: never;
@@ -2239,12 +1147,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": boolean;
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataMapStringObject"];
                 };
             };
         };
     };
-    getUserFavoriteCount: {
+    getUserFavoriteProjectIds: {
         parameters: {
             query?: never;
             header?: never;
@@ -2261,95 +1169,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": number;
-                };
-            };
-        };
-    };
-    getFavoriteCount: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                projectId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": number;
-                };
-            };
-        };
-    };
-    deleteAllProjectFiles: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                projectId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseVoid"];
-                };
-            };
-        };
-    };
-    removeAllUserFavorites: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                userId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseVoid"];
-                };
-            };
-        };
-    };
-    removeAllProjectFavorites: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                projectId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseVoid"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataListLong"];
                 };
             };
         };

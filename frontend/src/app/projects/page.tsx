@@ -1,7 +1,9 @@
 "use client";
 
+import FavoriteButton from '@/components/FavoriteButton';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { components } from '@/lib/backend/schema';
+import { getUserFavoriteProjectIds, sortProjectsByFavorite } from '@/utils/favoriteUtils';
 import {
   calculateDday,
   getBudgetTypeText,
@@ -26,6 +28,8 @@ const ProjectsPage = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [isLocationExpanded, setIsLocationExpanded] = useState(false);
   const [isBudgetExpanded, setIsBudgetExpanded] = useState(false);
+  const [favoriteProjectIds, setFavoriteProjectIds] = useState<number[]>([]);
+  const [sortByFavorite, setSortByFavorite] = useState(false);
   const [filters, setFilters] = useState({
     projectField: '',
     recruitmentType: '',
@@ -33,6 +37,27 @@ const ProjectsPage = () => {
     location: '',
     budgetRange: ''
   });
+
+  // TODO: 실제 사용자 인증 시스템과 연동
+  const getCurrentUserId = () => {
+    // 현재는 하드코딩된 값 사용 (추후 실제 인증 시스템과 연동 필요)
+    return 1;
+  };
+
+  // 즐겨찾기 목록 로드
+  useEffect(() => {
+    const loadFavorites = async () => {
+      try {
+        const userId = getCurrentUserId();
+        const favoriteIds = await getUserFavoriteProjectIds(userId);
+        setFavoriteProjectIds(favoriteIds);
+      } catch (error) {
+        console.error('즐겨찾기 목록 로드 실패:', error);
+      }
+    };
+
+    loadFavorites();
+  }, []);
 
   // 데이터 로드 및 필터 변경 처리
   useEffect(() => {
@@ -62,7 +87,17 @@ const ProjectsPage = () => {
           const data: PageProjectResponse = await response.json();
           console.log('API 응답 데이터:', data);
           console.log('프로젝트 상태들:', data.content?.map(p => p.status));
-          setProjects(data.content || []);
+          let projectList = data.content || [];
+          
+          // 즐겨찾기 순으로 정렬이 활성화된 경우
+          if (sortByFavorite && projectList.length > 0) {
+            const validProjects = projectList.filter((p): p is ProjectResponse & { id: number } => 
+              typeof p.id === 'number'
+            );
+            projectList = sortProjectsByFavorite(validProjects, favoriteProjectIds);
+          }
+          
+          setProjects(projectList);
           setTotalPages(data.totalPages || 0);
           setCurrentPage(data.number || 0);
         }
@@ -75,7 +110,10 @@ const ProjectsPage = () => {
 
     setCurrentPage(0);
     fetchProjects(0, searchQuery, filters);
-    // 필터 변경 시 페이지 최상단으로 스크롤
+  }, [filters, searchQuery, sortByFavorite, favoriteProjectIds]);
+
+  // 필터나 검색어 변경 시에만 스크롤 (즐겨찾기 정렬 제외)
+  useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [filters, searchQuery]);
 
@@ -136,7 +174,24 @@ const ProjectsPage = () => {
         <h2 className="text-xl font-bold text-gray-800 mb-4" style={{ fontSize: '24px', fontWeight: 'bold', color: '#374151', marginBottom: '16px' }}>프로젝트를 찾아보세요.</h2>
         <div className="flex space-x-8" style={{ display: 'flex', gap: '32px' }}>
           <aside className="w-1/4 bg-white shadow-md rounded-lg p-4" style={{ width: '25%', backgroundColor: 'white', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', borderRadius: '8px', padding: '16px' }}>
-            <h3 className="text-lg font-bold text-gray-800 mb-4" style={{ fontSize: '18px', fontWeight: 'bold', color: '#374151', marginBottom: '16px' }}>프로젝트 필터</h3>
+            <div className="flex items-center justify-between mb-4" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <h3 className="text-lg font-bold text-gray-800" style={{ fontSize: '18px', fontWeight: 'bold', color: '#374151' }}>프로젝트 필터</h3>
+              <button
+                onClick={() => setSortByFavorite(!sortByFavorite)}
+                className="p-1 transition-all duration-200 hover:scale-110 cursor-pointer"
+                style={{
+                  border: 'none',
+                  outline: 'none',
+                  backgroundColor: 'transparent',
+                  boxShadow: 'none'
+                }}
+                title={sortByFavorite ? '좋아요 정렬 해제' : '좋아요 순으로 정렬'}
+              >
+                <span className="text-20xl transition-all duration-200">
+                  {sortByFavorite ? '❤️' : '🤍'}
+                </span>
+              </button>
+            </div>
             
             {/* 프로젝트 분야 필터 */}
             <div className="mb-4" style={{ marginBottom: '16px' }}>
@@ -674,13 +729,30 @@ const ProjectsPage = () => {
             {!loading && projects.map((project) => (
               <div 
                 key={project.id} 
-                className="bg-white shadow-md rounded-lg p-6 mb-4 hover:shadow-lg transition-shadow" 
-                style={{ backgroundColor: 'white', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', borderRadius: '8px', padding: '24px', marginBottom: '16px', cursor: 'pointer', transition: 'box-shadow 0.3s' }}
+                className="relative bg-white shadow-md rounded-lg p-6 mb-4 hover:shadow-lg transition-shadow" 
+                style={{ position: 'relative', backgroundColor: 'white', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', borderRadius: '8px', padding: '24px', marginBottom: '16px', cursor: 'pointer', transition: 'box-shadow 0.3s' }}
                 onClick={() => router.push(`/projects/${project.id}`)}
               >
                 <div className="flex justify-between items-start mb-2" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                   <h3 className="text-lg font-bold text-gray-800 mb-2" style={{ fontSize: '18px', fontWeight: 'bold', color: '#374151', marginBottom: '8px' }}>{project.title}</h3>
-                  <div className="flex space-x-2" style={{ display: 'flex', gap: '8px' }}>
+                  <div className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {/* 북마크 버튼 */}
+                    {project.id && (
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <FavoriteButton 
+                          projectId={project.id} 
+                          isFavorite={favoriteProjectIds.includes(project.id)}
+                          userId={getCurrentUserId()}
+                          onToggle={(newState) => {
+                            if (newState) {
+                              setFavoriteProjectIds(prev => [...prev, project.id!]);
+                            } else {
+                              setFavoriteProjectIds(prev => prev.filter(id => id !== project.id));
+                            }
+                          }}
+                        />
+                      </div>
+                    )}
                     {project.recruitmentType && (
                       <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded" style={{ backgroundColor: '#dcfce7', color: '#166534', fontSize: '12px', padding: '4px 8px', borderRadius: '4px' }}>
                         {getRecruitmentTypeText(project.recruitmentType)}
