@@ -68,4 +68,31 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
                                                      @Param("keyword") String keyword,
                                                      @Param("techNames") List<String> techNames,
                                                      Pageable pageable);
+
+    // 즐겨찾기 수 기준으로 프로젝트 조회 (통합 검색/필터링 포함)
+    @Query("SELECT DISTINCT p, SIZE(p.projectFavorites) as favoriteCount FROM Project p " +
+            "LEFT JOIN p.projectTechs pt " +
+            "WHERE (:status IS NULL OR p.status = :status) " +
+            "AND (:projectField IS NULL OR p.projectField = :projectField) " +
+            "AND (:recruitmentType IS NULL OR p.recruitmentType = :recruitmentType) " +
+            "AND (:partnerType IS NULL OR p.partnerType = :partnerType) " +
+            "AND (:budgetType IS NULL OR p.budgetType = :budgetType) " +
+            "AND (:minBudget IS NULL OR :maxBudget IS NULL OR p.budgetAmount BETWEEN :minBudget AND :maxBudget) " +
+            "AND (:location IS NULL OR LOWER(p.companyLocation) LIKE LOWER(CONCAT('%', :location, '%'))) " +
+            "AND (:keyword IS NULL OR " +
+            "     LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "     LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND (:techNames IS NULL OR pt.techName IN :techNames) " +
+            "ORDER BY SIZE(p.projectFavorites) DESC, p.createDate DESC")
+    Page<Project> findProjectsOrderByFavoriteCount(@Param("status") ProjectStatus status,
+                                                   @Param("projectField") ProjectField projectField,
+                                                   @Param("recruitmentType") RecruitmentType recruitmentType,
+                                                   @Param("partnerType") PartnerType partnerType,
+                                                   @Param("budgetType") BudgetRange budgetType,
+                                                   @Param("minBudget") Long minBudget,
+                                                   @Param("maxBudget") Long maxBudget,
+                                                   @Param("location") String location,
+                                                   @Param("keyword") String keyword,
+                                                   @Param("techNames") List<String> techNames,
+                                                   Pageable pageable);
 }

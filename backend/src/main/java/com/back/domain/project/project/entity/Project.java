@@ -95,7 +95,6 @@ public class Project {
     @OneToMany(mappedBy = "projectId", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ProjectFavorite> projectFavorites;
 
-
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();

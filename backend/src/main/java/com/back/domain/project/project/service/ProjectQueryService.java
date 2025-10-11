@@ -5,6 +5,7 @@ import com.back.domain.project.project.entity.Project;
 import com.back.domain.project.project.entity.ProjectTech;
 import com.back.domain.project.project.entity.enums.*;
 import com.back.domain.project.project.repository.ProjectRepository;
+import com.back.domain.project.project.repository.ProjectFavoriteRepository;
 import com.back.domain.project.project.validator.ProjectValidator;
 import com.back.global.exception.ProjectNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 public class ProjectQueryService {
 
     private final ProjectRepository projectRepository;
+    private final ProjectFavoriteRepository projectFavoriteRepository;
     private final ProjectTechService projectTechService;
     private final ProjectValidator projectValidator;
 
@@ -44,18 +46,34 @@ public class ProjectQueryService {
                                                 String location, List<String> techNames, String sortBy) {
         log.debug("프로젝트 목록 조회 - page: {}, size: {}, keyword: {}, status: {}", page, size, keyword, status);
 
-        Pageable pageable = PageRequest.of(page, size);
+        // 검색 조건 검증
+        projectValidator.validateSearchKeyword(keyword);
+        projectValidator.validateBudgetRange(minBudget, maxBudget);
 
-        // 필터링 조건이 있으면 검색, 없으면 전체 조회
-        if (hasFilterConditions(keyword, status, projectField, recruitmentType, partnerType, budgetType, location, techNames)) {
-            Page<Project> projects = searchProjects(keyword, status, projectField, recruitmentType, partnerType,
-                    budgetType, minBudget, maxBudget, location, techNames, sortBy, pageable);
-            return projects.map(project -> ProjectResponse.from(project, null));
-        } else {
-            Pageable sortedPageable = createSortedPageable(pageable, sortBy);
-            Page<Project> projects = projectRepository.findAll(sortedPageable);
+        // 즐겨찾기 정렬인 경우 특별한 처리
+        if ("favorite".equals(sortBy)) {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Project> projects = projectRepository.findProjectsOrderByFavoriteCount(
+                    status, projectField, recruitmentType, partnerType, budgetType,
+                    minBudget, maxBudget, location, keyword, techNames, pageable);
             return projects.map(project -> ProjectResponse.from(project, null));
         }
+
+        // 일반 정렬 처리
+        Pageable pageable = PageRequest.of(page, size);
+        Pageable sortedPageable = createSortedPageable(pageable, sortBy);
+
+        // 필터링 조건이 있으면 필터링 쿼리 사용, 없으면 전체 조회
+        Page<Project> projects;
+        if (hasFilterConditions(keyword, status, projectField, recruitmentType, partnerType, budgetType, location, techNames)) {
+            projects = projectRepository.findProjectsWithFilters(
+                    status, projectField, recruitmentType, partnerType, budgetType,
+                    minBudget, maxBudget, location, keyword, techNames, sortedPageable);
+        } else {
+            projects = projectRepository.findAll(sortedPageable);
+        }
+
+        return projects.map(project -> ProjectResponse.from(project, null));
     }
 
     /**
@@ -63,22 +81,6 @@ public class ProjectQueryService {
      */
     public Page<ProjectResponse> getAllProjects(int page, int size) {
         return getAllProjects(page, size, null, null, null, null, null, null, null, null, null, null, "recent");
-    }
-
-    /**
-     * 사용자별 프로젝트 목록 조회
-     */
-    public List<ProjectResponse> getProjectsByManagerId(Long managerId) {
-        log.debug("사용자 프로젝트 목록 조회 - managerId: {}", managerId);
-
-        List<Project> projects = projectRepository.findByManagerIdOrderByCreateDateDesc(managerId);
-        return projects.stream()
-                .map(project -> {
-                    // 각 프로젝트의 기술스택도 함께 조회
-                    List<String> techNames = projectTechService.getProjectTechNames(project.getId());
-                    return ProjectResponse.from(project, techNames);
-                })
-                .collect(Collectors.toList());
     }
 
     /**
@@ -150,36 +152,6 @@ public class ProjectQueryService {
     }
 
     /**
-     * 프로젝트 검색 및 필터링
-     */
-    public Page<Project> searchProjects(String keyword,
-                                        ProjectStatus status,
-                                        ProjectField projectField,
-                                        RecruitmentType recruitmentType,
-                                        PartnerType partnerType,
-                                        BudgetRange budgetType,
-                                        Long minBudget,
-                                        Long maxBudget,
-                                        String location,
-                                        List<String> techNames,
-                                        String sortBy,
-                                        Pageable pageable) {
-        log.debug("프로젝트 검색 및 필터링 - keyword: {}, status: {}", keyword, status);
-
-        // 검색 조건 검증
-        projectValidator.validateSearchKeyword(keyword);
-        projectValidator.validateBudgetRange(minBudget, maxBudget);
-
-        // 정렬 처리
-        Pageable sortedPageable = createSortedPageable(pageable, sortBy);
-
-        // 항상 필터링 쿼리 실행 (null 값들은 쿼리에서 자동으로 처리됨)
-        return projectRepository.findProjectsWithFilters(
-                status, projectField, recruitmentType, partnerType, budgetType,
-                minBudget, maxBudget, location, keyword, techNames, sortedPageable);
-    }
-
-    /**
      * 조회수 증가
      */
     @Transactional
@@ -200,6 +172,8 @@ public class ProjectQueryService {
             sort = Sort.by(Sort.Direction.DESC, "viewCount", "createDate");
         } else if ("recent".equals(sortBy)) {
             sort = Sort.by(Sort.Direction.DESC, "createDate");
+        } else if ("favorite".equals(sortBy)) {
+            sort = Sort.by(Sort.Direction.DESC, "favoriteCount", "createDate");
         }
 
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
