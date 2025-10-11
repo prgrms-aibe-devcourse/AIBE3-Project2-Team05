@@ -1,11 +1,17 @@
 "use client";
 
+import ProjectFileManager from '@/components/ProjectFileManager';
 import { components } from '@/lib/backend/schema';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 type ProjectResponse = components['schemas']['ProjectResponse'];
 type ProjectRequest = components['schemas']['ProjectRequest'];
+type ProjectFile = components['schemas']['ProjectFile'];
+type ProjectFileInfo = components['schemas']['ProjectFileInfo'];
+
+// 두 타입을 모두 지원하는 유니온 타입
+type FileItem = ProjectFile | ProjectFileInfo;
 
 interface FormData {
   title: string;
@@ -30,7 +36,8 @@ const UserProjectEditPage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string>('');
-  const [uploadingFiles, setUploadingFiles] = useState(false);
+  // ProjectFileManager를 위한 별도 파일 상태 추가 (ProjectResponse의 projectFiles는 ProjectFileInfo[] 타입)
+  const [projectFiles, setProjectFiles] = useState<FileItem[]>([]);
   const [formData, setFormData] = useState<FormData>({
     title: '',
     description: '',
@@ -54,11 +61,19 @@ const UserProjectEditPage = () => {
       setLoading(true);
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}`);
-        if (response.ok) {
-          const data: ProjectResponse = await response.json();
-          setProject(data);
-          // 폼 데이터 초기화
-          setFormData({
+        if (response.ok) {        const data: ProjectResponse = await response.json();
+        setProject(data);
+        
+        // 디버깅 로그 추가
+        console.log('프로젝트 데이터 구조 확인:', data);
+        console.log('기술 스택 데이터:', data.techStacks);
+        console.log('파일 데이터:', data.projectFiles);
+        
+        // ProjectFileManager를 위한 파일 상태 초기화
+        setProjectFiles(data.projectFiles || []);
+        
+        // 폼 데이터 초기화
+        setFormData({
             title: data.title || '',
             description: data.description || '',
             budgetType: data.budgetType || '',
@@ -73,6 +88,8 @@ const UserProjectEditPage = () => {
             budgetAmount: data.budgetAmount,
             partnerEtcDescription: data.partnerEtcDescription || ''
           });
+          
+          console.log('초기화된 기술 스택:', data.techStacks?.map(tech => tech.techName || ''));
         } else if (response.status === 404) {
           setError('프로젝트를 찾을 수 없습니다.');
         } else {
@@ -163,12 +180,6 @@ const UserProjectEditPage = () => {
         partnerEtcDescription: formData.partnerEtcDescription
       };
 
-      // 디버깅: 전송할 데이터 확인
-      console.log('프로젝트 수정 시작');
-      console.log('전송할 데이터:', requestData);
-      console.log('전송할 기술 스택:', requestData.techNames);
-      console.log('API URL:', `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}/complete`);
-
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}/complete`, {
         method: 'PUT',
         headers: {
@@ -176,18 +187,52 @@ const UserProjectEditPage = () => {
         },
         body: JSON.stringify(requestData),
       });
-      
-      console.log('프로젝트 수정 응답 상태:', response.status);
 
       if (response.ok) {
         // 수정된 프로젝트 데이터를 다시 불러와서 최신 상태로 업데이트
-        const updatedResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}`);
+        const updatedResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}?_t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        });
         if (updatedResponse.ok) {
           const updatedData: ProjectResponse = await updatedResponse.json();
-          setProject(updatedData);
+          
+          // 현재 메모리의 파일 상태와 API 응답 중 더 최신인 것을 사용
+          const finalFiles = (projectFiles && projectFiles.length > 0) 
+            ? projectFiles  // 메모리에 파일이 있다면 메모리 상태 우선 사용
+            : (updatedData.projectFiles || []); // 메모리에 없다면 API 응답 사용
+          
+          setProject({
+            ...updatedData,
+            projectFiles: finalFiles  // 최종 파일 목록으로 설정
+          });
+          setProjectFiles(finalFiles);
         }
         
         alert('프로젝트가 수정되었습니다.');
+        
+        // 브라우저의 세션 스토리지에 업데이트 플래그 설정 (프로젝트별, TTL 포함)
+        const projectUpdateKey = `projectUpdated_${params.projectId}`;
+        const projectUpdateTimeKey = `projectUpdateTime_${params.projectId}`;
+        const projectFilesKey = `projectFiles_${params.projectId}`;
+        const projectFilesTimeKey = `projectFilesTime_${params.projectId}`;
+        
+        sessionStorage.setItem(projectUpdateKey, 'true');
+        sessionStorage.setItem(projectUpdateTimeKey, Date.now().toString());
+        
+        // 현재 메모리의 파일 상태를 세션 스토리지에 저장 (TTL 포함)
+        if (projectFiles && projectFiles.length > 0) {
+          sessionStorage.setItem(projectFilesKey, JSON.stringify(projectFiles));
+          sessionStorage.setItem(projectFilesTimeKey, Date.now().toString());
+        } else {
+          sessionStorage.removeItem(projectFilesKey);
+          sessionStorage.removeItem(projectFilesTimeKey);
+        }
+        
         // 완전한 페이지 새로고침으로 캐시 문제 방지
         window.location.href = `/user-projects/${params.managerId}/${params.projectId}`;
       } else {
@@ -202,74 +247,16 @@ const UserProjectEditPage = () => {
     }
   };
 
-  // 파일 업로드 함수 (단일 파일 업로드 API를 사용하여 여러 파일을 순차적으로 업로드)
-  const handleFileUpload = async (files: File[]) => {
-    if (!files.length || !params?.projectId) return;
-
-    setUploadingFiles(true);
-    try {
-      const uploadedFiles = [];
-      
-      // 각 파일을 개별적으로 업로드
-      for (const file of files) {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}/files/upload`, {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (response.ok) {
-          const uploadedFile = await response.json();
-          uploadedFiles.push(uploadedFile);
-        } else {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || `파일 "${file.name}" 업로드에 실패했습니다.`);
-        }
-      }
-      
-      // 프로젝트 데이터를 다시 불러와서 최신 파일 목록을 업데이트
-      const projectResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}`);
-      if (projectResponse.ok) {
-        const updatedProject: ProjectResponse = await projectResponse.json();
-        setProject(updatedProject);
-      }
-      
-      alert(`${uploadedFiles.length}개의 파일이 업로드되었습니다.`);
-    } catch (error) {
-      console.error('파일 업로드 실패:', error);
-      alert(error instanceof Error ? error.message : '파일 업로드 중 오류가 발생했습니다.');
-    } finally {
-      setUploadingFiles(false);
-    }
-  };
-
-  // 파일 삭제 함수
-  const handleFileDelete = async (fileId: number) => {
-    if (!params?.projectId) return;
-
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}/files/${fileId}`, {
-        method: 'DELETE',
+  // ProjectFileManager를 위한 파일 변경 핸들러 수정
+  const handleFilesChange = (updatedFiles: FileItem[]) => {
+    setProjectFiles(updatedFiles);
+    
+    // 프로젝트 상태도 동시에 업데이트
+    if (project) {
+      setProject({
+        ...project,
+        projectFiles: updatedFiles
       });
-
-      if (response.ok) {
-        // 프로젝트 데이터를 다시 불러와서 최신 파일 목록을 업데이트
-        const projectResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}`);
-        if (projectResponse.ok) {
-          const updatedProject: ProjectResponse = await projectResponse.json();
-          setProject(updatedProject);
-        }
-        
-        alert('파일이 삭제되었습니다.');
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        alert(errorData.message || '파일 삭제에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('파일 삭제 실패:', error);
-      alert('파일 삭제 중 오류가 발생했습니다.');
     }
   };
 
@@ -626,116 +613,13 @@ const UserProjectEditPage = () => {
 
             {/* 첨부파일 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2" style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                첨부파일
-              </label>
-              <div 
-                className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors" 
-                style={{ 
-                  border: '2px dashed #d1d5db', 
-                  borderRadius: '8px', 
-                  padding: '24px', 
-                  textAlign: 'center',
-                  transition: 'border-color 0.2s'
-                }}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                onDragEnter={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (uploadingFiles) return;
-                  const files = Array.from(e.dataTransfer.files);
-                  if (files.length > 0) {
-                    handleFileUpload(files);
-                  }
-                }}
-              >
-                <input
-                  type="file"
-                  multiple
-                  accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
-                  className="hidden"
-                  id="fileInput"
-                  disabled={uploadingFiles}
-                  onChange={(e) => {
-                    if (uploadingFiles) return;
-                    const files = Array.from(e.target.files || []);
-                    if (files.length > 0) {
-                      handleFileUpload(files);
-                    }
-                    // 파일 선택 후 input 초기화
-                    e.target.value = '';
-                  }}
-                />
-                <label 
-                  htmlFor="fileInput" 
-                  className={uploadingFiles ? 'cursor-not-allowed' : 'cursor-pointer'}
-                  style={{ cursor: uploadingFiles ? 'not-allowed' : 'pointer', opacity: uploadingFiles ? 0.6 : 1 }}
-                >
-                  <div className="text-gray-400 text-4xl mb-3" style={{ color: '#9ca3af', fontSize: '32px', marginBottom: '12px' }}>
-                    📁
-                  </div>
-                  <div className="text-gray-600 font-medium mb-2" style={{ color: '#4b5563', fontWeight: '500', marginBottom: '8px' }}>
-                    {uploadingFiles ? '파일 업로드 중...' : '파일을 드래그하여 놓거나 클릭하여 선택하세요'}
-                  </div>
-                  <div className="text-gray-500 text-sm" style={{ color: '#6b7280', fontSize: '14px' }}>
-                    {uploadingFiles ? '잠시만 기다려주세요.' : 'PDF, DOC, DOCX, TXT, JPG, JPEG, PNG, GIF 파일만 업로드 가능합니다'}
-                  </div>
-                </label>
-              </div>
-              
-              {/* 기존 첨부파일 목록 (수정 모드에서만) */}
-              {project?.projectFiles && project.projectFiles.length > 0 && (
-                <div className="mt-4">
-                  <h5 className="text-sm font-semibold text-gray-700 mb-2" style={{ fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                    기존 첨부파일
-                  </h5>
-                  <div className="space-y-2" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {project.projectFiles.map((file) => (
-                      <div key={file.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg" style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'space-between', 
-                        padding: '12px', 
-                        border: '1px solid #e5e7eb', 
-                        borderRadius: '8px' 
-                      }}>
-                        <div className="flex items-center gap-3" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div className="text-blue-500 text-lg" style={{ color: '#3b82f6', fontSize: '18px' }}>📄</div>
-                          <div>
-                            <div className="text-sm font-medium text-gray-900" style={{ fontSize: '14px', fontWeight: '500', color: '#111827' }}>
-                              {file.originalName}
-                            </div>
-                            <div className="text-xs text-gray-500" style={{ fontSize: '12px', color: '#6b7280' }}>
-                              {file.fileSize && `${(file.fileSize / 1024).toFixed(1)} KB`}
-                            </div>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (window.confirm('이 파일을 삭제하시겠습니까?')) {
-                              if (file.id) {
-                                handleFileDelete(file.id);
-                              }
-                            }
-                          }}
-                          className="text-red-500 hover:text-red-700 text-sm font-medium"
-                          style={{ color: '#ef4444', fontSize: '14px', fontWeight: '500', background: 'none', border: 'none', cursor: 'pointer' }}
-                        >
-                          삭제
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <ProjectFileManager
+                projectId={params?.projectId as string}
+                projectFiles={projectFiles}
+                onFilesChange={handleFilesChange}
+                disabled={saving}
+                mode="edit"
+              />
             </div>
 
           </div>
