@@ -20,6 +20,12 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 type ProjectResponse = components['schemas']['ProjectResponse'];
+type ProjectFile = {
+  id: number;
+  originalName: string;
+  fileSize: number;
+  uploadDate?: string;
+};
 
 const ProjectDetailPage = () => {
   const params = useParams();
@@ -28,11 +34,28 @@ const ProjectDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [activeTab, setActiveTab] = useState('summary');
+  const [alternativeFiles, setAlternativeFiles] = useState<ProjectFile[]>([]);
   
   // TODO: 실제 사용자 인증 시스템과 연동
   const getCurrentUserId = () => {
     // 현재는 하드코딩된 값 사용 (추후 실제 인증 시스템과 연동 필요)
     return 1;
+  };
+
+  // 별도 파일 API 호출 함수
+  const fetchAlternativeFiles = async (projectId: string): Promise<ProjectFile[]> => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${projectId}/files`);
+      if (response.ok) {
+        const files = await response.json();
+        return Array.isArray(files) ? files : [];
+      } else {
+        return [];
+      }
+    } catch (error) {
+      console.error('파일 API 오류:', error);
+      return [];
+    }
   };
 
   useEffect(() => {
@@ -42,9 +65,21 @@ const ProjectDetailPage = () => {
       setLoading(true);
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.id}`);
+        
         if (response.ok) {
           const data: ProjectResponse = await response.json();
           setProject(data);
+          
+          // 대안 파일 로딩 로직
+          let altFiles: ProjectFile[] = [];
+          const hasProjectFiles = data.projectFiles && Array.isArray(data.projectFiles) && data.projectFiles.length > 0;
+          
+          if (!hasProjectFiles) {
+            altFiles = await fetchAlternativeFiles(params.id as string);
+          }
+          
+          setAlternativeFiles(altFiles);
+          
         } else if (response.status === 404) {
           setError('프로젝트를 찾을 수 없습니다.');
         } else {
@@ -60,16 +95,6 @@ const ProjectDetailPage = () => {
 
     fetchProject();
   }, [params?.id]);
-
-
-
-
-
-
-
-
-
-
 
   if (loading) {
     return <LoadingSpinner message="프로젝트를 불러오는 중..." />;
@@ -91,6 +116,31 @@ const ProjectDetailPage = () => {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  // 파일 다운로드 함수
+  const handleFileDownload = (fileId: number, fileName: string) => {
+    const downloadUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${project?.id}/files/${fileId}/download`;
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // 통합 파일 목록 가져오기
+  const getDisplayFiles = () => {
+    const projectFiles = project?.projectFiles || [];
+    const hasProjectFiles = Array.isArray(projectFiles) && projectFiles.length > 0;
+    
+    if (hasProjectFiles) {
+      return projectFiles.filter((file): file is Required<ProjectFile> => 
+        file.id !== undefined && file.originalName !== undefined && file.fileSize !== undefined
+      );
+    } else {
+      return alternativeFiles;
     }
   };
 
@@ -334,9 +384,9 @@ const ProjectDetailPage = () => {
         {/* 참고파일 섹션 */}
         <div id="files" className="bg-white rounded-xl shadow-sm mb-8 p-8" style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', marginBottom: '32px', padding: '32px' }}>
           <h2 className="text-xl font-bold mb-6 text-gray-900" style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '24px', color: '#111827' }}>참고파일</h2>
-          {project.projectFiles?.length ? (
+          {getDisplayFiles().length ? (
             <div className="space-y-4" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {project.projectFiles.map((file) => (
+              {getDisplayFiles().map((file) => (
                 <div key={file.id} className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors" style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', border: '1px solid #e5e7eb', borderRadius: '12px', transition: 'background-color 0.2s' }}>
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-xl" style={{ width: '48px', height: '48px', backgroundColor: '#dbeafe', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', fontSize: '20px' }}>
                     📄
@@ -355,10 +405,7 @@ const ProjectDetailPage = () => {
                     style={{ padding: '8px 16px', backgroundColor: '#3b82f6', color: 'white', borderRadius: '8px', fontWeight: '500', border: 'none', cursor: 'pointer', transition: 'background-color 0.2s' }}
                     onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#2563eb'}
                     onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#3b82f6'}
-                    onClick={() => {
-                      console.log('파일 다운로드:', file.id);
-                      // window.open(`/api/projects/${project.id}/files/${file.id}/download`);
-                    }}
+                    onClick={() => handleFileDownload(file.id, file.originalName)}
                   >
                     다운로드
                   </button>
