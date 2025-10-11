@@ -1,6 +1,8 @@
 "use client";
 
+import { budgetOptions } from '@/constants/projectOptions';
 import { components } from '@/lib/backend/schema';
+import { showErrorMessage, showSuccessMessage, showValidationError } from '@/utils/formValidation';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -27,6 +29,7 @@ const ProjectCreatePage = () => {
     startDate: '',
     endDate: ''
   });
+  const [creating, setCreating] = useState(false);
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -46,10 +49,11 @@ const ProjectCreatePage = () => {
   // 기본 프로젝트 등록 (필수 정보만)
   const handleBasicSubmit = async () => {
     if (!isFormValid()) {
-      alert('모든 필수 항목을 입력해주세요.');
+      showValidationError('모든 필수 항목을 입력해주세요.');
       return;
     }
 
+    setCreating(true);
     try {
       const requestData: ProjectRequest = {
         title: formData.title,
@@ -62,7 +66,7 @@ const ProjectCreatePage = () => {
         managerId: 1 // TODO: 실제 사용자 ID로 교체
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/basic`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -71,22 +75,34 @@ const ProjectCreatePage = () => {
       });
 
       if (response.ok) {
-        alert('프로젝트가 등록되었습니다!');
-        router.push('/projects');
+        const result = await response.json();
+        const projectId = result.data?.id;
+        
+        // 세션스토리지 정리
+        sessionStorage.removeItem('projectBasicData');
+        
+        showSuccessMessage('프로젝트가 등록되었습니다!');
+        
+        // 생성된 프로젝트의 상세 페이지로 이동
+        router.push(`/user-projects/1/${projectId}`);
       } else {
         const errorData = await response.json().catch(() => ({}));
-        alert(errorData.message || '프로젝트 등록에 실패했습니다.');
+        showErrorMessage(errorData.message || '프로젝트 등록에 실패했습니다.');
       }
     } catch (error) {
       console.error('프로젝트 등록 실패:', error);
-      alert('프로젝트 등록 중 오류가 발생했습니다.');
+      showErrorMessage('프로젝트 등록 중 오류가 발생했습니다.');
+    } finally {
+      setCreating(false);
     }
   };
+
+
 
   // 추가 정보 입력으로 이동
   const handleContinueToAdditional = () => {
     if (!isFormValid()) {
-      alert('모든 필수 항목을 입력해주세요.');
+      showValidationError('모든 필수 항목을 입력해주세요.');
       return;
     }
     
@@ -95,20 +111,7 @@ const ProjectCreatePage = () => {
     router.push('/projects/create/additional');
   };
 
-  // 예산 타입 옵션
-  const budgetOptions = [
-    { value: 'RANGE_1_100', label: '1만원 ~ 100만원' },
-    { value: 'RANGE_100_200', label: '100만원 ~ 200만원' },
-    { value: 'RANGE_200_300', label: '200만원 ~ 300만원' },
-    { value: 'RANGE_300_500', label: '300만원 ~ 500만원' },
-    { value: 'RANGE_500_1000', label: '500만원 ~ 1000만원' },
-    { value: 'RANGE_1000_2000', label: '1000만원 ~ 2000만원' },
-    { value: 'RANGE_2000_3000', label: '2000만원 ~ 3000만원' },
-    { value: 'RANGE_3000_5000', label: '3000만원 ~ 5000만원' },
-    { value: 'RANGE_5000_OVER', label: '5000만원 이상' },
-    { value: 'OVER_1_EUK', label: '1억원 이상' },
-    { value: 'NEGOTIABLE', label: '협의' }
-  ];
+
 
   return (
     <div className="min-h-screen bg-gray-50" style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
@@ -308,43 +311,43 @@ const ProjectCreatePage = () => {
                 <button
                   type="button"
                   onClick={handleBasicSubmit}
-                  disabled={!isFormValid()}
+                  disabled={!isFormValid() || creating}
                   className="flex-1 py-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ 
                     flex: 1,
                     padding: '16px 0', 
-                    backgroundColor: isFormValid() ? '#3b82f6' : '#9ca3af', 
+                    backgroundColor: (isFormValid() && !creating) ? '#3b82f6' : '#9ca3af', 
                     color: 'white', 
                     fontWeight: '600', 
                     borderRadius: '8px', 
                     border: 'none', 
-                    cursor: isFormValid() ? 'pointer' : 'not-allowed', 
+                    cursor: (isFormValid() && !creating) ? 'pointer' : 'not-allowed', 
                     transition: 'background-color 0.2s',
-                    opacity: isFormValid() ? 1 : 0.5
+                    opacity: (isFormValid() && !creating) ? 1 : 0.5
                   }}
                 >
-                  프로젝트 등록 완료
+                  {creating ? '등록 중...' : '바로 프로젝트 등록'}
                 </button>
                 
                 <button
                   type="button"
                   onClick={handleContinueToAdditional}
-                  disabled={!isFormValid()}
+                  disabled={!isFormValid() || creating}
                   className="flex-1 py-4 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ 
                     flex: 1,
                     padding: '16px 0', 
-                    backgroundColor: isFormValid() ? '#f97316' : '#9ca3af', 
+                    backgroundColor: (isFormValid() && !creating) ? '#f97316' : '#9ca3af', 
                     color: 'white', 
                     fontWeight: '600', 
                     borderRadius: '8px', 
                     border: 'none', 
-                    cursor: isFormValid() ? 'pointer' : 'not-allowed', 
+                    cursor: (isFormValid() && !creating) ? 'pointer' : 'not-allowed', 
                     transition: 'background-color 0.2s',
-                    opacity: isFormValid() ? 1 : 0.5
+                    opacity: (isFormValid() && !creating) ? 1 : 0.5
                   }}
                 >
-                  추가 정보 입력하기
+                  {creating ? '잠시만 기다려주세요...' : '추가 정보 입력하기'}
                 </button>
               </div>
             </div>

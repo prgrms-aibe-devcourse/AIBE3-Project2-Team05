@@ -1,6 +1,16 @@
 "use client";
 
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { components } from '@/lib/backend/schema';
+import {
+  calculateDday,
+  getBudgetTypeText,
+  getLocationCodeFromText,
+  getLocationText,
+  getProjectFieldText,
+  getRecruitmentTypeText,
+  getStatusText
+} from '@/utils/projectUtils';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -118,115 +128,7 @@ const ProjectsPage = () => {
     }));
   };
 
-  // 예산 타입을 한국어로 변환
-  const getBudgetTypeText = (budgetType?: string) => {
-    const budgetMap: Record<string, string> = {
-      'RANGE_1_100': '1만원 ~ 100만원',
-      'RANGE_100_200': '100만원 ~ 200만원',
-      'RANGE_200_300': '200만원 ~ 300만원',
-      'RANGE_300_500': '300만원 ~ 500만원',
-      'RANGE_500_1000': '500만원 ~ 1000만원',
-      'RANGE_1000_2000': '1000만원 ~ 2000만원',
-      'RANGE_2000_3000': '2000만원 ~ 3000만원',
-      'RANGE_3000_5000': '3000만원 ~ 5000만원',
-      'RANGE_5000_OVER': '5000만원 ~ 1억',
-      'OVER_1_EUK': '1억 이상'
-    };
-    return budgetMap[budgetType || ''] || '미정';
-  };
 
-  // 프로젝트 필드를 한국어로 변환
-  const getProjectFieldText = (field?: string) => {
-    const fieldMap: Record<string, string> = {
-      'PLANNING': '기획',
-      'DESIGN': '디자인',
-      'DEVELOPMENT': '개발'
-    };
-    return fieldMap[field || ''] || field || '';
-  };
-
-  // 모집 형태를 한국어로 변환
-  const getRecruitmentTypeText = (recruitmentType?: string) => {
-    const recruitmentMap: Record<string, string> = {
-      'PROJECT_CONTRACT': '외주',
-      'PERSONAL_CONTRACT': '상주'
-    };
-    return recruitmentMap[recruitmentType || ''] || '';
-  };
-
-  // 상태를 한국어로 변환
-  const getStatusText = (status?: string) => {
-    const statusMap: Record<string, string> = {
-      'RECRUITING': '모집중',
-      'CONTRACTING': '계약중',
-      'IN_PROGRESS': '진행중',
-      'COMPLETED': '완료',
-      'SUSPENDED': '보류',
-      'CANCELLED': '취소'
-    };
-    return statusMap[status || ''] || status || '';
-  };
-
-  // 지역을 한국어로 변환
-  const getLocationText = (location?: string) => {
-    const locationMap: Record<string, string> = {
-      'SEOUL': '서울',
-      'BUSAN': '부산',
-      'DAEGU': '대구',
-      'INCHEON': '인천',
-      'GWANGJU': '광주',
-      'DAEJEON': '대전',
-      'ULSAN': '울산',
-      'SEJONG': '세종',
-      'GYEONGGI': '경기',
-      'GANGWON': '강원',
-      'CHUNGBUK': '충북',
-      'CHUNGNAM': '충남',
-      'JEONBUK': '전북',
-      'JEONNAM': '전남',
-      'GYEONGBUK': '경북',
-      'GYEONGNAM': '경남',
-      'JEJU': '제주',
-      'OVERSEAS': '해외'
-    };
-    return locationMap[location || ''] || location || '';
-  };
-
-  // 한글 지역명을 영어 코드로 변환
-  const getLocationCodeFromText = (locationText: string) => {
-    const locationCodeMap: Record<string, string> = {
-      '서울': 'SEOUL',
-      '부산': 'BUSAN',
-      '대구': 'DAEGU',
-      '인천': 'INCHEON',
-      '광주': 'GWANGJU',
-      '대전': 'DAEJEON',
-      '울산': 'ULSAN',
-      '세종': 'SEJONG',
-      '경기': 'GYEONGGI',
-      '강원': 'GANGWON',
-      '충북': 'CHUNGBUK',
-      '충남': 'CHUNGNAM',
-      '전북': 'JEONBUK',
-      '전남': 'JEONNAM',
-      '경북': 'GYEONGBUK',
-      '경남': 'GYEONGNAM',
-      '제주': 'JEJU',
-      '해외': 'OVERSEAS',
-      '국외': 'OVERSEAS'
-    };
-    return locationCodeMap[locationText] || locationText;
-  };
-
-  // D-day 계산
-  const calculateDday = (endDate?: string) => {
-    if (!endDate) return '';
-    const today = new Date();
-    const end = new Date(endDate);
-    const diffTime = end.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? `D-${diffDays}` : '마감';
-  };
 
   return (
     <div className="bg-gray-100 min-h-screen" style={{ backgroundColor: '#f3f4f6', minHeight: '100vh' }}>
@@ -759,9 +661,7 @@ const ProjectsPage = () => {
 
             {/* 로딩 상태 */}
             {loading && (
-              <div className="bg-white shadow-md rounded-lg p-8 text-center">
-                <div className="text-gray-600">프로젝트를 불러오는 중...</div>
-              </div>
+              <LoadingSpinner message="프로젝트를 불러오는 중..." />
             )}
 
             {/* 프로젝트 목록 */}

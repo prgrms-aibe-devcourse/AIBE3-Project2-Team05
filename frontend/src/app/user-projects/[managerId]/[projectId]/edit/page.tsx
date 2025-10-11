@@ -1,7 +1,22 @@
 "use client";
 
+import ErrorDisplay from '@/components/ErrorDisplay';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import ProjectFileManager from '@/components/ProjectFileManager';
+import {
+  budgetOptions,
+  partnerTypeOptions,
+  progressStatusOptions,
+  projectFieldOptions,
+  recruitmentTypeOptions,
+  regionOptions,
+  techStackCategories
+} from '@/constants/projectOptions';
 import { components } from '@/lib/backend/schema';
+import { formClasses, formStyles } from '@/styles/formStyles';
+import { showErrorMessage, showSuccessMessage, showValidationError, validateProjectForm } from '@/utils/formValidation';
+import { formatDateForInput } from '@/utils/projectUtils';
+import { sessionStorageUtils } from '@/utils/sessionStorageUtils';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -60,15 +75,10 @@ const UserProjectEditPage = () => {
       
       setLoading(true);
       try {
-        // 캐시 방지를 위한 타임스탬프 추가
-        const timestamp = new Date().getTime();
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}?_t=${timestamp}`, {
-          cache: 'no-store', // Next.js 캐시 방지
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate', // 브라우저 캐시 방지
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          }
+        const url = sessionStorageUtils.addCacheBuster(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}`);
+        const response = await fetch(url, {
+          cache: 'no-store',
+          headers: sessionStorageUtils.getCacheBustingHeaders()
         });
         
         if (response.ok) {
@@ -79,49 +89,20 @@ const UserProjectEditPage = () => {
           console.log('기술 스택 데이터:', data.techStacks);
           console.log('파일 데이터:', data.projectFiles);
           
-          // 세션 스토리지에서 파일 상태 복원 시도 (TTL 확인 포함)
-          const projectFilesKey = `projectFiles_${params.projectId}`;
-          const projectFilesTimeKey = `projectFilesTime_${params.projectId}`;
-          const savedFilesStr = sessionStorage.getItem(projectFilesKey);
-          const savedFilesTime = sessionStorage.getItem(projectFilesTimeKey);
-          
+          // 세션 스토리지에서 파일 상태 복원 시도
+          const savedFiles = sessionStorageUtils.getProjectFiles<FileItem>(params.projectId as string);
           let finalFiles: FileItem[] = [];
           
-          // TTL 확인 (30분 = 1800000ms)
-          const TTL = 30 * 60 * 1000;
-          const isSessionValid = savedFilesTime && (Date.now() - parseInt(savedFilesTime)) < TTL;
-          
-          if (savedFilesStr && isSessionValid) {
-            try {
-              const savedFiles = JSON.parse(savedFilesStr) as FileItem[];
-              // API 응답에 파일이 없고 세션스토리지에는 있으면 세션스토리지 우선
-              if (!data.projectFiles || data.projectFiles.length === 0) {
-                finalFiles = savedFiles;
-                console.log('세션 스토리지에서 파일 복원:', savedFiles);
-              } else {
-                // API 응답에 파일이 있으면 API 응답 우선하고 세션스토리지 제거
-                finalFiles = data.projectFiles;
-                sessionStorage.removeItem(projectFilesKey);
-                sessionStorage.removeItem(projectFilesTimeKey);
-                console.log('API 응답 파일 사용:', data.projectFiles);
-              }
-            } catch (e) {
-              console.error('세션 스토리지 파일 상태 파싱 실패:', e);
-              finalFiles = data.projectFiles || [];
-              // 파싱 실패 시 세션 스토리지 정리
-              sessionStorage.removeItem(projectFilesKey);
-              sessionStorage.removeItem(projectFilesTimeKey);
-            }
+          if (savedFiles && (!data.projectFiles || data.projectFiles.length === 0)) {
+            finalFiles = savedFiles;
+            console.log('세션 스토리지에서 파일 복원:', savedFiles);
+          } else if (data.projectFiles && data.projectFiles.length > 0) {
+            finalFiles = data.projectFiles;
+            sessionStorageUtils.clearProjectFiles(params.projectId as string);
+            console.log('API 응답 파일 사용:', data.projectFiles);
           } else {
-            // 세션 스토리지가 없거나 만료된 경우
             finalFiles = data.projectFiles || [];
             console.log('API 응답 파일만 사용:', data.projectFiles);
-            
-            // 만료된 세션 스토리지 정리
-            if (savedFilesStr && !isSessionValid) {
-              sessionStorage.removeItem(projectFilesKey);
-              sessionStorage.removeItem(projectFilesTimeKey);
-            }
           }
           
           setProject({
@@ -140,8 +121,8 @@ const UserProjectEditPage = () => {
             budgetType: data.budgetType || '',
             companyLocation: data.companyLocation || '',
             techNames: data.techStacks?.map(tech => tech.techName || '') || [],
-            startDate: data.startDate ? new Date(data.startDate).toISOString().split('T')[0] : '',
-            endDate: data.endDate ? new Date(data.endDate).toISOString().split('T')[0] : '',
+            startDate: formatDateForInput(data.startDate),
+            endDate: formatDateForInput(data.endDate),
             projectField: data.projectField || '',
             recruitmentType: data.recruitmentType || '',
             partnerType: data.partnerType || '',
@@ -191,36 +172,9 @@ const UserProjectEditPage = () => {
     setSaving(true);
     try {
       // 필수 필드 검증
-      if (!formData.title?.trim()) {
-        alert('프로젝트 제목을 입력해주세요.');
-        return;
-      }
-      if (!formData.description?.trim()) {
-        alert('프로젝트 설명을 입력해주세요.');
-        return;
-      }
-      if (!formData.projectField) {
-        alert('프로젝트 분야를 선택해주세요.');
-        return;
-      }
-      if (!formData.recruitmentType) {
-        alert('모집 유형을 선택해주세요.');
-        return;
-      }
-      if (!formData.budgetType) {
-        alert('예산 유형을 선택해주세요.');
-        return;
-      }
-      if (!formData.startDate) {
-        alert('시작 날짜를 입력해주세요.');
-        return;
-      }
-      if (!formData.endDate) {
-        alert('종료 날짜를 입력해주세요.');
-        return;
-      }
-      if (!params.managerId) {
-        alert('관리자 ID가 필요합니다.');
+      const validationError = validateProjectForm(formData, params.managerId as string);
+      if (validationError) {
+        showValidationError(validationError);
         return;
       }
 
@@ -233,12 +187,21 @@ const UserProjectEditPage = () => {
         startDate: formData.startDate,
         endDate: formData.endDate,
         managerId: parseInt(params.managerId as string),
-        companyLocation: formData.companyLocation as ProjectRequest['companyLocation'],
-        techNames: formData.techNames,
-        partnerType: formData.partnerType as ProjectRequest['partnerType'],
-        progressStatus: formData.progressStatus as ProjectRequest['progressStatus'],
-        budgetAmount: formData.budgetAmount,
-        partnerEtcDescription: formData.partnerEtcDescription
+        // 빈 문자열을 null로 변환하여 백엔드 에러 방지
+        companyLocation: formData.companyLocation && formData.companyLocation.trim() 
+          ? formData.companyLocation as ProjectRequest['companyLocation'] 
+          : undefined,
+        techNames: formData.techNames && formData.techNames.length > 0 ? formData.techNames : undefined,
+        partnerType: formData.partnerType && formData.partnerType.trim() 
+          ? formData.partnerType as ProjectRequest['partnerType'] 
+          : undefined,
+        progressStatus: formData.progressStatus && formData.progressStatus.trim() 
+          ? formData.progressStatus as ProjectRequest['progressStatus'] 
+          : undefined,
+        budgetAmount: formData.budgetAmount || undefined,
+        partnerEtcDescription: formData.partnerEtcDescription && formData.partnerEtcDescription.trim() 
+          ? formData.partnerEtcDescription 
+          : undefined
       };
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}/complete`, {
@@ -251,13 +214,10 @@ const UserProjectEditPage = () => {
 
       if (response.ok) {
         // 수정된 프로젝트 데이터를 다시 불러와서 최신 상태로 업데이트
-        const updatedResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}?_t=${Date.now()}`, {
+        const updatedUrl = sessionStorageUtils.addCacheBuster(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}`);
+        const updatedResponse = await fetch(updatedUrl, {
           cache: 'no-store',
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          }
+          headers: sessionStorageUtils.getCacheBustingHeaders()
         });
         if (updatedResponse.ok) {
           const updatedData: ProjectResponse = await updatedResponse.json();
@@ -274,35 +234,26 @@ const UserProjectEditPage = () => {
           setProjectFiles(finalFiles);
         }
         
-        alert('프로젝트가 수정되었습니다.');
+        showSuccessMessage('프로젝트가 수정되었습니다.');
         
-        // 브라우저의 세션 스토리지에 업데이트 플래그 설정 (프로젝트별, TTL 포함)
-        const projectUpdateKey = `projectUpdated_${params.projectId}`;
-        const projectUpdateTimeKey = `projectUpdateTime_${params.projectId}`;
-        const projectFilesKey = `projectFiles_${params.projectId}`;
-        const projectFilesTimeKey = `projectFilesTime_${params.projectId}`;
+        // 세션 스토리지에 업데이트 플래그 및 파일 상태 설정
+        sessionStorageUtils.setProjectUpdated(params.projectId as string);
         
-        sessionStorage.setItem(projectUpdateKey, 'true');
-        sessionStorage.setItem(projectUpdateTimeKey, Date.now().toString());
-        
-        // 현재 메모리의 파일 상태를 세션 스토리지에 저장 (TTL 포함)
         if (projectFiles && projectFiles.length > 0) {
-          sessionStorage.setItem(projectFilesKey, JSON.stringify(projectFiles));
-          sessionStorage.setItem(projectFilesTimeKey, Date.now().toString());
+          sessionStorageUtils.setProjectFiles(params.projectId as string, projectFiles);
         } else {
-          sessionStorage.removeItem(projectFilesKey);
-          sessionStorage.removeItem(projectFilesTimeKey);
+          sessionStorageUtils.clearProjectFiles(params.projectId as string);
         }
         
         // 완전한 페이지 새로고침으로 캐시 문제 방지
         window.location.href = `/user-projects/${params.managerId}/${params.projectId}`;
       } else {
         const errorData = await response.json().catch(() => ({}));
-        alert(errorData.message || '프로젝트 수정에 실패했습니다.');
+        showErrorMessage(errorData.message || '프로젝트 수정에 실패했습니다.');
       }
     } catch (error) {
       console.error('프로젝트 수정 실패:', error);
-      alert('프로젝트 수정 중 오류가 발생했습니다.');
+      showErrorMessage('프로젝트 수정 중 오류가 발생했습니다.');
     } finally {
       setSaving(false);
     }
@@ -321,156 +272,48 @@ const UserProjectEditPage = () => {
     }
   };
 
-  // 예산 타입 옵션
-  const budgetOptions = [
-    { value: 'RANGE_1_100', label: '1만원 ~ 100만원' },
-    { value: 'RANGE_100_200', label: '100만원 ~ 200만원' },
-    { value: 'RANGE_200_300', label: '200만원 ~ 300만원' },
-    { value: 'RANGE_300_500', label: '300만원 ~ 500만원' },
-    { value: 'RANGE_500_1000', label: '500만원 ~ 1000만원' },
-    { value: 'RANGE_1000_2000', label: '1000만원 ~ 2000만원' },
-    { value: 'RANGE_2000_3000', label: '2000만원 ~ 3000만원' },
-    { value: 'RANGE_3000_5000', label: '3000만원 ~ 5000만원' },
-    { value: 'RANGE_5000_OVER', label: '5000만원 이상' },
-    { value: 'OVER_1_EUK', label: '1억원 이상' },
-    { value: 'NEGOTIABLE', label: '협의' }
-  ];
 
-  // 지역 옵션
-  const regionOptions = [
-    { value: 'SEOUL', label: '서울' },
-    { value: 'BUSAN', label: '부산' },
-    { value: 'DAEGU', label: '대구' },
-    { value: 'INCHEON', label: '인천' },
-    { value: 'GWANGJU', label: '광주' },
-    { value: 'DAEJEON', label: '대전' },
-    { value: 'ULSAN', label: '울산' },
-    { value: 'SEJONG', label: '세종' },
-    { value: 'GYEONGGI', label: '경기' },
-    { value: 'GANGWON', label: '강원' },
-    { value: 'CHUNGBUK', label: '충북' },
-    { value: 'CHUNGNAM', label: '충남' },
-    { value: 'JEONBUK', label: '전북' },
-    { value: 'JEONNAM', label: '전남' },
-    { value: 'GYEONGBUK', label: '경북' },
-    { value: 'GYEONGNAM', label: '경남' },
-    { value: 'JEJU', label: '제주' },
-    { value: 'OVERSEAS', label: '해외' }
-  ];
-
-  // 기술 스택 옵션 (카테고리별)
-  const techStackCategories = {
-    'Frontend': [
-      { value: 'REACT', label: 'React' },
-      { value: 'VUE', label: 'Vue.js' },
-      { value: 'ANGULAR', label: 'Angular' },
-      { value: 'JAVASCRIPT', label: 'JavaScript' },
-      { value: 'TYPESCRIPT', label: 'TypeScript' },
-      { value: 'HTML', label: 'HTML' },
-      { value: 'CSS', label: 'CSS' },
-      { value: 'SASS', label: 'Sass' },
-      { value: 'TAILWIND_CSS', label: 'Tailwind CSS' },
-      { value: 'NEXT_JS', label: 'Next.js' },
-      { value: 'NUXT_JS', label: 'Nuxt.js' },
-      { value: 'SVELTE', label: 'Svelte' }
-    ],
-    'Backend': [
-      { value: 'SPRING_BOOT', label: 'Spring Boot' },
-      { value: 'SPRING', label: 'Spring' },
-      { value: 'NODE_JS', label: 'Node.js' },
-      { value: 'EXPRESS', label: 'Express.js' },
-      { value: 'DJANGO', label: 'Django' },
-      { value: 'FLASK', label: 'Flask' },
-      { value: 'FAST_API', label: 'FastAPI' },
-      { value: 'JAVA', label: 'Java' },
-      { value: 'PYTHON', label: 'Python' },
-      { value: 'KOTLIN', label: 'Kotlin' },
-      { value: 'GO', label: 'Go' },
-      { value: 'RUST', label: 'Rust' },
-      { value: 'PHP', label: 'PHP' },
-      { value: 'LARAVEL', label: 'Laravel' },
-      { value: 'NEST_JS', label: 'NestJS' }
-    ],
-    'Database': [
-      { value: 'MYSQL', label: 'MySQL' },
-      { value: 'POSTGRESQL', label: 'PostgreSQL' },
-      { value: 'MONGODB', label: 'MongoDB' },
-      { value: 'REDIS', label: 'Redis' },
-      { value: 'ORACLE', label: 'Oracle' },
-      { value: 'MSSQL', label: 'MS SQL' },
-      { value: 'SQLITE', label: 'SQLite' },
-      { value: 'MARIADB', label: 'MariaDB' },
-      { value: 'ELASTICSEARCH', label: 'Elasticsearch' },
-      { value: 'FIREBASE', label: 'Firebase' }
-    ]
-  };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50" style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
-        <div className="max-w-3xl mx-auto p-6" style={{ maxWidth: '48rem', margin: '0 auto', padding: '24px' }}>
-          <div className="bg-white rounded-xl shadow-sm p-8 text-center" style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', padding: '32px', textAlign: 'center' }}>
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4" style={{ animation: 'spin 1s linear infinite', borderRadius: '50%', width: '48px', height: '48px', border: '2px solid transparent', borderBottomColor: '#3b82f6', margin: '0 auto 16px auto' }}></div>
-            <div className="text-gray-600" style={{ color: '#4b5563' }}>프로젝트를 불러오는 중...</div>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="프로젝트를 불러오는 중..." />;
   }
 
   if (error || !project) {
-    return (
-      <div className="min-h-screen bg-gray-50" style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
-        <div className="max-w-3xl mx-auto p-6" style={{ maxWidth: '48rem', margin: '0 auto', padding: '24px' }}>
-          <div className="bg-white rounded-xl shadow-sm p-8 text-center" style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', padding: '32px', textAlign: 'center' }}>
-            <div className="text-red-500 text-lg mb-4" style={{ color: '#ef4444', fontSize: '18px', marginBottom: '16px' }}>{error || '프로젝트를 찾을 수 없습니다.'}</div>
-            <button 
-              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              style={{ padding: '12px 24px', backgroundColor: '#3b82f6', color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer', transition: 'background-color 0.2s' }}
-              onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#2563eb'}
-              onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#3b82f6'}
-              onClick={() => router.back()}
-            >
-              돌아가기
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+    return <ErrorDisplay error={error || '프로젝트를 찾을 수 없습니다.'} onRetry={() => router.back()} retryButtonText="돌아가기" />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50" style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
-      <div className="max-w-3xl mx-auto p-6" style={{ maxWidth: '48rem', margin: '0 auto', padding: '24px' }}>
+    <div className="min-h-screen bg-gray-50" style={formStyles.pageContainer}>
+      <div className="max-w-3xl mx-auto p-6" style={formStyles.contentContainer}>
         {/* 헤더 */}
-        <div className="mb-8" style={{ marginBottom: '32px' }}>
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-4" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
-            <button onClick={() => router.push(`/user-projects/${params.managerId}`)} className="hover:text-blue-600" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit' }}>
+        <div className="mb-8" style={formStyles.headerContainer}>
+          <div className="flex items-center gap-2 text-sm text-gray-500 mb-4" style={formStyles.breadcrumbContainer}>
+            <button onClick={() => router.push(`/user-projects/${params.managerId}`)} className="hover:text-blue-600" style={formStyles.breadcrumbButton}>
               내 프로젝트
             </button>
             <span>›</span>
-            <button onClick={() => router.push(`/user-projects/${params.managerId}/${params.projectId}`)} className="hover:text-blue-600" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit' }}>
+            <button onClick={() => router.push(`/user-projects/${params.managerId}/${params.projectId}`)} className="hover:text-blue-600" style={formStyles.breadcrumbButton}>
               {project.title}
             </button>
             <span>›</span>
             <span className="text-gray-700" style={{ color: '#374151' }}>수정</span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900" style={{ fontSize: '30px', fontWeight: '700', color: '#111827' }}>프로젝트 수정</h1>
+          <h1 className="text-3xl font-bold text-gray-900" style={formStyles.pageTitle}>프로젝트 수정</h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm" style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}>
-          <div className="p-8 space-y-6" style={{ padding: '32px' }}>
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm" style={formStyles.formContainer}>
+          <div className="p-8 space-y-6" style={formStyles.formContent}>
             {/* 프로젝트 제목 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2" style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+              <label className={formClasses.label} style={formStyles.label}>
                 프로젝트 제목 *
               </label>
               <input
                 type="text"
                 value={formData.title || ''}
                 onChange={(e) => handleInputChange('title', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                style={{ width: '100%', padding: '12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
+                className={formClasses.input}
+                style={formStyles.input}
                 placeholder="프로젝트 제목을 입력하세요"
                 required
               />
@@ -583,9 +426,11 @@ const UserProjectEditPage = () => {
                 style={{ width: '100%', padding: '12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
               >
                 <option value="">프로젝트 분야를 선택하세요</option>
-                <option value="PLANNING">기획</option>
-                <option value="DESIGN">디자인</option>
-                <option value="DEVELOPMENT">개발</option>
+                {projectFieldOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -601,8 +446,11 @@ const UserProjectEditPage = () => {
                 style={{ width: '100%', padding: '12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
               >
                 <option value="">모집 유형을 선택하세요</option>
-                <option value="PROJECT_CONTRACT">프로젝트 단위 계약(외주)</option>
-                <option value="PERSONAL_CONTRACT">개인 인력의 기간/시간제 계약(상주)</option>
+                {recruitmentTypeOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -618,11 +466,11 @@ const UserProjectEditPage = () => {
                 style={{ width: '100%', padding: '12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
               >
                 <option value="">파트너 유형을 선택하세요</option>
-                <option value="INDIVIDUAL_FREELANCER">개인 프리랜서를 선호합니다</option>
-                <option value="INDIVIDUAL_OR_TEAM_FREELANCER">개인 또는 팀 프리랜서 선호합니다</option>
-                <option value="BUSINESS_TEAM_OR_COMPANY">사업자가 있는 팀단위 또는 기업을 선호합니다</option>
-                <option value="ANY_TYPE">어떤 형태든 무관합니다</option>
-                <option value="ETC">기타</option>
+                {partnerTypeOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -638,9 +486,11 @@ const UserProjectEditPage = () => {
                 style={{ width: '100%', padding: '12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
               >
                 <option value="">진행 상태를 선택하세요</option>
-                <option value="IDEA_STAGE">아이디어 구상 단계에요.</option>
-                <option value="CONTENT_ORGANIZED">필요한 내용이 정리되었어요.</option>
-                <option value="DETAILED_PLAN">상세 기획서가 있어요.</option>
+                {progressStatusOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -686,32 +536,12 @@ const UserProjectEditPage = () => {
           </div>
 
           {/* 하단 버튼들 */}
-          <div className="px-8 py-6 bg-gray-50 rounded-b-xl border-t border-gray-200 flex gap-4" style={{ 
-            padding: '24px 32px', 
-            backgroundColor: '#f9fafb', 
-            borderTopLeftRadius: '0', 
-            borderTopRightRadius: '0', 
-            borderBottomLeftRadius: '12px', 
-            borderBottomRightRadius: '12px', 
-            borderTop: '1px solid #e5e7eb',
-            display: 'flex',
-            gap: '16px'
-          }}>
+          <div className="px-8 py-6 bg-gray-50 rounded-b-xl border-t border-gray-200 flex gap-4" style={formStyles.buttonContainer}>
             <button
               type="button"
               onClick={() => router.back()}
-              className="flex-1 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors"
-              style={{ 
-                flex: 1,
-                padding: '12px 0', 
-                backgroundColor: '#e5e7eb', 
-                color: '#374151', 
-                fontWeight: '600', 
-                borderRadius: '8px', 
-                border: 'none', 
-                cursor: 'pointer', 
-                transition: 'background-color 0.2s' 
-              }}
+              className={formClasses.cancelButton}
+              style={formStyles.cancelButton(saving)}
               disabled={saving}
             >
               취소
@@ -719,19 +549,8 @@ const UserProjectEditPage = () => {
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ 
-                flex: 1,
-                padding: '12px 0', 
-                backgroundColor: saving ? '#9ca3af' : '#3b82f6', 
-                color: 'white', 
-                fontWeight: '600', 
-                borderRadius: '8px', 
-                border: 'none', 
-                cursor: saving ? 'not-allowed' : 'pointer', 
-                transition: 'background-color 0.2s',
-                opacity: saving ? 0.5 : 1
-              }}
+              className={formClasses.submitButton}
+              style={formStyles.submitButton(saving)}
             >
               {saving ? '저장 중...' : '수정 완료'}
             </button>

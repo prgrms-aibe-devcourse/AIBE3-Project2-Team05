@@ -1,6 +1,14 @@
 "use client";
 
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { components } from '@/lib/backend/schema';
+import {
+  calculateDday,
+  getBudgetTypeText,
+  getProjectFieldText,
+  getRecruitmentTypeText,
+  getStatusText
+} from '@/utils/projectUtils';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -68,90 +76,17 @@ const UserProjectsPage = () => {
     }
   }, [projects, activeStatus]);
 
-  // 예산 타입을 한국어로 변환
-  const getBudgetTypeText = (budgetType?: string) => {
-    const budgetMap: Record<string, string> = {
-      'RANGE_1_100': '1만원 ~ 100만원',
-      'RANGE_100_200': '100만원 ~ 200만원',
-      'RANGE_200_300': '200만원 ~ 300만원',
-      'RANGE_300_500': '300만원 ~ 500만원',
-      'RANGE_500_1000': '500만원 ~ 1000만원',
-      'RANGE_1000_2000': '1000만원 ~ 2000만원',
-      'RANGE_2000_3000': '2000만원 ~ 3000만원',
-      'RANGE_3000_5000': '3000만원 ~ 5000만원',
-      'RANGE_5000_OVER': '5000만원 ~ 1억',
-      'OVER_1_EUK': '1억 이상',
-      'NEGOTIABLE': '협의'
-    };
-    return budgetMap[budgetType || ''] || '미정';
-  };
 
-  // 프로젝트 필드를 한국어로 변환
-  const getProjectFieldText = (field?: string) => {
-    const fieldMap: Record<string, string> = {
-      'PLANNING': '기획',
-      'DESIGN': '디자인',
-      'DEVELOPMENT': '개발'
-    };
-    return fieldMap[field || ''] || field || '';
-  };
 
-  // 모집 형태를 한국어로 변환
-  const getRecruitmentTypeText = (recruitmentType?: string) => {
-    const recruitmentMap: Record<string, string> = {
-      'PROJECT_CONTRACT': '외주',
-      'PERSONAL_CONTRACT': '상주'
-    };
-    return recruitmentMap[recruitmentType || ''] || '';
-  };
 
-  // 지역을 한국어로 변환
-  const getLocationText = (location?: string) => {
-    const locationMap: Record<string, string> = {
-      'SEOUL': '서울',
-      'BUSAN': '부산',
-      'DAEGU': '대구',
-      'INCHEON': '인천',
-      'GWANGJU': '광주',
-      'DAEJEON': '대전',
-      'ULSAN': '울산',
-      'SEJONG': '세종',
-      'GYEONGGI': '경기',
-      'GANGWON': '강원',
-      'CHUNGBUK': '충북',
-      'CHUNGNAM': '충남',
-      'JEONBUK': '전북',
-      'JEONNAM': '전남',
-      'GYEONGBUK': '경북',
-      'GYEONGNAM': '경남',
-      'JEJU': '제주',
-      'OVERSEAS': '해외'
-    };
-    return locationMap[location || ''] || location || '';
-  };
 
-  // 프로젝트 상태를 한국어로 변환
-  const getStatusText = (status?: string) => {
-    const statusMap: Record<string, string> = {
-      'RECRUITING': '모집중',
-      'CONTRACTING': '계약중',
-      'IN_PROGRESS': '진행중',
-      'COMPLETED': '완료',
-      'SUSPENDED': '보류',
-      'CANCELLED': '취소'
-    };
-    return statusMap[status || ''] || status || '';
-  };
 
-  // D-day 계산
-  const calculateDday = (endDate?: string) => {
-    if (!endDate) return '';
-    const today = new Date();
-    const end = new Date(endDate);
-    const diffTime = end.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? `D-${diffDays}` : '마감';
-  };
+
+
+
+
+
+
 
   // 상태별 프로젝트 개수 계산
   const getStatusCount = (status: string) => {
@@ -268,9 +203,7 @@ const UserProjectsPage = () => {
 
         {/* 로딩 상태 */}
         {loading && (
-          <div className="flex justify-center items-center py-16" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '64px 0' }}>
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" style={{ animation: 'spin 1s linear infinite', borderRadius: '50%', width: '48px', height: '48px', border: '2px solid transparent', borderBottomColor: '#3b82f6' }}></div>
-          </div>
+          <LoadingSpinner message="프로젝트를 불러오는 중..." />
         )}
 
         {/* 프로젝트 목록 */}

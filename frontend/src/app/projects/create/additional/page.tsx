@@ -1,6 +1,9 @@
 "use client";
 
+import LoadingSpinner from '@/components/LoadingSpinner';
+import { budgetOptions, partnerTypeOptions, progressStatusOptions, regionOptions, techStackCategories } from '@/constants/projectOptions';
 import { components } from '@/lib/backend/schema';
+import { sessionStorageUtils } from '@/utils/sessionStorageUtils';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -113,11 +116,17 @@ const ProjectCreateAdditionalPage = () => {
         endDate: basicData.endDate,
         managerId: 1, // TODO: 실제 사용자 ID로 교체
         
-        // 추가 정보
-        partnerType: additionalData.partnerType as ProjectRequest['partnerType'] || undefined,
-        progressStatus: additionalData.progressStatus as ProjectRequest['progressStatus'] || undefined,
-        companyLocation: additionalData.companyLocation as ProjectRequest['companyLocation'] || undefined,
-        techNames: additionalData.techNames.length > 0 ? additionalData.techNames : undefined
+        // 추가 정보 (빈 문자열을 undefined로 처리)
+        partnerType: additionalData.partnerType && additionalData.partnerType.trim() 
+          ? additionalData.partnerType as ProjectRequest['partnerType'] 
+          : undefined,
+        progressStatus: additionalData.progressStatus && additionalData.progressStatus.trim() 
+          ? additionalData.progressStatus as ProjectRequest['progressStatus'] 
+          : undefined,
+        companyLocation: additionalData.companyLocation && additionalData.companyLocation.trim() 
+          ? additionalData.companyLocation as ProjectRequest['companyLocation'] 
+          : undefined,
+        techNames: additionalData.techNames && additionalData.techNames.length > 0 ? additionalData.techNames : undefined
       };
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/complete`, {
@@ -158,24 +167,10 @@ const ProjectCreateAdditionalPage = () => {
                 // 업로드 성공한 파일 정보를 세션 스토리지에 저장 (상세 페이지에서 즉시 표시용)
                 const uploadResult = await fileUploadResponse.json();
                 if (uploadResult.data) {
-                  // 기존 파일 리스트 가져오기
-                  const existingFilesKey = `projectFiles_${projectId}`;
-                  const existingFilesTimeKey = `projectFilesTime_${projectId}`;
-                  const existingFilesStr = sessionStorage.getItem(existingFilesKey);
-                  let existingFiles = [];
-                  
-                  try {
-                    existingFiles = existingFilesStr ? JSON.parse(existingFilesStr) : [];
-                  } catch {
-                    existingFiles = [];
-                  }
-                  
-                  // 새 파일 추가
+                  // 기존 파일 리스트에 새 파일 추가
+                  const existingFiles = sessionStorageUtils.getProjectFiles(projectId) || [];
                   existingFiles.push(uploadResult.data);
-                  
-                  // 세션 스토리지에 저장 (30분 TTL)
-                  sessionStorage.setItem(existingFilesKey, JSON.stringify(existingFiles));
-                  sessionStorage.setItem(existingFilesTimeKey, Date.now().toString());
+                  sessionStorageUtils.setProjectFiles(projectId, existingFiles);
                 }
               } else {
                 console.error('파일 업로드 실패:', file.name);
@@ -190,9 +185,8 @@ const ProjectCreateAdditionalPage = () => {
           }
         }
         
-        // 프로젝트 생성 완료 플래그 설정 (상세 페이지에서 새로고침 트리거용)
-        sessionStorage.setItem(`projectUpdated_${projectId}`, 'true');
-        sessionStorage.setItem(`projectUpdateTime_${projectId}`, Date.now().toString());
+        // 프로젝트 생성 완료 플래그 설정
+        sessionStorageUtils.setProjectUpdated(projectId);
         
         // 세션스토리지 정리
         sessionStorage.removeItem('projectBasicData');
@@ -229,99 +223,10 @@ const ProjectCreateAdditionalPage = () => {
     router.push('/projects/create');
   };
 
-  // 지역 옵션
-  const regionOptions = [
-    { value: 'SEOUL', label: '서울' },
-    { value: 'BUSAN', label: '부산' },
-    { value: 'DAEGU', label: '대구' },
-    { value: 'INCHEON', label: '인천' },
-    { value: 'GWANGJU', label: '광주' },
-    { value: 'DAEJEON', label: '대전' },
-    { value: 'ULSAN', label: '울산' },
-    { value: 'SEJONG', label: '세종' },
-    { value: 'GYEONGGI', label: '경기' },
-    { value: 'GANGWON', label: '강원' },
-    { value: 'CHUNGBUK', label: '충북' },
-    { value: 'CHUNGNAM', label: '충남' },
-    { value: 'JEONBUK', label: '전북' },
-    { value: 'JEONNAM', label: '전남' },
-    { value: 'GYEONGBUK', label: '경북' },
-    { value: 'GYEONGNAM', label: '경남' },
-    { value: 'JEJU', label: '제주' },
-    { value: 'OVERSEAS', label: '해외' }
-  ];
 
-  // 기술 스택 옵션 (카테고리별)
-  const techStackCategories = {
-    'Frontend': [
-      { value: 'REACT', label: 'React' },
-      { value: 'VUE', label: 'Vue.js' },
-      { value: 'ANGULAR', label: 'Angular' },
-      { value: 'JAVASCRIPT', label: 'JavaScript' },
-      { value: 'TYPESCRIPT', label: 'TypeScript' },
-      { value: 'HTML', label: 'HTML' },
-      { value: 'CSS', label: 'CSS' },
-      { value: 'SASS', label: 'Sass' },
-      { value: 'TAILWIND_CSS', label: 'Tailwind CSS' },
-      { value: 'NEXT_JS', label: 'Next.js' },
-      { value: 'NUXT_JS', label: 'Nuxt.js' },
-      { value: 'SVELTE', label: 'Svelte' }
-    ],
-    'Backend': [
-      { value: 'SPRING_BOOT', label: 'Spring Boot' },
-      { value: 'SPRING', label: 'Spring' },
-      { value: 'NODE_JS', label: 'Node.js' },
-      { value: 'EXPRESS', label: 'Express.js' },
-      { value: 'DJANGO', label: 'Django' },
-      { value: 'FLASK', label: 'Flask' },
-      { value: 'FAST_API', label: 'FastAPI' },
-      { value: 'JAVA', label: 'Java' },
-      { value: 'PYTHON', label: 'Python' },
-      { value: 'KOTLIN', label: 'Kotlin' },
-      { value: 'GO', label: 'Go' },
-      { value: 'RUST', label: 'Rust' },
-      { value: 'PHP', label: 'PHP' },
-      { value: 'LARAVEL', label: 'Laravel' },
-      { value: 'NEST_JS', label: 'NestJS' }
-    ],
-    'Database': [
-      { value: 'MYSQL', label: 'MySQL' },
-      { value: 'POSTGRESQL', label: 'PostgreSQL' },
-      { value: 'MONGODB', label: 'MongoDB' },
-      { value: 'REDIS', label: 'Redis' },
-      { value: 'ORACLE', label: 'Oracle' },
-      { value: 'MARIADB', label: 'MariaDB' },
-      { value: 'SQLITE', label: 'SQLite' },
-      { value: 'ELASTICSEARCH', label: 'Elasticsearch' },
-      { value: 'FIREBASE', label: 'Firebase' },
-      { value: 'DYNAMODB', label: 'DynamoDB' }
-    ]
-  };
-
-  // 예산 타입 옵션
-  const budgetOptions = [
-    { value: 'RANGE_1_100', label: '1만원 ~ 100만원' },
-    { value: 'RANGE_100_200', label: '100만원 ~ 200만원' },
-    { value: 'RANGE_200_300', label: '200만원 ~ 300만원' },
-    { value: 'RANGE_300_500', label: '300만원 ~ 500만원' },
-    { value: 'RANGE_500_1000', label: '500만원 ~ 1000만원' },
-    { value: 'RANGE_1000_2000', label: '1000만원 ~ 2000만원' },
-    { value: 'RANGE_2000_3000', label: '2000만원 ~ 3000만원' },
-    { value: 'RANGE_3000_5000', label: '3000만원 ~ 5000만원' },
-    { value: 'RANGE_5000_OVER', label: '5000만원 이상' },
-    { value: 'OVER_1_EUK', label: '1억원 이상' },
-    { value: 'NEGOTIABLE', label: '협의' }
-  ];
 
   if (!basicData) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <div className="text-gray-600">데이터를 불러오는 중...</div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="데이터를 불러오는 중..." />;
   }
 
   return (
@@ -348,11 +253,7 @@ const ProjectCreateAdditionalPage = () => {
                   프로젝트 진행 상황은 어떤신가요?
                 </label>
                 <div className="space-y-3" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {[
-                    { value: 'IDEA_STAGE', label: '아이디어 구상 단계에요.', icon: '💡' },
-                    { value: 'CONTENT_ORGANIZED', label: '필요한 내용이 정리되었어요.', icon: '📋' },
-                    { value: 'DETAILED_PLAN', label: '상세 기획서가 있어요.', icon: '📊' }
-                  ].map(option => (
+                  {progressStatusOptions.map(option => (
                     <div
                       key={option.value}
                       onClick={() => handleInputChange('progressStatus', option.value)}
@@ -387,13 +288,7 @@ const ProjectCreateAdditionalPage = () => {
                   선호하시는 파트너의 형태를 알려주세요
                 </label>
                 <div className="space-y-3" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {[
-                    { value: 'INDIVIDUAL_FREELANCER', label: '개인 프리랜서를 선호합니다' },
-                    { value: 'INDIVIDUAL_OR_TEAM_FREELANCER', label: '개인 또는 팀 프리랜서를 선호합니다' },
-                    { value: 'BUSINESS_TEAM_OR_COMPANY', label: '사업자가 있는 팀단위 또는 기업을 선호합니다' },
-                    { value: 'ANY_TYPE', label: '어떤 형태든 무관합니다' },
-                    { value: 'ETC', label: '기타' }
-                  ].map(option => (
+                  {partnerTypeOptions.map(option => (
                     <label key={option.value} className="flex items-center">
                       <input
                         type="radio"
