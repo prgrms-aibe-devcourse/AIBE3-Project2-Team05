@@ -4,6 +4,7 @@ import com.back.domain.freelancer.freelancer.entity.Freelancer;
 
 import java.time.LocalDateTime;
 
+// todo 전면 수정
 public record FreelancerDetailResponseDto(
 
         //Member
@@ -20,9 +21,9 @@ public record FreelancerDetailResponseDto(
         int minMonthlyRate,
         int maxMonthlyRate
 ) {
-    public FreelancerDetailResponseDto(String nickname, Freelancer freelancer) {
+    public FreelancerDetailResponseDto(Freelancer freelancer) {
         this(
-                nickname,
+                freelancer.getMemberNickname(),
                 freelancer.getId(),
                 freelancer.getCreateDate(),
                 freelancer.getModifyDate(),

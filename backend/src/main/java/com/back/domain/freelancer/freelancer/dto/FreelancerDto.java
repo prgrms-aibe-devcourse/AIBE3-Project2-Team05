@@ -4,32 +4,31 @@ import com.back.domain.freelancer.freelancer.entity.Freelancer;
 
 import java.time.LocalDateTime;
 
-public record FreelancerListResponseDto(
+public record FreelancerDto(
 
-        //Member
-        String nickname,
-
-        //Freelancer
         long id,
         LocalDateTime createDate,
         LocalDateTime modifyDate,
+        String nickname,
+        String freelancerTitle,
         String type,
+        String location,
         String content,
         Boolean isOnSite,
-        String location,
         int minMonthlyRate,
         int maxMonthlyRate
 ) {
-    public FreelancerListResponseDto(String nickname, Freelancer freelancer) {
+    public FreelancerDto(Freelancer freelancer) {
         this(
-                nickname,
                 freelancer.getId(),
                 freelancer.getCreateDate(),
                 freelancer.getModifyDate(),
+                freelancer.getMemberNickname(),
+                freelancer.getFreelancerTitle(),
                 freelancer.getType(),
+                freelancer.getLocation(),
                 freelancer.getContent(),
                 freelancer.getIsOnSite(),
-                freelancer.getLocation(),
                 freelancer.getMinMonthlyRate(),
                 freelancer.getMaxMonthlyRate()
         );

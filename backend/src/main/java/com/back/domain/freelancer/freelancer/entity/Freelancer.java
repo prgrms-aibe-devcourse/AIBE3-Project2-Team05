@@ -17,38 +17,38 @@ public class Freelancer extends BaseEntity {
     @OneToOne
     private Member member;
 
+    // Todo member 에서 닉네임 수정 시 동기화 문제
+    private String memberNickname;  //비정규화
+    private String freelancerTitle;
     private String type;
+    private String location;
     private String content;
     private Boolean isOnSite;
-    private String location;
     private int minMonthlyRate;
     private int maxMonthlyRate;
-    private int experienceYears;
-    private double ratingAvg;
-    private int reviewsCount;
-    private int favoritesCount;
+    private double ratingAvg;  //비정규화
+    private int reviewsCount;  //비정규화
+    private int favoritesCount;  //비정규화
+    private int completedProjectsCount; //비정규화
 
-    public Freelancer(Member member, String type, String content, Boolean isOnSite,
-                      String location, int minMonthlyRate, int maxMonthlyRate) {
+    public Freelancer(Member member, String freelancerTitle, String type, String location, String content, Boolean isOnSite, int minMonthlyRate, int maxMonthlyRate) {
         this.member = member;
+        this.memberNickname = member.getNickname();
+        this.freelancerTitle = freelancerTitle;
         this.type = type;
+        this.location = location;
         this.content = content;
         this.isOnSite = isOnSite;
-        this.location = location;
         this.minMonthlyRate = minMonthlyRate;
         this.maxMonthlyRate = maxMonthlyRate;
-        this.experienceYears = 1;
-        this.ratingAvg = 1;
-        this.reviewsCount = 1;
-        this.favoritesCount = 1;
     }
 
-    public void update(String type, String content, Boolean isOnSite,
-                       String location, int minMonthlyRate, int maxMonthlyRate) {
+    public void update(String freelancerTitle, String type, String location, String content, Boolean isOnSite, int minMonthlyRate, int maxMonthlyRate) {
+        this.freelancerTitle = freelancerTitle;
         this.type = type;
+        this.location = location;
         this.content = content;
         this.isOnSite = isOnSite;
-        this.location = location;
         this.minMonthlyRate = minMonthlyRate;
         this.maxMonthlyRate = maxMonthlyRate;
     }

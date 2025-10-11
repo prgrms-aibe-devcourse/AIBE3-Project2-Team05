@@ -2,7 +2,7 @@ package com.back.domain.freelancer.freelancer.service;
 
 import com.back.domain.freelancer.freelancer.dto.FreelancerRequestDto;
 import com.back.domain.freelancer.freelancer.dto.FreelancerDetailResponseDto;
-import com.back.domain.freelancer.freelancer.dto.FreelancerListResponseDto;
+import com.back.domain.freelancer.freelancer.dto.FreelancerDto;
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
 import com.back.domain.member.entity.Member;
@@ -20,14 +20,11 @@ public class FreelancerService {
     private final MemberRepository memberRepository;
 
     @Transactional(readOnly = true)
-    public List<FreelancerListResponseDto> findAll() {
+    public List<FreelancerDto> findAll() {
         List<Freelancer> freelancers = freelancerRepository.findAll();
 
         return freelancers.stream()
-                .map(freelancer -> {
-                    Member member = freelancer.getMember();
-                    return new FreelancerListResponseDto(member.getNickname(), freelancer);
-                })
+                .map(FreelancerDto::new)
                 .toList();
     }
 
@@ -35,18 +32,17 @@ public class FreelancerService {
     public FreelancerDetailResponseDto findById(Long id) {
         Freelancer freelancer = freelancerRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 id 입니다."));
-        Member member = freelancer.getMember();
-        return new FreelancerDetailResponseDto(member.getNickname(), freelancer);
+
+        return new FreelancerDetailResponseDto(freelancer);
     }
 
     @Transactional
-    public Freelancer create(Member member, FreelancerRequestDto dto) {
-        memberRepository.save(member);
-        Freelancer freelancer = new Freelancer(
-                member, dto.type(), dto.content(), dto.isOnSite(), dto.location(),
-                dto.minMonthlyRate(), dto.maxMonthlyRate());
-        freelancerRepository.save(freelancer);
-        return freelancer;
+    public Freelancer create(Long memberId, FreelancerRequestDto dto) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        Freelancer freelancer = new Freelancer(member, dto.freelancerTitle(), dto.type(), dto.location(), dto.content(), dto.isOnSite(), dto.minMonthlyRate(), dto.maxMonthlyRate());
+
+        return freelancerRepository.save(freelancer);
     }
 
     @Transactional
@@ -62,8 +58,7 @@ public class FreelancerService {
     public Long update(Long id, FreelancerRequestDto dto) {
         Freelancer freelancer = freelancerRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 id 입니다."));
-        freelancer.update(dto.type(), dto.content(), dto.isOnSite(), dto.location(),
-                dto.minMonthlyRate(), dto.maxMonthlyRate());
+        freelancer.update(dto.freelancerTitle(), dto.type(), dto.location(), dto.content(), dto.isOnSite(), dto.minMonthlyRate(), dto.maxMonthlyRate());
         return freelancer.getId();
     }
 }
