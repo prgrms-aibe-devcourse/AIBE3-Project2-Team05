@@ -2,9 +2,12 @@ package com.back.domain.freelancer.career.controller;
 
 import com.back.domain.freelancer.career.dto.CareerRequestDto;
 import com.back.domain.freelancer.career.dto.CareerResponseDto;
+import com.back.domain.freelancer.career.entity.Career;
 import com.back.domain.freelancer.career.service.CareerService;
-import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
+import com.back.domain.member.entity.Member;
+import com.back.domain.member.repository.MemberRepository;
+import com.back.global.rsData.RsData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,50 +15,73 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/freelancers/careers")
+@RequestMapping("/api/v1/freelancers")
 public class CareerController {
     private final CareerService careerService;
     private final FreelancerRepository freelancerRepository;
+    private final MemberRepository memberRepository;
 
-    private final Long freelancerId = 27L;
+    // todo 병합 시 삭제
+    public Member setMember() {
+        return memberRepository.findById(34L).get();
+    }
+    // 여기까지 삭제
 
-    @GetMapping
-    public List<CareerResponseDto> getCareers() {
 
-        Freelancer freelancer = freelancerRepository.findById(freelancerId).get(); // todo 인증정보 수정 해야댐
-
-        return careerService.getCareers(freelancer);
+    @GetMapping("/{freelancerId}/careers")
+    public List<CareerResponseDto> getCareers(@PathVariable Long freelancerId) {
+        return careerService.getCareers(freelancerId);
     }
 
-    @GetMapping("/{id}")
-    public CareerResponseDto getCareer(@PathVariable long id) {
 
-        //todo 권한 검증 추가해야댐
+    @PostMapping("/me/careers")
+    public RsData<Void> addCareer(@RequestBody CareerRequestDto dto) {
 
-        return careerService.getCareer(id);
+        //todo 인증정보로 수정 해야함
+        // 여기는 삭제
+        Member member = setMember();
+        Career career =  careerService.create(member.getId(), dto);
+        //
+
+        /* 여기는 추가
+        addCareer(@AuthenticationPrincipal SecurityUser securityUser, @RequestBody CareerRequestDto dto)
+        Career career = careerService.create(securityUser.getId(), dto);
+         */
+
+        return new RsData<>("201-1", "%d번 경력이 생성되었습니다.".formatted(career.getId()));
+
     }
 
-    @PostMapping
-    public long addCareer(@RequestBody CareerRequestDto dto) {
+    @PutMapping("/me/careers/{careerId}")
+    public RsData<Void> updateCareer(@PathVariable long careerId, @RequestBody CareerRequestDto dto) {
+        //todo 인증정보로 수정 해야함
+        // 여기는 삭제
+        Member member = setMember();
+        careerService.update(careerId, member.getId(), dto);
+        //
 
-        Freelancer freelancer = freelancerRepository.findById(freelancerId).get(); // todo 인증정보 수정 해야댐
+        /* 여기는 추가
+        updateCareer(@PathVariable long careerId, @AuthenticationPrincipal SecurityUser securityUser, @RequestBody CareerRequestDto dto)
+        careerService.update(careerId, securityUser.getId(),dto);
+         */
 
-        return careerService.create(freelancer, dto);
+        return new RsData<>("200-1", "%d번 경력이 수정되었습니다.".formatted(careerId));
     }
 
-    @PutMapping("/{id}")
-    public long updateCareer(@PathVariable long id, @RequestBody CareerRequestDto dto) {
+    @DeleteMapping("/me/careers/{careerId}")
+    public RsData<Void> deleteCareer(@PathVariable long careerId) {
 
-        //todo 권한 검증 추가해야댐
+        //todo 인증정보로 수정 해야함
+        // 여기는 삭제
+        Member member = setMember();
+        careerService.delete(careerId, member.getId());
+        //
 
-        return careerService.update(id, dto);
-    }
+        /* 여기는 추가
+        deleteCareer(@PathVariable long careerId, @AuthenticationPrincipal SecurityUser securityUser)
+        careerService.delete(careerId, securityUser.getId());
+         */
 
-    @DeleteMapping("/{id}")
-    public long deleteCareer(@PathVariable long id) {
-
-        //todo 권한 검증 추가해야댐
-
-        return careerService.delete(id);
+        return new RsData<>("200-1", "%d번 경력이 삭제되었습니다.".formatted(careerId));
     }
 }

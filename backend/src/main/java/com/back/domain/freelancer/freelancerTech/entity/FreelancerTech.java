@@ -4,6 +4,7 @@ import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.tech.entity.Tech;
 import com.back.global.jpa.entity.BaseEntity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FreelancerTech extends BaseEntity {
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Freelancer freelancer;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Tech tech;
 
     private String techLevel;

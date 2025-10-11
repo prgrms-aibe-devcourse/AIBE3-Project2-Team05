@@ -3,6 +3,7 @@ package com.back.domain.freelancer.career.dto;
 import java.time.LocalDate;
 
 public record CareerRequestDto(
+        String title,
         String company,
         String position,
         LocalDate startDate,

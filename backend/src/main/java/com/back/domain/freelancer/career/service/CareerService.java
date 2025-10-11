@@ -5,6 +5,7 @@ import com.back.domain.freelancer.career.dto.CareerResponseDto;
 import com.back.domain.freelancer.career.entity.Career;
 import com.back.domain.freelancer.career.repository.CareerRepository;
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
+import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,41 +16,54 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CareerService {
     private final CareerRepository careerRepository;
+    private final FreelancerRepository freelancerRepository;
+
+    private Freelancer findFreelancerByMemberId(Long memberId) {
+        return freelancerRepository.findByMemberId(memberId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+    }
 
     @Transactional(readOnly = true)
-    public List<CareerResponseDto> getCareers(Freelancer freelancer) {
-        List<Career> careers = careerRepository.findAllByFreelancer(freelancer);
+    public List<CareerResponseDto> getCareers(Long freelancerId) {
+        freelancerRepository.findById(freelancerId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 프리랜서 id 입니다."));
+
+        List<Career> careers = careerRepository.findAllByFreelancerId(freelancerId);
 
         return careers.stream()
                 .map(CareerResponseDto::new)
                 .toList();
     }
 
-    @Transactional(readOnly = true)
-    public CareerResponseDto getCareer(long id) {
-        Career career = careerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 id 입니다."));
-
-        return new CareerResponseDto(career);
+    @Transactional
+    public Career create(Long memberId, CareerRequestDto dto) {
+        Freelancer freelancer = findFreelancerByMemberId(memberId);
+        Career career = new Career(freelancer, dto.title(), dto.company(), dto.position(), dto.startDate(), dto.endDate(), dto.current(), dto.description());
+        return careerRepository.save(career);
     }
 
     @Transactional
-    public long create(Freelancer freelancer, CareerRequestDto dto) {
-        Career career = new Career(freelancer, dto.company(), dto.position(), dto.startDate(), dto.endDate(), dto.current(), dto.description());
-        careerRepository.save(career);
-        return career.getId();
-    }
-
-    @Transactional
-    public long update(Long id, CareerRequestDto dto) {
+    public void update(Long id, Long memberId, CareerRequestDto dto) {
+        // 1. career 조회
         Career career = careerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 id 입니다."));
+
+        // 2. 권한 체크 (memberId로 freelancer 조회 후 career의 freelancer와 같은지 확인)
+        Freelancer freelancer = findFreelancerByMemberId(memberId);
+        if (!(career.getFreelancer().getId() == freelancer.getId())) {
+            throw new IllegalArgumentException("권한이 없습니다.");
+        }
+
+        // 3. career 수정
         career.update(dto);
-        return career.getId();
     }
 
     @Transactional
-    public long delete(long id) {
+    public void delete(long id, Long memberId) {
         Career career = careerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 id 입니다."));
+
+        Freelancer freelancer = findFreelancerByMemberId(memberId);
+        if (!(career.getFreelancer().getId() == freelancer.getId())) {
+            throw new IllegalArgumentException("권한이 없습니다.");
+        }
+
         careerRepository.delete(career);
-        return career.getId();
     }
 }

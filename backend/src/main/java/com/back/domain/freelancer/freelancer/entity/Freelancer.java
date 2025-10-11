@@ -1,12 +1,19 @@
 package com.back.domain.freelancer.freelancer.entity;
 
+import com.back.domain.freelancer.career.entity.Career;
+import com.back.domain.freelancer.freelancerTech.entity.FreelancerTech;
+import com.back.domain.freelancer.portfolio.entity.Portfolio;
 import com.back.domain.member.entity.Member;
 import com.back.global.jpa.entity.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @NoArgsConstructor
 @Entity
@@ -14,7 +21,7 @@ import lombok.Setter;
 @Setter
 public class Freelancer extends BaseEntity {
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     private Member member;
 
     // Todo member 에서 닉네임 수정 시 동기화 문제
@@ -30,6 +37,16 @@ public class Freelancer extends BaseEntity {
     private int reviewsCount;  //비정규화
     private int favoritesCount;  //비정규화
     private int completedProjectsCount; //비정규화
+
+    @OneToMany(mappedBy = "freelancer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Portfolio> portfolioList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "freelancer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Career> careerList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "freelancer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<FreelancerTech> techStacks = new HashSet<>();
+
 
     public Freelancer(Member member, String freelancerTitle, String type, String location, String content, Boolean isOnSite, int minMonthlyRate, int maxMonthlyRate) {
         this.member = member;
