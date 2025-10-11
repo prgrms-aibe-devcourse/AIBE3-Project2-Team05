@@ -60,17 +60,78 @@ const UserProjectEditPage = () => {
       
       setLoading(true);
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}`);
-        if (response.ok) {        const data: ProjectResponse = await response.json();
-        setProject(data);
+        // 캐시 방지를 위한 타임스탬프 추가
+        const timestamp = new Date().getTime();
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}?_t=${timestamp}`, {
+          cache: 'no-store', // Next.js 캐시 방지
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate', // 브라우저 캐시 방지
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        });
         
-        // 디버깅 로그 추가
-        console.log('프로젝트 데이터 구조 확인:', data);
-        console.log('기술 스택 데이터:', data.techStacks);
-        console.log('파일 데이터:', data.projectFiles);
-        
-        // ProjectFileManager를 위한 파일 상태 초기화
-        setProjectFiles(data.projectFiles || []);
+        if (response.ok) {
+          const data: ProjectResponse = await response.json();
+          
+          // 디버깅 로그 추가
+          console.log('프로젝트 데이터 구조 확인:', data);
+          console.log('기술 스택 데이터:', data.techStacks);
+          console.log('파일 데이터:', data.projectFiles);
+          
+          // 세션 스토리지에서 파일 상태 복원 시도 (TTL 확인 포함)
+          const projectFilesKey = `projectFiles_${params.projectId}`;
+          const projectFilesTimeKey = `projectFilesTime_${params.projectId}`;
+          const savedFilesStr = sessionStorage.getItem(projectFilesKey);
+          const savedFilesTime = sessionStorage.getItem(projectFilesTimeKey);
+          
+          let finalFiles: FileItem[] = [];
+          
+          // TTL 확인 (30분 = 1800000ms)
+          const TTL = 30 * 60 * 1000;
+          const isSessionValid = savedFilesTime && (Date.now() - parseInt(savedFilesTime)) < TTL;
+          
+          if (savedFilesStr && isSessionValid) {
+            try {
+              const savedFiles = JSON.parse(savedFilesStr) as FileItem[];
+              // API 응답에 파일이 없고 세션스토리지에는 있으면 세션스토리지 우선
+              if (!data.projectFiles || data.projectFiles.length === 0) {
+                finalFiles = savedFiles;
+                console.log('세션 스토리지에서 파일 복원:', savedFiles);
+              } else {
+                // API 응답에 파일이 있으면 API 응답 우선하고 세션스토리지 제거
+                finalFiles = data.projectFiles;
+                sessionStorage.removeItem(projectFilesKey);
+                sessionStorage.removeItem(projectFilesTimeKey);
+                console.log('API 응답 파일 사용:', data.projectFiles);
+              }
+            } catch (e) {
+              console.error('세션 스토리지 파일 상태 파싱 실패:', e);
+              finalFiles = data.projectFiles || [];
+              // 파싱 실패 시 세션 스토리지 정리
+              sessionStorage.removeItem(projectFilesKey);
+              sessionStorage.removeItem(projectFilesTimeKey);
+            }
+          } else {
+            // 세션 스토리지가 없거나 만료된 경우
+            finalFiles = data.projectFiles || [];
+            console.log('API 응답 파일만 사용:', data.projectFiles);
+            
+            // 만료된 세션 스토리지 정리
+            if (savedFilesStr && !isSessionValid) {
+              sessionStorage.removeItem(projectFilesKey);
+              sessionStorage.removeItem(projectFilesTimeKey);
+            }
+          }
+          
+          setProject({
+            ...data,
+            projectFiles: finalFiles
+          });
+          
+          // ProjectFileManager를 위한 파일 상태 초기화
+          setProjectFiles(finalFiles);
+          console.log('최종 설정된 파일:', finalFiles);
         
         // 폼 데이터 초기화
         setFormData({
