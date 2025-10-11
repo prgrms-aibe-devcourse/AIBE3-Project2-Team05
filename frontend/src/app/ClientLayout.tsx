@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
 
 const navItems = [
   { name: "홈", href: "/" },
@@ -16,6 +17,11 @@ export default function ClientLayout({
   children: React.ReactNode
 }>) {
   const pathname = usePathname()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(145deg, #f1f5f9 0%, #e0e7ff 100%)' }}>
@@ -43,27 +49,30 @@ export default function ClientLayout({
 
             {/* Navigation Bar - Right aligned with separators and more spacing */}
             <nav className="flex items-center space-x-8">
-              {navItems.map((item, index) => (
-                <div key={item.name + index} className="flex items-center space-x-1">
-                  <Link
-                    href={item.href}
-                    className={`px-6 py-3 rounded-xl text-base font-semibold transition-all duration-300 ${
-                      pathname === item.href
-                        ? "text-white shadow-md bg-gradient-to-r from-blue-500 to-purple-500"
-                        : "text-gray-700 hover:text-gray-900 hover:bg-gray-100/50"
-                    }`}
-                    style={{
-                      fontFamily: '"Poppins", "Noto Sans KR", sans-serif',
-                      letterSpacing: '-0.025em',
-                    }}
-                  >
-                    {item.name}
-                  </Link>
-                  {index < navItems.length - 1 && (
-                    <span className="text-gray-300 font-bold text-sm px-2">/</span>
-                  )}
-                </div>
-              ))}
+              {navItems.map((item, index) => {
+                const isActive = mounted ? pathname === item.href : false
+                return (
+                  <div key={item.name + index} className="flex items-center space-x-1">
+                    <Link
+                      href={item.href}
+                      className={`px-6 py-3 rounded-xl text-base font-semibold transition-all duration-300 ${
+                        isActive
+                          ? "text-white shadow-md bg-gradient-to-r from-blue-500 to-purple-500"
+                          : "text-gray-700 hover:text-gray-900 hover:bg-gray-100/50"
+                      }`}
+                      style={{
+                        fontFamily: '"Poppins", "Noto Sans KR", sans-serif',
+                        letterSpacing: '-0.025em',
+                      }}
+                    >
+                      {item.name}
+                    </Link>
+                    {index < navItems.length - 1 && (
+                      <span className="text-gray-300 font-bold text-sm px-2">/</span>
+                    )}
+                  </div>
+                )
+              })}
             </nav>
           </div>
         </div>
