@@ -4,6 +4,12 @@ import ErrorDisplay from '@/components/ErrorDisplay';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { components } from '@/lib/backend/schema';
 import {
+  canPreviewFile,
+  getFileIcon,
+  handleFileDownload,
+  handleFilePreview
+} from '@/utils/filePreviewUtils';
+import {
   calculateDday,
   formatFileSize,
   getBudgetTypeText,
@@ -119,16 +125,7 @@ const ProjectDetailPage = () => {
     }
   };
 
-  // 파일 다운로드 함수
-  const handleFileDownload = (fileId: number, fileName: string) => {
-    const downloadUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${project?.id}/files/${fileId}/download`;
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+
 
   // 통합 파일 목록 가져오기
   const getDisplayFiles = () => {
@@ -388,8 +385,8 @@ const ProjectDetailPage = () => {
             <div className="space-y-4" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {getDisplayFiles().map((file) => (
                 <div key={file.id} className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors" style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', border: '1px solid #e5e7eb', borderRadius: '12px', transition: 'background-color 0.2s' }}>
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-xl" style={{ width: '48px', height: '48px', backgroundColor: '#dbeafe', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', fontSize: '20px' }}>
-                    📄
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl" style={{ width: '48px', height: '48px', backgroundColor: '#dbeafe', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
+                    {getFileIcon(file.originalName)}
                   </div>
                   <div className="flex-1" style={{ flex: 1 }}>
                     <div className="font-semibold text-gray-900 mb-1" style={{ fontWeight: '600', color: '#111827', marginBottom: '4px' }}>{file.originalName}</div>
@@ -400,15 +397,28 @@ const ProjectDetailPage = () => {
                       )}
                     </div>
                   </div>
-                  <button
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium transition-colors"
-                    style={{ padding: '8px 16px', backgroundColor: '#3b82f6', color: 'white', borderRadius: '8px', fontWeight: '500', border: 'none', cursor: 'pointer', transition: 'background-color 0.2s' }}
-                    onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#2563eb'}
-                    onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#3b82f6'}
-                    onClick={() => handleFileDownload(file.id, file.originalName)}
-                  >
-                    다운로드
-                  </button>
+                  <div className="flex gap-2" style={{ display: 'flex', gap: '8px' }}>
+                    {canPreviewFile(file.originalName) && (
+                      <button
+                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors"
+                        style={{ padding: '8px 16px', backgroundColor: '#f3f4f6', color: '#374151', borderRadius: '8px', fontWeight: '500', border: 'none', cursor: 'pointer', transition: 'background-color 0.2s' }}
+                        onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#e5e7eb'}
+                        onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#f3f4f6'}
+                        onClick={() => handleFilePreview(project?.id?.toString() || '', file.id)}
+                      >
+                        미리보기
+                      </button>
+                    )}
+                    <button
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium transition-colors"
+                      style={{ padding: '8px 16px', backgroundColor: '#3b82f6', color: 'white', borderRadius: '8px', fontWeight: '500', border: 'none', cursor: 'pointer', transition: 'background-color 0.2s' }}
+                      onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#2563eb'}
+                      onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#3b82f6'}
+                      onClick={() => handleFileDownload(project?.id?.toString() || '', file.id, file.originalName)}
+                    >
+                      다운로드
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

@@ -1,6 +1,12 @@
 "use client";
 
 import { components } from '@/lib/backend/schema';
+import {
+    canPreviewFile,
+    getFileIcon,
+    handleFileDownload,
+    handleFilePreview
+} from '@/utils/filePreviewUtils';
 import { useEffect, useState } from 'react';
 
 type ProjectFile = components['schemas']['ProjectFile'];
@@ -134,16 +140,7 @@ const ProjectFileManager = ({
         }
     };
 
-    // 파일 다운로드 함수
-    const handleFileDownload = (fileId: number, fileName: string) => {
-        const downloadUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${projectId}/files/${fileId}/download`;
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
+
 
     return (
         <div>
@@ -217,7 +214,7 @@ const ProjectFileManager = ({
                         {currentFiles.map((file, index) => (
                             <div key={file.id || `file-${index}-${file.originalName}`} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
                                 <div className="flex items-center gap-3">
-                                    <div className="text-blue-500 text-lg">📄</div>
+                                    <div className="text-2xl">{getFileIcon(file.originalName || '')}</div>
                                     <div>
                                         <div className="text-sm font-medium text-gray-900">
                                             {file.originalName}
@@ -228,12 +225,27 @@ const ProjectFileManager = ({
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
+                                    {/* 미리보기 버튼 */}
+                                    {file.originalName && canPreviewFile(file.originalName) && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (file.id) {
+                                                    handleFilePreview(projectId, file.id);
+                                                }
+                                            }}
+                                            className="text-gray-500 hover:text-gray-700 text-sm font-medium"
+                                        >
+                                            미리보기
+                                        </button>
+                                    )}
+                                    
                                     {/* 다운로드 버튼 */}
                                     <button
                                         type="button"
                                         onClick={() => {
                                             if (file.id && file.originalName) {
-                                                handleFileDownload(file.id, file.originalName);
+                                                handleFileDownload(projectId, file.id, file.originalName);
                                             }
                                         }}
                                         className="text-blue-500 hover:text-blue-700 text-sm font-medium"
