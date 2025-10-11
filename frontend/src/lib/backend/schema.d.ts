@@ -30,7 +30,7 @@ export interface paths {
         get: operations["getProjectById"];
         put: operations["updateProject"];
         post?: never;
-        delete?: never;
+        delete: operations["deleteProject"];
         options?: never;
         head?: never;
         patch?: never;
@@ -226,6 +226,22 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["updateProjectStatus"];
+        trace?: never;
+    };
+    "/api/projects/{id}/status/legacy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["updateProjectStatusLegacy"];
         trace?: never;
     };
     "/api/projects/{id}/start": {
@@ -468,6 +484,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/projects/manager/{managerId}/simple": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getProjectsByManagerIdSimple"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/projects/manager/{managerId}/project/{id}": {
         parameters: {
             query?: never;
@@ -478,7 +510,7 @@ export interface paths {
         get: operations["getProjectByIdForManager"];
         put?: never;
         post?: never;
-        delete?: never;
+        delete: operations["deleteProjectForManager"];
         options?: never;
         head?: never;
         patch?: never;
@@ -746,7 +778,6 @@ export interface components {
             projectTechs?: components["schemas"]["ProjectTech"][];
             projectFiles?: components["schemas"]["ProjectFile"][];
             projectFavorites?: components["schemas"]["ProjectFavorite"][];
-            statusHistories?: components["schemas"]["ProjectStatusHistory"][];
         };
         ProjectFavorite: {
             /** Format: int64 */
@@ -772,20 +803,6 @@ export interface components {
             /** Format: date-time */
             uploadDate?: string;
         };
-        ProjectStatusHistory: {
-            /** Format: int64 */
-            id?: number;
-            /** Format: int64 */
-            projectId?: number;
-            /** @enum {string} */
-            previousStatus?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
-            /** @enum {string} */
-            currentStatus?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
-            /** Format: int64 */
-            changedById?: number;
-            /** Format: date-time */
-            changeDate?: string;
-        };
         ProjectTech: {
             /** Format: int64 */
             id?: number;
@@ -796,6 +813,12 @@ export interface components {
             techName?: string;
             /** Format: date-time */
             createDate?: string;
+        };
+        ApiResponseProject: {
+            success?: boolean;
+            message?: string;
+            data?: components["schemas"]["Project"];
+            error?: string;
         };
         ProjectRequest: {
             title?: string;
@@ -824,6 +847,12 @@ export interface components {
             techNames?: string[];
             attachmentFileIds?: number[];
             filesToDelete?: number[];
+        };
+        ApiResponseProjectResponse: {
+            success?: boolean;
+            message?: string;
+            data?: components["schemas"]["ProjectResponse"];
+            error?: string;
         };
         ProjectFileInfo: {
             /** Format: int64 */
@@ -873,30 +902,59 @@ export interface components {
             modifyDate?: string;
             techStacks?: components["schemas"]["TechInfo"][];
             projectFiles?: components["schemas"]["ProjectFileInfo"][];
-            statusHistories?: components["schemas"]["ProjectStatusHistory"][];
         };
         TechInfo: {
             techName?: string;
             /** @enum {string} */
             techCategory?: "FRONTEND" | "BACKEND" | "DATABASE";
         };
+        ApiResponseProjectFile: {
+            success?: boolean;
+            message?: string;
+            data?: components["schemas"]["ProjectFile"];
+            error?: string;
+        };
+        ApiResponseListProjectFile: {
+            success?: boolean;
+            message?: string;
+            data?: components["schemas"]["ProjectFile"][];
+            error?: string;
+        };
+        ApiResponseProjectFavorite: {
+            success?: boolean;
+            message?: string;
+            data?: components["schemas"]["ProjectFavorite"];
+            error?: string;
+        };
+        ApiResponseFavoriteToggleResult: {
+            success?: boolean;
+            message?: string;
+            data?: components["schemas"]["FavoriteToggleResult"];
+            error?: string;
+        };
         FavoriteToggleResult: {
             favorite?: components["schemas"]["ProjectFavorite"];
             added?: boolean;
+        };
+        ProjectStatusChangeRequest: {
+            /** @enum {string} */
+            status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
+            /** Format: int64 */
+            changedById?: number;
         };
         PageProjectResponse: {
             /** Format: int64 */
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["ProjectResponse"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            first?: boolean;
-            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
             pageable?: components["schemas"]["PageableObject"];
@@ -907,9 +965,9 @@ export interface components {
             offset?: number;
             sort?: components["schemas"]["SortObject"];
             /** Format: int32 */
-            pageSize?: number;
-            /** Format: int32 */
             pageNumber?: number;
+            /** Format: int32 */
+            pageSize?: number;
             paged?: boolean;
             unpaged?: boolean;
         };
@@ -923,14 +981,14 @@ export interface components {
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["Project"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            first?: boolean;
-            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
             pageable?: components["schemas"]["PageableObject"];
@@ -965,18 +1023,24 @@ export interface components {
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["ProjectFavorite"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            first?: boolean;
-            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
             pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
+        };
+        ApiResponseVoid: {
+            success?: boolean;
+            message?: string;
+            data?: unknown;
+            error?: string;
         };
     };
     responses: never;
@@ -1098,7 +1162,31 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["Project"];
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProject"];
+                };
+            };
+        };
+    };
+    deleteProject: {
+        parameters: {
+            query: {
+                requesterId: number;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseVoid"];
                 };
             };
         };
@@ -1124,7 +1212,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": Record<string, never>;
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProjectResponse"];
                 };
             };
         };
@@ -1226,7 +1314,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["Project"];
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProject"];
                 };
             };
         };
@@ -1255,7 +1343,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ProjectFile"];
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProjectFile"];
                 };
             };
         };
@@ -1279,7 +1367,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ProjectFile"][];
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseListProjectFile"];
                 };
             };
         };
@@ -1303,7 +1391,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ProjectResponse"];
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProjectResponse"];
                 };
             };
         };
@@ -1327,7 +1415,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ProjectResponse"];
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProjectResponse"];
                 };
             };
         };
@@ -1373,7 +1461,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ProjectFavorite"];
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProjectFavorite"];
                 };
             };
         };
@@ -1395,7 +1483,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseVoid"];
+                };
             };
         };
     };
@@ -1417,7 +1507,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["FavoriteToggleResult"];
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseFavoriteToggleResult"];
                 };
             };
         };
@@ -1442,7 +1532,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ProjectFile"];
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProjectFile"];
                 };
             };
         };
@@ -1466,16 +1556,42 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["Project"];
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProject"];
                 };
             };
         };
     };
     updateProjectStatus: {
         parameters: {
-            query: {
-                status: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
-                changedById: number;
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectStatusChangeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProject"];
+                };
+            };
+        };
+    };
+    updateProjectStatusLegacy: {
+        parameters: {
+            query?: {
+                status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
+                changedById?: number;
             };
             header?: never;
             path: {
@@ -1491,7 +1607,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["Project"];
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProject"];
                 };
             };
         };
@@ -1515,7 +1631,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["Project"];
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProject"];
                 };
             };
         };
@@ -1539,7 +1655,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["Project"];
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProject"];
                 };
             };
         };
@@ -1563,7 +1679,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["Project"];
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProject"];
                 };
             };
         };
@@ -1587,7 +1703,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["Project"];
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProject"];
                 };
             };
         };
@@ -1613,7 +1729,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ProjectResponse"];
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProjectResponse"];
                 };
             };
         };
@@ -1724,7 +1840,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseVoid"];
+                };
             };
         };
     };
@@ -1856,6 +1974,42 @@ export interface operations {
     };
     getProjectsByManagerId: {
         parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+                search?: string;
+                status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
+                projectField?: "PLANNING" | "DESIGN" | "DEVELOPMENT";
+                recruitmentType?: "PROJECT_CONTRACT" | "PERSONAL_CONTRACT";
+                partnerType?: "INDIVIDUAL_FREELANCER" | "INDIVIDUAL_OR_TEAM_FREELANCER" | "BUSINESS_TEAM_OR_COMPANY" | "ANY_TYPE" | "ETC";
+                budgetType?: "RANGE_1_100" | "RANGE_100_200" | "RANGE_200_300" | "RANGE_300_500" | "RANGE_500_1000" | "RANGE_1000_2000" | "RANGE_2000_3000" | "RANGE_3000_5000" | "RANGE_5000_OVER" | "OVER_1_EUK" | "NEGOTIABLE";
+                minBudget?: number;
+                maxBudget?: number;
+                location?: string;
+                techNames?: string[];
+                sortBy?: string;
+            };
+            header?: never;
+            path: {
+                managerId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["PageProjectResponse"];
+                };
+            };
+        };
+    };
+    getProjectsByManagerIdSimple: {
+        parameters: {
             query?: never;
             header?: never;
             path: {
@@ -1895,6 +2049,29 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["ProjectResponse"];
+                };
+            };
+        };
+    };
+    deleteProjectForManager: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                managerId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseVoid"];
                 };
             };
         };
@@ -2127,7 +2304,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseVoid"];
+                };
             };
         };
     };
@@ -2147,7 +2326,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseVoid"];
+                };
             };
         };
     };
@@ -2167,7 +2348,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseVoid"];
+                };
             };
         };
     };
