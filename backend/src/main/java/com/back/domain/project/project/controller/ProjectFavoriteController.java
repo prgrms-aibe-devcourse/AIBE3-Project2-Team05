@@ -15,6 +15,7 @@ import java.util.Map;
 @RequestMapping("/api/projects/favorites")
 @RequiredArgsConstructor
 @Slf4j
+@CrossOrigin(origins = "*")
 public class ProjectFavoriteController {
 
     private final ProjectFavoriteService projectFavoriteService;
