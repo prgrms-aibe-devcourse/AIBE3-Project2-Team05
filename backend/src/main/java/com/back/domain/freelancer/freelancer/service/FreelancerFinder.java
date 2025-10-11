@@ -15,4 +15,8 @@ public class FreelancerFinder {
     public Freelancer findFreelancerByMemberId(Long memberId) {
         return freelancerRepository.findByMemberId(memberId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
     }
+
+    public Freelancer findFreelancerById(Long freelancerId) {
+        return freelancerRepository.findById(freelancerId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 프리랜서입니다."));
+    }
 }

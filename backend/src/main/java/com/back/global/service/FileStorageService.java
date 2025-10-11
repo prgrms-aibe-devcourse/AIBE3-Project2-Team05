@@ -43,6 +43,26 @@ public class FileStorageService {
         return baseUrl + storedFileName;    // 저장된 파일의 접근 URL 반환
     }
 
+    public String updateFile(String existingImageUrl, MultipartFile newImageFile, Boolean deleteExistingImage) throws IOException {
+        String updatedImageUrl = existingImageUrl;
+
+        try {
+            if (newImageFile != null && !newImageFile.isEmpty()) {  // 새로운 이미지가 넘어왔는데
+                if (existingImageUrl != null) { // 기존 이미지가 있다면
+                    deleteFile(existingImageUrl);  //기존 이미지 삭제 후
+                }
+                updatedImageUrl = saveFile(newImageFile);  //새로운 이미지 저장
+            } else if (deleteExistingImage && existingImageUrl != null) { // 기존 이미지를 삭제하라는 요청이 왔고, 기존 이미지가 있다면
+                deleteFile(existingImageUrl);    // 기존 이미지 삭제 후
+                updatedImageUrl = null; // URL은 null로 지정
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("파일 처리 중 오류가 발생했습니다.", e);
+        }
+
+        return updatedImageUrl;
+    }
+
 
     public void deleteFile(String fileUrl) {
         if (fileUrl == null || fileUrl.isEmpty()) { // 파일 URL이 없으면 삭제할 필요 없음

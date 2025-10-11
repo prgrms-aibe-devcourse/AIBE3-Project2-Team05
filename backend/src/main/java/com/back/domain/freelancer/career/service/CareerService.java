@@ -45,9 +45,7 @@ public class CareerService {
 
         // 2. 권한 체크 (memberId로 freelancer 조회 후 career의 freelancer와 같은지 확인)
         Freelancer freelancer = freelancerFinder.findFreelancerByMemberId(memberId);
-        if (!(career.getFreelancer().getId() == freelancer.getId())) {
-            throw new IllegalArgumentException("권한이 없습니다.");
-        }
+        freelancer.checkCanUpdateOrDelete(career.getFreelancer().getId());
 
         // 3. career 수정
         career.update(dto);
@@ -58,9 +56,7 @@ public class CareerService {
         Career career = careerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 id 입니다."));
 
         Freelancer freelancer = freelancerFinder.findFreelancerByMemberId(memberId);
-        if (!(career.getFreelancer().getId() == freelancer.getId())) {
-            throw new IllegalArgumentException("권한이 없습니다.");
-        }
+        freelancer.checkCanUpdateOrDelete(career.getFreelancer().getId());
 
         careerRepository.delete(career);
     }

@@ -49,7 +49,7 @@ public class FreelancerTechController {
         return new RsData<>("201-1", "기술 스택이 추가되었습니다.", new FreelancerTechDto(freelancerTech));
     }
 
-    @PutMapping("/me/techs/{id}")
+    @PatchMapping("/me/techs/{id}")
     public RsData<Void> updateMyTech(@PathVariable long id, @RequestBody FreelancerTechUpdateDto dto) {
 
         //todo 인증정보로 수정 해야함

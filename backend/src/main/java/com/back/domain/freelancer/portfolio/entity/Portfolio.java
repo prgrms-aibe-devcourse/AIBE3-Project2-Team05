@@ -20,17 +20,17 @@ public class Portfolio extends BaseEntity {
     private Freelancer freelancer;
 
     private String title;
-    private String summary;
+    private String description;
     private LocalDate startDate;
     private LocalDate endDate;
     private int contribution;
     private String imageUrl;
     private String externalUrl;
 
-    public Portfolio(Freelancer freelancer, String title, String summary, LocalDate startDate, LocalDate endDate, int contribution, String imageUrl, String externalUrl) {
+    public Portfolio(Freelancer freelancer, String title, String description, LocalDate startDate, LocalDate endDate, int contribution, String imageUrl, String externalUrl) {
         this.freelancer = freelancer;
         this.title = title;
-        this.summary = summary;
+        this.description = description;
         this.startDate = startDate;
         this.endDate = endDate;
         this.contribution = contribution;
@@ -40,7 +40,7 @@ public class Portfolio extends BaseEntity {
 
     public void update(PortfolioUpdateRequestDto dto, String imageUrl) {
         this.title = dto.title();
-        this.summary = dto.summary();
+        this.description = dto.description();
         this.startDate = dto.startDate();
         this.endDate = dto.endDate();
         this.contribution = dto.contribution();

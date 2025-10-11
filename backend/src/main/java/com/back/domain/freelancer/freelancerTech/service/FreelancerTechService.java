@@ -23,7 +23,7 @@ public class FreelancerTechService {
 
     @Transactional(readOnly = true)
     public List<FreelancerTechDto> findTechsByFreelancerId(Long freelancerId) {
-        freelancerFinder.findFreelancerByMemberId(freelancerId);    // 프리랜서 존재 여부 확인
+        freelancerFinder.findFreelancerById(freelancerId); // 프리랜서 존재 여부 확인
 
         List<FreelancerTech> freelancerTechs = freelancerTechRepository.findByFreelancerId(freelancerId);
         return freelancerTechs.stream()
@@ -50,9 +50,7 @@ public class FreelancerTechService {
         FreelancerTech freelancerTech = freelancerTechRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 기술입니다"));
 
         Freelancer freelancer = freelancerFinder.findFreelancerByMemberId(memberId);
-        if(!(freelancerTech.getFreelancer().getId() == freelancer.getId())) {
-            throw new IllegalArgumentException("권한이 없습니다.");
-        }
+        freelancer.checkCanUpdateOrDelete(freelancerTech.getFreelancer().getId());
 
         freelancerTech.update(techLevel);
     }
@@ -62,9 +60,7 @@ public class FreelancerTechService {
         FreelancerTech freelancerTech = freelancerTechRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 기술입니다"));
 
         Freelancer freelancer = freelancerFinder.findFreelancerByMemberId(memberId);
-        if(!(freelancerTech.getFreelancer().getId() == freelancer.getId())) {
-            throw new IllegalArgumentException("권한이 없습니다.");
-        }
+        freelancer.checkCanUpdateOrDelete(freelancerTech.getFreelancer().getId());
 
         freelancerTechRepository.deleteById(id);
     }

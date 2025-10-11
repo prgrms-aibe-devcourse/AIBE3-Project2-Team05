@@ -70,4 +70,10 @@ public class Freelancer extends BaseEntity {
         this.maxMonthlyRate = maxMonthlyRate;
     }
 
+    public void checkCanUpdateOrDelete(Long freelancerId) {
+        if (this.getId() != freelancerId) {
+            throw new IllegalArgumentException("권한이 없습니다.");
+        }
+    }
+
 }

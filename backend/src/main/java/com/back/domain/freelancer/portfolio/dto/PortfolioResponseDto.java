@@ -7,7 +7,7 @@ import java.time.LocalDate;
 public record PortfolioResponseDto(
         Long id,
         String title,
-        String summary,
+        String description,
         LocalDate startDate,
         LocalDate endDate,
         int contribution,
@@ -18,7 +18,7 @@ public record PortfolioResponseDto(
         this(
                 portfolio.getId(),
                 portfolio.getTitle(),
-                portfolio.getSummary(),
+                portfolio.getDescription(),
                 portfolio.getStartDate(),
                 portfolio.getEndDate(),
                 portfolio.getContribution(),

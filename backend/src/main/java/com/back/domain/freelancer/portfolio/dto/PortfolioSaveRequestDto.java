@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public record PortfolioSaveRequestDto(
         String title,
-        String summary,
+        String description,
         LocalDate startDate,
         LocalDate endDate,
         int contribution,
