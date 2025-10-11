@@ -27,4 +27,8 @@ public class FreelancerTech extends BaseEntity {
         this.tech = tech;
         this.techLevel = techLevel;
     }
+
+    public void update(String techLevel) {
+        this.techLevel = techLevel;
+    }
 }

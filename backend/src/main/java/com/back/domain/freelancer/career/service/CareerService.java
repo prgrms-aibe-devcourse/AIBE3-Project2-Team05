@@ -6,6 +6,7 @@ import com.back.domain.freelancer.career.entity.Career;
 import com.back.domain.freelancer.career.repository.CareerRepository;
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
+import com.back.domain.freelancer.freelancer.service.FreelancerFinder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,10 +18,7 @@ import java.util.List;
 public class CareerService {
     private final CareerRepository careerRepository;
     private final FreelancerRepository freelancerRepository;
-
-    private Freelancer findFreelancerByMemberId(Long memberId) {
-        return freelancerRepository.findByMemberId(memberId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-    }
+    private final FreelancerFinder freelancerFinder;
 
     @Transactional(readOnly = true)
     public List<CareerResponseDto> getCareers(Long freelancerId) {
@@ -35,7 +33,7 @@ public class CareerService {
 
     @Transactional
     public Career create(Long memberId, CareerRequestDto dto) {
-        Freelancer freelancer = findFreelancerByMemberId(memberId);
+        Freelancer freelancer = freelancerFinder.findFreelancerByMemberId(memberId);
         Career career = new Career(freelancer, dto.title(), dto.company(), dto.position(), dto.startDate(), dto.endDate(), dto.current(), dto.description());
         return careerRepository.save(career);
     }
@@ -46,7 +44,7 @@ public class CareerService {
         Career career = careerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 id 입니다."));
 
         // 2. 권한 체크 (memberId로 freelancer 조회 후 career의 freelancer와 같은지 확인)
-        Freelancer freelancer = findFreelancerByMemberId(memberId);
+        Freelancer freelancer = freelancerFinder.findFreelancerByMemberId(memberId);
         if (!(career.getFreelancer().getId() == freelancer.getId())) {
             throw new IllegalArgumentException("권한이 없습니다.");
         }
@@ -59,7 +57,7 @@ public class CareerService {
     public void delete(long id, Long memberId) {
         Career career = careerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 id 입니다."));
 
-        Freelancer freelancer = findFreelancerByMemberId(memberId);
+        Freelancer freelancer = freelancerFinder.findFreelancerByMemberId(memberId);
         if (!(career.getFreelancer().getId() == freelancer.getId())) {
             throw new IllegalArgumentException("권한이 없습니다.");
         }

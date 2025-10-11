@@ -1,53 +1,86 @@
 package com.back.domain.freelancer.freelancerTech.controller;
 
-import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
 import com.back.domain.freelancer.freelancerTech.dto.FreelancerTechAddDto;
-import com.back.domain.freelancer.freelancerTech.dto.FreelancerTechListResponseDto;
-import com.back.domain.freelancer.freelancerTech.dto.MyTechListResponseDto;
+import com.back.domain.freelancer.freelancerTech.dto.FreelancerTechDto;
+import com.back.domain.freelancer.freelancerTech.dto.FreelancerTechUpdateDto;
+import com.back.domain.freelancer.freelancerTech.entity.FreelancerTech;
 import com.back.domain.freelancer.freelancerTech.service.FreelancerTechService;
-import com.back.domain.tech.service.TechService;
+import com.back.domain.member.entity.Member;
+import com.back.domain.member.repository.MemberRepository;
+import com.back.global.rsData.RsData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/freelancers/techs")
+@RequestMapping("/api/v1/freelancers")
 public class FreelancerTechController {
-    private final TechService techService;
     private final FreelancerTechService freelancerTechService;
     private final FreelancerRepository freelancerRepository;
+    private final MemberRepository memberRepository;
 
-    @GetMapping("/search")
-    public List<FreelancerTechListResponseDto> searchAvailableTechs(@RequestParam String keyword) {
-        return techService.searchAvailableTechs(keyword);
+    // todo 병합 시 삭제
+    public Member setMember() {
+        return memberRepository.findById(34L).get();
+    }
+    // 여기까지 삭제
+
+    @GetMapping("/{freelancerId}/techs")
+    public List<FreelancerTechDto> getFreelancersTechs(@PathVariable Long freelancerId) {
+        return freelancerTechService.findTechsByFreelancerId(freelancerId);
     }
 
-    @PostMapping
-    public long addMyTech(@RequestBody FreelancerTechAddDto dto) {
+    @PostMapping("/me/techs")
+    public RsData<FreelancerTechDto> addMyTech(@RequestBody FreelancerTechAddDto dto) {
+        //todo 인증정보로 수정 해야함
+        // 여기는 삭제
+        Member member = setMember();
+        FreelancerTech freelancerTech = freelancerTechService.addMyTech(member.getId(), dto);
+        //
 
-        Optional<Freelancer> freelancer = freelancerRepository.findById(27L); //todo 인증정보로 수정
+        /* 여기는 추가
+        addMyTech(@AuthenticationPrincipal SecurityUser securityUser, @RequestBody FreelancerTechAddDto dto)
+        FreelancerTech freelancerTech = freelancerTechService.addMyTech(securityUser.getId(), dto);
+         */
 
-        return freelancerTechService.addMyTech(freelancer, dto);
+        return new RsData<>("201-1", "기술 스택이 추가되었습니다.", new FreelancerTechDto(freelancerTech));
     }
 
-    @GetMapping
-    public List<MyTechListResponseDto> getMyTechs() {
+    @PutMapping("/me/techs/{id}")
+    public RsData<Void> updateMyTech(@PathVariable long id, @RequestBody FreelancerTechUpdateDto dto) {
 
-        Optional<Freelancer> freelancer = freelancerRepository.findById(27L); //todo 인증정보로 수정
+        //todo 인증정보로 수정 해야함
+        // 여기는 삭제
+        Member member = setMember();
+        freelancerTechService.update(id, dto.techLevel(), member.getId());
+        //
 
-        return freelancerTechService.findTechsByFreelancer(freelancer);
+        /* 여기는 추가
+        updateMyTech(@AuthenticationPrincipal SecurityUser securityUser, @PathVariable long id, @RequestBody String techLevel)
+        freelancerTechService.update(id, techLevel, securityUser.getId());
+         */
+
+        return new RsData<>("200-1", "기술 스택이 수정되었습니다.");
     }
 
-    @DeleteMapping("/{id}")
-    public long deleteTech(@PathVariable long id) {
+    @DeleteMapping("/me/techs/{id}")
+    public RsData<Void> deleteMyTech(@PathVariable long id) {
 
-        //todo 인증 검증 추가
+        //todo 인증정보로 수정 해야함
+        // 여기는 삭제
+        Member member = setMember();
+        freelancerTechService.delete(id, member.getId());
+        //
 
-        return freelancerTechService.deleteTechById(id);
+        /* 여기는 추가
+        deleteMyTech(@AuthenticationPrincipal SecurityUser securityUser, @PathVariable long id)
+        freelancerTechService.delete(id, securityUser.getId());
+         */
+
+        return new RsData<>("200-1", "기술 스택이 삭제되었습니다.");
     }
 
 }

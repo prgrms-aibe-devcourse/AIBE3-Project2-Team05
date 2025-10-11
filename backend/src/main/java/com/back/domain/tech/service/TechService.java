@@ -1,6 +1,6 @@
 package com.back.domain.tech.service;
 
-import com.back.domain.freelancer.freelancerTech.dto.FreelancerTechListResponseDto;
+import com.back.domain.tech.dto.TechDto;
 import com.back.domain.tech.entity.Tech;
 import com.back.domain.tech.repository.TechRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +15,10 @@ public class TechService {
     private final TechRepository techRepository;
 
     @Transactional(readOnly = true)
-    public List<FreelancerTechListResponseDto> searchAvailableTechs(String keyword) {
+    public List<TechDto> searchAvailableTechs(String keyword) {
         List<Tech> teches = techRepository.findByTechNameContainingIgnoreCase(keyword);
         return teches.stream()
-                .map(FreelancerTechListResponseDto::new)
+                .map(TechDto::new)
                 .toList();
     }
 }
