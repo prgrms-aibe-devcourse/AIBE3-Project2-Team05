@@ -1,7 +1,6 @@
 package com.back.domain.matching.projectSubmission.entity;
 
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
-import com.back.domain.freelancer.portfolio.entity.Portfolio;
 import com.back.domain.project.project.entity.Project;
 import com.back.global.baseEntity.BaseEntity;
 import jakarta.persistence.*;
@@ -50,21 +49,32 @@ public class ProjectSubmission extends BaseEntity {
     private Freelancer freelancer;
 
     /**
-     * 제출한 포트폴리오
-     * LAZY 로딩으로 성능 최적화
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "portfolio_id", nullable = false)
-    private Portfolio portfolio;
-
-    /**
      * 자기소개서 (지원 동기 및 소개)
      */
-    @Column(name = "cover_letter", columnDefinition = "TEXT")
+    @Column(name = "cover_letter", columnDefinition = "TEXT", nullable = false)
     private String coverLetter;
 
     /**
-     * 지원 상태 (PENDING, REVIEWING, APPROVED, REJECTED)
+     * 제안 단가 (시간당, 원)
+     */
+    @Column(name = "proposed_rate", nullable = false)
+    private Integer proposedRate;
+
+    /**
+     * 예상 소요 기간 (일)
+     */
+    @Column(name = "estimated_duration", nullable = false)
+    private Integer estimatedDuration;
+
+    /**
+     * 포트폴리오 데이터 (JSON 형식)
+     * 예시: [{"title":"프로젝트명","description":"설명","url":"https://...","thumbnailUrl":"https://..."}]
+     */
+    @Column(name = "portfolio_data", columnDefinition = "JSON")
+    private String portfolioData;
+
+    /**
+     * 지원 상태 (PENDING, ACCEPTED, REJECTED)
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -74,27 +84,33 @@ public class ProjectSubmission extends BaseEntity {
      * 지원 취소 일시
      * 프리랜서가 지원을 취소한 경우 기록
      */
-    @Column(name = "cancelled_at")
+    @Column(name = "cancelled_date")
     private LocalDateTime cancelledAt;
 
     /**
      * 생성자 - 프로젝트 지원 생성
      *
-     * @param project      지원할 프로젝트
-     * @param freelancer   지원하는 프리랜서
-     * @param portfolio    제출할 포트폴리오
-     * @param coverLetter  자기소개서
+     * @param project           지원할 프로젝트
+     * @param freelancer        지원하는 프리랜서
+     * @param coverLetter       자기소개서
+     * @param proposedRate      제안 단가 (시간당)
+     * @param estimatedDuration 예상 소요 기간 (일)
+     * @param portfolioData     포트폴리오 데이터 (JSON)
      */
     public ProjectSubmission(
             Project project,
             Freelancer freelancer,
-            Portfolio portfolio,
-            String coverLetter
+            String coverLetter,
+            Integer proposedRate,
+            Integer estimatedDuration,
+            String portfolioData
     ) {
         this.project = project;
         this.freelancer = freelancer;
-        this.portfolio = portfolio;
         this.coverLetter = coverLetter;
+        this.proposedRate = proposedRate;
+        this.estimatedDuration = estimatedDuration;
+        this.portfolioData = portfolioData;
         this.status = SubmissionStatus.PENDING;
     }
 
@@ -130,15 +146,19 @@ public class ProjectSubmission extends BaseEntity {
      * 지원서 수정
      * 대기 상태일 때만 수정 가능
      *
-     * @param portfolio    변경할 포트폴리오
-     * @param coverLetter  변경할 자기소개서
+     * @param coverLetter       변경할 자기소개서
+     * @param proposedRate      변경할 제안 단가
+     * @param estimatedDuration 변경할 예상 소요 기간
+     * @param portfolioData     변경할 포트폴리오 데이터
      */
-    public void modify(Portfolio portfolio, String coverLetter) {
+    public void modify(String coverLetter, Integer proposedRate, Integer estimatedDuration, String portfolioData) {
         if (this.status != SubmissionStatus.PENDING) {
             throw new IllegalStateException("대기 상태에서만 지원서를 수정할 수 있습니다.");
         }
-        this.portfolio = portfolio;
         this.coverLetter = coverLetter;
+        this.proposedRate = proposedRate;
+        this.estimatedDuration = estimatedDuration;
+        this.portfolioData = portfolioData;
     }
 
     /**

@@ -54,6 +54,9 @@ public class ApiV1MatchingController {
                 .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프로젝트입니다."));
 
         // 프로젝트 소유자 확인 (PM만 추천 조회 가능)
+        if (user == null) {
+            throw new ServiceException("401-1", "로그인이 필요합니다.");
+        }
         if (!project.isOwner(user.getMember())) {
             throw new ServiceException("403-1", "프로젝트 소유자만 추천을 조회할 수 있습니다.");
         }
@@ -118,6 +121,9 @@ public class ApiV1MatchingController {
                 .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프로젝트입니다."));
 
         // 프로젝트 소유자 확인
+        if (user == null) {
+            throw new ServiceException("401-1", "로그인이 필요합니다.");
+        }
         if (!project.isOwner(user.getMember())) {
             throw new ServiceException("403-1", "프로젝트 소유자만 재계산을 요청할 수 있습니다.");
         }

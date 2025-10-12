@@ -32,7 +32,7 @@ public class Project extends BaseEntity {
      * 프로젝트 매니저 (PM)
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pm_id", nullable = false)
+    @JoinColumn(name = "manager_id", nullable = false)
     private Member pm;
 
     /**
@@ -50,7 +50,7 @@ public class Project extends BaseEntity {
     /**
      * 프로젝트 분야
      */
-    @Column(name = "field", length = 50)
+    @Column(name = "project_field", length = 50)
     private String field;
 
     /**

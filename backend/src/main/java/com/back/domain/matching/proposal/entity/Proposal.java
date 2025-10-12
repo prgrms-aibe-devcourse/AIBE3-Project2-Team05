@@ -46,7 +46,7 @@ public class Proposal extends BaseEntity {
      * LAZY 로딩으로 성능 최적화
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pm_id", nullable = false)
+    @JoinColumn(name = "project_manager_id", nullable = false)
     private Member pm;
 
     /**
@@ -54,7 +54,7 @@ public class Proposal extends BaseEntity {
      * LAZY 로딩으로 성능 최적화
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "freelancer_id", nullable = false)
+    @JoinColumn(name = "freelancer_member_id", nullable = false)
     private Freelancer freelancer;
 
     /**
@@ -89,7 +89,7 @@ public class Proposal extends BaseEntity {
      * 응답 일자
      * 프리랜서가 제안에 응답(수락/거절)한 일시
      */
-    @Column(name = "response_date")
+    @Column(name = "responded_date")
     private LocalDateTime responseDate;
 
     /**

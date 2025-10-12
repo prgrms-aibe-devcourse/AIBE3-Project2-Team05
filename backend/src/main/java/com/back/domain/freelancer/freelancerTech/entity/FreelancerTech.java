@@ -53,7 +53,7 @@ public class FreelancerTech extends BaseEntity {
     /**
      * 숙련도 (BEGINNER, INTERMEDIATE, ADVANCED, EXPERT)
      */
-    @Column(name = "proficiency", length = 20)
+    @Column(name = "tech_level", length = 20)
     private String proficiency;
 
     /**

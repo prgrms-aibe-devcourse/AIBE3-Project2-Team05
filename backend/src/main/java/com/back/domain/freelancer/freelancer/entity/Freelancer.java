@@ -43,43 +43,43 @@ public class Freelancer extends BaseEntity {
     /**
      * 프리랜서 형태 (개인, 팀 등)
      */
-    @Column(name = "type", length = 50)
+    @Column(name = "freelancer_type", length = 50)
     private String type;
 
     /**
      * 소개글
      */
-    @Column(name = "introduction", columnDefinition = "TEXT")
+    @Column(name = "content", columnDefinition = "TEXT")
     private String introduction;
 
     /**
      * 총 경력 (년)
      */
-    @Column(name = "total_experience")
+    @Column(name = "experience_years")
     private Integer totalExperience;
 
     /**
      * 평균 평점 (0.00 ~ 5.00)
      */
-    @Column(name = "average_rating", precision = 3, scale = 2)
+    @Column(name = "rating_avg", precision = 3, scale = 2)
     private BigDecimal averageRating;
 
     /**
      * 리뷰 수
      */
-    @Column(name = "review_count")
+    @Column(name = "reviews_count")
     private Integer reviewCount = 0;
 
     /**
      * 월 최소 단가
      */
-    @Column(name = "min_rate")
+    @Column(name = "min_monthly_rate")
     private Integer minRate;
 
     /**
      * 월 최대 단가
      */
-    @Column(name = "max_rate")
+    @Column(name = "max_monthly_rate")
     private Integer maxRate;
 
     /**

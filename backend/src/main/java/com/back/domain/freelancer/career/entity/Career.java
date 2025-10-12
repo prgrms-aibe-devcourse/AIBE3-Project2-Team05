@@ -37,7 +37,7 @@ public class Career extends BaseEntity {
     /**
      * 회사명
      */
-    @Column(name = "company_name", length = 200)
+    @Column(name = "company", length = 200)
     private String companyName;
 
     /**
@@ -61,7 +61,7 @@ public class Career extends BaseEntity {
     /**
      * 재직 여부
      */
-    @Column(name = "is_current")
+    @Column(name = "current")
     private Boolean isCurrent = false;
 
     /**

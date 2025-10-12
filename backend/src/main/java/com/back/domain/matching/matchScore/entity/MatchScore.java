@@ -40,8 +40,8 @@ public class MatchScore {
      * 성능 최적화를 위한 LAZY 로딩
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("freelancerId")
-    @JoinColumn(name = "freelancer_id")
+    @MapsId("freelancerMemberId")
+    @JoinColumn(name = "freelancer_member_id")
     private Freelancer freelancer;
 
     /**
@@ -53,8 +53,8 @@ public class MatchScore {
     /**
      * 스킬 매칭 점수
      */
-    @Column(name = "score_skill", precision = 5, scale = 2)
-    private BigDecimal scoreSkill;
+    @Column(name = "score_skills", precision = 5, scale = 2)
+    private BigDecimal scoreSkills;
 
     /**
      * 경력 매칭 점수
@@ -65,15 +65,15 @@ public class MatchScore {
     /**
      * 매칭 순위 (1-10)
      */
-    @Column(name = "rank")
+    @Column(name = "`rank`")
     private Integer rank;
 
     /**
      * 상세 매칭 이유 (JSON 형식)
      * 예시: {"skill_matches": ["Spring Boot", "React"], "location_match": true}
      */
-    @Column(name = "reasons", columnDefinition = "JSON")
-    private String reasons;
+    @Column(name = "match_reason", columnDefinition = "JSON")
+    private String matchReason;
 
     /**
      * 추천 일자
@@ -97,20 +97,20 @@ public class MatchScore {
             Project project,
             Freelancer freelancer,
             BigDecimal scoreTotal,
-            BigDecimal scoreSkill,
+            BigDecimal scoreSkills,
             BigDecimal scoreExperience,
             Integer rank,
-            String reasons,
+            String matchReason,
             LocalDateTime recommendedAt
     ) {
         this.id = new MatchScoreId(project.getId(), freelancer.getId());
         this.project = project;
         this.freelancer = freelancer;
         this.scoreTotal = scoreTotal;
-        this.scoreSkill = scoreSkill;
+        this.scoreSkills = scoreSkills;
         this.scoreExperience = scoreExperience;
         this.rank = rank;
-        this.reasons = reasons;
+        this.matchReason = matchReason;
         this.recommendedAt = recommendedAt;
     }
 
@@ -119,23 +119,23 @@ public class MatchScore {
      * 추천 점수를 재계산할 때 사용
      *
      * @param scoreTotal      업데이트할 총 점수
-     * @param scoreSkill      업데이트할 스킬 점수
+     * @param scoreSkills     업데이트할 스킬 점수
      * @param scoreExperience 업데이트할 경력 점수
      * @param rank            업데이트할 순위
-     * @param reasons         업데이트할 매칭 이유
+     * @param matchReason     업데이트할 매칭 이유
      */
     public void updateScore(
             BigDecimal scoreTotal,
-            BigDecimal scoreSkill,
+            BigDecimal scoreSkills,
             BigDecimal scoreExperience,
             Integer rank,
-            String reasons
+            String matchReason
     ) {
         this.scoreTotal = scoreTotal;
-        this.scoreSkill = scoreSkill;
+        this.scoreSkills = scoreSkills;
         this.scoreExperience = scoreExperience;
         this.rank = rank;
-        this.reasons = reasons;
+        this.matchReason = matchReason;
         this.recommendedAt = LocalDateTime.now();
     }
 }

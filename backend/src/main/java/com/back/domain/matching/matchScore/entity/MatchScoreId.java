@@ -25,7 +25,7 @@ public class MatchScoreId implements Serializable {
     private Long projectId;
 
     /**
-     * 프리랜서 ID
+     * 프리랜서 회원 ID
      */
-    private Long freelancerId;
+    private Long freelancerMemberId;
 }

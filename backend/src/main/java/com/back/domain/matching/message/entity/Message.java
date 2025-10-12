@@ -42,7 +42,7 @@ public class Message extends BaseEntity {
      * 대화의 한 쪽 참여자
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pm_id", nullable = false)
+    @JoinColumn(name = "project_manager_id", nullable = false)
     private Member pm;
 
     /**
@@ -50,7 +50,7 @@ public class Message extends BaseEntity {
      * 대화의 다른 쪽 참여자
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "freelancer_id", nullable = false)
+    @JoinColumn(name = "freelancer_member_id", nullable = false)
     private Freelancer freelancer;
 
     /**
@@ -58,7 +58,7 @@ public class Message extends BaseEntity {
      * PM 또는 프리랜서 중 한 명
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_id", nullable = false)
+    @JoinColumn(name = "sender_member_id", nullable = false)
     private Member sender;
 
     /**

@@ -96,7 +96,7 @@ public record FreelancerRecommendationDto(
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, Object> reasons = objectMapper.readValue(
-                    matchScore.getReasons(),
+                    matchScore.getMatchReason(),
                     new TypeReference<Map<String, Object>>() {}
             );
 

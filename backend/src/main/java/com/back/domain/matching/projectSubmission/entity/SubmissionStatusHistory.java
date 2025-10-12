@@ -45,28 +45,28 @@ public class SubmissionStatusHistory extends BaseEntity {
      * 이전 상태
      */
     @Enumerated(EnumType.STRING)
-    @Column(name = "previous_status", nullable = false)
+    @Column(name = "from_status", nullable = false)
     private SubmissionStatus previousStatus;
 
     /**
      * 변경된 상태
      */
     @Enumerated(EnumType.STRING)
-    @Column(name = "current_status", nullable = false)
+    @Column(name = "to_status", nullable = false)
     private SubmissionStatus currentStatus;
 
     /**
      * 변경 사유
      * PM이 상태를 변경한 이유
      */
-    @Column(name = "change_reason", columnDefinition = "TEXT")
+    @Column(name = "reason", columnDefinition = "TEXT")
     private String changeReason;
 
     /**
      * 상태 변경 일시
      * BaseEntity의 createDate와 동일하지만, 명시적으로 관리
      */
-    @Column(name = "changed_at", nullable = false)
+    @Column(name = "changed_date", nullable = false)
     private LocalDateTime changedAt;
 
     /**

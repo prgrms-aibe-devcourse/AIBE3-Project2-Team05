@@ -27,13 +27,13 @@ public class Tech extends BaseEntity {
     /**
      * 기술 분야 (예: Frontend, Backend, Database 등)
      */
-    @Column(name = "category", length = 100)
+    @Column(name = "tech_category", length = 100)
     private String category;
 
     /**
      * 기술 이름 (예: React, Spring Boot, MySQL 등)
      */
-    @Column(name = "name", nullable = false, length = 100, unique = true)
+    @Column(name = "tech_name", nullable = false, length = 100, unique = true)
     private String name;
 
     /**

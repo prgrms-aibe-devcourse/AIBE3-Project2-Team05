@@ -43,7 +43,7 @@ public class Portfolio extends BaseEntity {
     /**
      * 프로젝트 설명
      */
-    @Column(name = "description", columnDefinition = "TEXT")
+    @Column(name = "summary", columnDefinition = "TEXT")
     private String description;
 
     /**
@@ -61,13 +61,13 @@ public class Portfolio extends BaseEntity {
     /**
      * 참여율 (0-100%)
      */
-    @Column(name = "participation_rate")
+    @Column(name = "contribution")
     private Integer participationRate;
 
     /**
      * 대표 이미지 URL
      */
-    @Column(name = "thumbnail_url")
+    @Column(name = "image_url")
     private String thumbnailUrl;
 
     /**
