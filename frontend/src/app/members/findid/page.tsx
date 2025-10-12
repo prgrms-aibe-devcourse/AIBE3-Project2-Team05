@@ -1,7 +1,10 @@
 "use client";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function FindId() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [verifyCode, setVerifyCode] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -25,7 +28,6 @@ export default function FindId() {
           body: JSON.stringify({ email }),
         }
       );
-
       const data = await res.json();
 
       if (!res.ok) {
@@ -67,7 +69,7 @@ export default function FindId() {
         return;
       }
 
-      setInfoMsg(data.msg); // "회원님의 아이디는 xxx 입니다."
+      setInfoMsg(data.msg);
     } catch (err) {
       console.error(err);
       setErrorMsg("아이디 찾기 중 오류 발생");
@@ -77,63 +79,162 @@ export default function FindId() {
   return (
     <main className="relative w-screen h-screen bg-[var(--background)] flex justify-center items-center overflow-y-auto">
       <div className="absolute inset-0 bg-[rgba(241,234,220,0.3)] z-0"></div>
-      <div className="relative z-10 w-[448px] h-[400px] flex flex-col items-center">
-        <div className="flex flex-col items-center mt-4">
-          <h1 className="text-[30px] font-bold text-[var(--primary)]">FIT</h1>
-          <p className="text-[16px] font-normal text-[var(--muted-foreground)] mt-2">
+
+      <div className="relative z-10 w-[480px] flex flex-col items-center">
+        {/* 제목 및 설명 */}
+        <div className="w-full flex flex-col items-center mb-6">
+          <h1
+            className="text-[24px] font-bold leading-[32px] mb-3"
+            style={{ color: "#0F0A03" }}
+          >
             아이디 찾기
+          </h1>
+          <p
+            className="text-[14px] font-[300] leading-[20px]"
+            style={{ color: "#5A5549" }}
+          >
+            등록 된 이메일로 인증번호를 발송해드려요
           </p>
         </div>
 
-        <div className="mt-6 w-full bg-[#FDFCF8] shadow-lg rounded-[16px] flex-1 p-6 flex flex-col gap-4">
-          <div className="flex flex-col">
-            <label className="text-[14px] font-medium text-[var(--foreground)]">
-              이메일
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="이메일을 입력하세요"
-              className="mt-2 h-[36px] rounded-[10px] border border-[var(--border)] bg-[var(--input)] px-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
-            />
-          </div>
-
-          <button
-            type="button"
-            onClick={sendCode}
-            className="w-full h-[36px] bg-[var(--primary)] text-[var(--primary-foreground)] rounded-[10px] cursor-pointer"
-          >
-            인증 코드 발송
-          </button>
-
-          {codeSent && (
-            <>
-              <div className="flex flex-col">
-                <label className="text-[14px] font-medium text-[var(--foreground)]">
-                  인증 코드
-                </label>
+        {/* 카드 본문 */}
+        <div
+          className="w-full bg-[#FDFCF8] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] rounded-[16px]"
+          style={{ padding: "35px 35px" }}
+        >
+          <div className="flex flex-col gap-4">
+            {/* 이메일 입력 */}
+            <div className="flex flex-col gap-2 mb-5">
+              <label
+                className="text-[14px] font-medium leading-[14px]"
+                style={{ color: "#0F0A03" }}
+              >
+                이메일
+              </label>
+              <div className="relative">
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 w-4 h-4"
+                  style={{ paddingLeft: "8px" }}
+                >
+                  <Image
+                    src="/email.png"
+                    alt="이메일 아이콘"
+                    width={16}
+                    height={16}
+                    className="object-contain"
+                  />
+                </div>
                 <input
-                  type="text"
-                  value={verifyCode}
-                  onChange={(e) => setVerifyCode(e.target.value)}
-                  placeholder="인증 코드를 입력하세요"
-                  className="mt-2 h-[36px] rounded-[10px] border border-[var(--border)] bg-[var(--input)] px-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="이메일을 입력하세요"
+                  className="w-full h-[40px] rounded-[10px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-2 focus:ring-[#006A20] text-[14px] font-[350] placeholder:font-[350]"
+                  style={{
+                    backgroundColor: "rgba(255,255,255,0.002)",
+                    border: `1px solid #F5EEE0`,
+                    color: "#0F0A03",
+                    paddingLeft: "35px",
+                    paddingRight: "12px",
+                  }}
                 />
               </div>
+            </div>
 
-              <button
-                type="button"
-                onClick={verifyId}
-                className="w-full h-[36px] bg-[var(--primary)] text-[var(--primary-foreground)] rounded-[10px] cursor-pointer"
+            {/* 비밀번호 재설정 */}
+            <div className="flex justify-end mt-[10px] mb-[20px]">
+              <span
+                className="text-[14px] font-normal cursor-pointer hover:underline"
+                style={{ color: "#006A20" }}
+                onClick={() => router.push("/members/updatePassword")}
               >
-                아이디 확인
-              </button>
-            </>
-          )}
+                비밀번호 재설정
+              </span>
+            </div>
 
-          {errorMsg && <p className="text-red-500">{errorMsg}</p>}
-          {infoMsg && <p className="text-green-600">{infoMsg}</p>}
+            {/* 아이디 찾기 버튼 */}
+            <button
+              type="button"
+              onClick={sendCode}
+              className="w-full h-[40px] bg-[#006A20] text-[#FBF8F1] rounded-[10px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-[14px] font-medium leading-[20px] cursor-pointer hover:bg-[#005a1a] transition-colors"
+            >
+              아이디 찾기
+            </button>
+
+            {/* 인증 코드 입력 */}
+            {codeSent && (
+              <div className="flex flex-col gap-2">
+                <label
+                  className="text-[14px] font-medium leading-[14px]"
+                  style={{ color: "#0F0A03" }}
+                >
+                  인증 코드
+                </label>
+                <div className="relative">
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 w-4 h-4"
+                    style={{ paddingLeft: "8px" }}
+                  >
+                    <Image
+                      src="/email.png"
+                      alt="인증 코드 아이콘"
+                      width={16}
+                      height={16}
+                      className="object-contain"
+                    />
+                  </div>
+                  <input
+                    type="text"
+                    value={verifyCode}
+                    onChange={(e) => setVerifyCode(e.target.value)}
+                    placeholder="인증 코드를 입력하세요"
+                    className="w-full h-[40px] rounded-[10px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-2 focus:ring-[#006A20] text-[14px] font-[350] placeholder:font-[350]"
+                    style={{
+                      backgroundColor: "rgba(255,255,255,0.002)",
+                      border: `1px solid #F5EEE0`,
+                      color: "#0F0A03",
+                      paddingLeft: "35px",
+                      paddingRight: "12px",
+                    }}
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={verifyId}
+                  className="w-full h-[40px] bg-[#006A20] text-[#FBF8F1] rounded-[10px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-[14px] font-medium leading-[20px] cursor-pointer hover:bg-[#005a1a] transition-colors"
+                >
+                  아이디 확인
+                </button>
+              </div>
+            )}
+
+            {/* 메시지 */}
+            {(errorMsg || infoMsg) && (
+              <p
+                className={`text-[14px] text-center ${
+                  errorMsg ? "text-red-500" : "text-green-500"
+                }`}
+              >
+                {errorMsg || infoMsg}
+              </p>
+            )}
+
+            {/* 회원가입 링크 */}
+            <p
+              className="text-[14px] font-[300] leading-[20px] text-center mt-4"
+              style={{ color: "#5A5549" }}
+            >
+              아직 FIT 회원이 아니라면?{" "}
+              <span
+                className="cursor-pointer hover:underline font-normal"
+                style={{ color: "#006A20" }}
+                onClick={() => router.push("/members/signup")}
+              >
+                회원가입
+              </span>
+            </p>
+          </div>
         </div>
       </div>
     </main>
