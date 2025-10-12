@@ -2,6 +2,7 @@ package com.back.domain.freelancer.freelancer.controller;
 
 import com.back.domain.freelancer.freelancer.dto.FreelancerDetailResponseDto;
 import com.back.domain.freelancer.freelancer.dto.FreelancerDto;
+import com.back.domain.freelancer.freelancer.dto.FreelancerListResponseDto;
 import com.back.domain.freelancer.freelancer.dto.FreelancerRequestDto;
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancer.service.FreelancerService;
@@ -28,7 +29,7 @@ public class FreelancerController {
     // 여기까지 삭제
 
     @GetMapping
-    public List<FreelancerDto> getItems() {
+    public List<FreelancerListResponseDto> getItems() {
         return freelancerService.findAll();
     }
 

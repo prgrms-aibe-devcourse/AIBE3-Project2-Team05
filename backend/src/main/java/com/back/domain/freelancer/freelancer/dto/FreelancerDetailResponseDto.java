@@ -1,38 +1,48 @@
 package com.back.domain.freelancer.freelancer.dto;
 
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
+import com.back.domain.freelancer.freelancerTech.dto.FreelancerTechDto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 // todo 전면 수정
 public record FreelancerDetailResponseDto(
-
-        //Member
-        String nickname,
-
-        //Freelancer
         long id,
         LocalDateTime createDate,
         LocalDateTime modifyDate,
+        String nickname,
+        String freelancerTitle,
         String type,
+        String location,
         String content,
         Boolean isOnSite,
-        String location,
         int minMonthlyRate,
-        int maxMonthlyRate
+        int maxMonthlyRate,
+        double ratingAvg,
+        int reviewsCount,
+        int favoritesCount,
+        int completedProjectsCount,
+        List<FreelancerTechDto> techList
 ) {
     public FreelancerDetailResponseDto(Freelancer freelancer) {
         this(
-                freelancer.getMemberNickname(),
                 freelancer.getId(),
                 freelancer.getCreateDate(),
                 freelancer.getModifyDate(),
+                freelancer.getMemberNickname(),
+                freelancer.getFreelancerTitle(),
                 freelancer.getType(),
+                freelancer.getLocation(),
                 freelancer.getContent(),
                 freelancer.getIsOnSite(),
-                freelancer.getLocation(),
                 freelancer.getMinMonthlyRate(),
-                freelancer.getMaxMonthlyRate()
+                freelancer.getMaxMonthlyRate(),
+                freelancer.getRatingAvg(),
+                freelancer.getReviewsCount(),
+                freelancer.getFavoritesCount(),
+                freelancer.getCompletedProjectsCount(),
+                freelancer.getTechStacks().stream().map(FreelancerTechDto::new).toList()
         );
     }
 }
