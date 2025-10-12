@@ -76,18 +76,6 @@ const UserProjectsPage = () => {
     }
   }, [projects, activeStatus]);
 
-
-
-
-
-
-
-
-
-
-
-
-
   // 상태별 프로젝트 개수 계산
   const getStatusCount = (status: string) => {
     if (status === 'ALL') return projects.length;

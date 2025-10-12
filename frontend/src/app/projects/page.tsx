@@ -207,7 +207,7 @@ const ProjectsPage = () => {
                   />
                   <span>전체</span>
                 </label>
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                   <input 
                     type="radio" 
                     name="projectField" 
@@ -217,7 +217,7 @@ const ProjectsPage = () => {
                   />
                   <span>기획</span>
                 </label>
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                   <input 
                     type="radio" 
                     name="projectField" 
@@ -227,7 +227,7 @@ const ProjectsPage = () => {
                   />
                   <span>디자인</span>
                 </label>
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                   <input 
                     type="radio" 
                     name="projectField" 
@@ -241,10 +241,10 @@ const ProjectsPage = () => {
             </div>
 
             {/* 모집 형태 필터 */}
-            <div className="mb-4">
-              <h4 className="font-semibold text-gray-700 mb-2">모집 형태</h4>
-              <div className="space-y-2">
-                <label className="flex items-center space-x-2">
+            <div className="mb-4" style={{ marginBottom: '16px' }}>
+              <h4 className="font-semibold text-gray-700 mb-2" style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>모집 형태</h4>
+              <div className="space-y-2" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                   <input 
                     type="radio" 
                     name="recruitmentType" 
@@ -254,7 +254,7 @@ const ProjectsPage = () => {
                   />
                   <span>전체</span>
                 </label>
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                   <input 
                     type="radio" 
                     name="recruitmentType" 
@@ -264,7 +264,7 @@ const ProjectsPage = () => {
                   />
                   <span>외주</span>
                 </label>
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                   <input 
                     type="radio" 
                     name="recruitmentType" 
@@ -278,10 +278,10 @@ const ProjectsPage = () => {
             </div>
 
             {/* 프로젝트 상태 필터 */}
-            <div className="mb-4">
-              <h4 className="font-semibold text-gray-700 mb-2">상태</h4>
-              <div className="space-y-2">
-                <label className="flex items-center space-x-2">
+            <div className="mb-4" style={{ marginBottom: '16px' }}>
+              <h4 className="font-semibold text-gray-700 mb-2" style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>상태</h4>
+              <div className="space-y-2" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                   <input 
                     type="radio" 
                     name="status" 
@@ -291,7 +291,7 @@ const ProjectsPage = () => {
                   />
                   <span>전체</span>
                 </label>
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                   <input 
                     type="radio" 
                     name="status" 
@@ -301,7 +301,7 @@ const ProjectsPage = () => {
                   />
                   <span>모집중</span>
                 </label>
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                   <input 
                     type="radio" 
                     name="status" 
@@ -311,7 +311,7 @@ const ProjectsPage = () => {
                   />
                   <span>계약중</span>
                 </label>
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                   <input 
                     type="radio" 
                     name="status" 
@@ -321,7 +321,7 @@ const ProjectsPage = () => {
                   />
                   <span>진행중</span>
                 </label>
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                   <input 
                     type="radio" 
                     name="status" 
@@ -331,7 +331,7 @@ const ProjectsPage = () => {
                   />
                   <span>완료</span>
                 </label>
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                   <input 
                     type="radio" 
                     name="status" 
@@ -341,7 +341,7 @@ const ProjectsPage = () => {
                   />
                   <span>보류</span>
                 </label>
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                   <input 
                     type="radio" 
                     name="status" 
@@ -355,19 +355,19 @@ const ProjectsPage = () => {
             </div>
 
             {/* 지역 필터 */}
-            <div className="mb-4">
+            <div className="mb-4" style={{ marginBottom: '16px' }}>
               <div 
                 className="flex items-center cursor-pointer hover:bg-gray-50 p-1 -m-1 rounded w-fit"
                 onClick={() => setIsLocationExpanded(!isLocationExpanded)}
               >
-                <h4 className="font-semibold text-gray-700 mb-2">지역</h4>
+                <h4 className="font-semibold text-gray-700 mb-2" style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>지역</h4>
                 <span className={`text-xs text-gray-400 transition-transform ml-1 ${isLocationExpanded ? 'rotate-180' : ''}`}>
                   ▼
                 </span>
               </div>
               {isLocationExpanded && (
-                <div className="space-y-2">
-                  <label className="flex items-center space-x-2">
+                <div className="space-y-2" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="location" 
@@ -377,7 +377,7 @@ const ProjectsPage = () => {
                     />
                     <span>전체</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="location" 
@@ -387,7 +387,7 @@ const ProjectsPage = () => {
                     />
                     <span>서울</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="location" 
@@ -397,7 +397,7 @@ const ProjectsPage = () => {
                     />
                     <span>경기</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="location" 
@@ -407,7 +407,7 @@ const ProjectsPage = () => {
                     />
                     <span>인천</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="location" 
@@ -417,7 +417,7 @@ const ProjectsPage = () => {
                     />
                     <span>강원</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="location" 
@@ -427,7 +427,7 @@ const ProjectsPage = () => {
                     />
                     <span>충남</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="location" 
@@ -437,7 +437,7 @@ const ProjectsPage = () => {
                     />
                     <span>대전</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="location" 
@@ -447,7 +447,7 @@ const ProjectsPage = () => {
                     />
                     <span>충북</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="location" 
@@ -457,7 +457,7 @@ const ProjectsPage = () => {
                     />
                     <span>세종</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="location" 
@@ -467,7 +467,7 @@ const ProjectsPage = () => {
                     />
                     <span>부산</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="location" 
@@ -477,7 +477,7 @@ const ProjectsPage = () => {
                     />
                     <span>울산</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="location" 
@@ -487,7 +487,7 @@ const ProjectsPage = () => {
                     />
                     <span>대구</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="location" 
@@ -497,7 +497,7 @@ const ProjectsPage = () => {
                     />
                     <span>경북</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="location" 
@@ -507,7 +507,7 @@ const ProjectsPage = () => {
                     />
                     <span>경남</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="location" 
@@ -517,7 +517,7 @@ const ProjectsPage = () => {
                     />
                     <span>전남</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="location" 
@@ -527,7 +527,7 @@ const ProjectsPage = () => {
                     />
                     <span>광주</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="location" 
@@ -537,7 +537,7 @@ const ProjectsPage = () => {
                     />
                     <span>전북</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="location" 
@@ -547,7 +547,7 @@ const ProjectsPage = () => {
                     />
                     <span>제주</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="location" 
@@ -562,19 +562,19 @@ const ProjectsPage = () => {
             </div>
 
             {/* 예산범위 필터 */}
-            <div className="mb-4">
+            <div className="mb-4" style={{ marginBottom: '16px' }}>
               <div 
                 className="flex items-center cursor-pointer hover:bg-gray-50 p-1 -m-1 rounded w-fit"
                 onClick={() => setIsBudgetExpanded(!isBudgetExpanded)}
               >
-                <h4 className="font-semibold text-gray-700 mb-2">예산범위</h4>
+                <h4 className="font-semibold text-gray-700 mb-2" style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>예산범위</h4>
                 <span className={`text-xs text-gray-400 transition-transform ml-1 ${isBudgetExpanded ? 'rotate-180' : ''}`}>
                   ▼
                 </span>
               </div>
               {isBudgetExpanded && (
-                <div className="space-y-2">
-                  <label className="flex items-center space-x-2">
+                <div className="space-y-2" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="budgetRange" 
@@ -584,7 +584,7 @@ const ProjectsPage = () => {
                     />
                     <span>전체</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="budgetRange" 
@@ -594,7 +594,7 @@ const ProjectsPage = () => {
                     />
                     <span>1만원 ~ 100만원</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="budgetRange" 
@@ -604,7 +604,7 @@ const ProjectsPage = () => {
                     />
                     <span>100만원 ~ 200만원</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="budgetRange" 
@@ -614,7 +614,7 @@ const ProjectsPage = () => {
                     />
                     <span>200만원 ~ 300만원</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="budgetRange" 
@@ -624,7 +624,7 @@ const ProjectsPage = () => {
                     />
                     <span>300만원 ~ 500만원</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="budgetRange" 
@@ -634,7 +634,7 @@ const ProjectsPage = () => {
                     />
                     <span>500만원 ~ 1000만원</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="budgetRange" 
@@ -644,7 +644,7 @@ const ProjectsPage = () => {
                     />
                     <span>1000만원 ~ 2000만원</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="budgetRange" 
@@ -654,7 +654,7 @@ const ProjectsPage = () => {
                     />
                     <span>2000만원 ~ 3000만원</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="budgetRange" 
@@ -664,7 +664,7 @@ const ProjectsPage = () => {
                     />
                     <span>3000만원 ~ 5000만원</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="budgetRange" 
@@ -674,7 +674,7 @@ const ProjectsPage = () => {
                     />
                     <span>5000만원 ~ 1억</span>
                   </label>
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input 
                       type="radio" 
                       name="budgetRange" 
