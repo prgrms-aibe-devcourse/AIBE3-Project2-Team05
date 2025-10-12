@@ -1,6 +1,7 @@
 package com.back.domain.matching.projectSubmission.controller;
 
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
+import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
 import com.back.domain.matching.projectSubmission.dto.ProjectSubmissionCreateReqBody;
 import com.back.domain.matching.projectSubmission.dto.ProjectSubmissionDto;
 import com.back.domain.matching.projectSubmission.dto.ProjectSubmissionModifyReqBody;
@@ -9,8 +10,10 @@ import com.back.domain.matching.projectSubmission.entity.ProjectSubmission;
 import com.back.domain.matching.projectSubmission.service.ProjectSubmissionService;
 import com.back.domain.project.project.entity.Project;
 import com.back.domain.project.project.service.ProjectService;
+import com.back.global.exception.ServiceException;
 import com.back.global.rsData.RsData;
 import com.back.global.security.SecurityUser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,6 +32,8 @@ public class ApiV1ProjectSubmissionController {
 
     private final ProjectSubmissionService projectSubmissionService;
     private final ProjectService projectService;
+    private final FreelancerRepository freelancerRepository;
+    private final ObjectMapper objectMapper;
 
     /**
      * 프로젝트 지원 생성
@@ -43,14 +48,28 @@ public class ApiV1ProjectSubmissionController {
             @AuthenticationPrincipal SecurityUser user,
             @Valid @RequestBody ProjectSubmissionCreateReqBody reqBody
     ) {
-        // TODO: user.getFreelancer() 구현 필요
-        Freelancer freelancer = user.getFreelancer();
+        // FreelancerRepository로 Freelancer 조회
+        Freelancer freelancer = freelancerRepository.findByMember(user.getMember())
+                .orElseThrow(() -> new ServiceException("403-1", "프리랜서 권한이 필요합니다."));
+
+        // Portfolio 데이터를 JSON 문자열로 변환
+        String portfolioData = null;
+        try {
+            if (reqBody.portfolio() != null && !reqBody.portfolio().isEmpty()) {
+                portfolioData = objectMapper.writeValueAsString(reqBody.portfolio());
+            }
+        } catch (Exception e) {
+            // JSON 변환 실패 시 빈 배열로 처리
+            portfolioData = "[]";
+        }
 
         ProjectSubmission submission = projectSubmissionService.create(
                 freelancer,
                 reqBody.projectId(),
-                reqBody.portfolioId(),
-                reqBody.coverLetter()
+                reqBody.coverLetter(),
+                reqBody.proposedRate(),
+                reqBody.estimatedDuration(),
+                portfolioData
         );
 
         return new RsData<>(
@@ -87,7 +106,8 @@ public class ApiV1ProjectSubmissionController {
             submissions = projectSubmissionService.findActiveSubmissionsByProject(projectId);
         } else {
             // 프리랜서가 자신의 지원 목록 조회
-            Freelancer freelancer = user.getFreelancer();
+            Freelancer freelancer = freelancerRepository.findByMember(user.getMember())
+                    .orElseThrow(() -> new ServiceException("403-1", "프리랜서 권한이 필요합니다."));
             submissions = projectSubmissionService.findActiveSubmissionsByFreelancer(freelancer);
         }
 
@@ -140,14 +160,27 @@ public class ApiV1ProjectSubmissionController {
             @PathVariable Long id,
             @Valid @RequestBody ProjectSubmissionModifyReqBody reqBody
     ) {
-        Freelancer freelancer = user.getFreelancer();
+        Freelancer freelancer = freelancerRepository.findByMember(user.getMember())
+                .orElseThrow(() -> new ServiceException("403-1", "프리랜서 권한이 필요합니다."));
         ProjectSubmission submission = projectSubmissionService.findById(id);
+
+        // Portfolio 데이터를 JSON 문자열로 변환
+        String portfolioData = null;
+        try {
+            if (reqBody.portfolio() != null && !reqBody.portfolio().isEmpty()) {
+                portfolioData = objectMapper.writeValueAsString(reqBody.portfolio());
+            }
+        } catch (Exception e) {
+            portfolioData = "[]";
+        }
 
         projectSubmissionService.modify(
                 submission,
                 freelancer,
-                reqBody.portfolioId(),
-                reqBody.coverLetter()
+                reqBody.coverLetter(),
+                reqBody.proposedRate(),
+                reqBody.estimatedDuration(),
+                portfolioData
         );
 
         return new RsData<>(
@@ -169,7 +202,8 @@ public class ApiV1ProjectSubmissionController {
             @AuthenticationPrincipal SecurityUser user,
             @PathVariable Long id
     ) {
-        Freelancer freelancer = user.getFreelancer();
+        Freelancer freelancer = freelancerRepository.findByMember(user.getMember())
+                .orElseThrow(() -> new ServiceException("403-1", "프리랜서 권한이 필요합니다."));
         ProjectSubmission submission = projectSubmissionService.findById(id);
 
         projectSubmissionService.cancel(submission, freelancer);

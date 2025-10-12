@@ -27,24 +27,27 @@ public class ProjectSubmissionService {
 
     private final ProjectSubmissionRepository projectSubmissionRepository;
     private final ProjectRepository projectRepository;
-    private final PortfolioRepository portfolioRepository;
     private final SubmissionStatusHistoryRepository submissionStatusHistoryRepository;
 
     /**
      * 프로젝트 지원 생성
      *
-     * @param freelancer   지원하는 프리랜서
-     * @param projectId    프로젝트 ID
-     * @param portfolioId  포트폴리오 ID
-     * @param coverLetter  자기소개서
+     * @param freelancer        지원하는 프리랜서
+     * @param projectId         프로젝트 ID
+     * @param coverLetter       자기소개서
+     * @param proposedRate      제안 단가 (시간당, 원)
+     * @param estimatedDuration 예상 소요 기간 (일)
+     * @param portfolioData     포트폴리오 데이터 (JSON 문자열)
      * @return 생성된 지원
      */
     @Transactional
     public ProjectSubmission create(
             Freelancer freelancer,
             Long projectId,
-            Long portfolioId,
-            String coverLetter
+            String coverLetter,
+            Integer proposedRate,
+            Integer estimatedDuration,
+            String portfolioData
     ) {
         // 프로젝트 조회
         Project project = projectRepository.findById(projectId)
@@ -55,20 +58,14 @@ public class ProjectSubmissionService {
             throw new ServiceException("409-1", "이미 지원한 프로젝트입니다.");
         }
 
-        // 포트폴리오 조회 및 권한 확인
-        Portfolio portfolio = portfolioRepository.findById(portfolioId)
-                .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 포트폴리오입니다."));
-
-        if (!portfolio.isOwner(freelancer)) {
-            throw new ServiceException("403-1", "본인의 포트폴리오만 제출할 수 있습니다.");
-        }
-
         // 지원 생성
         ProjectSubmission submission = new ProjectSubmission(
                 project,
                 freelancer,
-                portfolio,
-                coverLetter
+                coverLetter,
+                proposedRate,
+                estimatedDuration,
+                portfolioData
         );
 
         ProjectSubmission savedSubmission = projectSubmissionRepository.save(submission);
@@ -139,17 +136,21 @@ public class ProjectSubmissionService {
     /**
      * 지원서 수정 (PENDING 상태에서만 가능)
      *
-     * @param submission   지원
-     * @param freelancer   프리랜서 (권한 확인용)
-     * @param portfolioId  변경할 포트폴리오 ID
-     * @param coverLetter  변경할 자기소개서
+     * @param submission        지원
+     * @param freelancer        프리랜서 (권한 확인용)
+     * @param coverLetter       변경할 자기소개서
+     * @param proposedRate      변경할 제안 단가
+     * @param estimatedDuration 변경할 예상 소요 기간
+     * @param portfolioData     변경할 포트폴리오 데이터 (JSON)
      */
     @Transactional
     public void modify(
             ProjectSubmission submission,
             Freelancer freelancer,
-            Long portfolioId,
-            String coverLetter
+            String coverLetter,
+            Integer proposedRate,
+            Integer estimatedDuration,
+            String portfolioData
     ) {
         // 권한 확인
         if (!submission.isOwner(freelancer)) {
@@ -161,16 +162,8 @@ public class ProjectSubmissionService {
             throw new ServiceException("400-1", "취소된 지원은 수정할 수 없습니다.");
         }
 
-        // 포트폴리오 조회 및 권한 확인
-        Portfolio portfolio = portfolioRepository.findById(portfolioId)
-                .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 포트폴리오입니다."));
-
-        if (!portfolio.isOwner(freelancer)) {
-            throw new ServiceException("403-1", "본인의 포트폴리오만 제출할 수 있습니다.");
-        }
-
         // 수정 (PENDING 상태가 아니면 IllegalStateException 발생)
-        submission.modify(portfolio, coverLetter);
+        submission.modify(coverLetter, proposedRate, estimatedDuration, portfolioData);
     }
 
     /**
@@ -191,9 +184,9 @@ public class ProjectSubmissionService {
             throw new ServiceException("400-1", "이미 취소된 지원입니다.");
         }
 
-        // 승인된 지원은 취소 불가
-        if (submission.getStatus() == SubmissionStatus.APPROVED) {
-            throw new ServiceException("400-1", "승인된 지원은 취소할 수 없습니다.");
+        // 수락된 지원은 취소 불가
+        if (submission.getStatus() == SubmissionStatus.ACCEPTED) {
+            throw new ServiceException("400-1", "수락된 지원은 취소할 수 없습니다.");
         }
 
         submission.cancel();
