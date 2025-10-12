@@ -6,6 +6,7 @@ import com.back.domain.matching.message.entity.Message;
 import com.back.domain.matching.message.entity.RelatedType;
 import com.back.domain.matching.message.service.MessageService;
 import com.back.domain.member.member.entity.Member;
+import com.back.global.exception.ServiceException;
 import com.back.global.rsData.RsData;
 import com.back.global.security.SecurityUser;
 import jakarta.validation.Valid;
@@ -115,7 +116,7 @@ public class ApiV1MessageController {
 
         // 권한 확인 (대화 참여자만 조회 가능)
         if (!message.isParticipant(user.getMember())) {
-            throw new RuntimeException("403-1: 메시지를 볼 권한이 없습니다.");
+            throw new ServiceException("403-1", "메시지를 볼 권한이 없습니다.");
         }
 
         return new RsData<>(

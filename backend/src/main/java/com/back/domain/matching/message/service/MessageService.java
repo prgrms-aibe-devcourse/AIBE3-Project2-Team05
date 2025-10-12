@@ -97,9 +97,16 @@ public class MessageService {
      * @return 메시지 목록
      */
     public List<Message> findByMember(Member member) {
-        // TODO: 프리랜서/PM 구분 로직 필요
-        // 임시: PM으로 가정
-        return messageRepository.findByPmOrderByCreateDateDesc(member);
+        // 프리랜서인지 확인
+        var freelancerOpt = freelancerRepository.findByMember(member);
+
+        if (freelancerOpt.isPresent()) {
+            // 프리랜서가 참여한 메시지 조회
+            return messageRepository.findByFreelancerOrderByCreateDateDesc(freelancerOpt.get());
+        } else {
+            // PM이 참여한 메시지 조회
+            return messageRepository.findByPmOrderByCreateDateDesc(member);
+        }
     }
 
     /**
@@ -179,9 +186,9 @@ public class MessageService {
 
         // 발신자/수신자가 지원의 PM 또는 프리랜서인지 확인
         boolean senderIsParticipant = sender.getId().equals(submission.getProject().getPm().getId()) ||
-                                      sender.getId().equals(submission.getFreelancer().getId());
+                                      sender.getId().equals(submission.getFreelancer().getMember().getId());
         boolean receiverIsParticipant = receiver.getId().equals(submission.getProject().getPm().getId()) ||
-                                        receiver.getId().equals(submission.getFreelancer().getId());
+                                        receiver.getId().equals(submission.getFreelancer().getMember().getId());
 
         if (!senderIsParticipant || !receiverIsParticipant) {
             throw new ServiceException("403-1", "지원 관련 사용자만 메시지를 보낼 수 있습니다.");
@@ -203,9 +210,9 @@ public class MessageService {
 
         // 발신자/수신자가 제안의 PM 또는 프리랜서인지 확인
         boolean senderIsParticipant = sender.getId().equals(proposal.getPm().getId()) ||
-                                      sender.getId().equals(proposal.getFreelancer().getId());
+                                      sender.getId().equals(proposal.getFreelancer().getMember().getId());
         boolean receiverIsParticipant = receiver.getId().equals(proposal.getPm().getId()) ||
-                                        receiver.getId().equals(proposal.getFreelancer().getId());
+                                        receiver.getId().equals(proposal.getFreelancer().getMember().getId());
 
         if (!senderIsParticipant || !receiverIsParticipant) {
             throw new ServiceException("403-1", "제안 관련 사용자만 메시지를 보낼 수 있습니다.");
