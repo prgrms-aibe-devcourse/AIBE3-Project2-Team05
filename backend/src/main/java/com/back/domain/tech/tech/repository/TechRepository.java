@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * ⚠️ 임시 Repository - 매칭 시스템 개발/테스트용
+ * 임시 Repository - 매칭 시스템 개발/테스트용
  * TODO: [Tech 담당자] - 정식 Repository로 교체 필요
  */
 public interface TechRepository extends JpaRepository<Tech, Long> {

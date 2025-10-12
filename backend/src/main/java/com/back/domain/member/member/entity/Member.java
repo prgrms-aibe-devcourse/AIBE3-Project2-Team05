@@ -1,12 +1,12 @@
 package com.back.domain.member.member.entity;
 
-import com.back.global.jpa.BaseEntity;
+import com.back.global.baseEntity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * ⚠️ 임시 엔티티 - 매칭 시스템 개발/테스트용
+ * 임시 엔티티 - 매칭 시스템 개발/테스트용
  * TODO: [Member 담당자] - 정식 엔티티로 교체 필요
  * 브랜치: feature/matching-temp (main merge 대기)
  * 생성: 2025-10-12 임창기 (매칭 시스템)

@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 /**
- * ⚠️ 임시 Repository - 매칭 시스템 개발/테스트용
+ * 임시 Repository - 매칭 시스템 개발/테스트용
  * TODO: [Career 담당자] - 정식 Repository로 교체 필요
  */
 public interface CareerRepository extends JpaRepository<Career, Long> {

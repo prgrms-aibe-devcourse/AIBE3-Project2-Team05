@@ -1,7 +1,7 @@
 package com.back.domain.matching.projectSubmission.entity;
 
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
-import com.back.domain.portfolio.portfolio.entity.Portfolio;
+import com.back.domain.freelancer.portfolio.entity.Portfolio;
 import com.back.domain.project.project.entity.Project;
 import com.back.global.baseEntity.BaseEntity;
 import jakarta.persistence.*;
