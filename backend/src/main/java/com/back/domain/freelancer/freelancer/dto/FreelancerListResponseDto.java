@@ -22,7 +22,8 @@ public record FreelancerListResponseDto(
         int reviewsCount,
         int favoritesCount,
         int completedProjectsCount,
-        List<String> techNameList
+        List<String> techNameList,
+        String freelancerProfileImageUrl
 ){
     public FreelancerListResponseDto (Freelancer freelancer) {
         this(
@@ -41,7 +42,9 @@ public record FreelancerListResponseDto(
                 freelancer.getReviewsCount(),
                 freelancer.getFavoritesCount(),
                 freelancer.getCompletedProjectsCount(),
-                freelancer.getTechStacks().stream().map(FreelancerTechDto::new).map(FreelancerTechDto::techName).toList()
+                freelancer.getTechStacks().stream().map(FreelancerTechDto::new).map(FreelancerTechDto::techName).toList(),
+                freelancer.getFreelancerProfileImageUrl()
         );
+
     }
 }

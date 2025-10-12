@@ -2,15 +2,20 @@ package com.back.domain.freelancer.freelancer.service;
 
 import com.back.domain.freelancer.freelancer.dto.FreelancerDetailResponseDto;
 import com.back.domain.freelancer.freelancer.dto.FreelancerListResponseDto;
-import com.back.domain.freelancer.freelancer.dto.FreelancerRequestDto;
+import com.back.domain.freelancer.freelancer.dto.FreelancerSaveRequestDto;
+import com.back.domain.freelancer.freelancer.dto.FreelancerUpdateRequestDto;
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
 import com.back.domain.member.entity.Member;
 import com.back.domain.member.repository.MemberRepository;
+import com.back.global.fileStorage.FileStorageService;
+import com.back.global.fileStorage.FileType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -18,6 +23,7 @@ import java.util.List;
 public class FreelancerService {
     private final FreelancerRepository freelancerRepository;
     private final MemberRepository memberRepository;
+    private final FileStorageService fileStorageService;
 
     @Transactional(readOnly = true)
     public List<FreelancerListResponseDto> findAll() {
@@ -37,10 +43,17 @@ public class FreelancerService {
     }
 
     @Transactional
-    public Freelancer create(Long memberId, FreelancerRequestDto dto) {
+    public Freelancer create(Long memberId, FreelancerSaveRequestDto dto, MultipartFile imageFile) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        Freelancer freelancer = new Freelancer(member, dto.freelancerTitle(), dto.type(), dto.location(), dto.content(), dto.isOnSite(), dto.minMonthlyRate(), dto.maxMonthlyRate());
+        String imageUrl = null;
+        try {
+            imageUrl = fileStorageService.saveFile(imageFile, FileType.PROFILE);
+        } catch (IOException e) {
+            throw new RuntimeException("이미지 저장 실패",e);
+        }
+
+        Freelancer freelancer = new Freelancer(member, dto.freelancerTitle(), dto.type(), dto.location(), dto.content(), dto.isOnSite(), dto.minMonthlyRate(), dto.maxMonthlyRate(), imageUrl);
 
         return freelancerRepository.save(freelancer);
     }
@@ -54,9 +67,17 @@ public class FreelancerService {
     }
 
     @Transactional
-    public void update(Long id, FreelancerRequestDto dto) {
+    public void update(Long id, FreelancerUpdateRequestDto dto, MultipartFile newImageFile) {
         Freelancer freelancer = freelancerRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 id 입니다."));
-        freelancer.update(dto.freelancerTitle(), dto.type(), dto.location(), dto.content(), dto.isOnSite(), dto.minMonthlyRate(), dto.maxMonthlyRate());
+
+        String updatedImageUrl = null;
+        try {
+            updatedImageUrl = fileStorageService.updateFile(freelancer.getFreelancerProfileImageUrl(), newImageFile, dto.deleteExistingImage(), FileType.PROFILE);
+        } catch (IOException e) {
+            throw new RuntimeException("파일 처리 중 오류가 발생했습니다.", e);
+        }
+
+        freelancer.update(dto.freelancerTitle(), dto.type(), dto.location(), dto.content(), dto.isOnSite(), dto.minMonthlyRate(), dto.maxMonthlyRate(), updatedImageUrl);
     }
 }

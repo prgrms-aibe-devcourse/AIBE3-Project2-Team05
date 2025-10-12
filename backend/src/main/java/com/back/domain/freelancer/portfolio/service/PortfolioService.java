@@ -7,7 +7,8 @@ import com.back.domain.freelancer.portfolio.dto.PortfolioSaveRequestDto;
 import com.back.domain.freelancer.portfolio.dto.PortfolioUpdateRequestDto;
 import com.back.domain.freelancer.portfolio.entity.Portfolio;
 import com.back.domain.freelancer.portfolio.repository.PortfolioRepository;
-import com.back.global.service.FileStorageService;
+import com.back.global.fileStorage.FileStorageService;
+import com.back.global.fileStorage.FileType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +48,7 @@ public class PortfolioService {
 
         String imageUrl = null;
         try {
-            imageUrl = fileStorageService.saveFile(imageFile);
+            imageUrl = fileStorageService.saveFile(imageFile, FileType.PORTFOLIO);
         } catch (IOException e) {
             throw new RuntimeException("이미지 저장 실패",e);
         }
@@ -67,7 +68,7 @@ public class PortfolioService {
 
         String updatedImageUrl = null;
         try {
-            updatedImageUrl = fileStorageService.updateFile(portfolio.getImageUrl(), newImageFile, dto.deleteExistingImage());
+            updatedImageUrl = fileStorageService.updateFile(portfolio.getImageUrl(), newImageFile, dto.deleteExistingImage(), FileType.PORTFOLIO);
         } catch (IOException e) {
             throw new RuntimeException("파일 처리 중 오류가 발생했습니다.", e);
         }

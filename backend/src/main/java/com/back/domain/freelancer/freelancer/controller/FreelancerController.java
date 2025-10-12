@@ -1,9 +1,6 @@
 package com.back.domain.freelancer.freelancer.controller;
 
-import com.back.domain.freelancer.freelancer.dto.FreelancerDetailResponseDto;
-import com.back.domain.freelancer.freelancer.dto.FreelancerDto;
-import com.back.domain.freelancer.freelancer.dto.FreelancerListResponseDto;
-import com.back.domain.freelancer.freelancer.dto.FreelancerRequestDto;
+import com.back.domain.freelancer.freelancer.dto.*;
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancer.service.FreelancerService;
 import com.back.domain.member.entity.Member;
@@ -11,6 +8,7 @@ import com.back.domain.member.repository.MemberRepository;
 import com.back.global.rsData.RsData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -39,12 +37,12 @@ public class FreelancerController {
     }
 
     @PostMapping
-    public RsData<FreelancerDto> create(@RequestBody FreelancerRequestDto dto) {
+    public RsData<FreelancerDto> create(@RequestPart FreelancerSaveRequestDto dto, @RequestPart MultipartFile imageFile) {
 
         //todo 인증정보로 수정 해야함
         //삭제
         Member member = setMember();
-        Freelancer freelancer = freelancerService.create(member.getId(), dto);
+        Freelancer freelancer = freelancerService.create(member.getId(), dto, imageFile);
         return new RsData<>("201-1", "%d번 프리랜서가 생성되었습니다.".formatted(freelancer.getId()), new FreelancerDto(freelancer));
 
         /*
@@ -61,8 +59,8 @@ public class FreelancerController {
     }
 
     @PutMapping("/{id}")
-    public RsData<Void> update(@PathVariable Long id, @RequestBody FreelancerRequestDto dto) {
-        freelancerService.update(id, dto);
+    public RsData<Void> update(@PathVariable Long id, @RequestPart FreelancerUpdateRequestDto dto, @RequestPart MultipartFile imageFile) {
+        freelancerService.update(id, dto, imageFile);
         return new RsData<>("200-1", "%d번 프리랜서가 수정되었습니다.".formatted(id));
     }
 }

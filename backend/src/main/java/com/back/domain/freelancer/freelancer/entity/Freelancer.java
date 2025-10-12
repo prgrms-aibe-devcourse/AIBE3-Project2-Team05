@@ -33,6 +33,7 @@ public class Freelancer extends BaseEntity {
     private Boolean isOnSite;
     private int minMonthlyRate;
     private int maxMonthlyRate;
+    private String freelancerProfileImageUrl;
     private double ratingAvg;  //비정규화
     private int reviewsCount;  //비정규화
     private int favoritesCount;  //비정규화
@@ -48,7 +49,7 @@ public class Freelancer extends BaseEntity {
     private Set<FreelancerTech> techStacks = new HashSet<>();
 
 
-    public Freelancer(Member member, String freelancerTitle, String type, String location, String content, Boolean isOnSite, int minMonthlyRate, int maxMonthlyRate) {
+    public Freelancer(Member member, String freelancerTitle, String type, String location, String content, Boolean isOnSite, int minMonthlyRate, int maxMonthlyRate, String freelancerProfileImageUrl) {
         this.member = member;
         this.memberNickname = member.getNickname();
         this.freelancerTitle = freelancerTitle;
@@ -58,9 +59,10 @@ public class Freelancer extends BaseEntity {
         this.isOnSite = isOnSite;
         this.minMonthlyRate = minMonthlyRate;
         this.maxMonthlyRate = maxMonthlyRate;
+        this.freelancerProfileImageUrl = freelancerProfileImageUrl;
     }
 
-    public void update(String freelancerTitle, String type, String location, String content, Boolean isOnSite, int minMonthlyRate, int maxMonthlyRate) {
+    public void update(String freelancerTitle, String type, String location, String content, Boolean isOnSite, int minMonthlyRate, int maxMonthlyRate, String freelancerProfileImageUrl) {
         this.freelancerTitle = freelancerTitle;
         this.type = type;
         this.location = location;
@@ -68,6 +70,7 @@ public class Freelancer extends BaseEntity {
         this.isOnSite = isOnSite;
         this.minMonthlyRate = minMonthlyRate;
         this.maxMonthlyRate = maxMonthlyRate;
+        this.freelancerProfileImageUrl = freelancerProfileImageUrl;
     }
 
     public void checkCanUpdateOrDelete(Long freelancerId) {
