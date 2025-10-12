@@ -84,6 +84,12 @@ public class Project extends BaseEntity {
     private Integer viewCount = 0;
 
     /**
+     * 지원자 수
+     */
+    @Column(name = "applicant_count")
+    private Long applicantCount = 0L;
+
+    /**
      * 생성자
      */
     public Project(Member pm, String title, String description, String field, BigDecimal budget,
@@ -103,5 +109,21 @@ public class Project extends BaseEntity {
      */
     public boolean isOwner(Member member) {
         return this.pm.getId().equals(member.getId());
+    }
+
+    /**
+     * 지원자 수 증가
+     */
+    public void incrementApplicantCount() {
+        this.applicantCount++;
+    }
+
+    /**
+     * 지원자 수 감소
+     */
+    public void decrementApplicantCount() {
+        if (this.applicantCount > 0) {
+            this.applicantCount--;
+        }
     }
 }

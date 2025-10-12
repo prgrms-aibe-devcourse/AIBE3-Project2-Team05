@@ -3,7 +3,9 @@ package com.back.domain.matching.projectSubmission.service;
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.matching.projectSubmission.entity.ProjectSubmission;
 import com.back.domain.matching.projectSubmission.entity.SubmissionStatus;
+import com.back.domain.matching.projectSubmission.entity.SubmissionStatusHistory;
 import com.back.domain.matching.projectSubmission.repository.ProjectSubmissionRepository;
+import com.back.domain.matching.projectSubmission.repository.SubmissionStatusHistoryRepository;
 import com.back.domain.freelancer.portfolio.entity.Portfolio;
 import com.back.domain.freelancer.portfolio.repository.PortfolioRepository;
 import com.back.domain.project.project.entity.Project;
@@ -26,6 +28,7 @@ public class ProjectSubmissionService {
     private final ProjectSubmissionRepository projectSubmissionRepository;
     private final ProjectRepository projectRepository;
     private final PortfolioRepository portfolioRepository;
+    private final SubmissionStatusHistoryRepository submissionStatusHistoryRepository;
 
     /**
      * 프로젝트 지원 생성
@@ -68,7 +71,12 @@ public class ProjectSubmissionService {
                 coverLetter
         );
 
-        return projectSubmissionRepository.save(submission);
+        ProjectSubmission savedSubmission = projectSubmissionRepository.save(submission);
+
+        // 지원자 수 증가
+        project.incrementApplicantCount();
+
+        return savedSubmission;
     }
 
     /**
@@ -189,22 +197,51 @@ public class ProjectSubmissionService {
         }
 
         submission.cancel();
+
+        // 지원자 수 감소
+        submission.getProject().decrementApplicantCount();
     }
 
     /**
      * 지원 상태 변경 (PM 전용)
+     *
+     * @param submission   지원
+     * @param newStatus    변경할 상태
+     * @param changeReason 변경 사유 (선택)
+     */
+    @Transactional
+    public void updateStatus(ProjectSubmission submission, SubmissionStatus newStatus, String changeReason) {
+        // 취소된 지원은 상태 변경 불가
+        if (submission.isCancelled()) {
+            throw new ServiceException("400-1", "취소된 지원은 상태를 변경할 수 없습니다.");
+        }
+
+        // 이전 상태 저장
+        SubmissionStatus previousStatus = submission.getStatus();
+
+        // 상태 변경
+        submission.updateStatus(newStatus);
+
+        // 상태 변경 이력 저장
+        SubmissionStatusHistory history = new SubmissionStatusHistory(
+                submission,
+                submission.getProject(),
+                previousStatus,
+                newStatus,
+                changeReason
+        );
+        submissionStatusHistoryRepository.save(history);
+    }
+
+    /**
+     * 지원 상태 변경 (PM 전용) - 사유 없음
      *
      * @param submission 지원
      * @param newStatus  변경할 상태
      */
     @Transactional
     public void updateStatus(ProjectSubmission submission, SubmissionStatus newStatus) {
-        // 취소된 지원은 상태 변경 불가
-        if (submission.isCancelled()) {
-            throw new ServiceException("400-1", "취소된 지원은 상태를 변경할 수 없습니다.");
-        }
-
-        submission.updateStatus(newStatus);
+        updateStatus(submission, newStatus, null);
     }
 
     /**
@@ -218,5 +255,28 @@ public class ProjectSubmissionService {
                 .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프로젝트입니다."));
 
         return projectSubmissionRepository.countByProject(project);
+    }
+
+    /**
+     * 지원의 상태 변경 이력 조회
+     *
+     * @param submission 지원
+     * @return 상태 변경 이력 목록
+     */
+    public List<SubmissionStatusHistory> getStatusHistory(ProjectSubmission submission) {
+        return submissionStatusHistoryRepository.findBySubmissionOrderByCreateDateDesc(submission);
+    }
+
+    /**
+     * 프로젝트의 모든 지원 상태 변경 이력 조회
+     *
+     * @param projectId 프로젝트 ID
+     * @return 상태 변경 이력 목록
+     */
+    public List<SubmissionStatusHistory> getStatusHistoryByProject(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프로젝트입니다."));
+
+        return submissionStatusHistoryRepository.findByProjectOrderByCreateDateDesc(project);
     }
 }
