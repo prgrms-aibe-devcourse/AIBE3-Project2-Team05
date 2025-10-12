@@ -1,6 +1,7 @@
 package com.back.domain.matching.proposal.controller;
 
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
+import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
 import com.back.domain.matching.proposal.dto.ProposalAcceptReqBody;
 import com.back.domain.matching.proposal.dto.ProposalCreateReqBody;
 import com.back.domain.matching.proposal.dto.ProposalDto;
@@ -8,6 +9,7 @@ import com.back.domain.matching.proposal.dto.ProposalRejectReqBody;
 import com.back.domain.matching.proposal.entity.Proposal;
 import com.back.domain.matching.proposal.service.ProposalService;
 import com.back.domain.member.member.entity.Member;
+import com.back.global.exception.ServiceException;
 import com.back.global.rsData.RsData;
 import com.back.global.security.SecurityUser;
 import jakarta.validation.Valid;
@@ -27,6 +29,7 @@ import java.util.List;
 public class ApiV1ProposalController {
 
     private final ProposalService proposalService;
+    private final FreelancerRepository freelancerRepository;
 
     /**
      * 프로젝트 제안 생성 (PM 전용)
@@ -71,18 +74,16 @@ public class ApiV1ProposalController {
     ) {
         List<Proposal> proposals;
 
-        // TODO: 프리랜서/PM 구분 로직 구현 필요
-        // if (user.isFreelancer()) {
-        //     Freelancer freelancer = user.getFreelancer();
-        //     proposals = proposalService.findByFreelancer(freelancer);
-        // } else {
-        //     Member pm = user.getMember();
-        //     proposals = proposalService.findByPm(pm);
-        // }
+        // 프리랜서인지 확인
+        var freelancerOpt = freelancerRepository.findByMember(user.getMember());
 
-        // 임시: PM으로 가정
-        Member pm = user.getMember();
-        proposals = proposalService.findByPm(pm);
+        if (freelancerOpt.isPresent()) {
+            // 프리랜서가 받은 제안 목록
+            proposals = proposalService.findByFreelancer(freelancerOpt.get());
+        } else {
+            // PM이 보낸 제안 목록
+            proposals = proposalService.findByPm(user.getMember());
+        }
 
         List<ProposalDto> dtos = proposals.stream()
                 .map(ProposalDto::new)
@@ -133,8 +134,8 @@ public class ApiV1ProposalController {
             @PathVariable Long id,
             @RequestBody ProposalAcceptReqBody reqBody
     ) {
-        // TODO: user.getFreelancer() 구현 필요
-        Freelancer freelancer = user.getFreelancer();
+        Freelancer freelancer = freelancerRepository.findByMember(user.getMember())
+                .orElseThrow(() -> new ServiceException("403-1", "프리랜서 권한이 필요합니다."));
         Proposal proposal = proposalService.findById(id);
 
         proposalService.accept(proposal, freelancer, reqBody.responseMessage());
@@ -160,7 +161,8 @@ public class ApiV1ProposalController {
             @PathVariable Long id,
             @Valid @RequestBody ProposalRejectReqBody reqBody
     ) {
-        Freelancer freelancer = user.getFreelancer();
+        Freelancer freelancer = freelancerRepository.findByMember(user.getMember())
+                .orElseThrow(() -> new ServiceException("403-1", "프리랜서 권한이 필요합니다."));
         Proposal proposal = proposalService.findById(id);
 
         proposalService.reject(

@@ -19,9 +19,9 @@ import java.time.LocalDateTime;
     name = "messages",
     indexes = {
         @Index(name = "idx_project", columnList = "project_id"),
-        @Index(name = "idx_pm_freelancer", columnList = "pm_id, freelancer_id"),
+        @Index(name = "idx_pm_freelancer", columnList = "project_manager_id, freelancer_member_id"),
         @Index(name = "idx_related", columnList = "related_type, related_id"),
-        @Index(name = "idx_receiver_unread", columnList = "freelancer_id, is_read"),
+        @Index(name = "idx_receiver_unread", columnList = "freelancer_member_id, is_read"),
         @Index(name = "idx_created_at", columnList = "createDate")
     }
 )
