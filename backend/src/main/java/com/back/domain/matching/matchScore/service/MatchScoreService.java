@@ -43,8 +43,9 @@ public class MatchScoreService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     // 점수 배점
-    private static final double MAX_SKILL_SCORE = 60.0;      // 스킬 점수 최대 60점
-    private static final double MAX_EXPERIENCE_SCORE = 40.0; // 경력 점수 최대 40점
+    private static final double MAX_SKILL_SCORE = 50.0;      // 스킬 점수 최대 50점
+    private static final double MAX_EXPERIENCE_SCORE = 30.0; // 경력 점수 최대 30점
+    private static final double MAX_BUDGET_SCORE = 20.0;     // 단가 점수 최대 20점
     private static final int TOP_N = 10;                     // Top 10 추천
 
     /**
@@ -92,6 +93,7 @@ public class MatchScoreService {
                     scoreData.getTotalScore(),
                     scoreData.getSkillScore(),
                     scoreData.getExperienceScore(),
+                    scoreData.getBudgetScore(),
                     rank++,
                     scoreData.getReasonsJson(),
                     LocalDateTime.now()
@@ -106,25 +108,28 @@ public class MatchScoreService {
      * 매칭 점수 계산 (프로젝트 + 프리랜서)
      */
     private MatchScoreData calculateMatchScore(Project project, Freelancer freelancer, List<String> requiredTechNames) {
-        // 1. 스킬 점수 계산 (60점)
+        // 1. 스킬 점수 계산 (50점)
         BigDecimal skillScore = calculateSkillScore(freelancer, requiredTechNames);
 
-        // 2. 경력 점수 계산 (40점)
+        // 2. 경력 점수 계산 (30점)
         BigDecimal experienceScore = calculateExperienceScore(freelancer);
 
-        // 3. 총점 계산
-        BigDecimal totalScore = skillScore.add(experienceScore)
+        // 3. 단가 점수 계산 (20점)
+        BigDecimal budgetScore = calculateBudgetScore(project, freelancer);
+
+        // 4. 총점 계산
+        BigDecimal totalScore = skillScore.add(experienceScore).add(budgetScore)
                 .setScale(2, RoundingMode.HALF_UP);
 
-        // 4. 매칭 이유 생성
-        Map<String, Object> reasons = generateMatchingReasons(freelancer, requiredTechNames, skillScore, experienceScore);
+        // 5. 매칭 이유 생성
+        Map<String, Object> reasons = generateMatchingReasons(freelancer, requiredTechNames, skillScore, experienceScore, budgetScore, project);
         String reasonsJson = convertToJson(reasons);
 
-        return new MatchScoreData(freelancer, totalScore, skillScore, experienceScore, reasonsJson);
+        return new MatchScoreData(freelancer, totalScore, skillScore, experienceScore, budgetScore, reasonsJson);
     }
 
     /**
-     * 스킬 점수 계산 (60점 만점)
+     * 스킬 점수 계산 (50점 만점)
      * - 프로젝트 요구 기술과 프리랜서 보유 기술 매칭률
      * - 숙련도 가중치 적용
      */
@@ -172,30 +177,30 @@ public class MatchScoreService {
     }
 
     /**
-     * 경력 점수 계산 (40점 만점)
-     * - 총 경력 연수 (20점)
-     * - 완료 프로젝트 수 (10점)
-     * - 평균 평점 (10점)
+     * 경력 점수 계산 (30점 만점)
+     * - 총 경력 연수 (15점)
+     * - 완료 프로젝트 수 (8점)
+     * - 평균 평점 (7점)
      */
     private BigDecimal calculateExperienceScore(Freelancer freelancer) {
         double totalScore = 0.0;
 
-        // 1. 총 경력 연수 점수 (20점): 10년 이상이면 만점
+        // 1. 총 경력 연수 점수 (15점): 10년 이상이면 만점
         Integer totalExperience = freelancer.getTotalExperience();
         if (totalExperience != null && totalExperience > 0) {
-            double experienceScore = Math.min((totalExperience / 10.0) * 20, 20.0);
+            double experienceScore = Math.min((totalExperience / 10.0) * 15, 15.0);
             totalScore += experienceScore;
         }
 
-        // 2. 완료 프로젝트 수 (10점): 10개 이상이면 만점
+        // 2. 완료 프로젝트 수 (8점): 10개 이상이면 만점
         long completedProjects = portfolioRepository.countByFreelancer(freelancer);
-        double projectScore = Math.min((completedProjects / 10.0) * 10, 10.0);
+        double projectScore = Math.min((completedProjects / 10.0) * 8, 8.0);
         totalScore += projectScore;
 
-        // 3. 평균 평점 (10점): 5점 만점 기준
+        // 3. 평균 평점 (7점): 5점 만점 기준
         BigDecimal averageRating = freelancer.getAverageRating();
         if (averageRating != null && averageRating.compareTo(BigDecimal.ZERO) > 0) {
-            double ratingScore = averageRating.doubleValue() / 5.0 * 10.0;
+            double ratingScore = averageRating.doubleValue() / 5.0 * 7.0;
             totalScore += ratingScore;
         }
 
@@ -203,10 +208,51 @@ public class MatchScoreService {
     }
 
     /**
+     * 단가 점수 계산 (20점 만점)
+     * - 프로젝트 예산과 프리랜서 희망 단가 비교
+     */
+    private BigDecimal calculateBudgetScore(Project project, Freelancer freelancer) {
+        BigDecimal projectBudget = project.getBudget();
+        Integer freelancerMinRate = freelancer.getMinRate();
+        Integer freelancerMaxRate = freelancer.getMaxRate();
+
+        // 예산이나 단가 정보가 없으면 중간 점수 (10점)
+        if (projectBudget == null || freelancerMinRate == null || freelancerMaxRate == null) {
+            return BigDecimal.valueOf(10.0);
+        }
+
+        double budget = projectBudget.doubleValue();
+        double minRate = freelancerMinRate.doubleValue();
+        double maxRate = freelancerMaxRate.doubleValue();
+
+        double score;
+
+        if (budget >= minRate && budget <= maxRate) {
+            // 예산이 희망 단가 범위 내: 만점
+            score = MAX_BUDGET_SCORE;
+        } else if (budget > maxRate) {
+            // 예산이 최대 단가보다 높음: 15점 (예산 여유)
+            score = 15.0;
+        } else if (budget >= minRate * 0.8) {
+            // 예산이 최소 단가의 80% 이상: 10점 (협상 가능)
+            score = 10.0;
+        } else if (budget >= minRate * 0.6) {
+            // 예산이 최소 단가의 60% 이상: 5점 (협상 어려움)
+            score = 5.0;
+        } else {
+            // 예산이 최소 단가의 60% 미만: 0점 (매칭 불가능)
+            score = 0.0;
+        }
+
+        return BigDecimal.valueOf(score).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    /**
      * 매칭 이유 생성 (JSON)
      */
     private Map<String, Object> generateMatchingReasons(Freelancer freelancer, List<String> requiredTechNames,
-                                                         BigDecimal skillScore, BigDecimal experienceScore) {
+                                                         BigDecimal skillScore, BigDecimal experienceScore,
+                                                         BigDecimal budgetScore, Project project) {
         Map<String, Object> reasons = new HashMap<>();
 
         // 매칭된 기술 목록
@@ -222,6 +268,10 @@ public class MatchScoreService {
         reasons.put("experience_score", experienceScore.doubleValue());
         reasons.put("completed_projects", portfolioRepository.countByFreelancer(freelancer));
         reasons.put("average_rating", freelancer.getAverageRating());
+        reasons.put("budget_score", budgetScore.doubleValue());
+        reasons.put("project_budget", project.getBudget());
+        reasons.put("freelancer_min_rate", freelancer.getMinRate());
+        reasons.put("freelancer_max_rate", freelancer.getMaxRate());
 
         return reasons;
     }
@@ -264,14 +314,16 @@ public class MatchScoreService {
         private final BigDecimal totalScore;
         private final BigDecimal skillScore;
         private final BigDecimal experienceScore;
+        private final BigDecimal budgetScore;
         private final String reasonsJson;
 
         public MatchScoreData(Freelancer freelancer, BigDecimal totalScore, BigDecimal skillScore,
-                             BigDecimal experienceScore, String reasonsJson) {
+                             BigDecimal experienceScore, BigDecimal budgetScore, String reasonsJson) {
             this.freelancer = freelancer;
             this.totalScore = totalScore;
             this.skillScore = skillScore;
             this.experienceScore = experienceScore;
+            this.budgetScore = budgetScore;
             this.reasonsJson = reasonsJson;
         }
 
@@ -279,6 +331,7 @@ public class MatchScoreService {
         public BigDecimal getTotalScore() { return totalScore; }
         public BigDecimal getSkillScore() { return skillScore; }
         public BigDecimal getExperienceScore() { return experienceScore; }
+        public BigDecimal getBudgetScore() { return budgetScore; }
         public String getReasonsJson() { return reasonsJson; }
     }
 }

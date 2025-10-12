@@ -63,6 +63,12 @@ public class MatchScore {
     private BigDecimal scoreExperience;
 
     /**
+     * 단가 매칭 점수
+     */
+    @Column(name = "score_budget", precision = 5, scale = 2)
+    private BigDecimal scoreBudget;
+
+    /**
      * 매칭 순위 (1-10)
      */
     @Column(name = "`rank`")
@@ -87,10 +93,11 @@ public class MatchScore {
      * @param project          연관된 프로젝트
      * @param freelancer       연관된 프리랜서
      * @param scoreTotal       총 매칭 점수
-     * @param scoreSkill       스킬 매칭 점수
+     * @param scoreSkills      스킬 매칭 점수
      * @param scoreExperience  경력 매칭 점수
+     * @param scoreBudget      단가 매칭 점수
      * @param rank             매칭 순위 (1-10)
-     * @param reasons          매칭 이유 (JSON 형식)
+     * @param matchReason      매칭 이유 (JSON 형식)
      * @param recommendedAt    추천 일자
      */
     public MatchScore(
@@ -99,6 +106,7 @@ public class MatchScore {
             BigDecimal scoreTotal,
             BigDecimal scoreSkills,
             BigDecimal scoreExperience,
+            BigDecimal scoreBudget,
             Integer rank,
             String matchReason,
             LocalDateTime recommendedAt
@@ -109,6 +117,7 @@ public class MatchScore {
         this.scoreTotal = scoreTotal;
         this.scoreSkills = scoreSkills;
         this.scoreExperience = scoreExperience;
+        this.scoreBudget = scoreBudget;
         this.rank = rank;
         this.matchReason = matchReason;
         this.recommendedAt = recommendedAt;
@@ -121,6 +130,7 @@ public class MatchScore {
      * @param scoreTotal      업데이트할 총 점수
      * @param scoreSkills     업데이트할 스킬 점수
      * @param scoreExperience 업데이트할 경력 점수
+     * @param scoreBudget     업데이트할 단가 점수
      * @param rank            업데이트할 순위
      * @param matchReason     업데이트할 매칭 이유
      */
@@ -128,12 +138,14 @@ public class MatchScore {
             BigDecimal scoreTotal,
             BigDecimal scoreSkills,
             BigDecimal scoreExperience,
+            BigDecimal scoreBudget,
             Integer rank,
             String matchReason
     ) {
         this.scoreTotal = scoreTotal;
         this.scoreSkills = scoreSkills;
         this.scoreExperience = scoreExperience;
+        this.scoreBudget = scoreBudget;
         this.rank = rank;
         this.matchReason = matchReason;
         this.recommendedAt = LocalDateTime.now();
