@@ -1,5 +1,6 @@
 "use client";
 import { useUser } from "@/app/context/UserContext";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -28,7 +29,7 @@ export default function LoginPage() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          credentials: "include", // 쿠키 저장
+          credentials: "include",
           body: JSON.stringify({ username: usernameInput, password }),
         }
       );
@@ -54,80 +55,141 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="relative w-screen h-screen bg-[var(--background)] flex justify-center items-center overflow-y-auto">
-      <div className="absolute inset-0 bg-[rgba(241,234,220,0.3)] z-0"></div>
-      <div className="relative z-10 w-[448px] h-[400px] flex flex-col items-center">
-        <div className="flex flex-col items-center mt-4">
-          <h1 className="text-[30px] font-bold text-[var(--primary)]">FIT</h1>
-          <p className="text-[16px] font-normal text-[var(--muted-foreground)] mt-2">
-            로그인
-          </p>
-        </div>
-        <div className="mt-6 w-full bg-[#FDFCF8] shadow-lg rounded-[16px] flex-1 p-6">
-          <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-            <div className="flex flex-col">
-              <label className="text-[14px] font-medium text-[var(--foreground)]">
+    <div
+      className="w-full h-screen flex justify-center items-center"
+      style={{ backgroundColor: "var(--background)" }}
+    >
+      <div className="w-[448px] flex flex-col items-center">
+        {/* 상단 로고 또는 PNG */}
+
+        <h1 className="text-[24px] font-bold leading-[32px] mb-2 text-[#0F0A03]">
+          로그인
+        </h1>
+        <p className="text-[14px] font-[300] leading-[20px] mb-[20px] text-[#5A5549]">
+          FIT에 로그인하여 서비스를 이용하세요
+        </p>
+
+        {/* 로그인 폼 */}
+        <div
+          className="w-full bg-[#FDFCF8] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] rounded-[16px]"
+          style={{ padding: "35px 35px" }}
+        >
+          <form className="flex flex-col" onSubmit={handleSubmit}>
+            {/* 아이디 */}
+            <div className="flex flex-col mb-[20px] relative">
+              <label className="text-[14px] font-medium mb-[8px] text-[#0F0A03]">
                 아이디
               </label>
-              <input
-                type="text"
-                value={usernameInput}
-                onChange={(e) => setUsernameInput(e.target.value)}
-                placeholder="아이디를 입력하세요"
-                className="mt-2 h-[36px] rounded-[10px] border border-[var(--border)] bg-[var(--input)] px-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
-              />
+              <div className="relative">
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 w-4 h-4"
+                  style={{ paddingLeft: "8px" }}
+                >
+                  <Image
+                    src="/id.png"
+                    alt="아이디 아이콘"
+                    width={16}
+                    height={16}
+                  />
+                </div>
+                <input
+                  type="text"
+                  value={usernameInput}
+                  onChange={(e) => setUsernameInput(e.target.value)}
+                  placeholder="아이디를 입력하세요"
+                  className="w-full h-[36px] rounded-[10px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-2 focus:ring-[#006A20] text-[14px] font-[350] placeholder:font-[350]"
+                  style={{
+                    backgroundColor: "rgba(255,255,255,0.002)",
+                    border: "1px solid #F5EEE0",
+                    color: "#0F0A03",
+                    paddingLeft: "35px",
+                    paddingRight: "35px",
+                  }}
+                />
+              </div>
             </div>
-            <div className="flex flex-col">
-              <label className="text-[14px] font-medium text-[var(--foreground)]">
+
+            {/* 비밀번호 */}
+            <div className="flex flex-col mb-[20px] relative">
+              <label className="text-[14px] font-medium mb-[8px] text-[#0F0A03]">
                 비밀번호
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="비밀번호를 입력하세요"
-                className="mt-2 h-[36px] rounded-[10px] border border-[var(--border)] bg-[var(--input)] px-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
-              />
+              <div className="relative">
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 w-4 h-4"
+                  style={{ paddingLeft: "8px" }}
+                >
+                  <Image
+                    src="/password.png"
+                    alt="비밀번호 아이콘"
+                    width={16}
+                    height={16}
+                  />
+                </div>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="비밀번호를 입력하세요"
+                  className="w-full h-[36px] rounded-[10px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-2 focus:ring-[#006A20] text-[14px] font-[350] placeholder:font-[350]"
+                  style={{
+                    backgroundColor: "rgba(255,255,255,0.002)",
+                    border: "1px solid #F5EEE0",
+                    color: "#0F0A03",
+                    paddingLeft: "35px",
+                    paddingRight: "35px",
+                  }}
+                />
+              </div>
+              <p className="text-[14px] font-[300] leading-[20px]  text-right text-[#5A5549]">
+                <span
+                  className="cursor-pointer hover:underline font-normal text-[#006A20]"
+                  onClick={() => router.push("/members/findid")}
+                >
+                  아이디 찾기
+                </span>
+                {" / "}
+                <span
+                  className="cursor-pointer hover:underline font-normal text-[#006A20]"
+                  onClick={() => router.push("/members/updatePassword")}
+                >
+                  비밀번호 재설정
+                </span>
+              </p>
             </div>
 
-            {errorMsg && <p className="text-red-500">{errorMsg}</p>}
-            {successMsg && <p className="text-green-500">{successMsg}</p>}
+            {/* 에러 / 성공 메시지 */}
+            {(errorMsg || successMsg) && (
+              <p
+                className={`text-[14px] text-center mb-4 ${
+                  errorMsg ? "text-red-500" : "text-green-500"
+                }`}
+              >
+                {errorMsg || successMsg}
+              </p>
+            )}
 
+            {/* 로그인 버튼 */}
             <button
               type="submit"
-              className="w-full h-[36px] bg-[var(--primary)] text-[var(--primary-foreground)] rounded-[10px] cursor-pointer"
+              className="w-full h-[36px] bg-[#006A20] text-[#FBF8F1] rounded-[10px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-[14px] font-medium leading-[20px] cursor-pointer hover:bg-[#005a1a] transition-colors mb-[15px]"
             >
               로그인
             </button>
 
-            <p className="text-[14px] font-light text-[var(--muted-foreground)] text-center cursor-pointer">
-              계정이 없으신가요?{" "}
+            {/* 회원가입 / 비밀번호 찾기 링크 */}
+            <p className="text-[14px] font-[300] leading-[20px] text-center text-[#5A5549] mb-2">
+              아직 fit 회원이 아니라면?{" "}
               <span
-                className="text-[var(--primary)]"
+                className="cursor-pointer hover:underline font-normal text-[#006A20]"
                 onClick={() => router.push("/members/signup")}
               >
                 회원가입
               </span>
             </p>
-
-            <p className="text-[14px] font-light text-[var(--muted-foreground)] text-center mt-1">
-              <span
-                className="text-[var(--primary)] cursor-pointer"
-                onClick={() => router.push("/members/findid")}
-              >
-                아이디 찾기
-              </span>
-              {" / "}
-              <span
-                className="text-[var(--primary)] cursor-pointer"
-                onClick={() => router.push("/members/updatePassword")}
-              >
-                비밀번호 재설정
-              </span>
-            </p>
           </form>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

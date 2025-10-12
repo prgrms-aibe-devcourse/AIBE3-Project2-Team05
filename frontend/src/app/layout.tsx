@@ -20,7 +20,7 @@ export default function RootLayout({
       <body className="antialiased min-h-screen flex flex-col">
         <UserProvider>
           <Header />
-          <main className="flex-1 w-full pt-[68px] pb-[180px] bg-[#F1EADC]">
+          <main className="flex-1 w-full pt-[68px] pb-[180px] bg-[#f8f4eb]">
             {children}
           </main>
           <Footer />

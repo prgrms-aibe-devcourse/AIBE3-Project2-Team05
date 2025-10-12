@@ -1,126 +1,40 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Lato:wght@400;700&display=swap");
-
 .footer-container {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  width: 100vw;
-  height: 180px;
+  width: 100%;
+  padding: 20px 0;
   background: #555555;
-  z-index: 10;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 .footer-logo {
-  position: absolute;
   width: 137px;
-  height: 99px;
-  left: 471px;
-  top: 31px;
-  object-fit: contain;
+  height: auto;
+  margin: 0 auto 10px auto; /* 중앙 정렬 */
 }
 
-/* 첫 번째 줄: 고객센터 정보 */
-.footer-line-1 {
-  position: absolute;
-  left: 619px;
-  top: 40px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.customer-service {
-  font-family: "Inter", sans-serif;
-  font-style: normal;
-  font-weight: 700;
-  font-size: 21.3px;
-  line-height: 38px;
-  color: #ffffff;
-}
-
-.service-hours {
-  font-family: "Lato", sans-serif;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 17px;
-  line-height: 16px;
-  color: #ffffff;
-}
-
-.service-holiday {
-  font-family: "Lato", sans-serif;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 11.7px;
-  line-height: 16px;
-  color: #ffffff;
-}
-
-.email {
-  font-family: "Lato", sans-serif;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 16.3px;
-  line-height: 16px;
-  color: #ffffff;
-}
-
-/* 두 번째 줄: 회사 정보 */
-.footer-line-2 {
-  position: absolute;
-  left: 678px;
-  top: 82px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.company-name {
-  font-family: "Lato", sans-serif;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 15.9px;
-  line-height: 16px;
-  color: #ffffff;
-}
-
-.production {
-  font-family: "Lato", sans-serif;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 15.9px;
-  line-height: 16px;
-  color: #ffffff;
-}
-
-.address {
-  font-family: "Lato", sans-serif;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 15px;
-  line-height: 16px;
-  color: #ffffff;
-}
-
-/* 세 번째 줄: 포트폴리오 안내 */
+.footer-line-1,
+.footer-line-2,
 .footer-line-3 {
-  position: absolute;
-  left: 619px;
-  top: 131px;
+  display: flex;
+  justify-content: center; /* 중앙 정렬 */
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 5px 0;
 }
 
-.notice-text {
-  font-family: "Lato", sans-serif;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 14.2px;
-  line-height: 16px;
-  color: #aaaaaa;
-}
-
-/* 구분선 스타일 */
+.customer-service,
+.service-hours,
+.service-holiday,
+.email,
+.company-name,
+.production,
+.address,
+.notice-text,
 .separator {
-  color: #ffffff;
+  color: #f8f4eb;
+  font-family: "Lato", sans-serif;
   font-size: 14px;
+}
+.footer-line-3 .notice-text {
+  color: #aaaaaa;
 }

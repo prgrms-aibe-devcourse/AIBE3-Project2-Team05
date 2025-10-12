@@ -102,7 +102,7 @@ export default function FindId() {
           <button
             type="button"
             onClick={sendCode}
-            className="w-full h-[36px] bg-[var(--primary)] text-[var(--primary-foreground)] rounded-[10px]"
+            className="w-full h-[36px] bg-[var(--primary)] text-[var(--primary-foreground)] rounded-[10px] cursor-pointer"
           >
             인증 코드 발송
           </button>
@@ -125,7 +125,7 @@ export default function FindId() {
               <button
                 type="button"
                 onClick={verifyId}
-                className="w-full h-[36px] bg-[var(--primary)] text-[var(--primary-foreground)] rounded-[10px]"
+                className="w-full h-[36px] bg-[var(--primary)] text-[var(--primary-foreground)] rounded-[10px] cursor-pointer"
               >
                 아이디 확인
               </button>
