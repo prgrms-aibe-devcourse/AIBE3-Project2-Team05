@@ -351,12 +351,6 @@ export interface components {
             attachmentFileIds?: number[];
             filesToDelete?: number[];
         };
-        ApiResponseProjectResponse: {
-            success?: boolean;
-            message?: string;
-            data?: components["schemas"]["ProjectResponse"];
-            error?: string;
-        };
         ProjectFileInfo: {
             /** Format: int64 */
             id?: number;
@@ -405,6 +399,14 @@ export interface components {
             modifyDate?: string;
             techStacks?: components["schemas"]["TechInfo"][];
             projectFiles?: components["schemas"]["ProjectFileInfo"][];
+        };
+        RsDataProjectResponse: {
+            success?: boolean;
+            message?: string;
+            data?: components["schemas"]["ProjectResponse"];
+            errorCode?: string;
+            /** Format: date-time */
+            timestamp?: string;
         };
         TechInfo: {
             techName?: string;
@@ -456,12 +458,6 @@ export interface components {
             status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
             /** Format: int64 */
             changedById?: number;
-        };
-        ApiResponseProject: {
-            success?: boolean;
-            message?: string;
-            data?: components["schemas"]["Project"];
-            error?: string;
         };
         Project: {
             /** Format: int64 */
@@ -524,6 +520,14 @@ export interface components {
             /** Format: date-time */
             createDate?: string;
         };
+        RsDataProject: {
+            success?: boolean;
+            message?: string;
+            data?: components["schemas"]["Project"];
+            errorCode?: string;
+            /** Format: date-time */
+            timestamp?: string;
+        };
         PageProjectResponse: {
             /** Format: int64 */
             totalElements?: number;
@@ -546,11 +550,11 @@ export interface components {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
+            paged?: boolean;
             /** Format: int32 */
             pageSize?: number;
             /** Format: int32 */
             pageNumber?: number;
-            paged?: boolean;
             unpaged?: boolean;
         };
         SortObject: {
@@ -573,12 +577,6 @@ export interface components {
             errorCode?: string;
             /** Format: date-time */
             timestamp?: string;
-        };
-        ApiResponseVoid: {
-            success?: boolean;
-            message?: string;
-            data?: unknown;
-            error?: string;
         };
     };
     responses: never;
@@ -678,7 +676,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProjectResponse"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataProjectResponse"];
                 };
             };
         };
@@ -823,7 +821,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProjectResponse"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataProjectResponse"];
                 };
             };
         };
@@ -849,7 +847,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseProject"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataProject"];
                 };
             };
         };
@@ -1087,7 +1085,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ApiResponseVoid"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
                 };
             };
         };
