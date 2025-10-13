@@ -24,6 +24,12 @@ const FavoriteButton = ({
 
     console.log('FavoriteButton 클릭됨:', { projectId, userId, currentState: isFavorite });
 
+    // 추가 인증 체크 (안전장치)
+    if (!userId) {
+      alert('로그인이 필요한 기능입니다.');
+      return;
+    }
+
     if (isLoading) return;
 
     setIsLoading(true);

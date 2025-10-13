@@ -65,6 +65,8 @@ const ProjectsPage = () => {
       // 인증된 사용자인 경우에만 즐겨찾기 로드
       if (!isAuthenticated()) {
         setFavoriteProjectIds([]);
+        // 즐겨찾기 정렬도 해제
+        setSortByFavorite(false);
         return;
       }
 
@@ -72,6 +74,7 @@ const ProjectsPage = () => {
         const userId = getCurrentUserId();
         if (userId === null) {
           setFavoriteProjectIds([]);
+          setSortByFavorite(false);
           return;
         }
 
@@ -80,6 +83,7 @@ const ProjectsPage = () => {
       } catch (error) {
         console.error('즐겨찾기 목록 로드 실패:', error);
         setFavoriteProjectIds([]);
+        setSortByFavorite(false);
       }
     };
 
@@ -88,6 +92,9 @@ const ProjectsPage = () => {
 
   // 데이터 로드 및 필터 변경 처리
   useEffect(() => {
+    // UserContext가 로딩 중이면 대기
+    if (!isLoaded) return;
+
     const fetchProjects = async (page = 0, search = '', currentFilters = filters) => {
       setLoading(true);
       try {
@@ -109,7 +116,7 @@ const ProjectsPage = () => {
         console.log('API 호출 URL:', `/api/projects?${params}`);
         console.log('현재 필터:', currentFilters);
 
-        const response = await fetch(`/api/projects?${params}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects?${params}`, {
           method: 'GET',
           credentials: 'include',
           headers: {
@@ -123,8 +130,8 @@ const ProjectsPage = () => {
           console.log('프로젝트 상태들:', data.content?.map(p => p.status));
           let projectList = data.content || [];
           
-          // 즐겨찾기 순으로 정렬이 활성화된 경우
-          if (sortByFavorite && projectList.length > 0) {
+          // 즐겨찾기 순으로 정렬이 활성화된 경우 (로그인된 사용자만)
+          if (sortByFavorite && projectList.length > 0 && isAuthenticated()) {
             const validProjects = projectList.filter((p): p is ProjectResponse & { id: number } => 
               typeof p.id === 'number'
             );
@@ -144,7 +151,7 @@ const ProjectsPage = () => {
 
     setCurrentPage(0);
     fetchProjects(0, searchQuery, filters);
-  }, [filters, searchQuery, sortByFavorite, favoriteProjectIds]);
+  }, [filters, searchQuery, sortByFavorite, favoriteProjectIds, isLoaded]);
 
   // 필터나 검색어 변경 시에만 스크롤 (즐겨찾기 정렬 제외)
   useEffect(() => {
@@ -173,12 +180,29 @@ const ProjectsPage = () => {
       console.log('API 호출 URL:', `/api/projects?${params}`);
       console.log('현재 필터:', currentFilters);
 
-      const response = await fetch(`/api/projects?${params}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects?${params}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
       if (response.ok) {
         const data: PageProjectResponse = await response.json();
         console.log('API 응답 데이터:', data);
         console.log('프로젝트 상태들:', data.content?.map(p => p.status));
-        setProjects(data.content || []);
+        let projectList = data.content || [];
+        
+        // 즐겨찾기 순으로 정렬이 활성화된 경우 (로그인된 사용자만)
+        if (sortByFavorite && projectList.length > 0 && isAuthenticated()) {
+          const validProjects = projectList.filter((p): p is ProjectResponse & { id: number } => 
+            typeof p.id === 'number'
+          );
+          projectList = sortProjectsByFavorite(validProjects, favoriteProjectIds);
+        }
+        
+        setProjects(projectList);
         setTotalPages(data.totalPages || 0);
         setCurrentPage(data.number || 0);
       }
@@ -211,7 +235,14 @@ const ProjectsPage = () => {
             <div className="flex items-center justify-between mb-4" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <h3 className="text-lg font-bold text-gray-800" style={{ fontSize: '18px', fontWeight: 'bold', color: '#374151' }}>프로젝트 필터</h3>
               <button
-                onClick={() => setSortByFavorite(!sortByFavorite)}
+                onClick={() => {
+                  if (!isAuthenticated()) {
+                    alert('로그인이 필요한 기능입니다.');
+                    router.push('/members/login');
+                    return;
+                  }
+                  setSortByFavorite(!sortByFavorite);
+                }}
                 className="p-1 transition-all duration-200 hover:scale-110 cursor-pointer"
                 style={{
                   border: 'none',
@@ -773,7 +804,9 @@ const ProjectsPage = () => {
                 key={project.id} 
                 className="relative bg-white shadow-md rounded-lg p-6 mb-4 hover:shadow-lg transition-shadow" 
                 style={{ position: 'relative', backgroundColor: 'white', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', borderRadius: '8px', padding: '24px', marginBottom: '16px', cursor: 'pointer', transition: 'box-shadow 0.3s' }}
-                onClick={() => router.push(`/projects/${project.id}`)}
+                onClick={() => {
+                  router.push(`/projects/${project.id}`);
+                }}
               >
                 <div className="flex justify-between items-start mb-2" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                   <h3 className="text-lg font-bold text-gray-800 mb-2" style={{ fontSize: '18px', fontWeight: 'bold', color: '#374151', marginBottom: '8px' }}>{project.title}</h3>
