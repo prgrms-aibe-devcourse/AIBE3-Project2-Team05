@@ -8,7 +8,7 @@ export default function FindId() {
   const [email, setEmail] = useState("");
   const [verifyCode, setVerifyCode] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
-  const [infoMsg, setInfoMsg] = useState("");
+  const [infoMsg, setInfoMsg] = useState(""); // 모달 메시지
   const [codeSent, setCodeSent] = useState(false);
 
   const sendCode = async () => {
@@ -65,17 +65,17 @@ export default function FindId() {
       const data = await res.json();
 
       if (!res.ok) {
-        setErrorMsg(data.message || "아이디 찾기 실패");
+        setErrorMsg(data.msg || "아이디 찾기 실패");
         return;
       }
 
+      // 서버가 msg 안에 아이디 문구를 포함해서 보냄
       setInfoMsg(data.msg);
     } catch (err) {
       console.error(err);
       setErrorMsg("아이디 찾기 중 오류 발생");
     }
   };
-
   return (
     <main className="relative w-screen h-screen bg-[var(--background)] flex justify-center items-center overflow-y-auto">
       <div className="absolute inset-0 bg-[rgba(241,234,220,0.3)] z-0"></div>
@@ -202,7 +202,7 @@ export default function FindId() {
                     }}
                   />
                 </div>
-                <br></br>
+                <br />
 
                 <button
                   type="button"
@@ -213,16 +213,36 @@ export default function FindId() {
                 </button>
               </div>
             )}
+            {infoMsg && (
+              <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+                <div
+                  style={{
+                    backgroundColor: "white",
+                    position: "relative",
+                    padding: "24px",
+                    borderRadius: "12px",
+                    boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+                    width: "380px",
+                    textAlign: "center",
+                  }}
+                >
+                  <p className="mb-6 text-[16px] font-medium text-gray-800">
+                    {infoMsg}
+                  </p>
+                  <button
+                    onClick={() => setInfoMsg("")}
+                    className="px-5 py-2 bg-[#006A20] rounded-md hover:bg-[#005a1a] transition"
+                    style={{ color: "#ffffff" }}
+                  >
+                    확인
+                  </button>
+                </div>
+              </div>
+            )}
 
-            {/* 메시지 */}
-            {(errorMsg || infoMsg) && (
-              <p
-                className={`text-[14px] text-center ${
-                  errorMsg ? "text-red-500" : "text-green-500"
-                }`}
-              >
-                {errorMsg || infoMsg}
-              </p>
+            {/* 에러 메시지 */}
+            {errorMsg && (
+              <p className="text-[14px] text-red-500 text-center">{errorMsg}</p>
             )}
 
             {/* 회원가입 링크 */}
