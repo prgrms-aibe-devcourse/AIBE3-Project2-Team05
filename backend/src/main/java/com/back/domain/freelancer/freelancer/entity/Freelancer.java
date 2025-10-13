@@ -3,7 +3,7 @@ package com.back.domain.freelancer.freelancer.entity;
 import com.back.domain.freelancer.career.entity.Career;
 import com.back.domain.freelancer.freelancerTech.entity.FreelancerTech;
 import com.back.domain.freelancer.portfolio.entity.Portfolio;
-import com.back.domain.member.entity.Member;
+import com.back.domain.member.member.entity.Member;
 import com.back.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;

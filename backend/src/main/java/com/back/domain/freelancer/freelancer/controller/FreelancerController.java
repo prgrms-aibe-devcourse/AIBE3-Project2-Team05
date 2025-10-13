@@ -3,10 +3,10 @@ package com.back.domain.freelancer.freelancer.controller;
 import com.back.domain.freelancer.freelancer.dto.*;
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancer.service.FreelancerService;
-import com.back.domain.member.entity.Member;
-import com.back.domain.member.repository.MemberRepository;
 import com.back.global.rsData.RsData;
+import com.back.global.security.SecurityUser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,14 +17,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FreelancerController {
     private final FreelancerService freelancerService;
-    private final MemberRepository memberRepository;
-
-    // todo 병합 시 삭제
-    public Member setMember() {
-        Member member = new Member("testUser", "1234", "테스트 유저", "user1@user");
-        return memberRepository.save(member);
-    }
-    // 여기까지 삭제
 
     @GetMapping
     public List<FreelancerListResponseDto> getItems() {
@@ -37,30 +29,20 @@ public class FreelancerController {
     }
 
     @PostMapping
-    public RsData<FreelancerDto> create(@RequestPart FreelancerSaveRequestDto dto, @RequestPart MultipartFile imageFile) {
-
-        //todo 인증정보로 수정 해야함
-        //삭제
-        Member member = setMember();
-        Freelancer freelancer = freelancerService.create(member.getId(), dto, imageFile);
+    public RsData<FreelancerDto> create(@AuthenticationPrincipal SecurityUser securityUser, @RequestPart FreelancerSaveRequestDto dto, @RequestPart MultipartFile imageFile) {
+        Freelancer freelancer = freelancerService.create(securityUser.getId(), dto, imageFile);
         return new RsData<>("201-1", "%d번 프리랜서가 생성되었습니다.".formatted(freelancer.getId()), new FreelancerDto(freelancer));
-
-        /*
-        create(@AuthenticationPrincipal SecurityUser securityUser, @RequestBody FreelancerRequestDto dto)
-        Freelancer freelancer = freelancerService.create(securityUser.getId(), dto);
-        return new RsData<>("201-1", "%d번 프리랜서가 생성되었습니다.".formatted(freelancer.getId()), new FreelancerDto(freelancer));
-         */
     }
 
     @DeleteMapping("/{id}")
-    public RsData<Void> delete(@PathVariable long id) {
-        freelancerService.delete(id);
+    public RsData<Void> delete(@AuthenticationPrincipal SecurityUser securityUser, @PathVariable long id) {
+        freelancerService.delete(securityUser.getId(), id);
         return new RsData<>("200-1", "%d번 프리랜서가 삭제되었습니다.".formatted(id));
     }
 
     @PutMapping("/{id}")
-    public RsData<Void> update(@PathVariable Long id, @RequestPart FreelancerUpdateRequestDto dto, @RequestPart MultipartFile imageFile) {
-        freelancerService.update(id, dto, imageFile);
+    public RsData<Void> update(@AuthenticationPrincipal SecurityUser securityUser, @PathVariable Long id, @RequestPart FreelancerUpdateRequestDto dto, @RequestPart MultipartFile imageFile) {
+        freelancerService.update(securityUser.getId(), id, dto, imageFile);
         return new RsData<>("200-1", "%d번 프리랜서가 수정되었습니다.".formatted(id));
     }
 }

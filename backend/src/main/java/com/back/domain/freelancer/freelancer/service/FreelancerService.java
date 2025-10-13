@@ -6,8 +6,8 @@ import com.back.domain.freelancer.freelancer.dto.FreelancerSaveRequestDto;
 import com.back.domain.freelancer.freelancer.dto.FreelancerUpdateRequestDto;
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
-import com.back.domain.member.entity.Member;
-import com.back.domain.member.repository.MemberRepository;
+import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.repository.MemberRepository;
 import com.back.global.fileStorage.FileStorageService;
 import com.back.global.fileStorage.FileType;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +24,7 @@ public class FreelancerService {
     private final FreelancerRepository freelancerRepository;
     private final MemberRepository memberRepository;
     private final FileStorageService fileStorageService;
+    private final FreelancerFinder freelancerFinder;
 
     @Transactional(readOnly = true)
     public List<FreelancerListResponseDto> findAll() {
@@ -59,17 +60,19 @@ public class FreelancerService {
     }
 
     @Transactional
-    public void delete(long id) {
-        Freelancer freelancer = freelancerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 id 입니다."));
+    public void delete(Long memberId, long id) {
+        Freelancer freelancer = freelancerFinder.findFreelancerByMemberId(memberId);
+
+        freelancer.checkCanUpdateOrDelete(id);
 
         freelancerRepository.delete(freelancer);
     }
 
     @Transactional
-    public void update(Long id, FreelancerUpdateRequestDto dto, MultipartFile newImageFile) {
-        Freelancer freelancer = freelancerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 id 입니다."));
+    public void update(Long memberId, Long id, FreelancerUpdateRequestDto dto, MultipartFile newImageFile) {
+        Freelancer freelancer = freelancerFinder.findFreelancerByMemberId(memberId);
+
+        freelancer.checkCanUpdateOrDelete(id);
 
         String updatedImageUrl = null;
         try {
