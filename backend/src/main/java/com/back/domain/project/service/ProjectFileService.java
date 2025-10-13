@@ -115,7 +115,7 @@ public class ProjectFileService {
                 .orElseThrow(() -> new ProjectNotFoundException(projectId));
 
         // 파일 검증
-        fileValidator.validateFile(file, MAX_FILE_SIZE, allowedExtensionsStr);
+        fileValidator.validateFile(file, allowedExtensionsStr);
 
         try {
             // 파일 저장
@@ -148,7 +148,7 @@ public class ProjectFileService {
 
         } catch (IOException e) {
             log.error("파일 저장 중 오류 발생 - projectId: {}, fileName: {}", projectId, file.getOriginalFilename(), e);
-            throw new FileUploadException("파일 저장에 실패했습니다: " + e.getMessage());
+            throw new FileUploadException("파일 저장에 실패했습니다: " + e.getMessage(), e);
         }
     }
 
