@@ -10,7 +10,7 @@ export const sessionStorageUtils = {
   },
 
   // 파일 상태 저장
-  setProjectFiles: (projectId: string, files: unknown[]): void => {
+  setProjectFiles: <T>(projectId: string, files: T[]): void => {
     const filesKey = `projectFiles_${projectId}`;
     const timeKey = `projectFilesTime_${projectId}`;
     
