@@ -4,7 +4,6 @@ import com.back.domain.project.dto.ProjectRequest;
 import com.back.domain.project.dto.ProjectResponse;
 import com.back.domain.project.entity.Project;
 import com.back.domain.project.entity.enums.*;
-import com.back.domain.project.project.entity.enums.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

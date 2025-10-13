@@ -1,7 +1,6 @@
 package com.back.domain.project.entity;
 
 import com.back.domain.project.entity.enums.*;
-import com.back.domain.project.project.entity.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
 

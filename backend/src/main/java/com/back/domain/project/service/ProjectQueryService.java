@@ -4,7 +4,6 @@ import com.back.domain.project.dto.ProjectResponse;
 import com.back.domain.project.entity.Project;
 import com.back.domain.project.entity.ProjectTech;
 import com.back.domain.project.entity.enums.*;
-import com.back.domain.project.project.entity.enums.*;
 import com.back.domain.project.repository.ProjectRepository;
 import com.back.domain.project.repository.ProjectFavoriteRepository;
 import com.back.domain.project.validator.ProjectValidator;

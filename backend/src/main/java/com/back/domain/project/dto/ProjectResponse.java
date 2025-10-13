@@ -4,7 +4,6 @@ import com.back.domain.project.entity.Project;
 import com.back.domain.project.entity.ProjectFile;
 import com.back.domain.project.entity.ProjectTech;
 import com.back.domain.project.entity.enums.*;
-import com.back.domain.project.project.entity.enums.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
