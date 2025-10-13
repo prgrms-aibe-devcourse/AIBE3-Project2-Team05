@@ -357,11 +357,15 @@ const ProjectsPage = () => {
             {/* 지역 필터 */}
             <div className="mb-4" style={{ marginBottom: '16px' }}>
               <div 
-                className="flex items-center cursor-pointer hover:bg-gray-50 p-1 -m-1 rounded w-fit"
+                className="flex items-center justify-between cursor-pointer hover:bg-gray-50 rounded transition-colors"
+                style={{ padding: '8px 12px', margin: '-8px -12px 8px -12px' }}
                 onClick={() => setIsLocationExpanded(!isLocationExpanded)}
               >
-                <h4 className="font-semibold text-gray-700 mb-2" style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>지역</h4>
-                <span className={`text-xs text-gray-400 transition-transform ml-1 ${isLocationExpanded ? 'rotate-180' : ''}`}>
+                <h4 className="font-semibold text-gray-700 mb-2" style={{ margin: '0', color: '#374151' }}>지역</h4>
+                <span 
+                  className={`text-xs text-gray-400 transition-transform select-none ${isLocationExpanded ? 'rotate-180' : ''}`}
+                  style={{ fontSize: '10px' }}
+                >
                   ▼
                 </span>
               </div>
@@ -564,11 +568,15 @@ const ProjectsPage = () => {
             {/* 예산범위 필터 */}
             <div className="mb-4" style={{ marginBottom: '16px' }}>
               <div 
-                className="flex items-center cursor-pointer hover:bg-gray-50 p-1 -m-1 rounded w-fit"
+                className="flex items-center justify-between cursor-pointer hover:bg-gray-50 rounded transition-colors"
+                style={{ padding: '8px 12px', margin: '-8px -12px 8px -12px' }}
                 onClick={() => setIsBudgetExpanded(!isBudgetExpanded)}
               >
-                <h4 className="font-semibold text-gray-700 mb-2" style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>예산범위</h4>
-                <span className={`text-xs text-gray-400 transition-transform ml-1 ${isBudgetExpanded ? 'rotate-180' : ''}`}>
+                <h4 className="font-semibold text-gray-700 mb-2" style={{ margin: '0', color: '#374151' }}>예산범위</h4>
+                <span 
+                  className={`text-xs text-gray-400 transition-transform select-none ${isBudgetExpanded ? 'rotate-180' : ''}`}
+                  style={{ fontSize: '10px' }}
+                >
                   ▼
                 </span>
               </div>
