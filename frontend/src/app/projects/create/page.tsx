@@ -114,7 +114,7 @@ const ProjectCreatePage = () => {
 
 
   return (
-    <div className="min-h-screen bg-gray-50" style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+    <div className="min-h-screen bg-gray-50" style={{ backgroundColor: "var(--background)" }}>
       <div className="max-w-6xl mx-auto px-6 py-8" style={{ maxWidth: '1152px', margin: '0 auto', padding: '32px 24px' }}>
         <div className="flex gap-8">
           {/* 메인 폼 영역 */}

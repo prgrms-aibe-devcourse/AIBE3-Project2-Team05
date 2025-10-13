@@ -83,7 +83,7 @@ const UserProjectsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50" style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+    <div className="min-h-screen bg-gray-50" style={{ backgroundColor: "var(--background)" }}>
       <main className="max-w-7xl mx-auto p-6" style={{ maxWidth: '80rem', margin: '0 auto', padding: '24px' }}>
         {/* 페이지 헤더 */}
         <div className="mb-8" style={{ marginBottom: '32px' }}>

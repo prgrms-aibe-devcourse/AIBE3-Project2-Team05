@@ -283,7 +283,7 @@ const UserProjectEditPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50" style={formStyles.pageContainer}>
+    <div className="min-h-screen bg-gray-50" style={{ backgroundColor: "var(--background)" }}>
       <div className="max-w-3xl mx-auto p-6" style={formStyles.contentContainer}>
         {/* 헤더 */}
         <div className="mb-8" style={formStyles.headerContainer}>

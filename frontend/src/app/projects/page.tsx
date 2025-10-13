@@ -169,7 +169,7 @@ const ProjectsPage = () => {
 
 
   return (
-    <div className="bg-gray-100 min-h-screen" style={{ backgroundColor: '#f3f4f6', minHeight: '100vh' }}>
+    <div className="bg-gray-100 min-h-screen" style={{ backgroundColor: "var(--background)" }}>
       <main className="container mx-auto px-4 py-8" style={{ maxWidth: '1200px', margin: '0 auto', padding: '32px 16px' }}>
         <h2 className="text-xl font-bold text-gray-800 mb-4" style={{ fontSize: '24px', fontWeight: 'bold', color: '#374151', marginBottom: '16px' }}>프로젝트를 찾아보세요.</h2>
         <div className="flex space-x-8" style={{ display: 'flex', gap: '32px' }}>

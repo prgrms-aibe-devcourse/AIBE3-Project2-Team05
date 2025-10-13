@@ -265,7 +265,7 @@ const UserProjectDetailPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50" style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+        <div className="min-h-screen bg-gray-50" style={{ backgroundColor: "var(--background)" }}>
             <div className="max-w-3xl mx-auto p-6" style={{ maxWidth: '48rem', margin: '0 auto', padding: '24px' }}>
                 {/* 내 프로젝트 목록으로 돌아가기 */}
                 <div className="mb-6" style={{ marginBottom: '24px' }}>
