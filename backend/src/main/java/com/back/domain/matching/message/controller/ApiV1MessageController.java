@@ -208,4 +208,29 @@ public class ApiV1MessageController {
                 "메시지를 읽음 처리했습니다."
         );
     }
+
+    /**
+     * 대화방의 모든 읽지 않은 메시지 읽음 처리
+     *
+     * @param user         현재 로그인한 사용자
+     * @param projectId    프로젝트 ID
+     * @param freelancerId 프리랜서 ID
+     * @return 성공 메시지
+     */
+    @PutMapping("/conversation/{projectId}/{freelancerId}/read")
+    @Transactional
+    public RsData<Void> markConversationAsRead(
+            @AuthenticationPrincipal SecurityUser user,
+            @PathVariable Long projectId,
+            @PathVariable Long freelancerId
+    ) {
+        Member member = user.getMember();
+
+        messageService.markConversationAsRead(member, projectId, freelancerId);
+
+        return new RsData<>(
+                "200-1",
+                "대화방의 메시지를 읽음 처리했습니다."
+        );
+    }
 }

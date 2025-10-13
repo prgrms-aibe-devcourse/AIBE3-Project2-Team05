@@ -222,6 +222,42 @@ public class MessageService {
     }
 
     /**
+     * 대화방의 모든 읽지 않은 메시지 읽음 처리
+     *
+     * @param currentUser  현재 사용자
+     * @param projectId    프로젝트 ID
+     * @param freelancerId 프리랜서 ID
+     */
+    @Transactional
+    public void markConversationAsRead(Member currentUser, Long projectId, Long freelancerId) {
+        // 프로젝트 조회
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프로젝트입니다."));
+
+        // 프리랜서 조회
+        Freelancer freelancer = freelancerRepository.findById(freelancerId)
+                .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프리랜서입니다."));
+
+        Member pm = project.getPm();
+
+        // 현재 사용자가 PM 또는 프리랜서인지 확인
+        boolean isParticipant = currentUser.getId().equals(pm.getId()) ||
+                                currentUser.getId().equals(freelancer.getMember().getId());
+
+        if (!isParticipant) {
+            throw new ServiceException("403-1", "대화 참여자만 읽음 처리할 수 있습니다.");
+        }
+
+        // PM과 프리랜서 간의 모든 읽지 않은 메시지 조회
+        List<Message> messages = messageRepository.findByPmAndFreelancerOrderByCreateDateDesc(pm, freelancer);
+
+        // 현재 사용자가 수신자인 읽지 않은 메시지만 읽음 처리
+        messages.stream()
+                .filter(msg -> !msg.isRead() && msg.isReceiver(currentUser))
+                .forEach(Message::markAsRead);
+    }
+
+    /**
      * 연관 항목 검증 및 컨텍스트 추출
      */
     private MessageContext validateAndExtractContext(

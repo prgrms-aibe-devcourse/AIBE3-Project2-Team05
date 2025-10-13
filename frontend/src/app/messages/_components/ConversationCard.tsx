@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { Card } from '@/ui/card'
 import { Badge } from '@/ui/badge'
 import type { Conversation } from '@/hooks/useConversations'
@@ -10,7 +11,7 @@ interface ConversationCardProps {
   onClick: () => void
 }
 
-export function ConversationCard({
+export const ConversationCard = memo(function ConversationCard({
   conversation,
   currentUserRole,
   onClick
@@ -88,4 +89,4 @@ export function ConversationCard({
       </div>
     </Card>
   )
-}
+})

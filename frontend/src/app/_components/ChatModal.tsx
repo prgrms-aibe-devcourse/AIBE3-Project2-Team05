@@ -6,6 +6,7 @@ import { Button } from '@/ui/button'
 import { Input } from '@/ui/input'
 import { useChatMessages } from '@/hooks/useChatMessages'
 import { useAuth } from '@/global/auth/hooks/useAuth'
+import { apiClient } from '@/global/backend/client'
 
 interface ChatModalProps {
   isOpen: boolean
@@ -30,7 +31,7 @@ export function ChatModal({
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
 
-  const { messages, isLoading, error, sendMessage } = useChatMessages({
+  const { messages, isLoading, error, sendMessage, refetch } = useChatMessages({
     projectId,
     freelancerId,
     currentUserId: user?.id || 0,
@@ -43,6 +44,34 @@ export function ChatModal({
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
     }
   }, [messages])
+
+  // 대화방 열 때 자동 읽음 처리
+  useEffect(() => {
+    if (isOpen && projectId && freelancerId) {
+      const markAsRead = async () => {
+        try {
+          await apiClient.put(
+            `/api/v1/messages/conversation/${projectId}/${freelancerId}/read`,
+            {}
+          )
+        } catch (err) {
+          console.error('Failed to mark messages as read:', err)
+        }
+      }
+      markAsRead()
+    }
+  }, [isOpen, projectId, freelancerId])
+
+  // 폴링 방식 실시간 업데이트 (5초마다)
+  useEffect(() => {
+    if (!isOpen) return
+
+    const pollingInterval = setInterval(() => {
+      refetch()
+    }, 5000) // 5초마다 새 메시지 확인
+
+    return () => clearInterval(pollingInterval)
+  }, [isOpen, refetch])
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()

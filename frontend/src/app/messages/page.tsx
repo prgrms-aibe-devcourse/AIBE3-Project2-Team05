@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useAuth } from '@/global/auth/hooks/useAuth'
 import { useConversations } from '@/hooks/useConversations'
 import { ConversationCard } from './_components/ConversationCard'
@@ -34,7 +34,7 @@ export default function MessagesPage() {
     return matchesSearch && matchesUnread
   })
 
-  const handleConversationClick = (conversation: typeof conversations[0]) => {
+  const handleConversationClick = useCallback((conversation: typeof conversations[0]) => {
     const isUserPm = user?.role !== 'FREELANCER'
     setSelectedConversation({
       projectId: conversation.projectId,
@@ -43,15 +43,15 @@ export default function MessagesPage() {
       projectTitle: conversation.projectTitle
     })
     setChatModalOpen(true)
-  }
+  }, [user?.role])
 
-  const handleCloseChat = () => {
+  const handleCloseChat = useCallback(() => {
     setChatModalOpen(false)
     // 모달 닫을 때 대화방 목록 새로고침 (읽음 처리 반영)
     setTimeout(() => {
       refetch()
     }, 500)
-  }
+  }, [refetch])
 
   if (authLoading || isLoading) {
     return (
