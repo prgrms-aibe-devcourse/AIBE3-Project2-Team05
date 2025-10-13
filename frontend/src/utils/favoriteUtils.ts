@@ -35,7 +35,7 @@ export const toggleFavorite = async (projectId: number, userId: number): Promise
     if (response.ok) {
       const data = await response.json();
       console.log('즐겨찾기 토글 응답 데이터:', data);
-      return data.success !== false; // success가 false가 아니면 true로 간주
+      return data.success === true; // success가 true일 때만 true로 간주
     } else {
       const errorText = await response.text();
       console.error('즐겨찾기 토글 실패:', {
