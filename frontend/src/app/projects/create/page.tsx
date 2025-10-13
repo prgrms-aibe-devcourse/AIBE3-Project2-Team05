@@ -1,5 +1,6 @@
 "use client";
 
+import { useUser } from '@/app/context/UserContext';
 import { budgetOptions } from '@/constants/projectOptions';
 import { components } from '@/lib/backend/schema';
 import { showErrorMessage, showSuccessMessage, showValidationError } from '@/utils/formValidation';
@@ -20,6 +21,7 @@ interface FormData {
 
 const ProjectCreatePage = () => {
   const router = useRouter();
+  const { username, memberId, isLoaded } = useUser();
   const [formData, setFormData] = useState<FormData>({
     title: '',
     description: '',
@@ -55,6 +57,12 @@ const ProjectCreatePage = () => {
 
     setCreating(true);
     try {
+      // 사용자 인증 확인
+      if (!memberId) {
+        showErrorMessage('로그인이 필요합니다.');
+        return;
+      }
+
       const requestData: ProjectRequest = {
         title: formData.title,
         description: formData.description,
@@ -63,7 +71,7 @@ const ProjectCreatePage = () => {
         budgetType: formData.budgetType as ProjectRequest['budgetType'],
         startDate: formData.startDate,
         endDate: formData.endDate,
-        managerId: 1 // TODO: 실제 사용자 ID로 교체
+        managerId: memberId
       };
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/complete`, {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useUser } from '@/app/context/UserContext';
 import FavoriteButton from '@/components/FavoriteButton';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { components } from '@/lib/backend/schema';
@@ -21,6 +22,7 @@ type PageProjectResponse = components['schemas']['PageProjectResponse'];
 
 const ProjectsPage = () => {
   const router = useRouter();
+  const { username, memberId, isLoaded } = useUser();
   const [searchQuery, setSearchQuery] = useState('');
   const [projects, setProjects] = useState<ProjectResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,34 +40,51 @@ const ProjectsPage = () => {
     budgetRange: ''
   });
 
-  // TODO: 실제 사용자 인증 시스템과 연동
+  // 사용자 인증 시스템과 연동 - UserContext에서 사용자 정보 가져오기
   const getCurrentUserId = () => {
-    // 현재는 하드코딩된 값 사용 (추후 실제 인증 시스템과 연동 필요)
-    return 1;
+    // UserContext에서 사용자 정보를 확인
+    // 인증된 사용자의 경우 실제 사용자 ID를 반환하고, 
+    // 비인증 사용자의 경우 null을 반환하여 즐겨찾기 기능을 비활성화
+    if (username && isLoaded && memberId) {
+      return memberId;
+    }
+    return null;
   };
 
-  // 즐겨찾기 목록 로드
+  // 사용자 인증 상태 확인
+  const isAuthenticated = () => {
+    return username !== null && isLoaded;
+  };
+
+  // 즐겨찾기 목록 로드 - 인증된 사용자만
   useEffect(() => {
+    // UserContext 로딩이 완료된 후에만 실행
+    if (!isLoaded) return;
+
     const loadFavorites = async () => {
+      // 인증된 사용자인 경우에만 즐겨찾기 로드
+      if (!isAuthenticated()) {
+        setFavoriteProjectIds([]);
+        return;
+      }
+
       try {
         const userId = getCurrentUserId();
-        console.log('즐겨찾기 로드 시작, 사용자 ID:', userId);
+        if (userId === null) {
+          setFavoriteProjectIds([]);
+          return;
+        }
+
         const favoriteIds = await getUserFavoriteProjectIds(userId);
-        console.log('즐겨찾기 로드 완료, IDs:', favoriteIds);
         setFavoriteProjectIds(favoriteIds);
       } catch (error) {
-        console.error('즐겨찾기 목록 로드 실패:', {
-          error: error instanceof Error ? error.message : error,
-          stack: error instanceof Error ? error.stack : undefined,
-          userId: getCurrentUserId()
-        });
-        // 에러가 발생해도 빈 배열로 설정하여 앱이 동작하도록 함
+        console.error('즐겨찾기 목록 로드 실패:', error);
         setFavoriteProjectIds([]);
       }
     };
 
     loadFavorites();
-  }, []);
+  }, [username, isLoaded]); // username과 isLoaded 상태 변화에 따라 재실행
 
   // 데이터 로드 및 필터 변경 처리
   useEffect(() => {
@@ -760,12 +779,12 @@ const ProjectsPage = () => {
                   <h3 className="text-lg font-bold text-gray-800 mb-2" style={{ fontSize: '18px', fontWeight: 'bold', color: '#374151', marginBottom: '8px' }}>{project.title}</h3>
                   <div className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     {/* 북마크 버튼 */}
-                    {project.id && (
+                    {project.id && isAuthenticated() && (
                       <div onClick={(e) => e.stopPropagation()}>
                         <FavoriteButton 
                           projectId={project.id} 
                           isFavorite={favoriteProjectIds.includes(project.id)}
-                          userId={getCurrentUserId()}
+                          userId={getCurrentUserId()!}
                           onToggle={(newState) => {
                             if (newState) {
                               setFavoriteProjectIds(prev => [...prev, project.id!]);

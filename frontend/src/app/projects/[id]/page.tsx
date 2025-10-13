@@ -1,5 +1,6 @@
 "use client";
 
+import { useUser } from '@/app/context/UserContext';
 import ErrorDisplay from '@/components/ErrorDisplay';
 import FavoriteButton from '@/components/FavoriteButton';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -38,6 +39,7 @@ type ProjectFile = {
 const ProjectDetailPage = () => {
   const params = useParams();
   const router = useRouter();
+  const { username, memberId, isLoaded } = useUser();
   const [project, setProject] = useState<ProjectResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
@@ -46,10 +48,20 @@ const ProjectDetailPage = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   
-  // TODO: 실제 사용자 인증 시스템과 연동
+  // 사용자 인증 시스템과 연동 - UserContext에서 사용자 정보 가져오기
   const getCurrentUserId = () => {
-    // 현재는 하드코딩된 값 사용 (추후 실제 인증 시스템과 연동 필요)
-    return 1;
+    // UserContext에서 사용자 정보를 확인
+    // 인증된 사용자의 경우 실제 사용자 ID를 반환하고, 
+    // 비인증 사용자의 경우 null을 반환하여 즐겨찾기 기능을 비활성화
+    if (username && isLoaded && memberId) {
+      return memberId;
+    }
+    return null;
+  };
+
+  // 사용자 인증 상태 확인
+  const isAuthenticated = () => {
+    return username !== null && isLoaded;
   };
 
   // 별도 파일 API 호출 함수
@@ -95,10 +107,13 @@ const ProjectDetailPage = () => {
           const data: ProjectResponse = await response.json();
           setProject(data);
           
-          // 즐겨찾기 상태 로드
-          if (data.id) {
-            const favoriteStatus = await getFavoriteStatus(data.id, getCurrentUserId());
-            setIsFavorite(favoriteStatus);
+          // 즐겨찾기 상태 로드 - 인증된 사용자만
+          if (data.id && isAuthenticated()) {
+            const userId = getCurrentUserId();
+            if (userId !== null) {
+              const favoriteStatus = await getFavoriteStatus(data.id, userId);
+              setIsFavorite(favoriteStatus);
+            }
           }
           
           // 대안 파일 로딩 로직
@@ -212,11 +227,11 @@ const ProjectDetailPage = () => {
                 <h1 className="text-3xl font-bold text-gray-900" style={{ fontSize: '28px', fontWeight: 'bold', color: '#111827' }}>
                   {project.title}
                 </h1>
-                {project.id && !favoriteLoading && (
+                {project.id && !favoriteLoading && isAuthenticated() && (
                   <FavoriteButton
                     projectId={project.id}
                     isFavorite={isFavorite}
-                    userId={getCurrentUserId()}
+                    userId={getCurrentUserId()!}
                     onToggle={(newState) => setIsFavorite(newState)}
                   />
                 )}

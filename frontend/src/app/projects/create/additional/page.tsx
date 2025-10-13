@@ -1,5 +1,6 @@
 "use client";
 
+import { useUser } from '@/app/context/UserContext';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { budgetOptions, partnerTypeOptions, progressStatusOptions, regionOptions, techStackCategories } from '@/constants/projectOptions';
 import { components } from '@/lib/backend/schema';
@@ -33,6 +34,7 @@ interface AdditionalFormData {
 
 const ProjectCreateAdditionalPage = () => {
   const router = useRouter();
+  const { username, memberId, isLoaded } = useUser();
   const [basicData, setBasicData] = useState<BasicFormData | null>(null);
   const [additionalData, setAdditionalData] = useState<AdditionalFormData>({
     partnerType: '',
@@ -103,6 +105,12 @@ const ProjectCreateAdditionalPage = () => {
       return;
     }
 
+    // 사용자 인증 확인
+    if (!memberId) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
     setCreating(true);
     try {
       const requestData: ProjectRequest = {
@@ -114,7 +122,7 @@ const ProjectCreateAdditionalPage = () => {
         budgetType: basicData.budgetType as ProjectRequest['budgetType'],
         startDate: basicData.startDate,
         endDate: basicData.endDate,
-        managerId: 1, // TODO: 실제 사용자 ID로 교체
+        managerId: memberId,
         
         // 추가 정보 (빈 문자열을 undefined로 처리)
         partnerType: additionalData.partnerType && additionalData.partnerType.trim() 
