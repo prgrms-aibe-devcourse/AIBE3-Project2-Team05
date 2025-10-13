@@ -10,7 +10,7 @@ import {
   getStatusText
 } from '@/utils/projectUtils';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 type ProjectResponse = components['schemas']['ProjectResponse'];
 type PageProjectResponse = components['schemas']['PageProjectResponse'];
@@ -19,10 +19,14 @@ const UserProjectsPage = () => {
   const router = useRouter();
   const params = useParams();
   const [projects, setProjects] = useState<ProjectResponse[]>([]);
-  const [filteredProjects, setFilteredProjects] = useState<ProjectResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [managerId, setManagerId] = useState<string>('1');
   const [activeStatus, setActiveStatus] = useState<string>('ALL');
+  // 페이징 상태 추가
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  // 각 상태별 프로젝트 개수
+  const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
 
   // 프로젝트 상태 옵션
   const statusOptions = [
@@ -42,44 +46,91 @@ const UserProjectsPage = () => {
     }
   }, [params?.managerId]);
 
-  // 백엔드에서 프로젝트 목록 가져오기
-  useEffect(() => {
+  // 각 상태별 프로젝트 개수 조회
+  const fetchStatusCounts = useCallback(async () => {
     if (!managerId) return;
 
-    const fetchMyProjects = async () => {
-      setLoading(true);
-      try {
-        console.log('API 호출 URL:', `/api/projects/manager/${managerId}`);
+    try {
+      const counts: Record<string, number> = {};
+      
+      // 전체 개수 조회
+      const allResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/manager/${managerId}?size=1`);
+      if (allResponse.ok) {
+        const allData: PageProjectResponse = await allResponse.json();
+        counts['ALL'] = allData.totalElements || 0;
+      }
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/manager/${managerId}?size=100`);
+      // 각 상태별 개수 조회
+      const statuses = ['RECRUITING', 'CONTRACTING', 'IN_PROGRESS', 'COMPLETED', 'SUSPENDED', 'CANCELLED'];
+      for (const status of statuses) {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/manager/${managerId}?status=${status}&size=1`);
         if (response.ok) {
           const data: PageProjectResponse = await response.json();
-          console.log('API 응답 데이터:', data);
-          setProjects(data.content || []);
+          counts[status] = data.totalElements || 0;
         }
-      } catch (error) {
-        console.error('내 프로젝트 조회 실패:', error);
-      } finally {
-        setLoading(false);
       }
-    };
 
-    fetchMyProjects();
+      setStatusCounts(counts);
+    } catch (error) {
+      console.error('상태별 개수 조회 실패:', error);
+    }
   }, [managerId]);
 
-  // 상태별 필터링
-  useEffect(() => {
-    if (activeStatus === 'ALL') {
-      setFilteredProjects(projects);
-    } else {
-      setFilteredProjects(projects.filter(project => project.status === activeStatus));
+  // 백엔드에서 프로젝트 목록 가져오기 (페이징 및 상태 필터 통합)
+  const fetchMyProjects = useCallback(async (page = 0, status = activeStatus) => {
+    if (!managerId) return;
+
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        size: '9', // 3x3 그리드에 맞는 개수
+      });
+
+      // 상태 필터 추가 (ALL이 아닌 경우에만)
+      if (status !== 'ALL') {
+        params.append('status', status);
+      }
+
+      const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/manager/${managerId}?${params}`;
+      console.log('API 호출 URL:', url);
+      console.log('현재 페이지:', page, '상태:', status);
+
+      const response = await fetch(url);
+      if (response.ok) {
+        const data: PageProjectResponse = await response.json();
+        console.log('API 응답 데이터:', data);
+        setProjects(data.content || []);
+        setTotalPages(data.totalPages || 0);
+        setCurrentPage(page);
+      } else {
+        console.error('API 호출 실패:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('내 프로젝트 조회 실패:', error);
+    } finally {
+      setLoading(false);
     }
-  }, [projects, activeStatus]);
+  }, [managerId, activeStatus]);
+
+  // 관리자 ID가 변경되면 초기 로드 및 상태별 개수 조회
+  useEffect(() => {
+    if (managerId) {
+      fetchMyProjects(0, activeStatus);
+      fetchStatusCounts();
+    }
+  }, [managerId, activeStatus, fetchMyProjects, fetchStatusCounts]);
+
+  // 상태 필터 변경 시 첫 페이지부터 로드
+  useEffect(() => {
+    if (managerId) {
+      fetchMyProjects(0, activeStatus);
+    }
+  }, [activeStatus, managerId, fetchMyProjects]);
 
   // 상태별 프로젝트 개수 계산
   const getStatusCount = (status: string) => {
-    if (status === 'ALL') return projects.length;
-    return projects.filter(project => project.status === status).length;
+    return statusCounts[status] || 0;
   };
 
   return (
@@ -125,18 +176,6 @@ const UserProjectsPage = () => {
                       transform: isActive ? 'scale(1.05)' : 'scale(1)',
                       boxShadow: isActive ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
                     }}
-                    onMouseOver={(e) => {
-                      if (!isActive) {
-                        (e.target as HTMLButtonElement).style.transform = 'scale(1.02)';
-                        (e.target as HTMLButtonElement).style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1)';
-                      }
-                    }}
-                    onMouseOut={(e) => {
-                      if (!isActive) {
-                        (e.target as HTMLButtonElement).style.transform = 'scale(1)';
-                        (e.target as HTMLButtonElement).style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
-                      }
-                    }}
                   >
                     {option.label}
                     <span className={`ml-2 px-2 py-1 rounded-full text-xs ${
@@ -176,14 +215,6 @@ const UserProjectsPage = () => {
               transition: 'all 0.2s',
               transform: 'scale(1)'
             }}
-            onMouseOver={(e) => {
-              (e.target as HTMLButtonElement).style.transform = 'scale(1.05)';
-              (e.target as HTMLButtonElement).style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1)';
-            }}
-            onMouseOut={(e) => {
-              (e.target as HTMLButtonElement).style.transform = 'scale(1)';
-              (e.target as HTMLButtonElement).style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
-            }}
           >
             + 새 프로젝트 등록
           </button>
@@ -197,7 +228,7 @@ const UserProjectsPage = () => {
         {/* 프로젝트 목록 */}
         {!loading && (
           <>
-            {filteredProjects.length === 0 ? (
+            {projects.length === 0 ? (
               <div className="bg-white rounded-xl shadow-sm p-12 text-center" style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', padding: '48px', textAlign: 'center' }}>
                 <div className="text-gray-400 text-6xl mb-4" style={{ color: '#9ca3af', fontSize: '60px', marginBottom: '16px' }}>📋</div>
                 <div className="text-gray-600 text-lg mb-6" style={{ color: '#4b5563', fontSize: '18px', marginBottom: '24px' }}>
@@ -208,185 +239,145 @@ const UserProjectsPage = () => {
                     onClick={() => router.push('/projects/create')}
                     className="bg-blue-500 text-white px-8 py-3 rounded-xl font-medium hover:bg-blue-600 transition-colors"
                     style={{ backgroundColor: '#3b82f6', color: 'white', padding: '12px 32px', borderRadius: '12px', fontWeight: '500', border: 'none', cursor: 'pointer', transition: 'background-color 0.2s' }}
-                    onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#2563eb'}
-                    onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#3b82f6'}
                   >
                     첫 번째 프로젝트 등록하기
                   </button>
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
-                {filteredProjects.map((project) => (
-                  <div
-                    key={project.id}
-                    className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:border-blue-200 transition-all duration-300 cursor-pointer group"
-                    style={{ 
-                      backgroundColor: 'white', 
-                      borderRadius: '12px', 
-                      boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', 
-                      border: '1px solid #e5e7eb', 
-                      overflow: 'hidden', 
-                      cursor: 'pointer', 
-                      transition: 'all 0.3s'
-                    }}
-                    onClick={() => router.push(`/user-projects/${managerId}/${project.id}`)}
-                    onMouseOver={(e) => {
-                      (e.target as HTMLDivElement).style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
-                      (e.target as HTMLDivElement).style.borderColor = '#bfdbfe';
-                      (e.target as HTMLDivElement).style.transform = 'translateY(-2px)';
-                    }}
-                    onMouseOut={(e) => {
-                      (e.target as HTMLDivElement).style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
-                      (e.target as HTMLDivElement).style.borderColor = '#e5e7eb';
-                      (e.target as HTMLDivElement).style.transform = 'translateY(0)';
-                    }}
-                  >
-                    {/* 프로젝트 헤더 */}
-                    <div className="p-6 pb-4" style={{ padding: '24px 24px 16px 24px' }}>
-                      <div className="flex justify-between items-start mb-3" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                        <h3 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors" 
-                            style={{ fontSize: '18px', fontWeight: 'bold', color: '#111827', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', transition: 'color 0.2s' }}>
-                          {project.title}
-                        </h3>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ml-3 flex-shrink-0 ${
-                          project.status === 'RECRUITING' ? 'bg-blue-100 text-blue-700' :
-                          project.status === 'CONTRACTING' ? 'bg-orange-100 text-orange-700' :
-                          project.status === 'IN_PROGRESS' ? 'bg-green-100 text-green-700' :
-                          project.status === 'COMPLETED' ? 'bg-purple-100 text-purple-700' :
-                          project.status === 'SUSPENDED' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-red-100 text-red-700'
-                        }`} style={{ 
-                          padding: '4px 12px', 
-                          borderRadius: '9999px', 
-                          fontSize: '12px', 
-                          fontWeight: '500', 
-                          marginLeft: '12px', 
-                          flexShrink: 0 
-                        }}>
-                          {getStatusText(project.status)}
-                        </span>
-                      </div>
-                      
-                      <div className="flex items-center gap-4 text-sm text-gray-600 mb-4" style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '14px', color: '#4b5563', marginBottom: '16px' }}>
-                        <span className="bg-gray-100 px-2 py-1 rounded-md" style={{ backgroundColor: '#f3f4f6', padding: '4px 8px', borderRadius: '6px' }}>
-                          {getProjectFieldText(project.projectField)}
-                        </span>
-                        <span>{getRecruitmentTypeText(project.recruitmentType)}</span>
-                        {project.endDate && (
-                          <span className="text-red-600 font-medium" style={{ color: '#dc2626', fontWeight: '500' }}>
-                            {calculateDday(project.endDate)}
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
+                  {projects.map((project: ProjectResponse) => (
+                    <div
+                      key={project.id}
+                      className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:border-blue-200 transition-all duration-300 cursor-pointer group"
+                      style={{ 
+                        backgroundColor: 'white', 
+                        borderRadius: '12px', 
+                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', 
+                        border: '1px solid #e5e7eb', 
+                        overflow: 'hidden', 
+                        cursor: 'pointer', 
+                        transition: 'all 0.3s'
+                      }}
+                      onClick={() => router.push(`/user-projects/${managerId}/${project.id}`)}
+                    >
+                      {/* 프로젝트 헤더 */}
+                      <div className="p-6 pb-4" style={{ padding: '24px 24px 16px 24px' }}>
+                        <div className="flex justify-between items-start mb-3" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                          <h3 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors" 
+                              style={{ fontSize: '18px', fontWeight: 'bold', color: '#111827', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', transition: 'color 0.2s' }}>
+                            {project.title}
+                          </h3>
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ml-3 flex-shrink-0 ${
+                            project.status === 'RECRUITING' ? 'bg-blue-100 text-blue-700' :
+                            project.status === 'CONTRACTING' ? 'bg-orange-100 text-orange-700' :
+                            project.status === 'IN_PROGRESS' ? 'bg-green-100 text-green-700' :
+                            project.status === 'COMPLETED' ? 'bg-purple-100 text-purple-700' :
+                            project.status === 'SUSPENDED' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-red-100 text-red-700'
+                          }`} style={{ 
+                            padding: '4px 12px', 
+                            borderRadius: '9999px', 
+                            fontSize: '12px', 
+                            fontWeight: '500', 
+                            marginLeft: '12px', 
+                            flexShrink: 0 
+                          }}>
+                            {getStatusText(project.status)}
                           </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-4" style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '14px', color: '#4b5563', marginBottom: '16px' }}>
+                          <span className="bg-gray-100 px-2 py-1 rounded-md" style={{ backgroundColor: '#f3f4f6', padding: '4px 8px', borderRadius: '6px' }}>
+                            {getProjectFieldText(project.projectField)}
+                          </span>
+                          <span>{getRecruitmentTypeText(project.recruitmentType)}</span>
+                          {project.endDate && (
+                            <span className="text-red-600 font-medium" style={{ color: '#dc2626', fontWeight: '500' }}>
+                              {calculateDday(project.endDate)}
+                            </span>
+                          )}
+                        </div>
+
+                        <p className="text-gray-700 text-sm line-clamp-3 mb-4" style={{ color: '#374151', fontSize: '14px', marginBottom: '16px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
+                          {project.description}
+                        </p>
+                      </div>
+
+                      {/* 프로젝트 정보 */}
+                      <div className="px-6 py-4 bg-gray-50 border-t border-gray-200" style={{ padding: '16px 24px', backgroundColor: '#f9fafb', borderTop: '1px solid #e5e7eb' }}>
+                        <div className="grid grid-cols-2 gap-4 text-sm" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', fontSize: '14px' }}>
+                          <div>
+                            <span className="text-gray-500" style={{ color: '#6b7280' }}>예산</span>
+                            <div className="font-medium text-gray-900" style={{ fontWeight: '500', color: '#111827' }}>{getBudgetTypeText(project.budgetType)}</div>
+                          </div>
+                          <div>
+                            <span className="text-gray-500" style={{ color: '#6b7280' }}>지원자수</span>
+                            <div className="font-medium text-gray-900" style={{ fontWeight: '500', color: '#111827' }}>{project.applicantCount || 0}명</div>
+                          </div>
+                        </div>
+                        
+                        {project.startDate && project.endDate && (
+                          <div className="mt-3 pt-3 border-t border-gray-200" style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e5e7eb' }}>
+                            <span className="text-gray-500 text-sm" style={{ color: '#6b7280', fontSize: '14px' }}>기간</span>
+                            <div className="text-sm font-medium text-gray-900" style={{ fontSize: '14px', fontWeight: '500', color: '#111827' }}>
+                              {new Date(project.startDate).toLocaleDateString()} ~ {new Date(project.endDate).toLocaleDateString()}
+                            </div>
+                          </div>
                         )}
                       </div>
 
-                      <p className="text-gray-700 text-sm line-clamp-3 mb-4" style={{ color: '#374151', fontSize: '14px', marginBottom: '16px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
-                        {project.description}
-                      </p>
-                    </div>
-
-                    {/* 프로젝트 정보 */}
-                    <div className="px-6 py-4 bg-gray-50 border-t border-gray-200" style={{ padding: '16px 24px', backgroundColor: '#f9fafb', borderTop: '1px solid #e5e7eb' }}>
-                      <div className="grid grid-cols-2 gap-4 text-sm" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', fontSize: '14px' }}>
-                        <div>
-                          <span className="text-gray-500" style={{ color: '#6b7280' }}>예산</span>
-                          <div className="font-medium text-gray-900" style={{ fontWeight: '500', color: '#111827' }}>{getBudgetTypeText(project.budgetType)}</div>
-                        </div>
-                        <div>
-                          <span className="text-gray-500" style={{ color: '#6b7280' }}>지원자수</span>
-                          <div className="font-medium text-gray-900" style={{ fontWeight: '500', color: '#111827' }}>{project.applicantCount || 0}명</div>
-                        </div>
-                      </div>
-                      
-                      {project.startDate && project.endDate && (
-                        <div className="mt-3 pt-3 border-t border-gray-200" style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e5e7eb' }}>
-                          <span className="text-gray-500 text-sm" style={{ color: '#6b7280', fontSize: '14px' }}>기간</span>
-                          <div className="text-sm font-medium text-gray-900" style={{ fontSize: '14px', fontWeight: '500', color: '#111827' }}>
-                            {new Date(project.startDate).toLocaleDateString()} ~ {new Date(project.endDate).toLocaleDateString()}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* 관리 버튼들 */}
-                    <div className="p-4 bg-white border-t border-gray-100" style={{ padding: '16px', backgroundColor: 'white', borderTop: '1px solid #f3f4f6' }}>
-                      <div className="flex gap-2" style={{ display: 'flex', gap: '8px' }}>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            router.push(`/user-projects/${managerId}/${project.id}`);
-                          }}
-                          className="flex-1 px-3 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
-                          style={{ 
-                            flex: 1,
-                            padding: '8px 12px', 
-                            backgroundColor: '#3b82f6', 
-                            color: 'white', 
-                            borderRadius: '8px', 
-                            fontSize: '14px',
-                            fontWeight: '500',
-                            border: 'none', 
-                            cursor: 'pointer', 
-                            transition: 'background-color 0.2s' 
-                          }}
-                          onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#2563eb'}
-                          onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#3b82f6'}
-                        >
-                          상세보기
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            router.push(`/user-projects/${managerId}/${project.id}/edit`);
-                          }}
-                          className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
-                          style={{ 
-                            flex: 1,
-                            padding: '8px 12px', 
-                            backgroundColor: '#f3f4f6', 
-                            color: '#374151', 
-                            borderRadius: '8px', 
-                            fontSize: '14px',
-                            fontWeight: '500',
-                            border: 'none', 
-                            cursor: 'pointer', 
-                            transition: 'background-color 0.2s' 
-                          }}
-                          onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#e5e7eb'}
-                          onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#f3f4f6'}
-                        >
-                          수정
-                        </button>
-                        <button
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            if (window.confirm(`"${project.title}" 프로젝트를 정말 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) {
-                              try {
-                                console.log('프로젝트 삭제 시작:', project.id);
-                                console.log('managerId:', managerId);
-                                
-                                // 먼저 DELETE API 시도
-                                const deleteUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${project.id}?requesterId=${managerId}`;
-                                console.log('삭제 API URL:', deleteUrl);
-                                
-                                const response = await fetch(deleteUrl, {
-                                  method: 'DELETE',
-                                  headers: {
-                                    'Content-Type': 'application/json',
-                                  },
-                                });
-                                
-                                console.log('삭제 API 응답 상태:', response.status);
-                                
-                                if (response.ok) {
-                                  console.log('삭제 성공');
-                                  alert('프로젝트가 삭제되었습니다.');
-                                  // 로컬 상태에서 프로젝트 제거
-                                  setProjects(prevProjects => prevProjects.filter(p => p.id !== project.id));
-                                } else if (response.status === 404 || response.status === 405) {
-                                  // DELETE API가 없는 경우, 상태를 CANCELLED로 변경하는 방식으로 시도
-                                  console.log('DELETE API가 없음, 상태 변경으로 시도');
-                                  
+                      {/* 관리 버튼들 */}
+                      <div className="p-4 bg-white border-t border-gray-100" style={{ padding: '16px', backgroundColor: 'white', borderTop: '1px solid #f3f4f6' }}>
+                        <div className="flex gap-2" style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/user-projects/${managerId}/${project.id}`);
+                            }}
+                            className="flex-1 px-3 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
+                            style={{ 
+                              flex: 1,
+                              padding: '8px 12px', 
+                              backgroundColor: '#3b82f6', 
+                              color: 'white', 
+                              borderRadius: '8px', 
+                              fontSize: '14px',
+                              fontWeight: '500',
+                              border: 'none', 
+                              cursor: 'pointer', 
+                              transition: 'background-color 0.2s' 
+                            }}
+                          >
+                            상세보기
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/user-projects/${managerId}/${project.id}/edit`);
+                            }}
+                            className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+                            style={{ 
+                              flex: 1,
+                              padding: '8px 12px', 
+                              backgroundColor: '#f3f4f6', 
+                              color: '#374151', 
+                              borderRadius: '8px', 
+                              fontSize: '14px',
+                              fontWeight: '500',
+                              border: 'none', 
+                              cursor: 'pointer', 
+                              transition: 'background-color 0.2s' 
+                            }}
+                          >
+                            수정
+                          </button>
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (window.confirm(`"${project.title}" 프로젝트를 정말 삭제하시겠습니까?`)) {
+                                try {
                                   const statusResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${project.id}/status`, {
                                     method: 'PATCH',
                                     headers: {
@@ -399,53 +390,111 @@ const UserProjectsPage = () => {
                                   });
                                   
                                   if (statusResponse.ok) {
-                                    console.log('프로젝트 취소 성공');
                                     alert('프로젝트가 취소되었습니다.');
-                                    // 로컬 상태에서 프로젝트 상태 업데이트
-                                    setProjects(prevProjects => 
-                                      prevProjects.map(p => 
-                                        p.id === project.id ? { ...p, status: 'CANCELLED' } : p
-                                      )
-                                    );
+                                    fetchMyProjects(currentPage, activeStatus); // 현재 페이지 새로고침
                                   } else {
                                     const errorData = await statusResponse.json().catch(() => ({}));
-                                    console.error('상태 변경 실패:', errorData);
                                     alert(errorData.message || '프로젝트 삭제에 실패했습니다.');
                                   }
-                                } else {
-                                  const errorText = await response.text();
-                                  console.error('삭제 실패:', errorText);
-                                  alert(`프로젝트 삭제에 실패했습니다. (상태: ${response.status})`);
+                                } catch (error) {
+                                  console.error('삭제 오류:', error);
+                                  alert('프로젝트 삭제 중 오류가 발생했습니다.');
                                 }
-                              } catch (error) {
-                                console.error('삭제 오류:', error);
-                                const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
-                                alert('프로젝트 삭제 중 오류가 발생했습니다: ' + errorMessage);
                               }
-                            }
-                          }}
-                          className="px-3 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors"
-                          style={{ 
-                            padding: '8px 12px', 
-                            backgroundColor: '#fee2e2', 
-                            color: '#dc2626', 
-                            borderRadius: '8px', 
-                            fontSize: '14px',
-                            fontWeight: '500',
-                            border: 'none', 
-                            cursor: 'pointer', 
-                            transition: 'background-color 0.2s' 
-                          }}
-                          onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#fecaca'}
-                          onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#fee2e2'}
-                        >
-                          삭제
-                        </button>
+                            }}
+                            className="px-3 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors"
+                            style={{ 
+                              padding: '8px 12px', 
+                              backgroundColor: '#fee2e2', 
+                              color: '#dc2626', 
+                              borderRadius: '8px', 
+                              fontSize: '14px',
+                              fontWeight: '500',
+                              border: 'none', 
+                              cursor: 'pointer', 
+                              transition: 'background-color 0.2s' 
+                            }}
+                          >
+                            삭제
+                          </button>
+                        </div>
                       </div>
                     </div>
+                  ))}
+                </div>
+
+                {/* 페이징 네비게이션 */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center space-x-2 mt-8" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '32px' }}>
+                    <button
+                      className="px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{ 
+                        padding: '8px 16px', 
+                        border: '1px solid #d1d5db', 
+                        borderRadius: '8px', 
+                        fontWeight: '500',
+                        color: '#374151',
+                        backgroundColor: 'white',
+                        cursor: currentPage === 0 ? 'not-allowed' : 'pointer', 
+                        opacity: currentPage === 0 ? 0.5 : 1,
+                        transition: 'background-color 0.2s'
+                      }}
+                      disabled={currentPage === 0}
+                      onClick={() => fetchMyProjects(currentPage - 1, activeStatus)}
+                    >
+                      이전
+                    </button>
+                    
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      const pageNum = Math.max(0, Math.min(totalPages - 5, currentPage - 2)) + i;
+                      const isCurrentPage = currentPage === pageNum;
+                      
+                      return (
+                        <button
+                          key={pageNum}
+                          className={`px-4 py-2 border rounded-lg font-medium ${
+                            isCurrentPage
+                              ? 'bg-blue-500 text-white border-blue-500'
+                              : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                          }`}
+                          style={{
+                            padding: '8px 16px',
+                            border: `1px solid ${isCurrentPage ? '#3b82f6' : '#d1d5db'}`,
+                            borderRadius: '8px',
+                            fontWeight: '500',
+                            backgroundColor: isCurrentPage ? '#3b82f6' : 'white',
+                            color: isCurrentPage ? 'white' : '#374151',
+                            cursor: 'pointer',
+                            transition: 'background-color 0.2s'
+                          }}
+                          onClick={() => fetchMyProjects(pageNum, activeStatus)}
+                        >
+                          {pageNum + 1}
+                        </button>
+                      );
+                    })}
+
+                    <button
+                      className="px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{ 
+                        padding: '8px 16px', 
+                        border: '1px solid #d1d5db', 
+                        borderRadius: '8px', 
+                        fontWeight: '500',
+                        color: '#374151',
+                        backgroundColor: 'white',
+                        cursor: currentPage >= totalPages - 1 ? 'not-allowed' : 'pointer', 
+                        opacity: currentPage >= totalPages - 1 ? 0.5 : 1,
+                        transition: 'background-color 0.2s'
+                      }}
+                      disabled={currentPage >= totalPages - 1}
+                      onClick={() => fetchMyProjects(currentPage + 1, activeStatus)}
+                    >
+                      다음
+                    </button>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
           </>
         )}
