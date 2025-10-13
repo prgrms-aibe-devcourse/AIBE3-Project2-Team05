@@ -1,18 +1,35 @@
+server:
+  forward-headers-strategy: native
+
 spring:
   application:
     name: back
+  config:
+    import: optional:file:.env[.properties]
   profiles:
     active: dev
+    include: secret
   output:
     ansi:
       enabled: always
-
-  # ===== JSON 설정 =====
+  datasource:
+    hikari:
+      auto-commit: false
   jackson:
     time-zone: Asia/Seoul
     serialization:
+      fail-on-empty-beans: false
       write-dates-as-timestamps: false
 
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
   # ===== 파일 업로드 설정 =====
   servlet:
     multipart:
@@ -20,10 +37,26 @@ spring:
       max-file-size: 50MB
       max-request-size: 200MB
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL__SENDER__EMAIL}
+    password: ${GMAIL__SENDER__PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 # ===== Swagger =====
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8
 
+custom:
+  jwt:
+    secretKey: ${CUSTOM__JWT__SECRET_KEY}
+  accessToken:
+    expireSeconds: "#{60 * 15}"
 # ===== OpenAPI 스키마 자동 생성 설정 =====
 openapi:
   schema:

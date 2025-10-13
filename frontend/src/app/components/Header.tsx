@@ -7,21 +7,38 @@ import "./Header.css";
 
 export const Header = () => {
   const router = useRouter();
-  const { username, setUsername } = useUser();
+  const { username, setUsername, isLoaded } = useUser();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
+  if (!isClient || !isLoaded) return null;
+
   const handleLogout = async () => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/member/logout`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/member/logout`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+      // 서버가 빈 응답일 수도 있으니 JSON 파싱은 선택적으로
+      let data = null;
+      const text = await res.text();
+      if (text) {
+        try {
+          data = JSON.parse(text);
+        } catch {
+          console.log("JSON 파싱 실패, 빈 응답일 수 있음");
+        }
+      }
+
       setUsername(null);
-      router.push("/");
+      window.location.href = "/"; // SPA 새로고침 없이 로그인 상태 초기화
     } catch (err) {
       console.error("로그아웃 중 오류 발생:", err);
     }
@@ -45,23 +62,18 @@ export const Header = () => {
   ];
 
   return (
-    <header
-      className="fixed top-0 left-0 right-0 w-full h-[68px] bg-white z-50"
-      style={{ backgroundColor: "#ffffff" }}
-    >
-      {/* 로고 */}
+    <header className="fixed top-0 left-0 right-0 w-full h-[68px] bg-white z-50">
       <img
-        src={"/logo-text.png"}
+        src="/logo-text.png"
         alt="Logo"
-        className="absolute left-[13.2%] top-[14px] w-[174px] h-[44px] object-cover"
+        className="absolute left-[13.2%] top-[14px] w-[174px] h-[44px] object-cover cursor-pointer"
+        onClick={() => router.push("/")}
       />
-
-      {/* 내비게이션 */}
       {navigationItems.map((item, index) => (
         <a
           key={index}
           href={item.path}
-          className="header-text absolute text-[#424953] text-[14.6px] font-normal leading-[27px] flex items-center cursor-pointer hover:text-[#006A20] transition-colors"
+          className="absolute text-[#424953] text-[14.6px] leading-[27px] flex items-center cursor-pointer hover:text-[#006A20] transition-colors"
           style={{
             left: item.left,
             width: item.width,
@@ -73,34 +85,44 @@ export const Header = () => {
         </a>
       ))}
 
-      {/* 인증 링크 */}
-      <div className="absolute right-[28%] top-[calc(50%-24px/2+1px)] flex items-center">
-        {isClient && username ? (
+      <div className="absolute right-[28%] top-[calc(50%-24px/2+1px)] flex items-center gap-x-[24px]">
+        {username ? (
           <>
-            <span className="header-text text-[#666666] text-[13.1px] leading-[24px] flex items-center w-[36.26px] h-[19px]">
-              {username}님
-            </span>
-            <button
+            <div className="flex items-center">
+              <span className="text-[#666] text-[13.1px] leading-[24px] whitespace-nowrap">
+                {username}님
+              </span>
+              <span className="mx-2 text-[#666] text-[14px] leading-[21px] font-normal">
+                |
+              </span>
+              <a
+                href="/members/mypage"
+                className="text-[#666] text-[13.1px] leading-[24px] hover:text-[#006A20] transition-colors whitespace-nowrap"
+              >
+                마이페이지
+              </a>
+            </div>
+            <span
               onClick={handleLogout}
-              className="header-text text-[#666666] text-[13.1px] leading-[24px] flex items-center cursor-pointer hover:text-[#006A20] transition-colors ml-2"
+              className="text-[#666] text-[13.1px] leading-[24px] cursor-pointer hover:text-[#006A20] transition-colors whitespace-nowrap"
             >
               로그아웃
-            </button>
+            </span>
           </>
         ) : (
           <>
             <a
               href="/members/login"
-              className="header-text text-[#666666] text-[13.1px] leading-[24px] flex items-center cursor-pointer hover:text-[#006A20] transition-colors whitespace-nowrap"
+              className="text-[#666] text-[13.1px] leading-[24px] hover:text-[#006A20] transition-colors whitespace-nowrap"
             >
               로그인
             </a>
-            <span className="header-text text-[#666666] text-[14px] leading-[21px] flex items-center mx-2 font-normal">
+            <span className="mx-2 text-[#666] text-[14px] leading-[21px] font-normal">
               |
             </span>
             <a
               href="/members/signup"
-              className="header-text text-[#666666] text-[13.1px] leading-[24px] flex items-center cursor-pointer hover:text-[#006A20] transition-colors whitespace-nowrap"
+              className="text-[#666] text-[13.1px] leading-[24px] hover:text-[#006A20] transition-colors whitespace-nowrap"
             >
               회원가입
             </a>

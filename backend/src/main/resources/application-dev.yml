@@ -3,7 +3,6 @@ spring:
     activate:
       on-profile: dev
 
-  # ===== 개발용 MySQL 설정 =====
   datasource:
     url: jdbc:mysql://localhost:3306/project_management?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useUnicode=true
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -12,15 +11,9 @@ spring:
     hikari:
       auto-commit: false
 
-  # ===== 개발용 JPA 설정 =====
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: create-drop
-    properties:
-      hibernate:
-        format_sql: true
-        dialect: org.hibernate.dialect.MySQL8Dialect
+    redis:
+      host: localhost
+      port: 6379
 
 # ===== 개발용 로깅 =====
 logging:

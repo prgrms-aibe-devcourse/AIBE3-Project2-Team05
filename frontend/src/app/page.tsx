@@ -260,7 +260,7 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-500 ease-out cursor-pointer" style={{
                 backgroundColor: 'white',
                 borderRadius: '20px',
@@ -875,7 +875,7 @@ export default function HomePage() {
                   backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px'                }}>
                 </div>
               </div>
-              
+
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-500 ease-out cursor-pointer" style={{
                 backgroundColor: 'white',
                 borderRadius: '20px',
@@ -909,7 +909,7 @@ export default function HomePage() {
                 }}>
                 </div>
               </div>
-              
+
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-500 ease-out cursor-pointer" style={{
                 backgroundColor: 'white',
                 borderRadius: '20px',
