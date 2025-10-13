@@ -33,7 +33,6 @@ export default function LoginPage() {
           body: JSON.stringify({ username: usernameInput, password }),
         }
       );
-
       const data = await res.json();
 
       if (!res.ok) {
@@ -43,11 +42,10 @@ export default function LoginPage() {
 
       setSuccessMsg(data.msg || "로그인 성공");
 
-      // DTO에서 닉네임 가져와 Context에 저장
-      const usernameFromDto = data.Data?.MemberDto?.nickname ?? null;
+      // 새로고침 시 유지
+      const usernameFromDto = data.Data?.username ?? null;
       setUsername(usernameFromDto);
-
-      router.push("/"); // 메인 페이지 이동
+      window.location.href = "/";
     } catch (err) {
       console.error(err);
       setErrorMsg("로그인 중 오류가 발생했습니다.");
@@ -60,8 +58,6 @@ export default function LoginPage() {
       style={{ backgroundColor: "var(--background)" }}
     >
       <div className="w-[448px] flex flex-col items-center">
-        {/* 상단 로고 또는 PNG */}
-
         <h1 className="text-[24px] font-bold leading-[32px] mb-2 text-[#0F0A03]">
           로그인
         </h1>
@@ -69,10 +65,9 @@ export default function LoginPage() {
           FIT에 로그인하여 서비스를 이용하세요
         </p>
 
-        {/* 로그인 폼 */}
         <div
           className="w-full bg-[#FDFCF8] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] rounded-[16px]"
-          style={{ padding: "35px 35px" }}
+          style={{ padding: "35px" }}
         >
           <form className="flex flex-col" onSubmit={handleSubmit}>
             {/* 아이디 */}
@@ -177,7 +172,7 @@ export default function LoginPage() {
               로그인
             </button>
 
-            {/* 회원가입 / 비밀번호 찾기 링크 */}
+            {/* 회원가입 링크 */}
             <p className="text-[14px] font-[300] leading-[20px] text-center text-[#5A5549] mb-2">
               아직 fit 회원이 아니라면?{" "}
               <span

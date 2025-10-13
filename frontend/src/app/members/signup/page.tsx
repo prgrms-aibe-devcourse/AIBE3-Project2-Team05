@@ -14,12 +14,14 @@ export default function SignupPage() {
   const [agreed, setAgreed] = useState(false);
 
   const [errorMsg, setErrorMsg] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
+  const [showModal, setShowModal] = useState(false); // 모달 표시 여부
+  const [modalMsg, setModalMsg] = useState(""); // 모달 메시지
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
-    setSuccessMsg("");
+    setModalMsg("");
+    setShowModal(false);
 
     if (!username || !name || !email || !password || !passwordConfirm) {
       setErrorMsg("모든 필드를 입력해주세요.");
@@ -38,11 +40,17 @@ export default function SignupPage() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/member/signup`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/member`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, name, email, password }),
+          body: JSON.stringify({
+            username,
+            nickname: name,
+            email,
+            password,
+            passwordCheck: passwordConfirm,
+          }),
         }
       );
 
@@ -53,8 +61,9 @@ export default function SignupPage() {
         return;
       }
 
-      setSuccessMsg(data.msg || "회원가입 성공");
-      setTimeout(() => router.push("/members/login"), 1500);
+      // 회원가입 성공 → 모달 띄우기
+      setModalMsg(data.msg || "회원가입 성공");
+      setShowModal(true);
     } catch (err) {
       console.error(err);
       setErrorMsg("회원가입 중 오류가 발생했습니다.");
@@ -90,6 +99,7 @@ export default function SignupPage() {
           }}
         >
           <form className="flex flex-col" onSubmit={handleSubmit}>
+            {/* 아이디 */}
             <div className="flex flex-col mb-[20px]">
               <label
                 className="text-[14px] font-medium leading-[14px] mb-[8px]"
@@ -127,6 +137,7 @@ export default function SignupPage() {
               </div>
             </div>
 
+            {/* 이메일 */}
             <div className="flex flex-col mb-[20px]">
               <label
                 className="text-[14px] font-medium leading-[14px] mb-[8px]"
@@ -164,6 +175,7 @@ export default function SignupPage() {
               </div>
             </div>
 
+            {/* 이름 */}
             <div className="flex flex-col mb-[20px]">
               <label
                 className="text-[14px] font-medium leading-[14px] mb-[8px]"
@@ -201,6 +213,7 @@ export default function SignupPage() {
               </div>
             </div>
 
+            {/* 비밀번호 */}
             <div className="flex flex-col mb-[20px]">
               <label
                 className="text-[14px] font-medium leading-[14px] mb-[8px]"
@@ -238,6 +251,7 @@ export default function SignupPage() {
               </div>
             </div>
 
+            {/* 비밀번호 확인 */}
             <div className="flex flex-col mb-[20px]">
               <label
                 className="text-[14px] font-medium leading-[14px] mb-[8px]"
@@ -275,6 +289,7 @@ export default function SignupPage() {
               </div>
             </div>
 
+            {/* 약관 동의 */}
             <div className="flex items-center gap-[7px] mb-[24px]">
               <input
                 type="checkbox"
@@ -292,13 +307,10 @@ export default function SignupPage() {
               </label>
             </div>
 
-            {(errorMsg || successMsg) && (
-              <p
-                className={`text-[14px] text-center mb-4 ${
-                  errorMsg ? "text-red-500" : "text-green-500"
-                }`}
-              >
-                {errorMsg || successMsg}
+            {/* 에러 메시지 */}
+            {errorMsg && (
+              <p className="text-[14px] text-red-500 text-center mb-4">
+                {errorMsg}
               </p>
             )}
 
@@ -325,6 +337,63 @@ export default function SignupPage() {
           </form>
         </div>
       </div>
+
+      {/* 모달 */}
+      {showModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0,0,0,0.4)",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "white",
+              position: "relative",
+              padding: "24px",
+              borderRadius: "12px",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+              width: "380px",
+              textAlign: "center",
+            }}
+          >
+            <p
+              style={{
+                marginBottom: "24px",
+                fontSize: "16px",
+                fontWeight: 500,
+                color: "#0F0A03",
+              }}
+            >
+              {modalMsg}
+            </p>
+            <button
+              onClick={() => router.push("/members/login")}
+              style={{
+                padding: "8px 20px",
+                backgroundColor: "#006A20",
+                borderRadius: "8px",
+                color: "#ffffff",
+                fontWeight: 500,
+                cursor: "pointer",
+              }}
+              onMouseOver={(e) =>
+                (e.currentTarget.style.backgroundColor = "#005a1a")
+              }
+              onMouseOut={(e) =>
+                (e.currentTarget.style.backgroundColor = "#006A20")
+              }
+            >
+              로그인 페이지로 이동
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
