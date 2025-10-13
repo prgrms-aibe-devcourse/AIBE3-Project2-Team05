@@ -2,7 +2,6 @@ package com.back.domain.project.repository;
 
 import com.back.domain.project.entity.Project;
 import com.back.domain.project.entity.enums.*;
-import com.back.domain.project.project.entity.enums.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

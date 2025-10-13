@@ -1,6 +1,6 @@
 package com.back.global.exception;
 
-import com.back.global.RsData.RsData;
+import com.back.global.rsData.RsData;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
         log.error("프로젝트 찾기 실패: {}", e.getMessage());
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(RsData.error(e.getMessage(), e.getErrorCode()));
+                .body(new RsData<>(e.getErrorCode(), e.getMessage()));
     }
 
     /**
@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
         log.error("프로젝트 접근 권한 없음: {}", e.getMessage());
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(RsData.error(e.getMessage(), e.getErrorCode()));
+                .body(new RsData<>(e.getErrorCode(), e.getMessage()));
     }
 
     /**
@@ -44,7 +44,7 @@ public class GlobalExceptionHandler {
         log.error("입력값 검증 실패: {}", e.getMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(RsData.error("입력값 검증에 실패했습니다.", "VALIDATION_FAILED"));
+                .body(new RsData<>("400-1", "입력값 검증에 실패했습니다."));
     }
 
     /**
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
         log.error("제약조건 위반: {}", e.getMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(RsData.error("입력값이 제약조건을 위반했습니다.", "CONSTRAINT_VIOLATION"));
+                .body(new RsData<>("400-1", "입력값이 제약조건을 위반했습니다."));
     }
 
     /**
@@ -66,7 +66,7 @@ public class GlobalExceptionHandler {
         log.error("파일 업로드 크기 초과: {}", e.getMessage());
 
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
-                .body(RsData.error("업로드 파일 크기가 제한을 초과했습니다.", "FILE_SIZE_EXCEEDED"));
+                .body(new RsData<>("413-1", "업로드 파일 크기가 제한을 초과했습니다."));
     }
 
     /**
@@ -77,7 +77,7 @@ public class GlobalExceptionHandler {
         log.error("파일 업로드 예외: {}", e.getMessage(), e);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(RsData.error(e.getMessage(), e.getErrorCode()));
+                .body(new RsData<>(e.getErrorCode(), e.getMessage()));
     }
 
     /**
@@ -88,7 +88,7 @@ public class GlobalExceptionHandler {
         log.error("검증 예외: {}", e.getMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(RsData.error(e.getMessage(), e.getErrorCode()));
+                .body(new RsData<>(e.getErrorCode(), e.getMessage()));
     }
 
     /**
@@ -99,7 +99,7 @@ public class GlobalExceptionHandler {
         log.error("잘못된 매개변수: {}", e.getMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(RsData.error(e.getMessage(), "INVALID_ARGUMENT"));
+                .body(new RsData<>("400-1", e.getMessage()));
     }
 
     /**
@@ -110,6 +110,6 @@ public class GlobalExceptionHandler {
         log.error("예상하지 못한 예외 발생: {}", e.getMessage(), e);
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(RsData.error("내부 서버 오류가 발생했습니다.", "INTERNAL_ERROR"));
+                .body(new RsData<>("500-1", "내부 서버 오류가 발생했습니다."));
     }
 }

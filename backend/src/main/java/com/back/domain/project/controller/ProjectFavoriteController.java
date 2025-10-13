@@ -1,7 +1,7 @@
 package com.back.domain.project.controller;
 
 import com.back.domain.project.service.ProjectFavoriteService;
-import com.back.global.RsData.RsData;
+import com.back.global.rsData.RsData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -36,11 +36,11 @@ public class ProjectFavoriteController {
             result.put("favoriteCount", favoriteCount);
             result.put("message", isAdded ? "즐겨찾기에 추가되었습니다." : "즐겨찾기에서 제거되었습니다.");
 
-            return ResponseEntity.ok(RsData.success(result));
+            return ResponseEntity.ok(new RsData<>("200-1", "성공", result));
         } catch (Exception e) {
             log.error("즐겨찾기 토글 실패: projectId={}, userId={}", projectId, userId, e);
             return ResponseEntity.badRequest()
-                    .body(RsData.error("즐겨찾기 처리 중 오류가 발생했습니다: " + e.getMessage()));
+                    .body(new RsData<>("400-1", "즐겨찾기 처리 중 오류가 발생했습니다: " + e.getMessage()));
         }
     }
 
@@ -59,11 +59,11 @@ public class ProjectFavoriteController {
             result.put("isFavorite", isFavorite);
             result.put("favoriteCount", favoriteCount);
 
-            return ResponseEntity.ok(RsData.success(result));
+            return ResponseEntity.ok(new RsData<>("200-1", "성공", result));
         } catch (Exception e) {
             log.error("즐겨찾기 상태 조회 실패: projectId={}, userId={}", projectId, userId, e);
             return ResponseEntity.badRequest()
-                    .body(RsData.error("즐겨찾기 상태 조회 중 오류가 발생했습니다: " + e.getMessage()));
+                    .body(new RsData<>("400-1", "즐겨찾기 상태 조회 중 오류가 발생했습니다: " + e.getMessage()));
         }
     }
 
@@ -75,11 +75,11 @@ public class ProjectFavoriteController {
             @PathVariable Long userId) {
         try {
             List<Long> favoriteProjectIds = projectFavoriteService.getFavoriteProjectIds(userId);
-            return ResponseEntity.ok(RsData.success(favoriteProjectIds));
+            return ResponseEntity.ok(new RsData<>("200-1", "성공", favoriteProjectIds));
         } catch (Exception e) {
             log.error("사용자 즐겨찾기 목록 조회 실패: userId={}", userId, e);
             return ResponseEntity.badRequest()
-                    .body(RsData.error("즐겨찾기 목록 조회 중 오류가 발생했습니다: " + e.getMessage()));
+                    .body(new RsData<>("400-1", "즐겨찾기 목록 조회 중 오류가 발생했습니다: " + e.getMessage()));
         }
     }
 }

@@ -2,7 +2,7 @@ package com.back.domain.project.controller;
 
 import com.back.domain.project.entity.ProjectFile;
 import com.back.domain.project.service.ProjectFileService;
-import com.back.global.RsData.RsData;
+import com.back.global.rsData.RsData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -128,15 +128,15 @@ public class ProjectFileController {
         try {
             validateFile(file);
             ProjectFile uploadedFile = fileService.uploadFile(projectId, file);
-            return ResponseEntity.ok(RsData.success("파일이 성공적으로 업로드되었습니다.", uploadedFile));
+            return ResponseEntity.ok(new RsData<>("200-1", "파일이 성공적으로 업로드되었습니다.", uploadedFile));
         } catch (IllegalArgumentException e) {
             log.error("파일 업로드 실패 - 입력값 오류: {}", e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(RsData.error("파일 업로드 실패", e.getMessage()));
+                    .body(new RsData<>("400-1", "파일 업로드 실패: " + e.getMessage()));
         } catch (Exception e) {
             log.error("파일 업로드 실패 - {}", e.getMessage());
             return ResponseEntity.internalServerError()
-                    .body(RsData.error("파일 업로드 중 오류가 발생했습니다.", "UPLOAD_ERROR"));
+                    .body(new RsData<>("500-1", "파일 업로드 중 오류가 발생했습니다."));
         }
     }
 
@@ -153,15 +153,15 @@ public class ProjectFileController {
         try {
             validateFiles(files);
             List<ProjectFile> uploadedFiles = fileService.uploadFiles(projectId, files);
-            return ResponseEntity.ok(RsData.success("파일들이 성공적으로 업로드되었습니다.", uploadedFiles));
+            return ResponseEntity.ok(new RsData<>("200-1", "파일들이 성공적으로 업로드되었습니다.", uploadedFiles));
         } catch (IllegalArgumentException e) {
             log.error("파일 일괄 업로드 실패 - 입력값 오류: {}", e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(RsData.error("파일 업로드 실패", e.getMessage()));
+                    .body(new RsData<>("400-1", "파일 업로드 실패: " + e.getMessage()));
         } catch (Exception e) {
             log.error("파일 일괄 업로드 실패 - {}", e.getMessage());
             return ResponseEntity.internalServerError()
-                    .body(RsData.error("파일 업로드 중 오류가 발생했습니다.", "UPLOAD_ERROR"));
+                    .body(new RsData<>("500-1", "파일 업로드 중 오류가 발생했습니다."));
         }
     }
 
@@ -177,15 +177,15 @@ public class ProjectFileController {
 
         try {
             fileService.deleteFile(fileId);
-            return ResponseEntity.ok(RsData.success("파일이 성공적으로 삭제되었습니다.", null));
+            return ResponseEntity.ok(new RsData<>("200-1", "파일이 성공적으로 삭제되었습니다."));
         } catch (IllegalArgumentException e) {
-            log.error("파일 삭제 실패 - {}", e.getMessage());
+            log.error("파일 삭제 실패 - 입력값 오류: {}", e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(RsData.error("파일 삭제 실패", e.getMessage()));
-        } catch (RuntimeException e) {
+                    .body(new RsData<>("400-1", "파일 삭제 실패: " + e.getMessage()));
+        } catch (Exception e) {
             log.error("파일 삭제 실패 - {}", e.getMessage());
             return ResponseEntity.internalServerError()
-                    .body(RsData.error("파일 삭제 중 오류가 발생했습니다.", "DELETE_ERROR"));
+                    .body(new RsData<>("500-1", "파일 삭제 중 오류가 발생했습니다."));
         }
     }
 
