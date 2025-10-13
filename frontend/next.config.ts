@@ -5,7 +5,11 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:8080/api/:path*', // 백엔드 서버 주소로 변경
+        destination: 'http://localhost:8080/api/:path*',
+      },
+      {
+        source: '/api/member/:path*',
+        destination: 'http://localhost:8080/member/:path*',
       },
     ];
   },

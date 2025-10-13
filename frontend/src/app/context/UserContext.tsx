@@ -27,7 +27,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const fetchUser = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/member/me`,
+          `/api/member/me`,
           {
             method: "GET",
             credentials: "include",

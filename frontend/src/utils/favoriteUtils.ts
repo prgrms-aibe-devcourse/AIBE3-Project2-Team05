@@ -3,28 +3,25 @@
  */
 
 /**
- * API 기본 URL 확인
+ * API 기본 URL 확인 (프록시 경로 사용)
  */
 const getApiBaseUrl = (): string => {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!baseUrl) {
-    console.error('NEXT_PUBLIC_API_BASE_URL 환경변수가 설정되지 않았습니다.');
-    throw new Error('API Base URL이 설정되지 않았습니다.');
-  }
-  return baseUrl;
+  // Next.js 프록시를 사용하므로 빈 문자열 반환
+  return '';
 };
 
 /**
  * 즐겨찾기 토글 (추가/제거)
  */
-export const toggleFavorite = async (projectId: number, userId: number): Promise<boolean> => {
+export const toggleFavorite = async (projectId: number, memberId: number): Promise<boolean> => {
   try {
     const baseUrl = getApiBaseUrl();
-    const url = `${baseUrl}/api/projects/favorites/${projectId}/toggle?userId=${userId}`;
+    const url = `${baseUrl}/api/projects/favorites/${projectId}/toggle?memberId=${memberId}`;
     console.log('즐겨찾기 토글 API 호출:', url);
     
     const response = await fetch(url, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       }
@@ -54,13 +51,20 @@ export const toggleFavorite = async (projectId: number, userId: number): Promise
 /**
  * 즐겨찾기 상태 조회
  */
-export const getFavoriteStatus = async (projectId: number, userId: number): Promise<boolean> => {
+export const getFavoriteStatus = async (projectId: number, memberId: number): Promise<boolean> => {
   try {
     const baseUrl = getApiBaseUrl();
-    const url = `${baseUrl}/api/projects/favorites/${projectId}/status?userId=${userId}`;
+    const url = `${baseUrl}/api/projects/favorites/${projectId}/status?memberId=${memberId}`;
     console.log('즐겨찾기 상태 조회 API 호출:', url);
     
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
 
     console.log('즐겨찾기 상태 조회 응답 상태:', response.status);
 
@@ -86,40 +90,72 @@ export const getFavoriteStatus = async (projectId: number, userId: number): Prom
 /**
  * 사용자의 즐겨찾기 프로젝트 ID 목록 조회
  */
-export const getUserFavoriteProjectIds = async (userId: number): Promise<number[]> => {
+export const getUserFavoriteProjectIds = async (memberId: number): Promise<number[]> => {
+  const baseUrl = getApiBaseUrl();
+  const url = `${baseUrl}/api/projects/favorites/member/${memberId}`;
+  console.log('사용자 즐겨찾기 목록 조회 API 호출:', url);
+  
   try {
-    const baseUrl = getApiBaseUrl();
-    const url = `${baseUrl}/api/projects/favorites/user/${userId}`;
-    console.log('사용자 즐겨찾기 목록 조회 API 호출:', url);
-    
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
 
     console.log('사용자 즐겨찾기 목록 조회 응답 상태:', response.status);
 
     if (response.ok) {
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('응답 JSON 파싱 실패:', jsonError);
+        return [];
+      }
+      
       console.log('사용자 즐겨찾기 목록 조회 응답 데이터:', data);
       
       // 다양한 응답 구조 대응
-      const projectIds = data.data || data.result || data || [];
+      const projectIds = data?.data || data?.result || data || [];
       
       // 숫자 배열인지 확인하고 반환
       if (Array.isArray(projectIds)) {
-        return projectIds.filter(id => typeof id === 'number');
+        const validIds = projectIds.filter(id => typeof id === 'number');
+        console.log('유효한 즐겨찾기 프로젝트 IDs:', validIds);
+        return validIds;
       }
       
+      console.warn('예상하지 못한 응답 구조:', typeof projectIds, projectIds);
       return [];
     } else {
-      const errorText = await response.text();
+      let errorText = '';
+      try {
+        errorText = await response.text();
+      } catch (textError) {
+        console.warn('응답 텍스트 읽기 실패:', textError);
+        errorText = 'Unable to read response text';
+      }
+      
       console.error('사용자 즐겨찾기 목록 조회 실패:', {
         status: response.status,
         statusText: response.statusText,
-        error: errorText
+        url: url,
+        memberId: memberId,
+        error: errorText || 'No error text available',
+        headers: Object.fromEntries(response.headers.entries())
       });
       return [];
     }
   } catch (error) {
-    console.error('사용자 즐겨찾기 목록 조회 중 네트워크 오류:', error);
+    console.error('사용자 즐겨찾기 목록 조회 중 네트워크 오류:', {
+      error: error instanceof Error ? error.message : error,
+      stack: error instanceof Error ? error.stack : undefined,
+      url: url,
+      memberId: memberId
+    });
     return [];
   }
 };

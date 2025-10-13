@@ -55,7 +55,14 @@ const ProjectDetailPage = () => {
   // 별도 파일 API 호출 함수
   const fetchAlternativeFiles = async (projectId: string): Promise<ProjectFile[]> => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${projectId}/files`);
+      const response = await fetch(`/api/projects/${projectId}/files`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
       if (response.ok) {
         const files = await response.json();
         return Array.isArray(files) ? files : [];
@@ -75,7 +82,14 @@ const ProjectDetailPage = () => {
       setLoading(true);
       setFavoriteLoading(true);
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.id}`);
+        const response = await fetch(`/api/projects/${params.id}`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
         
         if (response.ok) {
           const data: ProjectResponse = await response.json();

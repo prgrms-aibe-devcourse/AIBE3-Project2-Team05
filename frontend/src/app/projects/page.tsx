@@ -49,10 +49,18 @@ const ProjectsPage = () => {
     const loadFavorites = async () => {
       try {
         const userId = getCurrentUserId();
+        console.log('즐겨찾기 로드 시작, 사용자 ID:', userId);
         const favoriteIds = await getUserFavoriteProjectIds(userId);
+        console.log('즐겨찾기 로드 완료, IDs:', favoriteIds);
         setFavoriteProjectIds(favoriteIds);
       } catch (error) {
-        console.error('즐겨찾기 목록 로드 실패:', error);
+        console.error('즐겨찾기 목록 로드 실패:', {
+          error: error instanceof Error ? error.message : error,
+          stack: error instanceof Error ? error.stack : undefined,
+          userId: getCurrentUserId()
+        });
+        // 에러가 발생해도 빈 배열로 설정하여 앱이 동작하도록 함
+        setFavoriteProjectIds([]);
       }
     };
 
@@ -82,7 +90,14 @@ const ProjectsPage = () => {
         console.log('API 호출 URL:', `/api/projects?${params}`);
         console.log('현재 필터:', currentFilters);
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects?${params}`);
+        const response = await fetch(`/api/projects?${params}`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
         if (response.ok) {
           const data: PageProjectResponse = await response.json();
           console.log('API 응답 데이터:', data);
