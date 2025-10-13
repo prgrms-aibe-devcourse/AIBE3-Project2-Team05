@@ -65,8 +65,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // 허용할 오리진 설정
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://localhost:*"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
         // 자격 증명 허용 설정
         configuration.setAllowCredentials(true);
@@ -74,9 +74,12 @@ public class SecurityConfig {
         // 허용할 헤더 설정
         configuration.setAllowedHeaders(List.of("*"));
 
-        // CORS 설정을 소스에 등록
+        // 노출할 헤더 설정
+        configuration.setExposedHeaders(List.of("*"));
+
+        // CORS 설정을 소스에 등록 (모든 경로에 적용)
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", configuration);
+        source.registerCorsConfiguration("/**", configuration);
 
         return source;
     }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { apiClient } from '@/global/backend/client'
 import { Button } from '@/ui/button'
 import {
@@ -33,6 +34,7 @@ const NOTIFICATION_TYPE_ICONS = {
 } as const
 
 export function NotificationDropdown() {
+  const router = useRouter()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
@@ -117,6 +119,38 @@ export function NotificationDropdown() {
     return date.toLocaleDateString('ko-KR')
   }
 
+  const handleNotificationClick = async (notification: Notification) => {
+    // 읽지 않은 알림이면 읽음 처리
+    if (!notification.isRead) {
+      await handleMarkAsRead(notification.id)
+    }
+
+    // 알림 유형에 따라 페이지 이동
+    const { relatedType, relatedId, notificationType } = notification
+
+    if (relatedType === 'PROPOSAL' && relatedId) {
+      // 제안 페이지로 이동하고 해당 제안으로 스크롤
+      router.push(`/proposals?id=${relatedId}`)
+    } else if (relatedType === 'MESSAGE' && relatedId) {
+      // 메시지 페이지로 이동
+      router.push('/messages')
+    } else if (relatedType === 'SUBMISSION' && relatedId) {
+      // 지원 목록 페이지로 이동
+      router.push('/submissions')
+    } else if (notificationType.includes('PROPOSAL')) {
+      // 제안 관련 알림
+      router.push('/proposals')
+    } else if (notificationType.includes('SUBMISSION')) {
+      // 지원 관련 알림
+      router.push('/submissions')
+    } else if (notificationType.includes('MESSAGE')) {
+      // 메시지 관련 알림
+      router.push('/messages')
+    }
+
+    setIsOpen(false)
+  }
+
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
@@ -161,7 +195,10 @@ export function NotificationDropdown() {
               onSelect={(e) => e.preventDefault()}
             >
               <div className="flex items-start justify-between w-full">
-                <div className="flex-1">
+                <div
+                  className="flex-1 cursor-pointer"
+                  onClick={() => handleNotificationClick(notification)}
+                >
                   <div className="flex items-center gap-2 mb-1">
                     <span>{getNotificationIcon(notification.notificationType)}</span>
                     <span className="text-sm font-semibold">{notification.title}</span>
@@ -179,7 +216,10 @@ export function NotificationDropdown() {
                       variant="ghost"
                       size="sm"
                       className="h-6 w-6 p-0"
-                      onClick={() => handleMarkAsRead(notification.id)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleMarkAsRead(notification.id)
+                      }}
                     >
                       ✓
                     </Button>
@@ -188,7 +228,10 @@ export function NotificationDropdown() {
                     variant="ghost"
                     size="sm"
                     className="h-6 w-6 p-0"
-                    onClick={() => handleDelete(notification.id)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDelete(notification.id)
+                    }}
                   >
                     ✕
                   </Button>

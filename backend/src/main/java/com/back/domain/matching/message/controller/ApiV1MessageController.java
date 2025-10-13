@@ -58,6 +58,42 @@ public class ApiV1MessageController {
     }
 
     /**
+     * 특정 프로젝트+프리랜서 간의 대화 히스토리 조회 (채팅 모달용)
+     *
+     * @param user         현재 로그인한 사용자
+     * @param projectId    프로젝트 ID
+     * @param freelancerId 프리랜서 ID
+     * @param limit        조회할 메시지 개수 (기본 50개)
+     * @return 메시지 목록 (날짜 오름차순)
+     */
+    @GetMapping("/conversation/{projectId}/{freelancerId}")
+    public RsData<List<MessageDto>> getConversation(
+            @AuthenticationPrincipal SecurityUser user,
+            @PathVariable Long projectId,
+            @PathVariable Long freelancerId,
+            @RequestParam(required = false, defaultValue = "50") int limit
+    ) {
+        Member member = user.getMember();
+
+        List<Message> messages = messageService.findConversation(
+                member,
+                projectId,
+                freelancerId,
+                limit
+        );
+
+        List<MessageDto> dtos = messages.stream()
+                .map(MessageDto::new)
+                .toList();
+
+        return new RsData<>(
+                "200-1",
+                "대화 히스토리가 조회되었습니다.",
+                dtos
+        );
+    }
+
+    /**
      * 메시지 목록 조회
      * - 전체 메시지 또는 필터링된 메시지 조회
      *

@@ -5,6 +5,8 @@ import { useAuth } from '@/global/auth/hooks/useAuth'
 import { apiClient } from '@/global/backend/client'
 import { useRouter } from 'next/navigation'
 import { ProposalCard } from './_components/ProposalCard'
+import { AcceptRejectModal } from './_components/AcceptRejectModal'
+import { ChatModal } from '@/app/_components/ChatModal'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 
@@ -30,6 +32,16 @@ export default function ProposalsPage() {
   const router = useRouter()
   const [proposals, setProposals] = useState<Proposal[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalType, setModalType] = useState<'accept' | 'reject'>('accept')
+  const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(null)
+  const [chatModalOpen, setChatModalOpen] = useState(false)
+  const [chatTarget, setChatTarget] = useState<{
+    freelancerId: number
+    receiverName: string
+    projectId: number
+    projectTitle: string
+  } | null>(null)
 
   const isPm = user?.role !== 'FREELANCER'
 
@@ -45,6 +57,28 @@ export default function ProposalsPage() {
     }
   }, [user, authLoading, router])
 
+  // URL 쿼리 파라미터에서 ID를 읽어서 해당 제안으로 스크롤
+  useEffect(() => {
+    if (proposals.length > 0) {
+      const params = new URLSearchParams(window.location.search)
+      const proposalId = params.get('id')
+      if (proposalId) {
+        // 약간의 딜레이 후 스크롤 (DOM 렌더링 대기)
+        setTimeout(() => {
+          const element = document.getElementById(`proposal-${proposalId}`)
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            // 하이라이트 효과
+            element.classList.add('ring-2', 'ring-primary', 'ring-offset-2')
+            setTimeout(() => {
+              element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2')
+            }, 3000)
+          }
+        }, 100)
+      }
+    }
+  }, [proposals])
+
   const loadProposals = async () => {
     try {
       const response = await apiClient.get<Proposal[]>('/api/v1/proposals')
@@ -57,36 +91,50 @@ export default function ProposalsPage() {
     }
   }
 
-  const handleAccept = async (id: number) => {
-    const message = window.prompt('수락 메시지를 입력하세요 (선택):')
+  const handleAccept = (id: number) => {
+    const proposal = proposals.find(p => p.id === id)
+    if (!proposal) return
+
+    setSelectedProposal(proposal)
+    setModalType('accept')
+    setModalOpen(true)
+  }
+
+  const handleReject = (id: number) => {
+    const proposal = proposals.find(p => p.id === id)
+    if (!proposal) return
+
+    setSelectedProposal(proposal)
+    setModalType('reject')
+    setModalOpen(true)
+  }
+
+  const handleModalSubmit = async (message: string, reason?: string) => {
+    if (!selectedProposal) return
 
     try {
-      await apiClient.put(`/api/v1/proposals/${id}/accept`, {
-        responseMessage: message || '제안을 수락합니다.'
-      })
-      alert('제안을 수락했습니다.')
+      if (modalType === 'accept') {
+        await apiClient.put(`/api/v1/proposals/${selectedProposal.id}/accept`, {
+          responseMessage: message
+        })
+        alert('제안을 수락했습니다.')
+      } else {
+        await apiClient.put(`/api/v1/proposals/${selectedProposal.id}/reject`, {
+          responseMessage: message,
+          rejectionReason: reason || ''
+        })
+        alert('제안을 거절했습니다.')
+      }
       loadProposals()
     } catch (error) {
-      alert(error instanceof Error ? error.message : '수락 실패')
+      alert(error instanceof Error ? error.message : '처리 실패')
     }
   }
 
-  const handleReject = async (id: number) => {
-    const message = window.prompt('거절 메시지를 입력하세요:')
-    if (!message || message.trim() === '') return
-
-    const reason = window.prompt('거절 사유를 입력하세요 (선택):')
-
-    try {
-      await apiClient.put(`/api/v1/proposals/${id}/reject`, {
-        responseMessage: message.trim(),
-        rejectionReason: reason?.trim() || ''
-      })
-      alert('제안을 거절했습니다.')
-      loadProposals()
-    } catch (error) {
-      alert(error instanceof Error ? error.message : '거절 실패')
-    }
+  const handleSendMessage = (freelancerId: number, receiverName: string, projectId: number, projectTitle: string) => {
+    // 채팅 모달 열기
+    setChatTarget({ freelancerId, receiverName, projectId, projectTitle })
+    setChatModalOpen(true)
   }
 
   const handleCancel = async (id: number) => {
@@ -136,16 +184,49 @@ export default function ProposalsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {proposals.map((proposal) => (
-            <ProposalCard
-              key={proposal.id}
-              proposal={proposal}
-              isPm={isPm}
-              onAccept={handleAccept}
-              onReject={handleReject}
-              onCancel={handleCancel}
-            />
+            <div key={proposal.id} id={`proposal-${proposal.id}`}>
+              <ProposalCard
+                proposal={proposal}
+                isPm={isPm}
+                onAccept={handleAccept}
+                onReject={handleReject}
+                onCancel={handleCancel}
+                onSendMessage={() => handleSendMessage(
+                  isPm ? proposal.freelancerId : proposal.pmId,
+                  isPm ? proposal.freelancerName : proposal.pmName,
+                  proposal.projectId,
+                  proposal.projectTitle
+                )}
+              />
+            </div>
           ))}
         </div>
+      )}
+
+      {/* Accept/Reject Modal */}
+      {selectedProposal && (
+        <AcceptRejectModal
+          type={modalType}
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+          onSubmit={handleModalSubmit}
+          proposalInfo={{
+            projectTitle: selectedProposal.projectTitle,
+            freelancerName: selectedProposal.freelancerName
+          }}
+        />
+      )}
+
+      {/* Chat Modal */}
+      {chatTarget && (
+        <ChatModal
+          isOpen={chatModalOpen}
+          onClose={() => setChatModalOpen(false)}
+          projectId={chatTarget.projectId}
+          freelancerId={chatTarget.freelancerId}
+          receiverName={chatTarget.receiverName}
+          projectTitle={chatTarget.projectTitle}
+        />
       )}
     </div>
   )

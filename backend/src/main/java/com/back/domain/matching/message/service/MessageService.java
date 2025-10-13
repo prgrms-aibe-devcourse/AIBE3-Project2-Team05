@@ -125,6 +125,49 @@ public class MessageService {
     }
 
     /**
+     * 특정 프로젝트+프리랜서 간 대화 히스토리 조회 (채팅 모달용)
+     *
+     * @param currentUser  현재 사용자
+     * @param projectId    프로젝트 ID
+     * @param freelancerId 프리랜서 ID
+     * @param limit        조회할 메시지 개수
+     * @return 메시지 목록 (날짜 오름차순)
+     */
+    public List<Message> findConversation(
+            Member currentUser,
+            Long projectId,
+            Long freelancerId,
+            int limit
+    ) {
+        // 프로젝트 조회
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프로젝트입니다."));
+
+        // 프리랜서 조회
+        Freelancer freelancer = freelancerRepository.findById(freelancerId)
+                .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프리랜서입니다."));
+
+        Member pm = project.getPm();
+
+        // 현재 사용자가 PM 또는 프리랜서인지 확인
+        boolean isParticipant = currentUser.getId().equals(pm.getId()) ||
+                                currentUser.getId().equals(freelancer.getMember().getId());
+
+        if (!isParticipant) {
+            throw new ServiceException("403-1", "대화 참여자만 조회할 수 있습니다.");
+        }
+
+        // PM과 프리랜서 간의 모든 메시지 조회 (날짜 내림차순)
+        List<Message> messages = messageRepository.findByPmAndFreelancerOrderByCreateDateDesc(pm, freelancer);
+
+        // limit 적용 및 날짜 오름차순으로 변경
+        return messages.stream()
+                .limit(limit)
+                .sorted((m1, m2) -> m1.getCreateDate().compareTo(m2.getCreateDate()))
+                .toList();
+    }
+
+    /**
      * 특정 대화의 메시지 목록 조회
      *
      * @param pm          PM

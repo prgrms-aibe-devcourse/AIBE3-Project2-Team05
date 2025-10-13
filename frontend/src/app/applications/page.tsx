@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 import { Button } from '@/ui/button'
 import { Badge } from '@/ui/badge'
 import { useRouter } from 'next/navigation'
+import { ChatModal } from '@/app/_components/ChatModal'
 
 interface ProjectListItem {
   id: number
@@ -36,6 +37,13 @@ export default function ApplicationsPage() {
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null)
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [chatModalOpen, setChatModalOpen] = useState(false)
+  const [chatTarget, setChatTarget] = useState<{
+    freelancerId: number
+    receiverName: string
+    projectId: number
+    projectTitle: string
+  } | null>(null)
 
   useEffect(() => {
     // PM이 아니면 홈으로 리다이렉트
@@ -117,6 +125,19 @@ export default function ApplicationsPage() {
     } catch (error) {
       alert(error instanceof Error ? error.message : '거절 실패')
     }
+  }
+
+  const handleSendMessage = (submission: Submission) => {
+    const project = projects.find(p => p.id === selectedProjectId)
+    if (!project) return
+
+    setChatTarget({
+      freelancerId: submission.freelancerId,
+      receiverName: submission.freelancerName,
+      projectId: submission.projectId,
+      projectTitle: submission.projectTitle
+    })
+    setChatModalOpen(true)
   }
 
   const getStatusBadge = (status: string) => {
@@ -238,27 +259,49 @@ export default function ApplicationsPage() {
                 </div>
 
                 {/* 액션 버튼 */}
-                {submission.status === 'PENDING' && (
-                  <div className="flex gap-2 pt-2">
+                <div className="flex gap-2 pt-2">
+                  {submission.status === 'PENDING' && (
+                    <>
+                      <Button
+                        onClick={() => handleAccept(submission.id)}
+                        className="flex-1"
+                      >
+                        수락
+                      </Button>
+                      <Button
+                        onClick={() => handleReject(submission.id)}
+                        variant="outline"
+                        className="flex-1"
+                      >
+                        거절
+                      </Button>
+                    </>
+                  )}
+                  {submission.status === 'ACCEPTED' && (
                     <Button
-                      onClick={() => handleAccept(submission.id)}
+                      onClick={() => handleSendMessage(submission)}
                       className="flex-1"
                     >
-                      수락
+                      💬 메시지 보내기
                     </Button>
-                    <Button
-                      onClick={() => handleReject(submission.id)}
-                      variant="outline"
-                      className="flex-1"
-                    >
-                      거절
-                    </Button>
-                  </div>
-                )}
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Chat Modal */}
+      {chatTarget && (
+        <ChatModal
+          isOpen={chatModalOpen}
+          onClose={() => setChatModalOpen(false)}
+          projectId={chatTarget.projectId}
+          freelancerId={chatTarget.freelancerId}
+          receiverName={chatTarget.receiverName}
+          projectTitle={chatTarget.projectTitle}
+        />
       )}
     </div>
   )

@@ -7,6 +7,7 @@ import { Card } from '@/ui/card'
 import { Button } from '@/ui/button'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { ChatModal } from '@/app/_components/ChatModal'
 
 interface Submission {
   id: number
@@ -18,13 +19,31 @@ interface Submission {
   estimatedDuration: number
   status: string
   appliedAt: string
+  pmId?: number
+  pmName?: string
+}
+
+interface Project {
+  id: number
+  title: string
+  pmId: number
+  pmName: string
 }
 
 export default function SubmissionsPage() {
   const { user, isLoading: authLoading } = useAuth()
   const router = useRouter()
   const [submissions, setSubmissions] = useState<Submission[]>([])
+  const [projects, setProjects] = useState<Project[]>([])
+  const [freelancerId, setFreelancerId] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [chatModalOpen, setChatModalOpen] = useState(false)
+  const [chatTarget, setChatTarget] = useState<{
+    freelancerId: number
+    receiverName: string
+    projectId: number
+    projectTitle: string
+  } | null>(null)
 
   useEffect(() => {
     if (!authLoading && user?.role !== 'FREELANCER') {
@@ -39,13 +58,40 @@ export default function SubmissionsPage() {
 
   const loadSubmissions = async () => {
     try {
-      const response = await apiClient.get<Submission[]>('/api/v1/submissions')
-      setSubmissions(response.data)
+      const [submissionsRes, projectsRes, freelancerRes] = await Promise.all([
+        apiClient.get<Submission[]>('/api/v1/submissions'),
+        apiClient.get<Project[]>('/api/v1/projects'),
+        apiClient.get<{ id: number }>('/api/v1/freelancers/me')
+      ])
+      setSubmissions(submissionsRes.data)
+      setProjects(projectsRes.data)
+      setFreelancerId(freelancerRes.data.id)
     } catch (error) {
       console.error('Failed to load submissions:', error)
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleSendMessage = (submission: Submission) => {
+    const project = projects.find(p => p.id === submission.projectId)
+    if (!project) {
+      alert('프로젝트 정보를 찾을 수 없습니다.')
+      return
+    }
+
+    if (!freelancerId) {
+      alert('프리랜서 정보를 찾을 수 없습니다.')
+      return
+    }
+
+    setChatTarget({
+      freelancerId: freelancerId,
+      receiverName: project.pmName,
+      projectId: submission.projectId,
+      projectTitle: submission.projectTitle
+    })
+    setChatModalOpen(true)
   }
 
   const handleCancel = async (id: number) => {
@@ -156,10 +202,30 @@ export default function SubmissionsPage() {
                     </Button>
                   </>
                 )}
+                {submission.status === 'ACCEPTED' && (
+                  <Button
+                    size="sm"
+                    onClick={() => handleSendMessage(submission)}
+                  >
+                    💬 메시지 보내기
+                  </Button>
+                )}
               </div>
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Chat Modal */}
+      {chatTarget && (
+        <ChatModal
+          isOpen={chatModalOpen}
+          onClose={() => setChatModalOpen(false)}
+          projectId={chatTarget.projectId}
+          freelancerId={chatTarget.freelancerId}
+          receiverName={chatTarget.receiverName}
+          projectTitle={chatTarget.projectTitle}
+        />
       )}
     </div>
   )

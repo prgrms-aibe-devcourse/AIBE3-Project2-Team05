@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/ui/button'
 import { FreelancerCard } from './_components/FreelancerCard'
 import { FreelancerProfileModal } from './_components/FreelancerProfileModal'
+import { ProposalMessageModal } from './_components/ProposalMessageModal'
 import { apiClient } from '@/global/backend/client'
 import { useAuth } from '@/global/auth/hooks/useAuth'
 import type { RecommendationResponseDto, FreelancerRecommendationDto } from '@/global/backend/apiV1/types'
@@ -20,6 +21,8 @@ export default function MatchingPage() {
   const [data, setData] = useState<RecommendationResponseDto | null>(null)
   const [selectedFreelancer, setSelectedFreelancer] = useState<FreelancerRecommendationDto | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isProposalModalOpen, setIsProposalModalOpen] = useState(false)
+  const [proposalTargetFreelancer, setProposalTargetFreelancer] = useState<{ id: number; name: string } | null>(null)
 
   const isFreelancer = user?.role === 'FREELANCER'
   const isPm = user?.role !== 'FREELANCER' && user !== null // PM 또는 일반 사용자
@@ -71,22 +74,23 @@ export default function MatchingPage() {
     }
   }
 
-  const handlePropose = async (freelancerId: number) => {
-    // TODO: Implement dialog with Textarea instead of window.prompt
-    const message = window.prompt('프리랜서에게 보낼 제안 메시지를 입력하세요:')
+  const handlePropose = (freelancerId: number, freelancerName: string) => {
+    setProposalTargetFreelancer({ id: freelancerId, name: freelancerName })
+    setIsProposalModalOpen(true)
+  }
 
-    if (!message || message.trim() === '') {
-      return
-    }
+  const handleProposalSubmit = async (message: string) => {
+    if (!proposalTargetFreelancer) return
 
     try {
       const response = await apiClient.post('/api/v1/proposals', {
         projectId: Number(projectId),
-        freelancerId: freelancerId,
-        message: message.trim()
+        freelancerId: proposalTargetFreelancer.id,
+        message: message
       })
 
       alert(response.msg || '제안이 전송되었습니다.')
+      setProposalTargetFreelancer(null)
     } catch (err) {
       alert(err instanceof Error ? err.message : '제안 전송에 실패했습니다.')
     }
@@ -216,7 +220,7 @@ export default function MatchingPage() {
           <FreelancerCard
             key={freelancer.freelancerId}
             freelancer={freelancer}
-            onPropose={() => handlePropose(freelancer.freelancerId)}
+            onPropose={() => handlePropose(freelancer.freelancerId, freelancer.freelancerName)}
             onViewProfile={() => handleViewProfile(freelancer)}
             isPm={isPm}
           />
@@ -229,6 +233,16 @@ export default function MatchingPage() {
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
       />
+
+      {/* Proposal Message Modal */}
+      {proposalTargetFreelancer && (
+        <ProposalMessageModal
+          freelancerName={proposalTargetFreelancer.name}
+          open={isProposalModalOpen}
+          onOpenChange={setIsProposalModalOpen}
+          onSubmit={handleProposalSubmit}
+        />
+      )}
     </div>
   )
 }
