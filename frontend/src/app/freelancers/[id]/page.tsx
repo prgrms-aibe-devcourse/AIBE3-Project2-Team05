@@ -227,16 +227,16 @@ export default function FreelancerDetailPage({
                 </h3>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {(freelancer?.techList || []).length > 0 ? (
-                    freelancer?.techList.map((t: string) => (
+                    freelancer?.techList.map((tech) => (
                       <span
-                        key={t}
+                        key={tech.id}
                         style={{
                           background: "#f1f1f1",
                           padding: "6px 10px",
                           borderRadius: 9999,
                         }}
                       >
-                        {t}
+                        {tech.techName}
                       </span>
                     ))
                   ) : (
