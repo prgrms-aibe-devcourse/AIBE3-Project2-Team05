@@ -1,10 +1,14 @@
 package com.back.global.config;
 
+import com.back.domain.project.entity.Project;
+import com.back.domain.project.entity.ProjectFile;
+import com.back.domain.project.entity.ProjectTech;
+import com.back.domain.project.entity.enums.*;
+import com.back.domain.project.repository.ProjectFileRepository;
+import com.back.domain.project.repository.ProjectRepository;
+import com.back.domain.project.repository.ProjectTechRepository;
 import com.back.domain.user.entity.User;
 import com.back.domain.user.repository.UserRepository;
-import com.back.domain.project.project.entity.*;
-import com.back.domain.project.project.entity.enums.*;
-import com.back.domain.project.project.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;

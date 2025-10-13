@@ -1,7 +1,7 @@
 package com.back.global.util;
 
-import com.back.domain.project.project.dto.ProjectRequest;
-import com.back.domain.project.project.entity.Project;
+import com.back.domain.project.dto.ProjectRequest;
+import com.back.domain.project.entity.Project;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
