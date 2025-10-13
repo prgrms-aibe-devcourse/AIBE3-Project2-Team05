@@ -1,5 +1,6 @@
 package com.back.domain.matching.message.controller;
 
+import com.back.domain.matching.message.dto.ConversationDto;
 import com.back.domain.matching.message.dto.MessageCreateReqBody;
 import com.back.domain.matching.message.dto.MessageDto;
 import com.back.domain.matching.message.entity.Message;
@@ -54,6 +55,28 @@ public class ApiV1MessageController {
                 "201-1",
                 "메시지가 전송되었습니다.",
                 new MessageDto(message)
+        );
+    }
+
+    /**
+     * 대화방 목록 조회
+     * 현재 사용자가 참여한 모든 대화방을 최신 메시지 순으로 반환
+     *
+     * @param user 현재 로그인한 사용자
+     * @return 대화방 목록
+     */
+    @GetMapping("/conversations")
+    public RsData<List<ConversationDto>> getConversations(
+            @AuthenticationPrincipal SecurityUser user
+    ) {
+        Member member = user.getMember();
+
+        List<ConversationDto> conversations = messageService.findConversations(member);
+
+        return new RsData<>(
+                "200-1",
+                "대화방 목록이 조회되었습니다.",
+                conversations
         );
     }
 

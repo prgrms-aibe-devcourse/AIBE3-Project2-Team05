@@ -2,6 +2,7 @@ package com.back.domain.matching.message.service;
 
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
+import com.back.domain.matching.message.dto.ConversationDto;
 import com.back.domain.matching.message.entity.Message;
 import com.back.domain.matching.message.entity.RelatedType;
 import com.back.domain.matching.message.repository.MessageRepository;
@@ -20,7 +21,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 메시지 Service
@@ -296,6 +298,44 @@ public class MessageService {
                 .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프리랜서입니다."));
 
         return new MessageContext(project, sender, freelancer);
+    }
+
+    /**
+     * 대화방 목록 조회
+     * 현재 사용자가 참여한 모든 대화방을 최신 메시지 순으로 정렬
+     *
+     * @param member 현재 사용자
+     * @return 대화방 목록
+     */
+    public List<ConversationDto> findConversations(Member member) {
+        // 사용자가 참여한 모든 메시지 조회
+        List<Message> allMessages = findByMember(member);
+
+        if (allMessages.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // (projectId, pmId, freelancerId) 조합으로 그룹핑
+        Map<String, List<Message>> conversationMap = allMessages.stream()
+                .collect(Collectors.groupingBy(msg ->
+                    msg.getProject().getId() + "_" +
+                    msg.getPm().getId() + "_" +
+                    msg.getFreelancer().getId()
+                ));
+
+        // 각 대화방의 메시지를 최신순으로 정렬하고 ConversationDto 생성
+        List<ConversationDto> conversations = conversationMap.values().stream()
+                .map(messages -> {
+                    // 메시지를 최신순으로 정렬
+                    messages.sort((m1, m2) -> m2.getCreateDate().compareTo(m1.getCreateDate()));
+                    return new ConversationDto(messages, member.getId());
+                })
+                .collect(Collectors.toList());
+
+        // 최신 메시지 시간 기준으로 정렬
+        conversations.sort((c1, c2) -> c2.getLastMessageAt().compareTo(c1.getLastMessageAt()));
+
+        return conversations;
     }
 
     /**
