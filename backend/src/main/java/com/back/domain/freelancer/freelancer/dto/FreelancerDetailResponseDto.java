@@ -1,5 +1,6 @@
 package com.back.domain.freelancer.freelancer.dto;
 
+import com.back.domain.freelancer.career.dto.CareerResponseDto;
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancerTech.dto.FreelancerTechDto;
 
@@ -24,6 +25,7 @@ public record FreelancerDetailResponseDto(
         int favoritesCount,
         int completedProjectsCount,
         List<FreelancerTechDto> techList,
+        List<CareerResponseDto> careerList,
         String freelancerProfileImageUrl
 ) {
     public FreelancerDetailResponseDto(Freelancer freelancer) {
@@ -44,6 +46,7 @@ public record FreelancerDetailResponseDto(
                 freelancer.getFavoritesCount(),
                 freelancer.getCompletedProjectsCount(),
                 freelancer.getTechStacks().stream().map(FreelancerTechDto::new).toList(),
+                freelancer.getCareerList().stream().map(CareerResponseDto::new).toList(),
                 freelancer.getFreelancerProfileImageUrl()
         );
     }

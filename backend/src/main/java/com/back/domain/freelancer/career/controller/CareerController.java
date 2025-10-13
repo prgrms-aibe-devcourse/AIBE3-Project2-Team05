@@ -4,6 +4,7 @@ import com.back.domain.freelancer.career.dto.CareerRequestDto;
 import com.back.domain.freelancer.career.dto.CareerResponseDto;
 import com.back.domain.freelancer.career.entity.Career;
 import com.back.domain.freelancer.career.service.CareerService;
+import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
 import com.back.domain.member.entity.Member;
 import com.back.domain.member.repository.MemberRepository;
@@ -23,7 +24,8 @@ public class CareerController {
 
     // todo 병합 시 삭제
     public Member setMember() {
-        return memberRepository.findById(34L).get();
+        Freelancer freelancer = freelancerRepository.findById(22L).get();
+        return memberRepository.findById(freelancer.getMember().getId()).get();
     }
     // 여기까지 삭제
 

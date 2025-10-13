@@ -43,6 +43,12 @@ dependencies {
 
 //	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
+
+	//redis
+	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+
+	//이메일 발송
+	implementation ("org.springframework.boot:spring-boot-starter-mail")
 }
 
 tasks.withType<Test> {
