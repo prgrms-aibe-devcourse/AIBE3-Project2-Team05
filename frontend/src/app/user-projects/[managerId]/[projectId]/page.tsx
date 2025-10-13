@@ -252,7 +252,15 @@ const UserProjectDetailPage = () => {
         setActiveTab(sectionId);
         const element = document.getElementById(sectionId);
         if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // 헤더나 탭 네비게이션 높이를 고려한 오프셋 (필요에 따라 조정)
+            const offset = 120;
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - offset;
+            
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
         }
     };
 

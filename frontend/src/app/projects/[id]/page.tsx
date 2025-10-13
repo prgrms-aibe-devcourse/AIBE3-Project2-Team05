@@ -133,7 +133,15 @@ const ProjectDetailPage = () => {
     setActiveTab(sectionId);
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // 헤더나 탭 네비게이션 높이를 고려한 오프셋 (필요에 따라 조정)
+      const offset = 120;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -451,24 +459,6 @@ const ProjectDetailPage = () => {
             </div>
           )}
         </div>
-
-        {/* 지원하기 버튼 - 자신의 프로젝트가 아닌 경우에만 표시 */}
-        {project.status === 'RECRUITING' && project.managerId !== getCurrentUserId() && (
-          <div className="bg-white rounded-xl shadow-sm p-6" style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', padding: '24px' }}>
-            <button 
-              className="w-full py-4 bg-blue-500 text-white font-semibold rounded-xl hover:bg-blue-600 transition-colors text-lg"
-              style={{ width: '100%', padding: '16px 0', backgroundColor: '#3b82f6', color: 'white', fontWeight: '600', borderRadius: '12px', border: 'none', cursor: 'pointer', transition: 'background-color 0.2s', fontSize: '18px' }}
-              onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#2563eb'}
-              onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#3b82f6'}
-              onClick={() => {
-                console.log('프로젝트 지원:', project.id);
-                // 지원하기 로직 구현
-              }}
-            >
-              프로젝트 지원하기
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
