@@ -84,13 +84,13 @@ public class Project {
     private String partnerEtcDescription;
 
     // 연관관계 매핑
-    @OneToMany(mappedBy = "projectId", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ProjectTech> projectTechs;
 
-    @OneToMany(mappedBy = "projectId", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ProjectFile> projectFiles;
 
-    @OneToMany(mappedBy = "projectId", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ProjectFavorite> projectFavorites;
 
     @PrePersist
