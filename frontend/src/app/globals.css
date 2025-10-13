@@ -1,11 +1,18 @@
+@import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* 전역 리셋 */
+* {
+  box-sizing: border-box;
+}
+
 /* 라이트 모드 전용 CSS 변수 */
 :root {
   /* 기본 색상 */
-  --background: #fbf8f1;
+  --background: #f8f4eb;
   --foreground: #252525;
   --card: #ffffff;
   --card-foreground: #252525;
@@ -15,11 +22,11 @@
   /* 버튼 색상 */
   --primary: #006a20;
   --primary-foreground: #ffffff;
-  --secondary: #f1eadc;
+  --secondary: #f8f4eb;
   --secondary-foreground: #252525;
 
   /* 강조 및 상태 색상 */
-  --muted: #f1eadc;
+  --muted: #f8f4eb;
   --muted-foreground: #5a5549;
   --accent: #fcc800;
   --accent-foreground: #252525;
@@ -53,7 +60,9 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Lato", sans-serif; /* <- 전역 폰트 통일 */
+  margin: 0;
+  padding: 0;
 }
 
 .card {
@@ -69,6 +78,7 @@ body {
 .btn-primary {
   background: var(--primary);
   color: var(--primary-foreground);
+  cursor: pointer;
 }
 
 .btn-secondary {
