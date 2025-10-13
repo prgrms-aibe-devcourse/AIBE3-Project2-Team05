@@ -1,5 +1,6 @@
 package com.back.domain.project.service;
 
+import com.back.domain.project.entity.Project;
 import com.back.domain.project.entity.ProjectFile;
 import com.back.domain.project.repository.ProjectFileRepository;
 import com.back.domain.project.repository.ProjectRepository;
@@ -50,7 +51,7 @@ public class ProjectFileService {
      */
     public List<ProjectFile> getProjectFiles(Long projectId) {
         log.debug("프로젝트 파일 목록 조회 - projectId: {}", projectId);
-        return projectFileRepository.findByProjectIdOrderByUploadDateDesc(projectId);
+        return projectFileRepository.findByProject_IdOrderByUploadDateDesc(projectId);
     }
 
     /**
@@ -59,7 +60,7 @@ public class ProjectFileService {
     @Transactional
     public ProjectFile saveProjectFile(ProjectFile projectFile) {
         log.debug("프로젝트 파일 정보 저장 - projectId: {}, fileName: {}",
-                projectFile.getProjectId(), projectFile.getOriginalName());
+                projectFile.getProject().getId(), projectFile.getOriginalName());
 
         return projectFileRepository.save(projectFile);
     }
@@ -103,43 +104,52 @@ public class ProjectFileService {
      */
     @Transactional
     public ProjectFile uploadFile(Long projectId, MultipartFile file) {
-        log.info("파일 업로드 - projectId: {}, fileName: {}, size: {}bytes",
-                projectId, file.getOriginalFilename(), file.getSize());
+        log.info("파일 업로드 시작 - projectId: {}, fileName: {}", projectId, file.getOriginalFilename());
 
-        // 프로젝트 존재 확인
+        // 프로젝트 존재 여부 확인 및 Project 엔티티 조회
         if (!projectRepository.existsById(projectId)) {
             throw new ProjectNotFoundException(projectId);
         }
 
-        // 파일 검증 (FileValidator 사용)
-        fileValidator.validateFile(file, allowedExtensionsStr);
-        fileValidator.validateMimeType(file);
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
 
-        // 프로젝트별 파일 크기 제한 검증
-        long currentTotalSize = getProjectFilesTotalSize(projectId);
-        fileValidator.validateProjectFileSize(currentTotalSize, file.getSize());
+        // 파일 검증
+        fileValidator.validateFile(file, MAX_FILE_SIZE, allowedExtensionsStr);
 
         try {
             // 파일 저장
             String storedFileName = generateStoredFileName(file.getOriginalFilename());
-            String filePath = saveFileToStorage(file, projectId, storedFileName);
+            Path uploadPath = Paths.get(uploadDir);
 
-            // 파일 정보 DB 저장
+            // 업로드 디렉토리 생성
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            Path filePath = uploadPath.resolve(storedFileName);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // 파일 정보 저장
             ProjectFile projectFile = ProjectFile.builder()
-                    .projectId(projectId)
+                    .project(project)  // Project 엔티티 설정
                     .originalName(file.getOriginalFilename())
                     .storedName(storedFileName)
-                    .filePath(filePath)
-                    .fileType(file.getContentType())
+                    .filePath(filePath.toString())
                     .fileSize(file.getSize())
+                    .fileType(getFileExtension(file.getOriginalFilename()))
                     .uploadDate(LocalDateTime.now())
                     .build();
 
-            return projectFileRepository.save(projectFile);
+            ProjectFile savedFile = projectFileRepository.save(projectFile);
+            log.info("파일 업로드 완료 - projectId: {}, fileId: {}, fileName: {}",
+                    projectId, savedFile.getId(), savedFile.getOriginalName());
+
+            return savedFile;
 
         } catch (IOException e) {
-            log.error("파일 업로드 실패 - projectId: {}, fileName: {}", projectId, file.getOriginalFilename(), e);
-            throw new FileUploadException("파일 업로드에 실패했습니다: " + e.getMessage(), e);
+            log.error("파일 저장 중 오류 발생 - projectId: {}, fileName: {}", projectId, file.getOriginalFilename(), e);
+            throw new FileUploadException("파일 저장에 실패했습니다: " + e.getMessage());
         }
     }
 
@@ -216,16 +226,15 @@ public class ProjectFileService {
             return;
         }
 
-        // 프로젝트 존재 확인
-        if (!projectRepository.existsById(projectId)) {
-            throw new ProjectNotFoundException(projectId);
-        }
+        // 프로젝트 존재 확인 및 Project 엔티티 조회
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
 
         for (Long fileId : fileIds) {
             ProjectFile file = projectFileRepository.findById(fileId)
                     .orElseThrow(() -> new FileUploadException("파일을 찾을 수 없습니다: " + fileId, "FILE_NOT_FOUND"));
 
-            file.setProjectId(projectId);
+            file.setProject(project);  // Project 엔티티 설정
             projectFileRepository.save(file);
         }
     }

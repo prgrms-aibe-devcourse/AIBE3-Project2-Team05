@@ -13,7 +13,7 @@ import java.util.List;
 public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     // 사용자별 프로젝트 조회
-    List<Project> findByManagerIdOrderByCreateDateDesc(Long managerId);
+    List<Project> findByManager_IdOrderByCreateDateDesc(Long managerId);
 
     // 통합 검색/필터링 쿼리 (Service의 searchProjects에서 사용)
     @Query("SELECT DISTINCT p FROM Project p " +
@@ -44,7 +44,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     // 사용자별 프로젝트 조회 (페이징과 필터링 지원)
     @Query("SELECT DISTINCT p FROM Project p " +
             "LEFT JOIN p.projectTechs pt " +
-            "WHERE p.managerId = :managerId " +
+            "WHERE p.manager.id = :managerId " +
             "AND (:status IS NULL OR p.status = :status) " +
             "AND (:projectField IS NULL OR p.projectField = :projectField) " +
             "AND (:recruitmentType IS NULL OR p.recruitmentType = :recruitmentType) " +

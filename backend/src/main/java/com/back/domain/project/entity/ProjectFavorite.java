@@ -1,5 +1,6 @@
 package com.back.domain.project.entity;
 
+import com.back.domain.member.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,11 +19,13 @@ public class ProjectFavorite {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private Member user;
 
-    @Column(name = "project_id", nullable = false)
-    private Long projectId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
 
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createDate;

@@ -19,8 +19,9 @@ public class ProjectTech {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "project_id", nullable = false)
-    private Long projectId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tech_category", nullable = false, length = 50)

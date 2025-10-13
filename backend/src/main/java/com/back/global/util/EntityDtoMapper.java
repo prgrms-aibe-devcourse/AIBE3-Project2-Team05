@@ -27,7 +27,7 @@ public final class EntityDtoMapper {
                 .budgetType(request.budgetType())
                 .startDate(request.startDate())
                 .endDate(request.endDate())
-                .managerId(request.managerId())
+                // managerId는 서비스에서 Member 객체로 설정
                 .partnerType(request.partnerType())
                 .budgetAmount(request.budgetAmount())
                 .progressStatus(request.progressStatus())

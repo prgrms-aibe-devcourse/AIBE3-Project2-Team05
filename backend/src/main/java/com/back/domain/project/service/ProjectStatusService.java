@@ -1,5 +1,7 @@
 package com.back.domain.project.service;
 
+import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.repository.MemberRepository;
 import com.back.domain.project.entity.Project;
 import com.back.domain.project.entity.enums.ProjectStatus;
 import com.back.domain.project.repository.ProjectRepository;
@@ -23,6 +25,7 @@ import java.time.LocalDateTime;
 public class ProjectStatusService {
 
     private final ProjectRepository projectRepository;
+    private final MemberRepository memberRepository;
     private final ProjectValidator projectValidator;
 
     /**

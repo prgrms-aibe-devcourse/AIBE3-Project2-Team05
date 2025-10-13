@@ -1,5 +1,6 @@
 package com.back.domain.project.entity;
 
+import com.back.domain.member.member.entity.Member;
 import com.back.domain.project.entity.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
@@ -73,8 +74,9 @@ public class Project {
     @Builder.Default
     private Integer applicantCount = 0;
 
-    @Column(name = "manager_id", nullable = false)
-    private Long managerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "manager_id", nullable = false)
+    private Member manager;
 
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createDate;

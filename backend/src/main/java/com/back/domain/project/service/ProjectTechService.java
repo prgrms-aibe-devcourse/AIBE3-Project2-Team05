@@ -1,7 +1,9 @@
 package com.back.domain.project.service;
 
+import com.back.domain.project.entity.Project;
 import com.back.domain.project.entity.ProjectTech;
 import com.back.domain.project.entity.enums.TechCategory;
+import com.back.domain.project.repository.ProjectRepository;
 import com.back.domain.project.repository.ProjectTechRepository;
 import com.back.domain.project.util.TechCategoryMapper;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +26,14 @@ import java.util.stream.Collectors;
 public class ProjectTechService {
 
     private final ProjectTechRepository projectTechRepository;
+    private final ProjectRepository projectRepository;
 
     /**
      * 프로젝트 기술스택 조회
      */
     public List<ProjectTech> getProjectTechs(Long projectId) {
         log.debug("프로젝트 기술스택 조회 - projectId: {}", projectId);
-        return projectTechRepository.findByProjectIdOrderByCreateDate(projectId);
+        return projectTechRepository.findByProject_IdOrderByCreateDate(projectId);
     }
 
     /**
@@ -50,13 +53,17 @@ public class ProjectTechService {
     public List<String> saveTechStacks(Long projectId, List<String> techNames) {
         log.debug("프로젝트 기술스택 저장 - projectId: {}, count: {}", projectId, techNames.size());
 
+        // Project 엔티티 조회
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 프로젝트입니다."));
+
         List<ProjectTech> projectTechs = techNames.stream()
                 .map(techName -> {
                     TechCategory category = TechCategoryMapper.getCategoryByTechName(techName);
                     log.debug("기술스택 매핑 - techName: {}, category: {}", techName, category);
 
                     return ProjectTech.builder()
-                            .projectId(projectId)
+                            .project(project)  // Project 엔티티 설정
                             .techName(techName)
                             .techCategory(category) // 카테고리 자동 설정
                             .createDate(LocalDateTime.now())
@@ -65,7 +72,7 @@ public class ProjectTechService {
                 .collect(Collectors.toList());
 
         projectTechRepository.saveAll(projectTechs);
-        log.debug("프로젝트 기술스택 저장 완료 - projectId: {}, count: {}", projectId, projectTechs.size());
+        log.info("프로젝트 기술스택 저장 완료 - projectId: {}, 저장된 기술: {}", projectId, techNames);
 
         return techNames;
     }
@@ -108,11 +115,15 @@ public class ProjectTechService {
     public void addTechStack(Long projectId, String techName) {
         log.debug("기술스택 추가 - projectId: {}, techName: {}", projectId, techName);
 
+        // Project 엔티티 조회
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 프로젝트입니다."));
+
         TechCategory category = TechCategoryMapper.getCategoryByTechName(techName);
         log.debug("기술스택 매핑 - techName: {}, category: {}", techName, category);
 
         ProjectTech projectTech = ProjectTech.builder()
-                .projectId(projectId)
+                .project(project)  // Project 엔티티 설정
                 .techName(techName)
                 .techCategory(category) // 카테고리 자동 설정
                 .createDate(LocalDateTime.now())
@@ -127,7 +138,7 @@ public class ProjectTechService {
     @Transactional
     public void deleteTechStacks(Long projectId) {
         log.debug("프로젝트 기술스택 삭제 - projectId: {}", projectId);
-        projectTechRepository.deleteByProjectId(projectId);
+        projectTechRepository.deleteByProject_Id(projectId);
     }
 
     /**
@@ -136,13 +147,13 @@ public class ProjectTechService {
     @Transactional
     public void deleteTechStack(Long projectId, String techName) {
         log.debug("특정 기술스택 삭제 - projectId: {}, techName: {}", projectId, techName);
-        projectTechRepository.deleteByProjectIdAndTechName(projectId, techName);
+        projectTechRepository.deleteByProject_IdAndTechName(projectId, techName);
     }
 
     /**
      * 프로젝트가 특정 기술 스택을 가지고 있는지 확인
      */
     public boolean hasProjectTech(Long projectId, String techName) {
-        return projectTechRepository.existsByProjectIdAndTechName(projectId, techName);
+        return projectTechRepository.existsByProject_IdAndTechName(projectId, techName);
     }
 }

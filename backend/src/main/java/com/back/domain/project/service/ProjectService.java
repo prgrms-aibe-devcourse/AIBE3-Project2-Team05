@@ -1,5 +1,7 @@
 package com.back.domain.project.service;
 
+import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.repository.MemberRepository;
 import com.back.domain.project.entity.enums.ProjectStatus;
 import com.back.domain.project.dto.ProjectRequest;
 import com.back.domain.project.dto.ProjectResponse;
@@ -26,6 +28,7 @@ import java.util.List;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
+    private final MemberRepository memberRepository;
     private final ProjectTechService projectTechService;
     private final ProjectFileService projectFileService;
     private final ProjectValidator projectValidator;
@@ -37,7 +40,12 @@ public class ProjectService {
     public ProjectResponse createCompleteProject(ProjectRequest request) {
         log.info("프로젝트 완전 생성 - title: {}, managerId: {}", request.title(), request.managerId());
 
+        // Member 조회
+        Member manager = memberRepository.findById(request.managerId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
         Project project = EntityDtoMapper.toEntity(request);
+        project.setManager(manager);  // Member 객체 설정
         project.setStatus(ProjectStatus.RECRUITING);
         project.setViewCount(0);
 

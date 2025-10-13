@@ -1,5 +1,6 @@
 package com.back.domain.project.dto;
 
+import com.back.domain.member.member.entity.Member;
 import com.back.domain.project.entity.Project;
 import com.back.domain.project.entity.ProjectFile;
 import com.back.domain.project.entity.ProjectTech;
@@ -35,7 +36,7 @@ public record ProjectResponse(
     ProjectStatus status,
     Integer viewCount,
     Integer applicantCount,
-    Long managerId,
+    MemberInfo manager,
     LocalDateTime createDate,
     LocalDateTime modifyDate,
 
@@ -71,7 +72,7 @@ public record ProjectResponse(
                 project.getStatus(),
                 project.getViewCount(),
                 project.getApplicantCount(),
-                project.getManagerId(),
+                project.getManager() != null ? MemberInfo.from(project.getManager()) : null,
                 project.getCreateDate(),
                 project.getModifyDate(),
                 techInfos,
@@ -117,7 +118,7 @@ public record ProjectResponse(
                 project.getStatus(),
                 project.getViewCount(),
                 project.getApplicantCount(),
-                project.getManagerId(),
+                project.getManager() != null ? MemberInfo.from(project.getManager()) : null,
                 project.getCreateDate(),
                 project.getModifyDate(),
                 techInfos,
@@ -143,4 +144,21 @@ public record ProjectResponse(
             String fileType,
             LocalDateTime uploadDate
     ) {}
+
+    /**
+     * 멤버 정보
+     */
+    public record MemberInfo(
+            Long id,
+            String username,
+            String nickname
+    ) {
+        public static MemberInfo from(Member member) {
+            return new MemberInfo(
+                    member.getId(),
+                    member.getUsername(),
+                    member.getNickname()
+            );
+        }
+    }
 }

@@ -28,7 +28,7 @@ public class ProjectValidator {
         validateNotNull(project.getBudgetType(), "예산 유형은 필수입니다.");
         validateNotNull(project.getStartDate(), "시작일은 필수입니다.");
         validateNotNull(project.getEndDate(), "종료일은 필수입니다.");
-        validateNotNull(project.getManagerId(), "프로젝트 관리자는 필수입니다.");
+        validateNotNull(project.getManager(), "프로젝트 관리자는 필수입니다.");
 
         // 길이 검증
         validateStringLength(project.getTitle(), 200, "프로젝트 제목은 200자를 초과할 수 없습니다.");
@@ -83,9 +83,9 @@ public class ProjectValidator {
         if (requesterId == null) {
             throw new IllegalArgumentException("요청자 ID가 없습니다.");
         }
-        if (!project.getManagerId().equals(requesterId)) {
+        if (!project.getManager().getId().equals(requesterId)) {
             log.warn("프로젝트 소유권 검증 실패 - projectId: {}, managerId: {}, requesterId: {}",
-                    project.getId(), project.getManagerId(), requesterId);
+                    project.getId(), project.getManager().getId(), requesterId);
             throw new ProjectAccessDeniedException();
         }
     }
