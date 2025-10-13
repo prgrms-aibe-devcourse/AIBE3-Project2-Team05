@@ -7,6 +7,7 @@ import com.back.domain.freelancer.portfolio.repository.PortfolioRepository;
 import com.back.domain.matching.matchScore.dto.FreelancerRecommendationDto;
 import com.back.domain.matching.matchScore.dto.RecommendationResponseDto;
 import com.back.domain.matching.matchScore.entity.MatchScore;
+import com.back.domain.matching.matchScore.repository.MatchScoreRepository;
 import com.back.domain.matching.matchScore.service.MatchScoreService;
 import com.back.domain.project.project.entity.Project;
 import com.back.domain.project.project.repository.ProjectRepository;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 public class ApiV1MatchingController {
 
     private final MatchScoreService matchScoreService;
+    private final MatchScoreRepository matchScoreRepository;
     private final ProjectRepository projectRepository;
     private final FreelancerRepository freelancerRepository;
     private final FreelancerTechRepository freelancerTechRepository;
@@ -60,34 +62,55 @@ public class ApiV1MatchingController {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프로젝트입니다."));
 
-        // 매칭 점수 조회 (없으면 계산)
-        List<MatchScore> matchScores = matchScoreService.getRecommendations(projectId, limit, minScore);
+        List<MatchScore> matchScores;
 
-        // 매칭 점수가 없으면 계산 후 다시 조회
-        if (matchScores.isEmpty()) {
-            int calculatedCount = matchScoreService.calculateAndSaveRecommendations(projectId);
-
-            if (calculatedCount == 0) {
-                throw new ServiceException("404-1", "추천할 프리랜서가 없습니다. 프로젝트 요구 기술을 확인해주세요.");
-            }
-
-            matchScores = matchScoreService.getRecommendations(projectId, limit, minScore);
-        }
-
-        // 프리랜서인 경우: 본인의 매칭 정보만 필터링
+        // 프리랜서인 경우: 본인의 매칭 점수만 조회 (minScore 무시)
         if (user != null) {
             var freelancerOpt = freelancerRepository.findByMember(user.getMember());
 
             if (freelancerOpt.isPresent()) {
-                // 프리랜서로 로그인한 경우, 본인의 매칭 점수만 반환
-                Long currentFreelancerId = freelancerOpt.get().getId();
-                matchScores = matchScores.stream()
-                        .filter(score -> score.getFreelancer().getId().equals(currentFreelancerId))
-                        .collect(Collectors.toList());
+                // 프리랜서로 로그인한 경우, 본인의 매칭 점수만 조회
+                var myScoreOpt = matchScoreRepository.findByProjectAndFreelancer(project, freelancerOpt.get());
 
-                if (matchScores.isEmpty()) {
-                    throw new ServiceException("404-1", "이 프로젝트에 대한 매칭 점수가 없습니다.");
+                // 매칭 점수가 없으면 계산해서 생성
+                if (myScoreOpt.isEmpty()) {
+                    matchScoreService.calculateAndSaveForFreelancer(projectId, freelancerOpt.get().getId());
+                    myScoreOpt = matchScoreRepository.findByProjectAndFreelancer(project, freelancerOpt.get());
+
+                    if (myScoreOpt.isEmpty()) {
+                        throw new ServiceException("500-1", "매칭 점수 계산에 실패했습니다.");
+                    }
                 }
+
+                matchScores = List.of(myScoreOpt.get());
+            } else {
+                // PM 또는 일반 사용자: 전체 추천 목록 조회
+                matchScores = matchScoreService.getRecommendations(projectId, limit, minScore);
+
+                // 매칭 점수가 없으면 계산 후 다시 조회
+                if (matchScores.isEmpty()) {
+                    int calculatedCount = matchScoreService.calculateAndSaveRecommendations(projectId);
+
+                    if (calculatedCount == 0) {
+                        throw new ServiceException("404-1", "추천할 프리랜서가 없습니다. 프로젝트 요구 기술을 확인해주세요.");
+                    }
+
+                    matchScores = matchScoreService.getRecommendations(projectId, limit, minScore);
+                }
+            }
+        } else {
+            // 비로그인 사용자: 전체 추천 목록 조회
+            matchScores = matchScoreService.getRecommendations(projectId, limit, minScore);
+
+            // 매칭 점수가 없으면 계산 후 다시 조회
+            if (matchScores.isEmpty()) {
+                int calculatedCount = matchScoreService.calculateAndSaveRecommendations(projectId);
+
+                if (calculatedCount == 0) {
+                    throw new ServiceException("404-1", "추천할 프리랜서가 없습니다. 프로젝트 요구 기술을 확인해주세요.");
+                }
+
+                matchScores = matchScoreService.getRecommendations(projectId, limit, minScore);
             }
         }
 

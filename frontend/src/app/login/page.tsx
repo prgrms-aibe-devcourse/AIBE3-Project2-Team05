@@ -27,8 +27,8 @@ export default function LoginPage() {
       setIsLoading(true)
       await login(username, password)
       router.push('/')
-    } catch (error: any) {
-      alert(error.message || '로그인 실패')
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '로그인 실패')
     } finally {
       setIsLoading(false)
     }

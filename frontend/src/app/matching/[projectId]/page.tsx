@@ -18,6 +18,7 @@ export default function MatchingPage() {
   const [data, setData] = useState<RecommendationResponseDto | null>(null)
 
   const isFreelancer = user?.role === 'FREELANCER'
+  const isPm = user?.role !== 'FREELANCER' && user !== null // PM 또는 일반 사용자
 
   useEffect(() => {
     fetchRecommendations()
@@ -56,9 +57,31 @@ export default function MatchingPage() {
     }
   }
 
-  const handleContact = (freelancerId: number) => {
-    // TODO: Implement contact/message functionality
-    console.log('Contact freelancer:', freelancerId)
+  const handlePropose = async (freelancerId: number) => {
+    // TODO: Implement dialog with Textarea instead of window.prompt
+    const message = window.prompt('프리랜서에게 보낼 제안 메시지를 입력하세요:')
+
+    if (!message || message.trim() === '') {
+      return
+    }
+
+    try {
+      const response = await apiClient.post('/api/v1/proposals', {
+        projectId: Number(projectId),
+        freelancerId: freelancerId,
+        message: message.trim()
+      })
+
+      alert(response.msg || '제안이 전송되었습니다.')
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '제안 전송에 실패했습니다.')
+    }
+  }
+
+  const handleViewAllFreelancers = () => {
+    // TODO: 프리랜서 담당 개발자가 /freelancers 페이지 구현 후 활성화
+    alert('전체 프리랜서 목록 페이지는 추후 구현 예정입니다.')
+    // window.location.href = '/freelancers'
   }
 
   if (loading) {
@@ -120,12 +143,19 @@ export default function MatchingPage() {
             <p className="text-muted-foreground">
               {isFreelancer
                 ? '이 프로젝트와의 매칭 점수입니다'
-                : `총 ${data.recommendations.length}명의 프리랜서를 추천합니다`}
+                : `총 ${data.recommendations.length}명의 프리랜서를 추천합니다 (TOP 10, 최소 60점 이상)`}
             </p>
           </div>
-          <Button onClick={handleRecalculate} variant="outline">
-            {isFreelancer ? '내 점수 업데이트' : '전체 재계산'}
-          </Button>
+          <div className="flex gap-2">
+            {isPm && (
+              <Button onClick={handleViewAllFreelancers} variant="outline">
+                전체 프리랜서 목록
+              </Button>
+            )}
+            <Button onClick={handleRecalculate} variant="outline">
+              {isFreelancer ? '내 점수 업데이트' : '전체 재계산'}
+            </Button>
+          </div>
         </div>
 
         {/* Info Card */}
@@ -160,7 +190,8 @@ export default function MatchingPage() {
           <FreelancerCard
             key={freelancer.freelancerId}
             freelancer={freelancer}
-            onContact={() => handleContact(freelancer.freelancerId)}
+            onPropose={() => handlePropose(freelancer.freelancerId)}
+            isPm={isPm}
           />
         ))}
       </div>

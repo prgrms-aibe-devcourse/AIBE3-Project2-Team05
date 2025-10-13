@@ -55,8 +55,8 @@ export default function SubmissionsPage() {
       await apiClient.delete(`/api/v1/submissions/${id}`)
       alert('지원이 취소되었습니다.')
       loadSubmissions()
-    } catch (error: any) {
-      alert(error.message || '취소 실패')
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '취소 실패')
     }
   }
 

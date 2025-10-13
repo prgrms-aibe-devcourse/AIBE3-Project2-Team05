@@ -354,11 +354,15 @@ public class MatchScoreService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프로젝트입니다."));
 
+        int limitValue = limit != null ? limit : TOP_N;
+
+        // minScore와 limit을 함께 적용
         if (minScore != null) {
-            return matchScoreRepository.findByProjectAndMinScore(project, minScore);
+            return matchScoreRepository.findTopRecommendationsWithMinScore(project, limitValue, minScore);
         }
 
-        return matchScoreRepository.findTopRecommendations(project, limit != null ? limit : TOP_N);
+        // limit만 적용
+        return matchScoreRepository.findTopRecommendations(project, limitValue);
     }
 
     /**

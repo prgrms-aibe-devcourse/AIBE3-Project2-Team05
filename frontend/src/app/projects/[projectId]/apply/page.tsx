@@ -82,8 +82,8 @@ export default function ApplyPage() {
 
       alert('지원이 완료되었습니다!')
       router.push('/submissions')
-    } catch (error: any) {
-      alert(error.message || '지원 실패')
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '지원 실패')
     } finally {
       setIsSubmitting(false)
     }

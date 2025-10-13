@@ -25,11 +25,16 @@ export default function Header() {
               홈
             </Link>
             <Link href="/projects" className="hover:text-primary transition-colors">
-              프로젝트
+              매칭 서비스
             </Link>
             {user?.role === 'FREELANCER' && (
               <Link href="/submissions" className="hover:text-primary transition-colors">
                 내 지원 목록
+              </Link>
+            )}
+            {user && user.role !== 'FREELANCER' && (
+              <Link href="/applications" className="hover:text-primary transition-colors">
+                지원자 관리
               </Link>
             )}
             {user && (

@@ -13,11 +13,12 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 /**
  * 인증 API Controller
- * 간단한 username 기반 로그인 (테스트용)
+ * username/password 기반 로그인
  */
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -27,6 +28,7 @@ public class ApiV1AuthController {
     private final MemberRepository memberRepository;
     private final FreelancerRepository freelancerRepository;
     private final ProjectRepository projectRepository;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * 로그인 (username/password 검증 후 쿠키 설정)
@@ -40,8 +42,17 @@ public class ApiV1AuthController {
         Member member = memberRepository.findByUsername(request.username())
                 .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 사용자입니다."));
 
-        // 비밀번호 검증
-        if (!member.getPassword().equals(request.password())) {
+        // 비밀번호 검증 (BCrypt 또는 평문)
+        boolean passwordMatches;
+        if (member.getPassword().startsWith("$2a$") || member.getPassword().startsWith("$2b$")) {
+            // BCrypt 해시인 경우
+            passwordMatches = passwordEncoder.matches(request.password(), member.getPassword());
+        } else {
+            // 평문인 경우 (개발 환경)
+            passwordMatches = member.getPassword().equals(request.password());
+        }
+
+        if (!passwordMatches) {
             throw new ServiceException("401-1", "비밀번호가 일치하지 않습니다.");
         }
 

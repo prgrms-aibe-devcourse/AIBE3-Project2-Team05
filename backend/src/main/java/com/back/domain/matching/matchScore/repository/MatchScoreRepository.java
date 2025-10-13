@@ -21,11 +21,12 @@ public interface MatchScoreRepository extends JpaRepository<MatchScore, MatchSco
      * 순위순 정렬
      *
      * @param project 프로젝트
-     * @param limit   조회 개수
+     * @param limit   조회 개수 (rank가 limit 이하인 것만 조회)
      * @return 추천 프리랜서 목록
      */
     @Query("SELECT ms FROM MatchScore ms " +
            "WHERE ms.project = :project " +
+           "AND ms.rank <= :limit " +
            "ORDER BY ms.rank ASC")
     List<MatchScore> findTopRecommendations(@Param("project") Project project,
                                            @Param("limit") int limit);
@@ -43,6 +44,24 @@ public interface MatchScoreRepository extends JpaRepository<MatchScore, MatchSco
            "ORDER BY ms.scoreTotal DESC")
     List<MatchScore> findByProjectAndMinScore(@Param("project") Project project,
                                               @Param("minScore") double minScore);
+
+    /**
+     * 프로젝트의 Top N 추천 프리랜서 조회 (최소 점수 필터 포함)
+     * rank와 minScore를 모두 적용
+     *
+     * @param project  프로젝트
+     * @param limit    조회 개수 (rank가 limit 이하)
+     * @param minScore 최소 점수
+     * @return 추천 프리랜서 목록
+     */
+    @Query("SELECT ms FROM MatchScore ms " +
+           "WHERE ms.project = :project " +
+           "AND ms.rank <= :limit " +
+           "AND ms.scoreTotal >= :minScore " +
+           "ORDER BY ms.rank ASC")
+    List<MatchScore> findTopRecommendationsWithMinScore(@Param("project") Project project,
+                                                        @Param("limit") int limit,
+                                                        @Param("minScore") double minScore);
 
     /**
      * 특정 프로젝트-프리랜서 매칭 점수 조회

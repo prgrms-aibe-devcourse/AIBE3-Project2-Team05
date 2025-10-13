@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,7 @@ public class TestDataRunner implements ApplicationRunner {
     private final FreelancerRepository freelancerRepository;
     private final ProjectTechRepository projectTechRepository;
     private final FreelancerTechRepository freelancerTechRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -127,8 +129,9 @@ public class TestDataRunner implements ApplicationRunner {
     private List<Member> createPMs() {
         List<Member> pms = new ArrayList<>();
 
-        pms.add(new Member("pm1", "password", "김프로", "pm1@fit.com"));
-        pms.add(new Member("pm2", "password", "이매니저", "pm2@fit.com"));
+        String encodedPassword = passwordEncoder.encode("1234");
+        pms.add(new Member("pm1", encodedPassword, "김프로", "pm1@fit.com"));
+        pms.add(new Member("pm2", encodedPassword, "이매니저", "pm2@fit.com"));
 
         return pms.stream().map(memberRepository::save).toList();
     }
@@ -139,11 +142,12 @@ public class TestDataRunner implements ApplicationRunner {
     private List<Member> createFreelancerMembers() {
         List<Member> members = new ArrayList<>();
 
-        members.add(new Member("freelancer1", "password", "홍개발", "freelancer1@fit.com"));
-        members.add(new Member("freelancer2", "password", "김풀스택", "freelancer2@fit.com"));
-        members.add(new Member("freelancer3", "password", "박프론트", "freelancer3@fit.com"));
-        members.add(new Member("freelancer4", "password", "이백엔드", "freelancer4@fit.com"));
-        members.add(new Member("freelancer5", "password", "최데브옵스", "freelancer5@fit.com"));
+        String encodedPassword = passwordEncoder.encode("1234");
+        members.add(new Member("freelancer1", encodedPassword, "홍개발", "freelancer1@fit.com"));
+        members.add(new Member("freelancer2", encodedPassword, "김풀스택", "freelancer2@fit.com"));
+        members.add(new Member("freelancer3", encodedPassword, "박프론트", "freelancer3@fit.com"));
+        members.add(new Member("freelancer4", encodedPassword, "이백엔드", "freelancer4@fit.com"));
+        members.add(new Member("freelancer5", encodedPassword, "최데브옵스", "freelancer5@fit.com"));
 
         return members.stream().map(memberRepository::save).toList();
     }

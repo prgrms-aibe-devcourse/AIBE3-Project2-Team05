@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import { apiClient, RsData } from '@/global/backend/client'
+import { apiClient } from '@/global/backend/client'
 
 export interface MemberDto {
   id: number
@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await apiClient.get<MemberDto>('/api/v1/auth/me')
       setUser(response.data)
-    } catch (error) {
+    } catch {
       setUser(null)
     } finally {
       setIsLoading(false)

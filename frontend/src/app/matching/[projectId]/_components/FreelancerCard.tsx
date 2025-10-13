@@ -5,10 +5,11 @@ import type { FreelancerRecommendationDto } from '@/global/backend/apiV1/types'
 
 interface FreelancerCardProps {
   freelancer: FreelancerRecommendationDto
-  onContact?: () => void
+  onPropose?: () => void
+  isPm?: boolean
 }
 
-export function FreelancerCard({ freelancer, onContact }: FreelancerCardProps) {
+export function FreelancerCard({ freelancer, onPropose, isPm = false }: FreelancerCardProps) {
   const getProficiencyColor = (proficiency: string) => {
     switch (proficiency) {
       case 'EXPERT':
@@ -107,10 +108,12 @@ export function FreelancerCard({ freelancer, onContact }: FreelancerCardProps) {
 
         {/* Actions */}
         <div className="flex gap-2 pt-2">
-          <Button onClick={onContact} className="flex-1">
-            연락하기
-          </Button>
-          <Button variant="outline" className="flex-1">
+          {isPm && (
+            <Button onClick={onPropose} className="flex-1">
+              제안하기
+            </Button>
+          )}
+          <Button variant="outline" className={isPm ? "flex-1" : "w-full"}>
             프로필 보기
           </Button>
         </div>
