@@ -37,3 +37,9 @@ out/
 .vscode/
 
 .env
+# 로그 및 임시 파일
+logs/
+*.log
+
+application-secret.yml
+application-dev-secret
