@@ -40,5 +40,4 @@ out/
 logs/
 *.log
 
-application-secret.yml
-application-dev-secret
+.env
