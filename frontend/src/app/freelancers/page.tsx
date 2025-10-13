@@ -43,27 +43,8 @@ export default function FreelancerSearchPage() {
   }
 
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-    apiFetch("/api/v1/freelancers")
-      .then((res) => {
-        if (cancelled) return;
-        // assume API returns an array of freelancers matching the DTO field names
-        setFreelancers(res || []);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        console.error("Failed to fetch freelancers", err);
-        setError(String(err || "Unknown error"));
-      })
-      .finally(() => {
-        if (cancelled) return;
-        setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
+    // (data) => setPosts(data) == setPosts
+    apiFetch("/api/v1/freelancers").then(setFreelancers);
   }, []);
 
   const [query, setQuery] = useState("");
