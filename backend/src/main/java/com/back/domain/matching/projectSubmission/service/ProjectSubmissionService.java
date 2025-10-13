@@ -8,6 +8,8 @@ import com.back.domain.matching.projectSubmission.repository.ProjectSubmissionRe
 import com.back.domain.matching.projectSubmission.repository.SubmissionStatusHistoryRepository;
 import com.back.domain.freelancer.portfolio.entity.Portfolio;
 import com.back.domain.freelancer.portfolio.repository.PortfolioRepository;
+import com.back.domain.notification.notification.entity.NotificationType;
+import com.back.domain.notification.notification.service.NotificationService;
 import com.back.domain.project.project.entity.Project;
 import com.back.domain.project.project.repository.ProjectRepository;
 import com.back.global.exception.ServiceException;
@@ -28,6 +30,7 @@ public class ProjectSubmissionService {
     private final ProjectSubmissionRepository projectSubmissionRepository;
     private final ProjectRepository projectRepository;
     private final SubmissionStatusHistoryRepository submissionStatusHistoryRepository;
+    private final NotificationService notificationService;
 
     /**
      * 프로젝트 지원 생성
@@ -224,6 +227,27 @@ public class ProjectSubmissionService {
                 changeReason
         );
         submissionStatusHistoryRepository.save(history);
+
+        // 프리랜서에게 알림 전송 (ACCEPTED 또는 REJECTED인 경우만)
+        if (newStatus == SubmissionStatus.ACCEPTED) {
+            notificationService.create(
+                    submission.getFreelancer().getMember(),
+                    NotificationType.SUBMISSION_ACCEPTED,
+                    "지원이 수락되었습니다",
+                    String.format("'%s' 프로젝트 지원이 수락되었습니다.", submission.getProject().getTitle()),
+                    "SUBMISSION",
+                    submission.getId()
+            );
+        } else if (newStatus == SubmissionStatus.REJECTED) {
+            notificationService.create(
+                    submission.getFreelancer().getMember(),
+                    NotificationType.SUBMISSION_REJECTED,
+                    "지원이 거절되었습니다",
+                    String.format("'%s' 프로젝트 지원이 거절되었습니다.", submission.getProject().getTitle()),
+                    "SUBMISSION",
+                    submission.getId()
+            );
+        }
     }
 
     /**

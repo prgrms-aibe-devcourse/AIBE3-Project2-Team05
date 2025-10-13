@@ -15,7 +15,7 @@ public record ProjectSubmissionCreateReqBody(
         Long projectId,
 
         @NotBlank(message = "자기소개서는 필수입니다.")
-        @Size(min = 50, message = "자기소개서는 최소 50자 이상이어야 합니다.")
+        @Size(min = 5, message = "자기소개서는 최소 5자 이상이어야 합니다.")
         String coverLetter,
 
         @NotNull(message = "제안 단가는 필수입니다.")

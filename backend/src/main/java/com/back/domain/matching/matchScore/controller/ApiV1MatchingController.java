@@ -84,8 +84,8 @@ public class ApiV1MatchingController {
 
                 matchScores = List.of(myScoreOpt.get());
             } else {
-                // PM 또는 일반 사용자: 전체 추천 목록 조회
-                matchScores = matchScoreService.getRecommendations(projectId, limit, minScore);
+                // PM 또는 일반 사용자: 전체 추천 목록 조회 (minScore 무시, TOP 10만)
+                matchScores = matchScoreService.getRecommendations(projectId, limit, null);
 
                 // 매칭 점수가 없으면 계산 후 다시 조회
                 if (matchScores.isEmpty()) {
@@ -95,12 +95,12 @@ public class ApiV1MatchingController {
                         throw new ServiceException("404-1", "추천할 프리랜서가 없습니다. 프로젝트 요구 기술을 확인해주세요.");
                     }
 
-                    matchScores = matchScoreService.getRecommendations(projectId, limit, minScore);
+                    matchScores = matchScoreService.getRecommendations(projectId, limit, null);
                 }
             }
         } else {
             // 비로그인 사용자: 전체 추천 목록 조회
-            matchScores = matchScoreService.getRecommendations(projectId, limit, minScore);
+            matchScores = matchScoreService.getRecommendations(projectId, limit, null);
 
             // 매칭 점수가 없으면 계산 후 다시 조회
             if (matchScores.isEmpty()) {
@@ -110,7 +110,7 @@ public class ApiV1MatchingController {
                     throw new ServiceException("404-1", "추천할 프리랜서가 없습니다. 프로젝트 요구 기술을 확인해주세요.");
                 }
 
-                matchScores = matchScoreService.getRecommendations(projectId, limit, minScore);
+                matchScores = matchScoreService.getRecommendations(projectId, limit, null);
             }
         }
 

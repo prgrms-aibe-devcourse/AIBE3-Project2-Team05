@@ -70,6 +70,11 @@ export default function ApplyPage() {
       return
     }
 
+    if (coverLetter.length < 5) {
+      alert('자기소개서는 최소 5자 이상 작성해주세요.')
+      return
+    }
+
     try {
       setIsSubmitting(true)
       await apiClient.post('/api/v1/submissions', {
@@ -130,15 +135,19 @@ export default function ApplyPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium mb-2">
-              지원 동기 및 자기소개 *
+              지원 동기 및 자기소개 * (최소 5자)
             </label>
             <textarea
               value={coverLetter}
               onChange={(e) => setCoverLetter(e.target.value)}
               className="w-full min-h-[200px] p-3 border rounded-md"
-              placeholder="프로젝트에 지원하는 이유와 자신의 경력, 강점을 소개해주세요."
+              placeholder="프로젝트에 지원하는 이유와 자신의 경력, 강점을 소개해주세요. (최소 5자)"
               required
+              minLength={5}
             />
+            <div className="text-xs text-muted-foreground mt-1">
+              {coverLetter.length}자 {coverLetter.length < 5 && `(최소 5자 필요)`}
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

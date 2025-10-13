@@ -1,29 +1,43 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/ui/button'
 import { FreelancerCard } from './_components/FreelancerCard'
+import { FreelancerProfileModal } from './_components/FreelancerProfileModal'
 import { apiClient } from '@/global/backend/client'
 import { useAuth } from '@/global/auth/hooks/useAuth'
-import type { RecommendationResponseDto } from '@/global/backend/apiV1/types'
+import type { RecommendationResponseDto, FreelancerRecommendationDto } from '@/global/backend/apiV1/types'
 
 export default function MatchingPage() {
   const params = useParams()
   const projectId = params.projectId as string
-  const { user } = useAuth()
+  const router = useRouter()
+  const { user, isLoading: authLoading } = useAuth()
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<RecommendationResponseDto | null>(null)
+  const [selectedFreelancer, setSelectedFreelancer] = useState<FreelancerRecommendationDto | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const isFreelancer = user?.role === 'FREELANCER'
   const isPm = user?.role !== 'FREELANCER' && user !== null // PM 또는 일반 사용자
 
+  // 로그인 체크
   useEffect(() => {
-    fetchRecommendations()
+    if (!authLoading && !user) {
+      alert('로그인이 필요한 서비스입니다.')
+      router.push('/login')
+    }
+  }, [authLoading, user, router])
+
+  useEffect(() => {
+    if (user) {
+      fetchRecommendations()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId])
+  }, [projectId, user])
 
   const fetchRecommendations = async () => {
     try {
@@ -84,17 +98,29 @@ export default function MatchingPage() {
     // window.location.href = '/freelancers'
   }
 
-  if (loading) {
+  const handleViewProfile = (freelancer: FreelancerRecommendationDto) => {
+    setSelectedFreelancer(freelancer)
+    setIsModalOpen(true)
+  }
+
+  if (authLoading || loading) {
     return (
       <div className="container mx-auto py-8 px-4">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-muted-foreground">추천 프리랜서를 찾고 있습니다...</p>
+            <p className="text-muted-foreground">
+              {authLoading ? '로그인 확인 중...' : '추천 프리랜서를 찾고 있습니다...'}
+            </p>
           </div>
         </div>
       </div>
     )
+  }
+
+  // 로그인되지 않은 경우 (리디렉션 전 화면)
+  if (!user) {
+    return null
   }
 
   if (error) {
@@ -191,10 +217,18 @@ export default function MatchingPage() {
             key={freelancer.freelancerId}
             freelancer={freelancer}
             onPropose={() => handlePropose(freelancer.freelancerId)}
+            onViewProfile={() => handleViewProfile(freelancer)}
             isPm={isPm}
           />
         ))}
       </div>
+
+      {/* Freelancer Profile Modal */}
+      <FreelancerProfileModal
+        freelancer={selectedFreelancer}
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+      />
     </div>
   )
 }

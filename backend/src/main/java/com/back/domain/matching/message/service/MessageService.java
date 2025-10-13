@@ -11,6 +11,8 @@ import com.back.domain.matching.projectSubmission.entity.ProjectSubmission;
 import com.back.domain.matching.projectSubmission.repository.ProjectSubmissionRepository;
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.repository.MemberRepository;
+import com.back.domain.notification.notification.entity.NotificationType;
+import com.back.domain.notification.notification.service.NotificationService;
 import com.back.domain.project.project.entity.Project;
 import com.back.domain.project.project.repository.ProjectRepository;
 import com.back.global.exception.ServiceException;
@@ -34,6 +36,7 @@ public class MessageService {
     private final ProjectRepository projectRepository;
     private final ProjectSubmissionRepository projectSubmissionRepository;
     private final ProposalRepository proposalRepository;
+    private final NotificationService notificationService;
 
     /**
      * 메시지 전송
@@ -76,7 +79,19 @@ public class MessageService {
                 content
         );
 
-        return messageRepository.save(message);
+        Message savedMessage = messageRepository.save(message);
+
+        // 수신자에게 알림 전송
+        notificationService.create(
+                receiver,
+                NotificationType.MESSAGE_RECEIVED,
+                "새 메시지가 도착했습니다",
+                String.format("%s님이 '%s' 프로젝트에 메시지를 보냈습니다.", sender.getNickname(), context.project.getTitle()),
+                "MESSAGE",
+                savedMessage.getId()
+        );
+
+        return savedMessage;
     }
 
     /**

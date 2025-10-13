@@ -6,6 +6,8 @@ import com.back.domain.matching.proposal.entity.Proposal;
 import com.back.domain.matching.proposal.entity.ProposalStatus;
 import com.back.domain.matching.proposal.repository.ProposalRepository;
 import com.back.domain.member.member.entity.Member;
+import com.back.domain.notification.notification.entity.NotificationType;
+import com.back.domain.notification.notification.service.NotificationService;
 import com.back.domain.project.project.entity.Project;
 import com.back.domain.project.project.repository.ProjectRepository;
 import com.back.global.exception.ServiceException;
@@ -26,6 +28,7 @@ public class ProposalService {
     private final ProposalRepository proposalRepository;
     private final ProjectRepository projectRepository;
     private final FreelancerRepository freelancerRepository;
+    private final NotificationService notificationService;
 
     /**
      * 프로젝트 제안 생성 (PM 전용)
@@ -70,7 +73,19 @@ public class ProposalService {
                 message
         );
 
-        return proposalRepository.save(proposal);
+        Proposal savedProposal = proposalRepository.save(proposal);
+
+        // 프리랜서에게 알림 전송
+        notificationService.create(
+                freelancer.getMember(),
+                NotificationType.PROPOSAL_RECEIVED,
+                "새 제안이 도착했습니다",
+                String.format("%s님이 '%s' 프로젝트에 대한 제안을 보냈습니다.", pm.getNickname(), project.getTitle()),
+                "PROPOSAL",
+                savedProposal.getId()
+        );
+
+        return savedProposal;
     }
 
     /**
@@ -155,6 +170,16 @@ public class ProposalService {
 
         // 수락 (PENDING 상태가 아니면 IllegalStateException 발생)
         proposal.accept(responseMessage);
+
+        // PM에게 알림 전송
+        notificationService.create(
+                proposal.getPm(),
+                NotificationType.PROPOSAL_ACCEPTED,
+                "제안이 수락되었습니다",
+                String.format("%s님이 '%s' 프로젝트 제안을 수락했습니다.", freelancer.getName(), proposal.getProject().getTitle()),
+                "PROPOSAL",
+                proposal.getId()
+        );
     }
 
     /**
@@ -179,6 +204,16 @@ public class ProposalService {
 
         // 거절 (PENDING 상태가 아니면 IllegalStateException 발생)
         proposal.reject(responseMessage, rejectionReason);
+
+        // PM에게 알림 전송
+        notificationService.create(
+                proposal.getPm(),
+                NotificationType.PROPOSAL_REJECTED,
+                "제안이 거절되었습니다",
+                String.format("%s님이 '%s' 프로젝트 제안을 거절했습니다.", freelancer.getName(), proposal.getProject().getTitle()),
+                "PROPOSAL",
+                proposal.getId()
+        );
     }
 
     /**

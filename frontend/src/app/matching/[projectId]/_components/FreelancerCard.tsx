@@ -6,20 +6,34 @@ import type { FreelancerRecommendationDto } from '@/global/backend/apiV1/types'
 interface FreelancerCardProps {
   freelancer: FreelancerRecommendationDto
   onPropose?: () => void
+  onViewProfile?: () => void
   isPm?: boolean
 }
 
-export function FreelancerCard({ freelancer, onPropose, isPm = false }: FreelancerCardProps) {
-  const getProficiencyColor = (proficiency: string) => {
-    switch (proficiency) {
-      case 'EXPERT':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-      case 'ADVANCED':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-      case 'INTERMEDIATE':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+const PROFICIENCY_CONFIG = {
+  EXPERT: {
+    label: '특급',
+    className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+  },
+  ADVANCED: {
+    label: '고급',
+    className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+  },
+  INTERMEDIATE: {
+    label: '중급',
+    className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+  },
+  BEGINNER: {
+    label: '초급',
+    className: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+  }
+} as const
+
+export function FreelancerCard({ freelancer, onPropose, onViewProfile, isPm = false }: FreelancerCardProps) {
+  const getProficiencyInfo = (proficiency: string) => {
+    return PROFICIENCY_CONFIG[proficiency as keyof typeof PROFICIENCY_CONFIG] || {
+      label: proficiency,
+      className: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
     }
   }
 
@@ -58,15 +72,18 @@ export function FreelancerCard({ freelancer, onPropose, isPm = false }: Freelanc
         <div>
           <h4 className="text-sm font-semibold mb-2">보유 기술</h4>
           <div className="flex flex-wrap gap-2">
-            {freelancer.skills.map((skill, index) => (
-              <Badge
-                key={index}
-                variant="secondary"
-                className={getProficiencyColor(skill.proficiency)}
-              >
-                {skill.techName} ({skill.proficiency})
-              </Badge>
-            ))}
+            {freelancer.skills.map((skill, index) => {
+              const info = getProficiencyInfo(skill.proficiency)
+              return (
+                <Badge
+                  key={index}
+                  variant="secondary"
+                  className={info.className}
+                >
+                  {skill.techName} ({info.label})
+                </Badge>
+              )
+            })}
           </div>
         </div>
 
@@ -113,7 +130,11 @@ export function FreelancerCard({ freelancer, onPropose, isPm = false }: Freelanc
               제안하기
             </Button>
           )}
-          <Button variant="outline" className={isPm ? "flex-1" : "w-full"}>
+          <Button
+            variant="outline"
+            className={isPm ? "flex-1" : "w-full"}
+            onClick={onViewProfile}
+          >
             프로필 보기
           </Button>
         </div>
