@@ -1,7 +1,10 @@
 "use client";
+import { useUser } from "@/app/context/UserContext";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 export default function MyPage() {
+  const { username, setUsername } = useUser(); // Context 상태 사용
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
@@ -12,12 +15,8 @@ export default function MyPage() {
       try {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/member/me`,
-          {
-            method: "GET",
-            credentials: "include",
-          }
+          { method: "GET", credentials: "include" }
         );
-
         const data = await res.json();
 
         if (!res.ok) {
@@ -27,6 +26,7 @@ export default function MyPage() {
 
         const member = data.Data;
         if (member) {
+          setUsername(member.username ?? ""); // Context 업데이트
           setNickname(member.nickname ?? "");
           setEmail(member.email ?? "");
         } else {
@@ -41,183 +41,205 @@ export default function MyPage() {
     };
 
     fetchMe();
-  }, []);
+  }, [setUsername]);
 
-  if (loading) return <p className="text-center mt-10">로딩 중...</p>;
+  if (loading)
+    return <p className="text-center mt-20 text-gray-600">로딩 중...</p>;
 
   return (
-    <main className="relative min-h-screen bg-[#FBF8F1] pt-8 pb-20 px-4">
-      <div className="max-w-[1200px] mx-auto">
+    <div
+      className="min-h-screen bg-[#f8f4eb] flex justify-center"
+      style={{
+        paddingTop: "68px",
+        paddingBottom: "180px",
+        paddingLeft: "1.5rem",
+        paddingRight: "1.5rem",
+      }}
+    >
+      <div className="w-full max-w-[1100px]">
         {/* 제목 */}
-        <h1 className="text-[30px] font-bold text-[#0f0a03] mb-2">
-          마이페이지
-        </h1>
-        <p className="text-base text-[#5A5549] mb-8">
-          프로필 정보와 활동 현황을 관리하세요
-        </p>
-
-        {/* 상단: 프로필 + 내 작업 바로가기 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* 프로필 카드 */}
-          <div className="bg-[#FDFCF8] border border-[#DDD7C9] rounded-2xl p-6 relative shadow-sm">
-            {msg && <p className="text-red-500 text-sm mb-4">{msg}</p>}
-
-            <div className="flex flex-col gap-5 mt-8">
-              {/* 닉네임 */}
-              <div className="flex flex-col">
-                <label className="text-sm font-medium text-[#0f0a03] mb-2">
-                  닉네임
-                </label>
-                <input
-                  type="text"
-                  value={nickname}
-                  readOnly
-                  className="h-11 rounded-lg border border-[#DDD7C9] bg-[#FDFCF8] px-4 text-[#0f0a03] cursor-not-allowed text-sm"
-                />
-              </div>
-
-              {/* 이메일 */}
-              <div className="flex flex-col">
-                <label className="text-sm font-medium text-[#0f0a03] mb-2">
-                  이메일
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  readOnly
-                  className="h-11 rounded-lg border border-[#DDD7C9] bg-[#FDFCF8] px-4 text-[#0f0a03] cursor-not-allowed text-sm"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 내 작업 바로가기 */}
-          <div className="bg-[#FDFCF8] border border-[#DDD7C9] rounded-2xl p-6 shadow-sm">
-            <h2 className="font-bold text-[#0f0a03] text-xl mb-2">
-              내 작업 바로가기
-            </h2>
-            <p className="text-[#5A5549] text-sm mb-6">
-              주요 활동과 자료를 한눈에 확인하세요
-            </p>
-
-            <div className="flex flex-col gap-3">
-              <div className="bg-[#2b7fff] text-white rounded-xl p-4 cursor-pointer hover:bg-[#1a5fd1] transition-colors">
-                <span className="font-medium">내 프로젝트</span>
-              </div>
-              <div className="bg-[#F5EEE0] text-[#0f0a03] rounded-xl p-4 cursor-pointer hover:bg-[#E8E1D3] transition-colors">
-                <span className="font-medium">포트폴리오</span>
-              </div>
-            </div>
-          </div>
+        <div style={{ marginBottom: "2.5rem" }}>
+          <h1
+            className="text-[26px] font-extrabold text-[#1E1B16]"
+            style={{ marginBottom: "0.25rem" }}
+          >
+            마이페이지
+          </h1>
+          <p className="text-[#6A6558] text-[15px] font-[400]">
+            프로필 정보와 활동 현황을 관리하세요
+          </p>
         </div>
 
-        {/* 하단: 프로젝트 목록 */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-bold text-[#0f0a03] mb-4">내 프로젝트</h3>
+        {msg && (
+          <p className="text-red-500 text-sm" style={{ marginBottom: "1rem" }}>
+            {msg}
+          </p>
+        )}
 
-          {/* 프로젝트 카드 1 */}
-          <div className="bg-[#FDFCF8] border border-[#DDD7C9] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[#2b7fff] flex items-center justify-center flex-shrink-0">
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 5V19M5 12H19"
-                    stroke="white"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+        {/* 카드 레이아웃 */}
+        <div className="flex items-stretch" style={{ gap: "1.5rem" }}>
+          {/* 왼쪽 카드 */}
+          <div
+            className="flex-[1.2] bg-[#FFFFFF] border border-[#E8E3D9] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex flex-col justify-start"
+            style={{ padding: "3.5rem", minHeight: "520px" }}
+          >
+            <div>
+              <div
+                className="flex items-center gap-2"
+                style={{ marginBottom: "1rem" }}
+              >
+                <Image
+                  src="/id.png"
+                  alt="id icon"
+                  width={20}
+                  height={20}
+                  className="object-contain"
+                />
+                <h2 className="text-[15px] font-bold text-[#1E1B16]">
+                  기본 정보
+                </h2>
               </div>
-              <div className="flex-1">
-                <h4 className="font-bold text-[#0f0a03] text-base mb-1">
-                  이메일 인증 화면 개발
-                </h4>
-                <p className="text-[#5A5549] text-sm mb-3">
-                  프로젝트 설명과 진행 현황을 관리하세요
-                </p>
-                <div className="flex items-center gap-2 text-xs text-[#5A5549]">
-                  <span>진행중</span>
-                  <span>•</span>
-                  <span>2024.10.09 ~ 2024.12.31</span>
+              <p
+                className="text-[#6A6558] text-[13px]"
+                style={{ marginBottom: "2rem" }}
+              >
+                개인 정보를 관리하고 업데이트하세요
+              </p>
+
+              <div
+                className="border-b border-[#E8E3D9]"
+                style={{ paddingBottom: "1.25rem", marginBottom: "2.5rem" }}
+              >
+                <span className="text-[17px] font-bold text-[#1E1B16]">
+                  {username}
+                </span>
+              </div>
+
+              <div
+                className="grid grid-cols-2"
+                style={{
+                  columnGap: "2rem",
+                  rowGap: "2.5rem",
+                  marginTop: "1.5rem",
+                }}
+              >
+                <div>
+                  <label
+                    className="text-[13px] text-[#1E1B16] font-medium block"
+                    style={{ marginBottom: "0.75rem" }}
+                  >
+                    이름
+                  </label>
+                  <input
+                    type="text"
+                    value={nickname}
+                    readOnly
+                    className="w-full h-[46px] rounded-md border border-[#E8E3D9] bg-[#FAF9F6] px-3 text-sm text-[#1E1B16] focus:outline-none cursor-not-allowed"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    className="text-[13px] text-[#1E1B16] font-medium block"
+                    style={{ marginBottom: "0.75rem" }}
+                  >
+                    이메일
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    readOnly
+                    className="w-full h-[46px] rounded-md border border-[#E8E3D9] bg-[#FAF9F6] px-3 text-sm text-[#1E1B16] focus:outline-none cursor-not-allowed"
+                  />
                 </div>
               </div>
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M9 18L15 12L9 6"
-                  stroke="#5A5549"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
             </div>
           </div>
 
-          {/* 프로젝트 카드 2 */}
-          <div className="bg-[#FDFCF8] border border-[#DDD7C9] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer opacity-50">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[#00C950] flex items-center justify-center flex-shrink-0">
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+          {/* 오른쪽 카드 */}
+          <div
+            className="flex-[0.8] bg-[#FFFFFF] border border-[#E8E3D9] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex flex-col justify-start"
+            style={{ padding: "3.5rem", minHeight: "520px" }}
+          >
+            <div>
+              <h2
+                className="text-[15px] font-bold text-[#1E1B16]"
+                style={{ marginBottom: "0.75rem" }}
+              >
+                내 작업 바로가기
+              </h2>
+              <p
+                className="text-[#6A6558] text-[13px]"
+                style={{ marginBottom: "2.5rem" }}
+              >
+                주요 활동과 자료를 한눈에 확인하세요
+              </p>
+
+              <div className="flex flex-col" style={{ gap: "1.5rem" }}>
+                {/* 내 프로젝트 */}
+                <div
+                  className="flex items-start gap-4 border border-[#E8E3D9] rounded-[10px] hover:bg-[#FBFAF7] transition cursor-pointer"
+                  style={{ padding: "1.5rem" }}
                 >
-                  <path
-                    d="M9 11L12 14L22 4M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16"
-                    stroke="white"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h4 className="font-bold text-[#0f0a03] text-base mb-1">
-                  회원가입 화면 완료
-                </h4>
-                <p className="text-[#5A5549] text-sm mb-3">
-                  프로젝트 설명과 진행 현황을 관리하세요
-                </p>
-                <div className="flex items-center gap-2 text-xs text-[#5A5549]">
-                  <span>완료</span>
-                  <span>•</span>
-                  <span>2024.09.01 ~ 2024.09.30</span>
+                  <div
+                    className="w-10 h-10 bg-[#2B7FFF] rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ marginTop: "8px", marginRight: "0.5rem" }}
+                  >
+                    <Image
+                      src="/project.png"
+                      alt="project icon"
+                      width={25}
+                      height={25}
+                    />
+                  </div>
+                  <div className="flex flex-col flex-1">
+                    <h3
+                      className="text-[#1E1B16] font-semibold text-[13px]"
+                      style={{ marginBottom: "0.5rem" }}
+                    >
+                      내 프로젝트
+                    </h3>
+                    <p className="text-[#6A6558] text-[12px] leading-snug">
+                      진행 중인 프로젝트와 완료된 프로젝트를 확인하세요
+                    </p>
+                  </div>
+                  <span className="text-[#8B8577] text-lg">→</span>
+                </div>
+
+                {/* 포트폴리오 */}
+                <div
+                  className="flex items-start gap-4 border border-[#E8E3D9] rounded-[10px] hover:bg-[#FBFAF7] transition cursor-pointer"
+                  style={{ padding: "1.5rem" }}
+                >
+                  <div
+                    className="w-10 h-10 bg-[#00C950] rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ marginTop: "8px", marginRight: "0.5rem" }}
+                  >
+                    <Image
+                      src="/portfolio.png"
+                      alt="portfolio icon"
+                      width={25}
+                      height={25}
+                    />
+                  </div>
+                  <div className="flex flex-col flex-1">
+                    <h3
+                      className="text-[#1E1B16] font-semibold text-[13px]"
+                      style={{ marginBottom: "0.5rem" }}
+                    >
+                      포트폴리오
+                    </h3>
+                    <p className="text-[#6A6558] text-[12px] leading-snug">
+                      나의 작업물과 경력을 관리하고 업데이트하세요
+                    </p>
+                  </div>
+                  <span className="text-[#8B8577] text-lg">→</span>
                 </div>
               </div>
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M9 18L15 12L9 6"
-                  stroke="#5A5549"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
             </div>
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

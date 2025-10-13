@@ -141,7 +141,7 @@ export default function LoginPage() {
                   }}
                 />
               </div>
-              <p className="text-[14px] font-[300] leading-[20px]  text-right text-[#5A5549]">
+              <p className="text-[14px] font-[300] leading-[20px] text-right text-[#5A5549]">
                 <span
                   className="cursor-pointer hover:underline font-normal text-[#006A20]"
                   onClick={() => router.push("/members/findid")}

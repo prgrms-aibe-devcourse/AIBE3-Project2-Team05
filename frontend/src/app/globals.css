@@ -56,27 +56,26 @@
   --sidebar-ring: #006a20;
 }
 
-/* 글로벌 기본 스타일 */
+/* ✅ 글로벌 기본 스타일 */
+html,
 body {
-  background: var(--background);
+  font-family: "Lato", sans-serif;
   color: var(--foreground);
-  font-family: "Lato", sans-serif; /* <- 전역 폰트 통일 */
+  background-color: var(--background);
   margin: 0;
   padding: 0;
 }
 
-.card {
-  background: var(--card);
-  color: var(--card-foreground);
-}
-
+/* 카드나 팝오버는 진짜 흰색으로 고정 */
+.card,
 .popover {
-  background: var(--popover);
+  background-color: #ffffff;
   color: var(--popover-foreground);
 }
 
+/* 버튼 */
 .btn-primary {
-  background: var(--primary);
+  background-color: var(--primary);
   color: var(--primary-foreground);
   cursor: pointer;
 }
@@ -96,6 +95,7 @@ body {
   color: var(--destructive-foreground);
 }
 
+/* 입력창 */
 .input {
   background: var(--input);
   border: 1px solid var(--border);
@@ -107,6 +107,7 @@ body {
   box-shadow: 0 0 0 2px var(--ring);
 }
 
+/* 사이드바 */
 .sidebar {
   background: var(--sidebar);
   color: var(--sidebar-foreground);
@@ -123,7 +124,7 @@ body {
   color: var(--sidebar-accent-foreground);
 }
 
-/* 차트 색상 예시 */
+/* 차트 색상 */
 .chart-1 {
   color: var(--chart-1);
 }
