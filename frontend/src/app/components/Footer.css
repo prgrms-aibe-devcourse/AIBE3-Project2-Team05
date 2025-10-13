@@ -1,0 +1,40 @@
+.footer-container {
+  width: 100%;
+  padding: 20px 0;
+  background: #555555;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.footer-logo {
+  width: 137px;
+  height: auto;
+  margin: 0 auto 10px auto; /* 중앙 정렬 */
+}
+
+.footer-line-1,
+.footer-line-2,
+.footer-line-3 {
+  display: flex;
+  justify-content: center; /* 중앙 정렬 */
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 5px 0;
+}
+
+.customer-service,
+.service-hours,
+.service-holiday,
+.email,
+.company-name,
+.production,
+.address,
+.notice-text,
+.separator {
+  color: #f8f4eb;
+  font-family: "Lato", sans-serif;
+  font-size: 14px;
+}
+.footer-line-3 .notice-text {
+  color: #aaaaaa;
+}
