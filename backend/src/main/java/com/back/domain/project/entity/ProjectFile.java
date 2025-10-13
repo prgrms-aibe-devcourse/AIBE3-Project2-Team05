@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ProjectFile {
 
     @Id
@@ -39,6 +38,18 @@ public class ProjectFile {
 
     @Column(name = "upload_date", nullable = false)
     private LocalDateTime uploadDate;
+
+    // 기본 생성자
+    public ProjectFile(Project project, String originalName, String storedName,
+                      String filePath, Long fileSize, String fileType) {
+        this.project = project;
+        this.originalName = originalName;
+        this.storedName = storedName;
+        this.filePath = filePath;
+        this.fileSize = fileSize;
+        this.fileType = fileType;
+        this.uploadDate = LocalDateTime.now();
+    }
 
     @PrePersist
     protected void onCreate() {

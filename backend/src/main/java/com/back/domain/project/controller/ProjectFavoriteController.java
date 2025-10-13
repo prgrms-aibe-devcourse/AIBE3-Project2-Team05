@@ -26,9 +26,9 @@ public class ProjectFavoriteController {
     @PostMapping("/{projectId}/toggle")
     public ResponseEntity<RsData<Map<String, Object>>> toggleFavorite(
             @PathVariable Long projectId,
-            @RequestParam Long userId) {
+            @RequestParam Long memberId) {
         try {
-            boolean isAdded = projectFavoriteService.toggleFavorite(userId, projectId);
+            boolean isAdded = projectFavoriteService.toggleFavorite(memberId, projectId);
             long favoriteCount = projectFavoriteService.getFavoriteCount(projectId);
 
             Map<String, Object> result = new HashMap<>();
@@ -38,7 +38,7 @@ public class ProjectFavoriteController {
 
             return ResponseEntity.ok(new RsData<>("200-1", "성공", result));
         } catch (Exception e) {
-            log.error("즐겨찾기 토글 실패: projectId={}, userId={}", projectId, userId, e);
+            log.error("즐겨찾기 토글 실패: projectId={}, memberId={}", projectId, memberId, e);
             return ResponseEntity.badRequest()
                     .body(new RsData<>("400-1", "즐겨찾기 처리 중 오류가 발생했습니다: " + e.getMessage()));
         }
@@ -50,9 +50,9 @@ public class ProjectFavoriteController {
     @GetMapping("/{projectId}/status")
     public ResponseEntity<RsData<Map<String, Object>>> getFavoriteStatus(
             @PathVariable Long projectId,
-            @RequestParam Long userId) {
+            @RequestParam Long memberId) {
         try {
-            boolean isFavorite = projectFavoriteService.isFavorite(userId, projectId);
+            boolean isFavorite = projectFavoriteService.isFavorite(memberId, projectId);
             long favoriteCount = projectFavoriteService.getFavoriteCount(projectId);
 
             Map<String, Object> result = new HashMap<>();
@@ -61,7 +61,7 @@ public class ProjectFavoriteController {
 
             return ResponseEntity.ok(new RsData<>("200-1", "성공", result));
         } catch (Exception e) {
-            log.error("즐겨찾기 상태 조회 실패: projectId={}, userId={}", projectId, userId, e);
+            log.error("즐겨찾기 상태 조회 실패: projectId={}, memberId={}", projectId, memberId, e);
             return ResponseEntity.badRequest()
                     .body(new RsData<>("400-1", "즐겨찾기 상태 조회 중 오류가 발생했습니다: " + e.getMessage()));
         }
@@ -70,14 +70,14 @@ public class ProjectFavoriteController {
     /**
      * 사용자의 즐겨찾기 프로젝트 ID 목록 조회
      */
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<RsData<List<Long>>> getUserFavoriteProjectIds(
-            @PathVariable Long userId) {
+    @GetMapping("/member/{memberId}")
+    public ResponseEntity<RsData<List<Long>>> getMemberFavoriteProjectIds(
+            @PathVariable Long memberId) {
         try {
-            List<Long> favoriteProjectIds = projectFavoriteService.getFavoriteProjectIds(userId);
+            List<Long> favoriteProjectIds = projectFavoriteService.getFavoriteProjectIds(memberId);
             return ResponseEntity.ok(new RsData<>("200-1", "성공", favoriteProjectIds));
         } catch (Exception e) {
-            log.error("사용자 즐겨찾기 목록 조회 실패: userId={}", userId, e);
+            log.error("사용자 즐겨찾기 목록 조회 실패: memberId={}", memberId, e);
             return ResponseEntity.badRequest()
                     .body(new RsData<>("400-1", "즐겨찾기 목록 조회 중 오류가 발생했습니다: " + e.getMessage()));
         }

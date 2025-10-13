@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ProjectTech {
 
     @Id
@@ -32,6 +31,14 @@ public class ProjectTech {
 
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createDate;
+
+    // 기본 생성자
+    public ProjectTech(Project project, TechCategory techCategory, String techName) {
+        this.project = project;
+        this.techCategory = techCategory;
+        this.techName = techName;
+        this.createDate = LocalDateTime.now();
+    }
 
     @PrePersist
     protected void onCreate() {

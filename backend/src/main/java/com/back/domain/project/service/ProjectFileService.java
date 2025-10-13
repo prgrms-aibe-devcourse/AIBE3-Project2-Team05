@@ -131,15 +131,14 @@ public class ProjectFileService {
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
             // 파일 정보 저장
-            ProjectFile projectFile = ProjectFile.builder()
-                    .project(project)  // Project 엔티티 설정
-                    .originalName(file.getOriginalFilename())
-                    .storedName(storedFileName)
-                    .filePath(filePath.toString())
-                    .fileSize(file.getSize())
-                    .fileType(getFileExtension(file.getOriginalFilename()))
-                    .uploadDate(LocalDateTime.now())
-                    .build();
+            ProjectFile projectFile = new ProjectFile(
+                    project,
+                    file.getOriginalFilename(),
+                    storedFileName,
+                    filePath.toString(),
+                    file.getSize(),
+                    getFileExtension(file.getOriginalFilename())
+            );
 
             ProjectFile savedFile = projectFileRepository.save(projectFile);
             log.info("파일 업로드 완료 - projectId: {}, fileId: {}, fileName: {}",

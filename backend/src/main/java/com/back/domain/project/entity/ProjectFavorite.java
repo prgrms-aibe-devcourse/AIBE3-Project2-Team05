@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ProjectFavorite {
 
     @Id
@@ -20,8 +19,8 @@ public class ProjectFavorite {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private Member user;
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
@@ -29,6 +28,13 @@ public class ProjectFavorite {
 
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createDate;
+
+    // 기본 생성자
+    public ProjectFavorite(Member member, Project project) {
+        this.member = member;
+        this.project = project;
+        this.createDate = LocalDateTime.now();
+    }
 
     @PrePersist
     protected void onCreate() {

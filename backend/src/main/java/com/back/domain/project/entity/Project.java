@@ -15,7 +15,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Project {
 
     @Id
@@ -63,15 +62,12 @@ public class Project {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    @Builder.Default
     private ProjectStatus status = ProjectStatus.RECRUITING;
 
     @Column(name = "view_count", nullable = false)
-    @Builder.Default
     private Integer viewCount = 0;
 
     @Column(name = "applicant_count", nullable = false)
-    @Builder.Default
     private Integer applicantCount = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -114,6 +110,24 @@ public class Project {
     @PreUpdate
     protected void onUpdate() {
         modifyDate = LocalDateTime.now();
+    }
+
+    // 기본 생성자를 위한 추가 생성자
+    public Project(String title, String description, ProjectField projectField,
+                   RecruitmentType recruitmentType, BudgetRange budgetType,
+                   LocalDate startDate, LocalDate endDate, Member manager) {
+        this.title = title;
+        this.description = description;
+        this.projectField = projectField;
+        this.recruitmentType = recruitmentType;
+        this.budgetType = budgetType;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.manager = manager;
+        this.status = ProjectStatus.RECRUITING;
+        this.viewCount = 0;
+        this.applicantCount = 0;
+        this.createDate = LocalDateTime.now();
     }
 
     // 검증 제약조건

@@ -28,9 +28,9 @@ public class ProjectFavoriteService {
      * 즐겨찾기 추가/제거 토글
      */
     @Transactional
-    public boolean toggleFavorite(Long userId, Long projectId) {
+    public boolean toggleFavorite(Long memberId, Long projectId) {
         // Member 및 프로젝트 존재 확인
-        Member user = memberRepository.findById(userId)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         if (!projectRepository.existsById(projectId)) {
@@ -38,22 +38,21 @@ public class ProjectFavoriteService {
         }
 
         Optional<ProjectFavorite> existingFavorite =
-            projectFavoriteRepository.findByUser_IdAndProject_Id(userId, projectId);
+            projectFavoriteRepository.findByMember_IdAndProject_Id(memberId, projectId);
 
         if (existingFavorite.isPresent()) {
             // 이미 즐겨찾기가 되어있으면 제거
             projectFavoriteRepository.delete(existingFavorite.get());
-            log.info("즐겨찾기 제거: userId={}, projectId={}", userId, projectId);
+            log.info("즐겨찾기 제거: memberId={}, projectId={}", memberId, projectId);
             return false; // 제거됨
         } else {
             // 즐겨찾기 추가 - Member와 Project 엔티티 관계 설정
-            ProjectFavorite favorite = ProjectFavorite.builder()
-                    .user(user)
-                    .project(projectRepository.findById(projectId).orElseThrow())
-                    .createDate(LocalDateTime.now())
-                    .build();
+            ProjectFavorite favorite = new ProjectFavorite(
+                    member,
+                    projectRepository.findById(projectId).orElseThrow()
+            );
             projectFavoriteRepository.save(favorite);
-            log.info("즐겨찾기 추가: userId={}, projectId={}", userId, projectId);
+            log.info("즐겨찾기 추가: memberId={}, projectId={}", memberId, projectId);
             return true; // 추가됨
         }
     }
@@ -61,15 +60,15 @@ public class ProjectFavoriteService {
     /**
      * 즐겨찾기 상태 확인
      */
-    public boolean isFavorite(Long userId, Long projectId) {
-        return projectFavoriteRepository.findByUser_IdAndProject_Id(userId, projectId).isPresent();
+    public boolean isFavorite(Long memberId, Long projectId) {
+        return projectFavoriteRepository.findByMember_IdAndProject_Id(memberId, projectId).isPresent();
     }
 
     /**
      * 사용자의 즐겨찾기 프로젝트 ID 목록 조회
      */
-    public List<Long> getFavoriteProjectIds(Long userId) {
-        return projectFavoriteRepository.findProjectIdsByUserId(userId);
+    public List<Long> getFavoriteProjectIds(Long memberId) {
+        return projectFavoriteRepository.findProjectIdsByMemberId(memberId);
     }
 
     /**
@@ -82,7 +81,7 @@ public class ProjectFavoriteService {
     /**
      * 사용자의 즐겨찾기 목록 조회
      */
-    public List<ProjectFavorite> getUserFavorites(Long userId) {
-        return projectFavoriteRepository.findByUser_IdOrderByCreateDateDesc(userId);
+    public List<ProjectFavorite> getMemberFavorites(Long memberId) {
+        return projectFavoriteRepository.findByMember_IdOrderByCreateDateDesc(memberId);
     }
 }

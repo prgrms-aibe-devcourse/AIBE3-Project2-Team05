@@ -19,23 +19,25 @@ public final class EntityDtoMapper {
      * ProjectRequest → Project 엔티티 변환 (기본 생성용)
      */
     public static Project toEntity(ProjectRequest request) {
-        return Project.builder()
-                .title(request.title())
-                .description(request.description())
-                .projectField(request.projectField())
-                .recruitmentType(request.recruitmentType())
-                .budgetType(request.budgetType())
-                .startDate(request.startDate())
-                .endDate(request.endDate())
-                // managerId는 서비스에서 Member 객체로 설정
-                .partnerType(request.partnerType())
-                .budgetAmount(request.budgetAmount())
-                .progressStatus(request.progressStatus())
-                .companyLocation(request.companyLocation())
-                .partnerEtcDescription(request.partnerEtcDescription())
-                .viewCount(0)
-                .createDate(LocalDateTime.now())
-                .build();
+        Project project = new Project(
+                request.title(),
+                request.description(),
+                request.projectField(),
+                request.recruitmentType(),
+                request.budgetType(),
+                request.startDate(),
+                request.endDate(),
+                null // manager는 서비스에서 설정
+        );
+
+        // 추가 필드들 설정
+        project.setPartnerType(request.partnerType());
+        project.setBudgetAmount(request.budgetAmount());
+        project.setProgressStatus(request.progressStatus());
+        project.setCompanyLocation(request.companyLocation());
+        project.setPartnerEtcDescription(request.partnerEtcDescription());
+
+        return project;
     }
 
     /**

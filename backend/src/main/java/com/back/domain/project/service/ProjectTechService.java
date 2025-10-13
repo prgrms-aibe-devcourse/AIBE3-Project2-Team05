@@ -62,12 +62,7 @@ public class ProjectTechService {
                     TechCategory category = TechCategoryMapper.getCategoryByTechName(techName);
                     log.debug("기술스택 매핑 - techName: {}, category: {}", techName, category);
 
-                    return ProjectTech.builder()
-                            .project(project)  // Project 엔티티 설정
-                            .techName(techName)
-                            .techCategory(category) // 카테고리 자동 설정
-                            .createDate(LocalDateTime.now())
-                            .build();
+                    return new ProjectTech(project, category, techName);
                 })
                 .collect(Collectors.toList());
 
@@ -122,12 +117,7 @@ public class ProjectTechService {
         TechCategory category = TechCategoryMapper.getCategoryByTechName(techName);
         log.debug("기술스택 매핑 - techName: {}, category: {}", techName, category);
 
-        ProjectTech projectTech = ProjectTech.builder()
-                .project(project)  // Project 엔티티 설정
-                .techName(techName)
-                .techCategory(category) // 카테고리 자동 설정
-                .createDate(LocalDateTime.now())
-                .build();
+        ProjectTech projectTech = new ProjectTech(project, category, techName);
 
         projectTechRepository.save(projectTech);
     }
