@@ -33,6 +33,16 @@ public class TestAuthenticationFilter extends OncePerRequestFilter {
 
         String testMemberId = request.getHeader("X-Test-Member-Id");
 
+        // 헤더에 없으면 쿠키에서 찾기
+        if (testMemberId == null && request.getCookies() != null) {
+            for (var cookie : request.getCookies()) {
+                if ("X-Test-Member-Id".equals(cookie.getName())) {
+                    testMemberId = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
         if (testMemberId != null) {
             try {
                 Long memberId = Long.parseLong(testMemberId);

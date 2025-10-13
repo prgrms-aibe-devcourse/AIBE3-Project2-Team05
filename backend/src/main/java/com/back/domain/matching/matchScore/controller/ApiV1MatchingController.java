@@ -1,5 +1,6 @@
 package com.back.domain.matching.matchScore.controller;
 
+import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
 import com.back.domain.freelancer.freelancerTech.entity.FreelancerTech;
 import com.back.domain.freelancer.freelancerTech.repository.FreelancerTechRepository;
 import com.back.domain.freelancer.portfolio.repository.PortfolioRepository;
@@ -29,6 +30,7 @@ public class ApiV1MatchingController {
 
     private final MatchScoreService matchScoreService;
     private final ProjectRepository projectRepository;
+    private final FreelancerRepository freelancerRepository;
     private final FreelancerTechRepository freelancerTechRepository;
     private final PortfolioRepository portfolioRepository;
 
@@ -41,11 +43,11 @@ public class ApiV1MatchingController {
      * - 경력: 30점 (총 경력 연수, 완료 프로젝트 수, 평균 평점)
      * - 단가: 20점 (프로젝트 예산과 희망 단가 일치도)
      *
-     * @param user      현재 로그인한 사용자 (PM)
+     * @param user      현재 로그인한 사용자
      * @param projectId 프로젝트 ID
-     * @param limit     추천 결과 개수 (기본값: 10)
+     * @param limit     추천 결과 개수 (기본값: 10, PM만 해당)
      * @param minScore  최소 매칭 점수 (기본값: 60)
-     * @return 추천 프리랜서 목록
+     * @return 추천 프리랜서 목록 (프리랜서는 본인 매칭 정보만 조회)
      */
     @GetMapping("/recommend/{projectId}")
     public RsData<RecommendationResponseDto> getRecommendations(
@@ -57,14 +59,6 @@ public class ApiV1MatchingController {
         // 프로젝트 조회
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프로젝트입니다."));
-
-        // 프로젝트 소유자 확인 (PM만 추천 조회 가능)
-        if (user == null) {
-            throw new ServiceException("401-1", "로그인이 필요합니다.");
-        }
-        if (!project.isOwner(user.getMember())) {
-            throw new ServiceException("403-1", "프로젝트 소유자만 추천을 조회할 수 있습니다.");
-        }
 
         // 매칭 점수 조회 (없으면 계산)
         List<MatchScore> matchScores = matchScoreService.getRecommendations(projectId, limit, minScore);
@@ -78,6 +72,23 @@ public class ApiV1MatchingController {
             }
 
             matchScores = matchScoreService.getRecommendations(projectId, limit, minScore);
+        }
+
+        // 프리랜서인 경우: 본인의 매칭 정보만 필터링
+        if (user != null) {
+            var freelancerOpt = freelancerRepository.findByMember(user.getMember());
+
+            if (freelancerOpt.isPresent()) {
+                // 프리랜서로 로그인한 경우, 본인의 매칭 점수만 반환
+                Long currentFreelancerId = freelancerOpt.get().getId();
+                matchScores = matchScores.stream()
+                        .filter(score -> score.getFreelancer().getId().equals(currentFreelancerId))
+                        .collect(Collectors.toList());
+
+                if (matchScores.isEmpty()) {
+                    throw new ServiceException("404-1", "이 프로젝트에 대한 매칭 점수가 없습니다.");
+                }
+            }
         }
 
         // DTO 변환
@@ -110,9 +121,10 @@ public class ApiV1MatchingController {
 
     /**
      * 매칭 점수 재계산
-     * 프로젝트의 매칭 점수를 다시 계산합니다.
+     * PM: 프로젝트의 전체 매칭 점수 재계산
+     * 프리랜서: 본인의 매칭 점수만 재계산
      *
-     * @param user      현재 로그인한 사용자 (PM)
+     * @param user      현재 로그인한 사용자
      * @param projectId 프로젝트 ID
      * @return 재계산 성공 메시지
      */
@@ -125,20 +137,31 @@ public class ApiV1MatchingController {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프로젝트입니다."));
 
-        // 프로젝트 소유자 확인
         if (user == null) {
             throw new ServiceException("401-1", "로그인이 필요합니다.");
         }
-        if (!project.isOwner(user.getMember())) {
-            throw new ServiceException("403-1", "프로젝트 소유자만 재계산을 요청할 수 있습니다.");
+
+        // PM인 경우: 전체 재계산
+        if (project.isOwner(user.getMember())) {
+            int calculatedCount = matchScoreService.calculateAndSaveRecommendations(projectId);
+            return new RsData<>(
+                    "200-1",
+                    String.format("매칭 점수가 재계산되었습니다. (추천 프리랜서: %d명)", calculatedCount)
+            );
         }
 
-        // 매칭 점수 재계산
-        int calculatedCount = matchScoreService.calculateAndSaveRecommendations(projectId);
+        // 프리랜서인 경우: 본인 것만 재계산
+        var freelancerOpt = freelancerRepository.findByMember(user.getMember());
+
+        if (freelancerOpt.isEmpty()) {
+            throw new ServiceException("403-1", "프로젝트 소유자 또는 프리랜서만 재계산을 요청할 수 있습니다.");
+        }
+
+        matchScoreService.calculateAndSaveForFreelancer(projectId, freelancerOpt.get().getId());
 
         return new RsData<>(
                 "200-1",
-                String.format("매칭 점수가 재계산되었습니다. (추천 프리랜서: %d명)", calculatedCount)
+                "내 매칭 점수가 업데이트되었습니다."
         );
     }
 }

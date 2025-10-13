@@ -21,4 +21,14 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
      * 특정 상태의 프로젝트 조회
      */
     List<Project> findByStatusOrderByCreateDateDesc(String status);
+
+    /**
+     * Member가 PM인지 확인
+     */
+    boolean existsByPm(Member pm);
+
+    /**
+     * 전체 프로젝트 목록 조회 (최신순)
+     */
+    List<Project> findAllByOrderByCreateDateDesc();
 }

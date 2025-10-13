@@ -288,6 +288,61 @@ public class MatchScoreService {
     }
 
     /**
+     * 특정 프리랜서의 매칭 점수만 재계산
+     * 프리랜서가 자신의 정보를 업데이트했을 때 사용
+     *
+     * @param projectId    프로젝트 ID
+     * @param freelancerId 프리랜서 ID
+     */
+    @Transactional
+    public void calculateAndSaveForFreelancer(Long projectId, Long freelancerId) {
+        // 프로젝트 조회
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프로젝트입니다."));
+
+        // 프리랜서 조회
+        Freelancer freelancer = freelancerRepository.findById(freelancerId)
+                .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프리랜서입니다."));
+
+        // 프로젝트 요구 기술 조회
+        List<String> requiredTechNames = projectTechRepository.findTechNamesByProjectId(projectId);
+
+        if (requiredTechNames.isEmpty()) {
+            throw new ServiceException("400-1", "프로젝트에 요구 기술이 설정되지 않았습니다.");
+        }
+
+        // 기존 매칭 점수 삭제
+        matchScoreRepository.deleteByProjectAndFreelancer(project, freelancer);
+
+        // 매칭 점수 재계산
+        MatchScoreData scoreData = calculateMatchScore(project, freelancer, requiredTechNames);
+
+        // 전체 매칭 점수 조회하여 순위 계산
+        List<MatchScore> allScores = matchScoreRepository.findByProjectOrderByScoreTotalDesc(project);
+        int rank = 1;
+        for (MatchScore score : allScores) {
+            if (scoreData.getTotalScore().compareTo(score.getScoreTotal()) > 0) {
+                break;
+            }
+            rank++;
+        }
+
+        // 새로운 매칭 점수 저장
+        MatchScore matchScore = new MatchScore(
+                project,
+                freelancer,
+                scoreData.getTotalScore(),
+                scoreData.getSkillScore(),
+                scoreData.getExperienceScore(),
+                scoreData.getBudgetScore(),
+                rank,
+                scoreData.getReasonsJson(),
+                LocalDateTime.now()
+        );
+        matchScoreRepository.save(matchScore);
+    }
+
+    /**
      * 프로젝트의 추천 프리랜서 조회
      *
      * @param projectId 프로젝트 ID

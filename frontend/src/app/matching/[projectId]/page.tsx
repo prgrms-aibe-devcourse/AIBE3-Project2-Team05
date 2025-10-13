@@ -5,15 +5,19 @@ import { useParams } from 'next/navigation'
 import { Button } from '@/ui/button'
 import { FreelancerCard } from './_components/FreelancerCard'
 import { apiClient } from '@/global/backend/client'
+import { useAuth } from '@/global/auth/hooks/useAuth'
 import type { RecommendationResponseDto } from '@/global/backend/apiV1/types'
 
 export default function MatchingPage() {
   const params = useParams()
   const projectId = params.projectId as string
+  const { user } = useAuth()
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<RecommendationResponseDto | null>(null)
+
+  const isFreelancer = user?.role === 'FREELANCER'
 
   useEffect(() => {
     fetchRecommendations()
@@ -40,8 +44,11 @@ export default function MatchingPage() {
   const handleRecalculate = async () => {
     try {
       setLoading(true)
-      await apiClient.post(`/api/v1/matching/recommend/${projectId}/recalculate`)
+      const response = await apiClient.post(`/api/v1/matching/recommend/${projectId}/recalculate`)
       await fetchRecommendations()
+
+      // 성공 메시지 표시
+      alert(response.msg || (isFreelancer ? '내 매칭 점수가 업데이트되었습니다!' : '매칭 점수가 재계산되었습니다.'))
     } catch (err) {
       setError(err instanceof Error ? err.message : '재계산에 실패했습니다.')
     } finally {
@@ -111,11 +118,13 @@ export default function MatchingPage() {
           <div>
             <h1 className="text-3xl font-bold mb-2">{data.projectTitle}</h1>
             <p className="text-muted-foreground">
-              총 {data.recommendations.length}명의 프리랜서를 추천합니다
+              {isFreelancer
+                ? '이 프로젝트와의 매칭 점수입니다'
+                : `총 ${data.recommendations.length}명의 프리랜서를 추천합니다`}
             </p>
           </div>
           <Button onClick={handleRecalculate} variant="outline">
-            재계산하기
+            {isFreelancer ? '내 점수 업데이트' : '전체 재계산'}
           </Button>
         </div>
 

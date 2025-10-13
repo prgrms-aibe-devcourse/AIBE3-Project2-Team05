@@ -22,4 +22,9 @@ public interface FreelancerRepository extends JpaRepository<Freelancer, Long> {
      * 작업 가능한 프리랜서 목록 조회
      */
     List<Freelancer> findByAvailableTrue();
+
+    /**
+     * Member가 프리랜서인지 확인
+     */
+    boolean existsByMember(Member member);
 }

@@ -77,6 +77,14 @@ public interface MatchScoreRepository extends JpaRepository<MatchScore, MatchSco
     void deleteByProject(Project project);
 
     /**
+     * 특정 프로젝트-프리랜서 매칭 점수 삭제
+     *
+     * @param project    프로젝트
+     * @param freelancer 프리랜서
+     */
+    void deleteByProjectAndFreelancer(Project project, Freelancer freelancer);
+
+    /**
      * 프로젝트의 매칭 점수 개수 조회
      *
      * @param project 프로젝트
