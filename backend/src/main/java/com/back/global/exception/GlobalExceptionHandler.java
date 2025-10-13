@@ -109,6 +109,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<RsData<Object>> handleException(Exception e) {
         log.error("예상하지 못한 예외 발생: {}", e.getMessage(), e);
 
+        // 응답이 이미 커밋된 경우 추가 응답을 방지
+        if (e instanceof org.springframework.web.context.request.async.AsyncRequestTimeoutException) {
+            return null;
+        }
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new RsData<>("500-1", "내부 서버 오류가 발생했습니다."));
     }
