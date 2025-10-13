@@ -107,7 +107,7 @@ export default function FindId() {
             <div className="flex flex-col gap-2 mb-5">
               <label
                 className="text-[14px] font-medium leading-[14px]"
-                style={{ color: "#0F0A03" }}
+                style={{ color: "#0F0A03", marginBottom: "10px" }}
               >
                 이메일
               </label>
@@ -166,7 +166,11 @@ export default function FindId() {
               <div className="flex flex-col gap-2">
                 <label
                   className="text-[14px] font-medium leading-[14px]"
-                  style={{ color: "#0F0A03" }}
+                  style={{
+                    color: "#0F0A03",
+                    marginTop: "10px",
+                    marginBottom: "10px",
+                  }}
                 >
                   인증 코드
                 </label>
@@ -198,6 +202,7 @@ export default function FindId() {
                     }}
                   />
                 </div>
+                <br></br>
 
                 <button
                   type="button"
