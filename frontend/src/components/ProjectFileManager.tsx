@@ -60,6 +60,7 @@ const ProjectFileManager = ({
 
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${projectId}/files/upload`, {
                     method: 'POST',
+                    credentials: 'include',
                     body: formData,
                 });
 
@@ -105,6 +106,7 @@ const ProjectFileManager = ({
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${projectId}/files/${fileId}`, {
                 method: 'DELETE',
+                credentials: 'include',
             });
 
             if (response.ok) {

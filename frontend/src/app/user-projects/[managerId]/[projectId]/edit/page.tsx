@@ -78,6 +78,7 @@ const UserProjectEditPage = () => {
         const url = sessionStorageUtils.addCacheBuster(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}`);
         const response = await fetch(url, {
           cache: 'no-store',
+          credentials: 'include',
           headers: sessionStorageUtils.getCacheBustingHeaders()
         });
         
@@ -206,6 +207,7 @@ const UserProjectEditPage = () => {
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}/complete`, {
         method: 'PUT',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -217,6 +219,7 @@ const UserProjectEditPage = () => {
         const updatedUrl = sessionStorageUtils.addCacheBuster(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}`);
         const updatedResponse = await fetch(updatedUrl, {
           cache: 'no-store',
+          credentials: 'include',
           headers: sessionStorageUtils.getCacheBustingHeaders()
         });
         if (updatedResponse.ok) {
