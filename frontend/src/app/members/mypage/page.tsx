@@ -9,7 +9,8 @@ export default function MyPage() {
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState("");
 
-  // 단순 권한 체크용
+  const [modalType, setModalType] = useState<"project" | "portfolio" | null>(null);
+
   const hasPM = roles.includes("PM");
   const hasFreelancer = roles.includes("FREELANCER");
 
@@ -49,7 +50,7 @@ export default function MyPage() {
     if (hasPM) {
       window.location.href = `/user-projects/${memberId}`;
     } else {
-      alert("프로젝트를 확인할 권한이 없습니다.");
+      setModalType("project");
     }
   };
 
@@ -57,7 +58,15 @@ export default function MyPage() {
     if (hasFreelancer) {
       window.location.href = `/freelancers/mypage`;
     } else {
-      alert("포트폴리오를 확인할 권한이 없습니다.");
+      setModalType("portfolio");
+    }
+  };
+
+  const handleModalCreate = () => {
+    if (modalType === "project") {
+      window.location.href = "/projects/create";
+    } else if (modalType === "portfolio") {
+      window.location.href = "/freelancers/write";
     }
   };
 
@@ -181,6 +190,63 @@ export default function MyPage() {
           </div>
         </div>
       </div>
+
+ {/* 권한 없을 때 모달 */}
+{modalType && (
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+    <div
+      style={{
+        backgroundColor: "white",
+        position: "relative",
+        padding: "24px",
+        borderRadius: "12px",
+        boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+        width: "380px",
+        textAlign: "center",
+      }}
+    >
+      {/* 닫기 X 버튼 */}
+      <button
+        onClick={() => setModalType(null)}
+        style={{
+          position: "absolute",
+          top: "10px",
+          right: "14px",
+          background: "none",
+          border: "none",
+          color: "#6b6b6b",
+          fontSize: "22px",
+          fontWeight: "bold",
+          lineHeight: "1",
+          cursor: "pointer",
+        }}
+        aria-label="닫기"
+      >
+        ×
+      </button>
+
+      <p className="text-[18px] text-gray-900 mb-4 mt-2">
+  {modalType === "project" ? "아직 프로젝트가 없어요" : "아직 포트폴리오가 없어요"}
+      </p>
+
+       <button
+        onClick={handleModalCreate}
+        style={{
+          background: "none",
+          border: "none",
+          color: "#16a34a",
+          fontSize: "15px",
+          cursor: "pointer",
+          textDecoration: "underline",
+          padding: "8px 0",
+        }}
+      >
+        생성하러 가기
+      </button>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
