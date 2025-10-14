@@ -316,7 +316,7 @@ export default function SignupPage() {
 
             <button
               type="submit"
-              className="w-full h-[36px] bg-[#006A20] text-[#FBF8F1] rounded-[10px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-[14px] font-medium leading-[20px] cursor-pointer hover:bg-[#005a1a] transition-colors mb-[15px]"
+              className="w-full h-[36px] bg-[#16a34a] text-[#FBF8F1] rounded-[10px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-[14px] font-medium leading-[20px] cursor-pointer hover:bg-[#005a1a] transition-colors mb-[15px] border-none"
             >
               회원가입
             </button>
@@ -376,7 +376,7 @@ export default function SignupPage() {
               onClick={() => router.push("/members/login")}
               style={{
                 padding: "8px 20px",
-                backgroundColor: "#006A20",
+                backgroundColor: "#16a34a",
                 borderRadius: "8px",
                 color: "#ffffff",
                 fontWeight: 500,
@@ -386,7 +386,7 @@ export default function SignupPage() {
                 (e.currentTarget.style.backgroundColor = "#005a1a")
               }
               onMouseOut={(e) =>
-                (e.currentTarget.style.backgroundColor = "#006A20")
+                (e.currentTarget.style.backgroundColor = "#16a34a")
               }
             >
               로그인 페이지로 이동
