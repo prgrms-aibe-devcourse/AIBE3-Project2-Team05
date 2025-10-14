@@ -72,7 +72,7 @@ export default function SignupPage() {
 
   return (
     <div
-      className="w-full h-screen flex justify-center items-center"
+      className="w-full h-screen flex justify-center items-start pt-[20px]"
       style={{ backgroundColor: "var(--background)" }}
     >
       <div className="w-[448px] flex flex-col items-center">

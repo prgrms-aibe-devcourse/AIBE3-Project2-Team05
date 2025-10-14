@@ -1,8 +1,10 @@
 package com.back.domain.member.member.dto;
 
 import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.entity.Role;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record MemberDto(
         long id,
@@ -10,7 +12,8 @@ public record MemberDto(
         LocalDateTime modifyDate,
         String username,
         String nickname,
-        String email
+        String email,
+        List<Role> roles
 ) {
 
     public MemberDto(Member member) {
@@ -20,7 +23,8 @@ public record MemberDto(
                 member.getModifyDate(),
                 member.getUsername(),
                 member.getNickname(),
-                member.getEmail()
+                member.getEmail(),
+                member.getRoles()
         );
     }
 }

@@ -10,6 +10,7 @@ dist
 build
 coverage
 tsconfig.tsbuildinfo
+src/global/backend/*/schema.d.ts
 
 # 의존성 디렉토리
 node_modules

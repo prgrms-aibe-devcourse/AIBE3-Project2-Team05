@@ -1,7 +1,9 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useUser } from "../context/UserContext";
+
+import { useUser } from "@/app/context/UserContext";
 import "./Header.css";
 
 export const Header = () => {
@@ -44,14 +46,20 @@ export const Header = () => {
   };
 
   const navigationItems = [
-    { text: "프로젝트", path: "/projects", left: "41.4%", width: "54.28px" },
+    { text: "프로젝트", path: "/projects", left: "35%", width: "54.28px" },
+    {
+      text: "프로젝트 생성",
+      path: "/projects/create",
+      left: "42%",
+      width: "98.17px",
+    },
     {
       text: "포트폴리오 검색",
       path: "/freelancers",
-      left: "46.6%",
+      left: "50%",
       width: "98.17px",
     },
-    { text: "이용후기", path: "/reviews", left: "54.1%", width: "54.28px" },
+    { text: "이용후기", path: "/reviews", left: "58%", width: "54.28px" },
   ];
 
   return (

@@ -36,5 +36,9 @@ out/
 ### VS Code ###
 .vscode/
 
+# 로그 및 임시 파일
+logs/
+*.log
+
 .env
 application-secret.yml
