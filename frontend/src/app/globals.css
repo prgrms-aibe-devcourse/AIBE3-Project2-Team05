@@ -22,7 +22,7 @@
   /* 버튼 색상 */
   --primary: #006a20;
   --primary-foreground: #ffffff;
-  --secondary: #ffffff;
+  --secondary: #f1eadc;
   --secondary-foreground: #252525;
 
   /* 강조 및 상태 색상 */
@@ -61,13 +61,14 @@ html,
 body {
   font-family: "Lato", sans-serif;
   color: var(--foreground);
-  background-color: var(--background);
-  margin: 0;
-  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-/* 카드나 팝오버는 진짜 흰색으로 고정 */
-.card,
+.card {
+  background: var(--card);
+  color: var(--card-foreground);
+}
+
 .popover {
   background-color: #ffffff;
   color: var(--popover-foreground);
