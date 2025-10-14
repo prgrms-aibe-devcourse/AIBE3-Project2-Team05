@@ -2,7 +2,7 @@ package com.back.global.rsData;
 
 public record RsData<T>(
         String resultCode,
-        int StatusCode,
+        int statusCode,
         String msg,
         T Data
 ) {
