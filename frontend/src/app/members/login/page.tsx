@@ -54,7 +54,7 @@ export default function LoginPage() {
 
   return (
     <div
-      className="w-full h-screen flex justify-center items-start pt-[100px]"
+      className="w-full h-screen flex justify-center items-center"
       style={{ backgroundColor: "var(--background)" }}
     >
       <div className="w-[448px] flex flex-col items-center">

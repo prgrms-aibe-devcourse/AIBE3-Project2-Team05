@@ -898,6 +898,51 @@ export interface components {
             msg?: string;
             Data?: components["schemas"]["PortfolioResponseDto"];
         };
+        ProjectFile: {
+            /** Format: int64 */
+            id?: number;
+            originalName?: string;
+            storedName?: string;
+            filePath?: string;
+            /** Format: int64 */
+            fileSize?: number;
+            fileType?: string;
+            /** Format: date-time */
+            uploadDate?: string;
+        };
+        RsDataProjectFile: {
+            resultCode?: string;
+            /** Format: int32 */
+            statusCode?: number;
+            msg?: string;
+            Data?: components["schemas"]["ProjectFile"];
+        };
+        RsDataListProjectFile: {
+            resultCode?: string;
+            /** Format: int32 */
+            statusCode?: number;
+            msg?: string;
+            Data?: components["schemas"]["ProjectFile"][];
+        };
+        RsDataMapStringObject: {
+            resultCode?: string;
+            /** Format: int32 */
+            statusCode?: number;
+            msg?: string;
+            Data?: {
+                [key: string]: unknown;
+            };
+        };
+        UpdateMemberReq: {
+            email?: string;
+            nickname?: string;
+        };
+        ProjectStatusChangeRequest: {
+            /** @enum {string} */
+            status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
+            /** Format: int64 */
+            changedById?: number;
+        };
         Member: {
             /** Format: int64 */
             id?: number;
@@ -949,73 +994,6 @@ export interface components {
             /** Format: date-time */
             modifyDate?: string;
             partnerEtcDescription?: string;
-            projectTechs?: components["schemas"]["ProjectTech"][];
-            projectFiles?: components["schemas"]["ProjectFile"][];
-            projectFavorites?: components["schemas"]["ProjectFavorite"][];
-        };
-        ProjectFavorite: {
-            /** Format: int64 */
-            id?: number;
-            member?: components["schemas"]["Member"];
-            project?: unknown;
-            /** Format: date-time */
-            createDate?: string;
-        };
-        ProjectFile: {
-            /** Format: int64 */
-            id?: number;
-            project?: components["schemas"]["Project"];
-            originalName?: string;
-            storedName?: string;
-            filePath?: string;
-            /** Format: int64 */
-            fileSize?: number;
-            fileType?: string;
-            /** Format: date-time */
-            uploadDate?: string;
-        };
-        ProjectTech: {
-            /** Format: int64 */
-            id?: number;
-            project?: unknown;
-            /** @enum {string} */
-            techCategory?: "FRONTEND" | "BACKEND" | "DATABASE";
-            techName?: string;
-            /** Format: date-time */
-            createDate?: string;
-        };
-        RsDataProjectFile: {
-            resultCode?: string;
-            /** Format: int32 */
-            statusCode?: number;
-            msg?: string;
-            Data?: components["schemas"]["ProjectFile"];
-        };
-        RsDataListProjectFile: {
-            resultCode?: string;
-            /** Format: int32 */
-            statusCode?: number;
-            msg?: string;
-            Data?: components["schemas"]["ProjectFile"][];
-        };
-        RsDataMapStringObject: {
-            resultCode?: string;
-            /** Format: int32 */
-            statusCode?: number;
-            msg?: string;
-            Data?: {
-                [key: string]: unknown;
-            };
-        };
-        UpdateMemberReq: {
-            email?: string;
-            nickname?: string;
-        };
-        ProjectStatusChangeRequest: {
-            /** @enum {string} */
-            status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
-            /** Format: int64 */
-            changedById?: number;
         };
         RsDataProject: {
             resultCode?: string;
@@ -1123,17 +1101,17 @@ export interface components {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
-            paged?: boolean;
-            unpaged?: boolean;
             /** Format: int32 */
             pageNumber?: number;
             /** Format: int32 */
             pageSize?: number;
+            paged?: boolean;
+            unpaged?: boolean;
         };
         SortObject: {
             empty?: boolean;
-            sorted?: boolean;
             unsorted?: boolean;
+            sorted?: boolean;
         };
         RsDataListLong: {
             resultCode?: string;

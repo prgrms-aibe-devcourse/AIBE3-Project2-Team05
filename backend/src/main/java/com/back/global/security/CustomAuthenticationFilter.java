@@ -10,6 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -40,13 +41,13 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
                 uri.equals("/swagger-ui.html") ||
                 uri.startsWith("/swagger-resources") ||
                 uri.startsWith("/webjars") ||
-                uri.startsWith("/webjars") ||
                 uri.equals("/member") && method.equals("POST")) ||  // 회원가입
                 (uri.equals("/member/login") && method.equals("POST")) || // 로그인
                 (uri.equals("/auth/findId/verify") && method.equals("POST")) ||
                 (uri.equals("/auth/findId/sendCode") && method.equals("POST")) ||
                 (uri.equals("/auth/updatePassword/sendCode") && method.equals("POST")) ||
                 (uri.equals("/auth/updatePassword/verify") && method.equals("PUT")) ||
+                (uri.equals("/api/projects") && method.equals("GET")) ||
                 (uri.equals("/auth/refresh") && method.equals("POST"))) {
 
             filterChain.doFilter(request, response);

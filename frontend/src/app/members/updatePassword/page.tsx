@@ -100,7 +100,7 @@ export default function UpdatePassword() {
   };
 
   return (
-    <main className="relative w-screen h-screen bg-[var(--background)] flex justify-center items-start pt-[100px] overflow-y-auto">
+    <main className="relative w-screen h-screen bg-[var(--background)] flex justify-center items-center overflow-y-auto">
       <div className="absolute inset-0 bg-[rgba(241,234,220,0.3)] z-0"></div>
 
       <div className="relative z-10 w-[448px] flex flex-col items-center">

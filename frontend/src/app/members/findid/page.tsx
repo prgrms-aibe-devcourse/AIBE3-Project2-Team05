@@ -77,7 +77,7 @@ export default function FindId() {
     }
   };
   return (
-    <main className="relative w-screen h-screen bg-[var(--background)] flex justify-center items-start pt-[150px] overflow-y-auto">
+    <main className="relative w-screen h-screen bg-[var(--background)] flex justify-center items-center overflow-y-auto">
       <div className="absolute inset-0 bg-[rgba(241,234,220,0.3)] z-0"></div>
 
       <div className="relative z-10 w-[480px] flex flex-col items-center">
@@ -85,13 +85,13 @@ export default function FindId() {
         <div className="w-full flex flex-col items-center mb-6">
           <h1
             className="text-[24px] font-bold leading-[32px] mb-3"
-            style={{ color: "#0F0A03", marginBottom: "10px" }}
+            style={{ color: "#0F0A03" }}
           >
             아이디 찾기
           </h1>
           <p
             className="text-[14px] font-[300] leading-[20px]"
-            style={{ color: "#5A5549", marginBottom: "10px" }}
+            style={{ color: "#5A5549" }}
           >
             등록 된 이메일로 인증번호를 발송해드려요
           </p>
