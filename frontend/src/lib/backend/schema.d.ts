@@ -909,6 +909,9 @@ export interface components {
             fileType?: string;
             /** Format: date-time */
             uploadDate?: string;
+            contentType?: string;
+            /** @enum {string} */
+            storageType?: "FILE_SYSTEM" | "DATABASE";
         };
         RsDataProjectFile: {
             resultCode?: string;
@@ -1101,17 +1104,17 @@ export interface components {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
-            /** Format: int32 */
-            pageNumber?: number;
+            paged?: boolean;
             /** Format: int32 */
             pageSize?: number;
-            paged?: boolean;
+            /** Format: int32 */
+            pageNumber?: number;
             unpaged?: boolean;
         };
         SortObject: {
             empty?: boolean;
-            unsorted?: boolean;
             sorted?: boolean;
+            unsorted?: boolean;
         };
         RsDataListLong: {
             resultCode?: string;
@@ -1997,7 +2000,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ProjectFile"][];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataListProjectFile"];
                 };
             };
         };
