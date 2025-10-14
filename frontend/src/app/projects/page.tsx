@@ -14,6 +14,7 @@ import {
   getRecruitmentTypeText,
   getStatusText
 } from '@/utils/projectUtils';
+import { sessionStorageUtils } from '@/utils/sessionStorageUtils';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -78,8 +79,12 @@ const ProjectsPage = () => {
           return;
         }
 
+        // 항상 서버에서 최신 즐겨찾기 목록을 가져와서 baseinitdata와 동기화 보장
         const favoriteIds = await getUserFavoriteProjectIds(userId);
         setFavoriteProjectIds(favoriteIds);
+        
+        // sessionStorage에 저장 (페이지 간 동기화용)
+        sessionStorageUtils.setFavoriteList(userId, favoriteIds);
       } catch (error) {
         console.error('즐겨찾기 목록 로드 실패:', error);
         setFavoriteProjectIds([]);
@@ -89,6 +94,52 @@ const ProjectsPage = () => {
 
     loadFavorites();
   }, [username, isLoaded]); // username과 isLoaded 상태 변화에 따라 재실행
+
+  // 즐겨찾기 상태 변경 이벤트 리스너
+  useEffect(() => {
+    const handleFavoriteChange = async (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const { projectId, isFavorite } = customEvent.detail;
+      
+      // 서버에서 최신 즐겨찾기 목록을 다시 로드
+      const userId = getCurrentUserId();
+      if (userId !== null && isAuthenticated()) {
+        try {
+          // 서버에서 최신 즐겨찾기 목록 가져오기
+          const favoriteIds = await getUserFavoriteProjectIds(userId);
+          setFavoriteProjectIds(favoriteIds);
+          
+          // sessionStorage 업데이트 (캐시 갱신)
+          sessionStorageUtils.setFavoriteList(userId, favoriteIds);
+        } catch (error) {
+          console.error('즐겨찾기 목록 갱신 실패:', error);
+          
+          // 서버 요청 실패 시 로컬 상태만 업데이트
+          setFavoriteProjectIds(prev => {
+            let newIds: number[];
+            if (isFavorite) {
+              newIds = prev.includes(projectId) ? prev : [...prev, projectId];
+            } else {
+              newIds = prev.filter(id => id !== projectId);
+            }
+            
+            // sessionStorage 업데이트
+            if (userId !== null) {
+              sessionStorageUtils.setFavoriteList(userId, newIds);
+            }
+            
+            return newIds;
+          });
+        }
+      }
+    };
+
+    window.addEventListener('favoriteStatusChanged', handleFavoriteChange);
+    
+    return () => {
+      window.removeEventListener('favoriteStatusChanged', handleFavoriteChange);
+    };
+  }, []);
 
   // 데이터 로드 및 필터 변경 처리
   useEffect(() => {
@@ -111,12 +162,7 @@ const ProjectsPage = () => {
         // 상태 필터 처리
         if (currentFilters.status) {
           params.append('status', currentFilters.status);
-        }
-
-        console.log('API 호출 URL:', `/api/projects?${params}`);
-        console.log('현재 필터:', currentFilters);
-
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects?${params}`, {
+        }      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects?${params}`, {
           method: 'GET',
           credentials: 'include',
           headers: {
@@ -125,9 +171,15 @@ const ProjectsPage = () => {
           }
         });
         if (response.ok) {
-          const data: PageProjectResponse = await response.json();
-          console.log('API 응답 데이터:', data);
-          console.log('프로젝트 상태들:', data.content?.map(p => p.status));
+          const responseText = await response.text();
+          
+          let data: PageProjectResponse;
+          try {
+            data = JSON.parse(responseText);
+          } catch (parseError) {
+            console.error('프로젝트 목록 JSON 파싱 실패:', parseError);
+            throw new Error('서버 응답을 처리할 수 없습니다.');
+          }
           let projectList = data.content || [];
           
           // 즐겨찾기 순으로 정렬이 활성화된 경우 (로그인된 사용자만)
@@ -177,8 +229,7 @@ const ProjectsPage = () => {
         params.append('status', currentFilters.status);
       }
 
-      console.log('API 호출 URL:', `/api/projects?${params}`);
-      console.log('현재 필터:', currentFilters);
+
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects?${params}`, {
         method: 'GET',
@@ -190,8 +241,6 @@ const ProjectsPage = () => {
       });
       if (response.ok) {
         const data: PageProjectResponse = await response.json();
-        console.log('API 응답 데이터:', data);
-        console.log('프로젝트 상태들:', data.content?.map(p => p.status));
         let projectList = data.content || [];
         
         // 즐겨찾기 순으로 정렬이 활성화된 경우 (로그인된 사용자만)
@@ -224,7 +273,32 @@ const ProjectsPage = () => {
     }));
   };
 
+  // 페이지 visibility 변경 시 즐겨찾기 상태 갱신 (탭 전환, 뒤로가기 등)
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible' && isLoaded && isAuthenticated()) {
+        const userId = getCurrentUserId();
+        if (userId !== null) {
+          try {
+            // 서버에서 최신 즐겨찾기 목록 가져오기
+            const favoriteIds = await getUserFavoriteProjectIds(userId);
+            setFavoriteProjectIds(favoriteIds);
+            
+            // sessionStorage 업데이트
+            sessionStorageUtils.setFavoriteList(userId, favoriteIds);
+          } catch (error) {
+            console.error('페이지 재활성화 시 즐겨찾기 목록 갱신 실패:', error);
+          }
+        }
+      }
+    };
 
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   return (
     <div className="bg-gray-100 min-h-screen" style={{ backgroundColor: "var(--background)" }}>
@@ -819,6 +893,10 @@ const ProjectsPage = () => {
                           isFavorite={favoriteProjectIds.includes(project.id)}
                           userId={getCurrentUserId()!}
                           onToggle={(newState) => {
+                            // sessionStorage에 개별 프로젝트 즐겨찾기 상태 저장
+                            sessionStorageUtils.setFavoriteStatus(project.id!, newState);
+                            
+                            // 로컬 상태 업데이트
                             if (newState) {
                               setFavoriteProjectIds(prev => [...prev, project.id!]);
                             } else {

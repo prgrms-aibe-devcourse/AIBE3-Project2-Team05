@@ -1,11 +1,8 @@
 "use client";
 
-import { useUser } from '@/app/context/UserContext';
 import ErrorDisplay from '@/components/ErrorDisplay';
-import FavoriteButton from '@/components/FavoriteButton';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { components } from '@/lib/backend/schema';
-import { getFavoriteStatus } from '@/utils/favoriteUtils';
 import {
   canPreviewFile,
   getFileIcon,
@@ -39,30 +36,12 @@ type ProjectFile = {
 const ProjectDetailPage = () => {
   const params = useParams();
   const router = useRouter();
-  const { username, memberId, isLoaded } = useUser();
+
   const [project, setProject] = useState<ProjectResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [activeTab, setActiveTab] = useState('summary');
   const [alternativeFiles, setAlternativeFiles] = useState<ProjectFile[]>([]);
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [favoriteLoading, setFavoriteLoading] = useState(false);
-  
-  // 사용자 인증 시스템과 연동 - UserContext에서 사용자 정보 가져오기
-  const getCurrentUserId = () => {
-    // UserContext에서 사용자 정보를 확인
-    // 인증된 사용자의 경우 실제 사용자 ID를 반환하고, 
-    // 비인증 사용자의 경우 null을 반환하여 즐겨찾기 기능을 비활성화
-    if (username && isLoaded && memberId) {
-      return memberId;
-    }
-    return null;
-  };
-
-  // 사용자 인증 상태 확인
-  const isAuthenticated = () => {
-    return username !== null && isLoaded;
-  };
 
   // 별도 파일 API 호출 함수
   const fetchAlternativeFiles = async (projectId: string): Promise<ProjectFile[]> => {
@@ -76,8 +55,20 @@ const ProjectDetailPage = () => {
         }
       });
       if (response.ok) {
-        const files = await response.json();
-        return Array.isArray(files) ? files : [];
+        const responseText = await response.text();
+        
+        // 빈 응답 체크
+        if (!responseText || responseText.trim() === '') {
+          return [];
+        }
+        
+        try {
+          const files = JSON.parse(responseText);
+          return Array.isArray(files) ? files : [];
+        } catch (parseError) {
+          console.error('파일 API JSON 파싱 실패:', parseError);
+          return [];
+        }
       } else {
         return [];
       }
@@ -92,7 +83,6 @@ const ProjectDetailPage = () => {
       if (!params?.id) return;
       
       setLoading(true);
-      setFavoriteLoading(true);
       try {
         const response = await fetch(`/api/projects/${params.id}`, {
           method: 'GET',
@@ -104,17 +94,19 @@ const ProjectDetailPage = () => {
         });
         
         if (response.ok) {
-          const data: ProjectResponse = await response.json();
+          const responseText = await response.text();
+          
+          let data: ProjectResponse;
+          try {
+            data = JSON.parse(responseText);
+          } catch (parseError) {
+            console.error('JSON 파싱 실패:', parseError);
+            throw new Error('서버 응답을 처리할 수 없습니다.');
+          }
+          
           setProject(data);
           
-          // 즐겨찾기 상태 로드 - 인증된 사용자만
-          if (data.id && isAuthenticated()) {
-            const userId = getCurrentUserId();
-            if (userId !== null) {
-              const favoriteStatus = await getFavoriteStatus(data.id, userId);
-              setIsFavorite(favoriteStatus);
-            }
-          }
+          // 즐겨찾기 기능은 프로젝트 목록 페이지에서만 제공
           
           // 대안 파일 로딩 로직
           let altFiles: ProjectFile[] = [];
@@ -136,12 +128,13 @@ const ProjectDetailPage = () => {
         setError('프로젝트를 불러오는 중 오류가 발생했습니다.');
       } finally {
         setLoading(false);
-        setFavoriteLoading(false);
       }
     };
 
     fetchProject();
   }, [params?.id]);
+
+
 
   if (loading) {
     return <LoadingSpinner message="프로젝트를 불러오는 중..." />;
@@ -227,14 +220,7 @@ const ProjectDetailPage = () => {
                 <h1 className="text-3xl font-bold text-gray-900" style={{ fontSize: '28px', fontWeight: 'bold', color: '#111827' }}>
                   {project.title}
                 </h1>
-                {project.id && !favoriteLoading && isAuthenticated() && (
-                  <FavoriteButton
-                    projectId={project.id}
-                    isFavorite={isFavorite}
-                    userId={getCurrentUserId()!}
-                    onToggle={(newState) => setIsFavorite(newState)}
-                  />
-                )}
+
               </div>
               <span className={`px-4 py-2 rounded-full text-sm font-medium ${
                 project.status === 'RECRUITING' ? 'bg-blue-100 text-blue-700 border border-blue-200' :

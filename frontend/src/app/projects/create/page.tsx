@@ -5,7 +5,7 @@ import { budgetOptions } from '@/constants/projectOptions';
 import { components } from '@/lib/backend/schema';
 import { showErrorMessage, showSuccessMessage, showValidationError } from '@/utils/formValidation';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type ProjectRequest = components['schemas']['ProjectRequest'];
 
@@ -33,6 +33,14 @@ const ProjectCreatePage = () => {
   });
   const [creating, setCreating] = useState(false);
 
+  // 페이지 접근 시 로그인 체크
+  useEffect(() => {
+    if (isLoaded && !username) {
+      showErrorMessage('로그인이 필요한 페이지입니다.');
+      router.push('/members/login');
+    }
+  }, [isLoaded, username, router]);
+
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -58,8 +66,9 @@ const ProjectCreatePage = () => {
     setCreating(true);
     try {
       // 사용자 인증 확인
-      if (!memberId) {
+      if (!username || !memberId || !isLoaded) {
         showErrorMessage('로그인이 필요합니다.');
+        router.push('/members/login');
         return;
       }
 
@@ -76,6 +85,7 @@ const ProjectCreatePage = () => {
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/complete`, {
         method: 'POST',
+        credentials: 'include', // 중요: 쿠키를 포함하여 요청
         headers: {
           'Content-Type': 'application/json',
         },

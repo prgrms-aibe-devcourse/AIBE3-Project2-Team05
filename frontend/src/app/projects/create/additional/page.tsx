@@ -48,6 +48,15 @@ const ProjectCreateAdditionalPage = () => {
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
 
+  // 페이지 접근 시 로그인 체크
+  useEffect(() => {
+    if (isLoaded && !username) {
+      alert('로그인이 필요한 페이지입니다.');
+      router.push('/members/login');
+      return;
+    }
+  }, [isLoaded, username, router]);
+
   // 필수 정보 불러오기
   useEffect(() => {
     const savedBasicData = sessionStorage.getItem('projectBasicData');
@@ -106,8 +115,9 @@ const ProjectCreateAdditionalPage = () => {
     }
 
     // 사용자 인증 확인
-    if (!memberId) {
+    if (!username || !memberId || !isLoaded) {
       alert('로그인이 필요합니다.');
+      router.push('/members/login');
       return;
     }
 
@@ -139,6 +149,7 @@ const ProjectCreateAdditionalPage = () => {
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/complete`, {
         method: 'POST',
+        credentials: 'include', // 중요: 쿠키를 포함하여 요청
         headers: {
           'Content-Type': 'application/json',
         },
@@ -166,6 +177,7 @@ const ProjectCreateAdditionalPage = () => {
               
               const fileUploadResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${projectId}/files/upload`, {
                 method: 'POST',
+                credentials: 'include', // 파일 업로드도 인증 필요
                 body: formData,
               });
               
