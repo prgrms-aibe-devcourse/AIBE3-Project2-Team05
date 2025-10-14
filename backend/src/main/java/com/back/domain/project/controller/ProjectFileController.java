@@ -27,15 +27,22 @@ public class ProjectFileController {
      * 프로젝트 파일 목록 조회
      */
     @GetMapping
-    public ResponseEntity<List<ProjectFile>> getProjectFiles(@PathVariable Long projectId) {
+    public ResponseEntity<RsData<List<ProjectFile>>> getProjectFiles(@PathVariable Long projectId) {
         log.info("프로젝트 파일 목록 조회 요청 - projectId: {}", projectId);
 
         try {
             List<ProjectFile> files = fileService.getProjectFiles(projectId);
-            return ResponseEntity.ok(files);
+            return ResponseEntity.ok(
+                new RsData<>("200-1", "파일 목록 조회 성공", files)
+            );
         } catch (IllegalArgumentException e) {
             log.error("프로젝트 파일 목록 조회 실패 - {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest()
+                    .body(new RsData<>("400-1", "파일 목록 조회 실패: " + e.getMessage(), null));
+        } catch (Exception e) {
+            log.error("프로젝트 파일 목록 조회 실패 - 서버 오류: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError()
+                    .body(new RsData<>("500-1", "파일 목록 조회 중 오류가 발생했습니다.", null));
         }
     }
 
@@ -72,7 +79,11 @@ public class ProjectFileController {
             ProjectFile projectFile = fileService.getProjectFile(fileId);
             Resource resource = fileService.getFileAsResource(fileId);
 
-            String contentType = determineContentType(projectFile.getFileType());
+            // 데이터베이스에 저장된 파일의 경우 저장된 contentType 사용
+            String contentType = (projectFile.getStorageType() == ProjectFile.StorageType.DATABASE &&
+                    projectFile.getContentType() != null)
+                    ? projectFile.getContentType()
+                    : determineContentType(projectFile.getFileType());
 
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
@@ -100,7 +111,11 @@ public class ProjectFileController {
             ProjectFile projectFile = fileService.getProjectFile(fileId);
             Resource resource = fileService.getFileAsResource(fileId);
 
-            String contentType = determineContentType(projectFile.getFileType());
+            // 데이터베이스에 저장된 파일의 경우 저장된 contentType 사용
+            String contentType = (projectFile.getStorageType() == ProjectFile.StorageType.DATABASE &&
+                    projectFile.getContentType() != null)
+                    ? projectFile.getContentType()
+                    : determineContentType(projectFile.getFileType());
 
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
