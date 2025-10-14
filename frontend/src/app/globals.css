@@ -1,11 +1,18 @@
+@import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* 전역 리셋 */
+* {
+  box-sizing: border-box;
+}
+
 /* 라이트 모드 전용 CSS 변수 */
 :root {
   /* 기본 색상 */
-  --background: #fbf8f1;
+  --background: #f8f4eb;
   --foreground: #252525;
   --card: #ffffff;
   --card-foreground: #252525;
@@ -19,7 +26,7 @@
   --secondary-foreground: #252525;
 
   /* 강조 및 상태 색상 */
-  --muted: #f1eadc;
+  --muted: #f8f4eb;
   --muted-foreground: #5a5549;
   --accent: #fcc800;
   --accent-foreground: #252525;
@@ -49,9 +56,10 @@
   --sidebar-ring: #006a20;
 }
 
-/* 글로벌 기본 스타일 */
+/* ✅ 글로벌 기본 스타일 */
+html,
 body {
-  background: var(--background);
+  font-family: "Lato", sans-serif;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -62,13 +70,15 @@ body {
 }
 
 .popover {
-  background: var(--popover);
+  background-color: #ffffff;
   color: var(--popover-foreground);
 }
 
+/* 버튼 */
 .btn-primary {
-  background: var(--primary);
+  background-color: var(--primary);
   color: var(--primary-foreground);
+  cursor: pointer;
 }
 
 .btn-secondary {
@@ -86,6 +96,7 @@ body {
   color: var(--destructive-foreground);
 }
 
+/* 입력창 */
 .input {
   background: var(--input);
   border: 1px solid var(--border);
@@ -97,6 +108,7 @@ body {
   box-shadow: 0 0 0 2px var(--ring);
 }
 
+/* 사이드바 */
 .sidebar {
   background: var(--sidebar);
   color: var(--sidebar-foreground);
@@ -113,7 +125,7 @@ body {
   color: var(--sidebar-accent-foreground);
 }
 
-/* 차트 색상 예시 */
+/* 차트 색상 */
 .chart-1 {
   color: var(--chart-1);
 }

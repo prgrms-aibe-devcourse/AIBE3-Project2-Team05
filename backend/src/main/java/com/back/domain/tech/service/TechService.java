@@ -1,0 +1,24 @@
+package com.back.domain.tech.service;
+
+import com.back.domain.tech.dto.TechDto;
+import com.back.domain.tech.entity.Tech;
+import com.back.domain.tech.repository.TechRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class TechService {
+    private final TechRepository techRepository;
+
+    @Transactional(readOnly = true)
+    public List<TechDto> searchAvailableTechs(String keyword) {
+        List<Tech> teches = techRepository.findByTechNameContainingIgnoreCase(keyword);
+        return teches.stream()
+                .map(TechDto::new)
+                .toList();
+    }
+}
