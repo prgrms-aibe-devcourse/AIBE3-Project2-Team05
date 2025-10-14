@@ -2,13 +2,11 @@
 
 import ErrorDisplay from '@/components/ErrorDisplay';
 import LoadingSpinner from '@/components/LoadingSpinner';
-
+import { ProjectFileApiService } from '@/lib/backend/projectFileApi';
 import { components } from '@/lib/backend/schema';
 import {
     canPreviewFile,
-    getFileIcon,
-    handleFileDownload,
-    handleFilePreview
+    getFileIcon
 } from '@/utils/filePreviewUtils';
 import {
     calculateDday,
@@ -23,7 +21,6 @@ import {
     getTechCategoryFromName,
     getTechStackText
 } from '@/utils/projectUtils';
-import { sessionStorageUtils } from '@/utils/sessionStorageUtils';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -76,20 +73,38 @@ const UserProjectDetailPage = () => {
                 });
                 if (response.ok) {
                     const data: ProjectResponse = await response.json();
-                    // 세션 스토리지에서 파일 상태 복원 시도
-                    const savedFiles = sessionStorageUtils.getProjectFiles<FileItem>(params.projectId as string);
                     
+                    // 파일 로딩 로직 - projects/[id]/page.tsx와 동일하게 처리
                     let finalFiles: FileItem[] = [];
+                    const hasProjectFiles = data.projectFiles && Array.isArray(data.projectFiles) && data.projectFiles.length > 0;
                     
-                    if (savedFiles && (!data.projectFiles || data.projectFiles.length === 0)) {
-                        // API 응답에 파일이 없고 세션스토리지에는 있으면 세션스토리지 우선
-                        finalFiles = savedFiles;
-                    } else {
-                        // API 응답에 파일이 있으면 API 응답 우선하고 세션스토리지 제거
-                        finalFiles = data.projectFiles || [];
-                        if (savedFiles) {
-                            sessionStorageUtils.clearProjectFiles(params.projectId as string);
+                    if (!hasProjectFiles) {
+                        // API 응답에 파일이 없으면 별도 파일 API 호출
+                        try {
+                            const files = await ProjectFileApiService.getProjectFiles(params.projectId as string);
+                            // ProjectFile 타입으로 변환
+                            finalFiles = files.map(file => ({
+                                id: file.id!,
+                                originalName: file.originalName!,
+                                fileSize: file.fileSize!,
+                                uploadDate: file.uploadDate
+                            }));
+                        } catch (fileError) {
+                            console.error('파일 목록 조회 실패:', fileError);
+                            finalFiles = [];
                         }
+                    } else {
+                        // API 응답의 파일 데이터를 사용
+                        finalFiles = (data.projectFiles || [])
+                            .filter((file): file is Required<typeof file> => 
+                                file.id !== undefined && file.originalName !== undefined && file.fileSize !== undefined
+                            )
+                            .map(file => ({
+                                id: file.id,
+                                originalName: file.originalName,
+                                fileSize: file.fileSize,
+                                uploadDate: file.uploadDate
+                            }));
                     }
                     
                     setProject({
@@ -529,7 +544,7 @@ const UserProjectDetailPage = () => {
                                                 onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#f3f4f6'}
                                                 onClick={() => {
                                                     if (file.id) {
-                                                        handleFilePreview(params?.projectId as string, file.id);
+                                                        ProjectFileApiService.previewFile(params?.projectId as string, file.id);
                                                     }
                                                 }}
                                             >
@@ -543,7 +558,7 @@ const UserProjectDetailPage = () => {
                                             onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#3b82f6'}
                                             onClick={() => {
                                                 if (file.id && file.originalName) {
-                                                    handleFileDownload(params?.projectId as string, file.id, file.originalName);
+                                                    ProjectFileApiService.downloadFile(params?.projectId as string, file.id, file.originalName);
                                                 }
                                             }}
                                         >

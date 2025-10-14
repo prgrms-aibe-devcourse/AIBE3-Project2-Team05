@@ -2,12 +2,11 @@
 
 import ErrorDisplay from '@/components/ErrorDisplay';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { ProjectFileApiService } from '@/lib/backend/projectFileApi';
 import { components } from '@/lib/backend/schema';
 import {
   canPreviewFile,
-  getFileIcon,
-  handleFileDownload,
-  handleFilePreview
+  getFileIcon
 } from '@/utils/filePreviewUtils';
 import {
   calculateDday,
@@ -43,37 +42,19 @@ const ProjectDetailPage = () => {
   const [activeTab, setActiveTab] = useState('summary');
   const [alternativeFiles, setAlternativeFiles] = useState<ProjectFile[]>([]);
 
-  // 별도 파일 API 호출 함수
-  const fetchAlternativeFiles = async (projectId: string): Promise<ProjectFile[]> => {
+  // 새로운 API 서비스를 사용한 파일 조회
+  const fetchProjectFiles = async (projectId: string): Promise<ProjectFile[]> => {
     try {
-      const response = await fetch(`/api/projects/${projectId}/files`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      });
-      if (response.ok) {
-        const responseText = await response.text();
-        
-        // 빈 응답 체크
-        if (!responseText || responseText.trim() === '') {
-          return [];
-        }
-        
-        try {
-          const files = JSON.parse(responseText);
-          return Array.isArray(files) ? files : [];
-        } catch (parseError) {
-          console.error('파일 API JSON 파싱 실패:', parseError);
-          return [];
-        }
-      } else {
-        return [];
-      }
+      const files = await ProjectFileApiService.getProjectFiles(projectId);
+      // ProjectFile 타입으로 변환
+      return files.map(file => ({
+        id: file.id!,
+        originalName: file.originalName!,
+        fileSize: file.fileSize!,
+        uploadDate: file.uploadDate
+      }));
     } catch (error) {
-      console.error('파일 API 오류:', error);
+      console.error('파일 목록 조회 실패:', error);
       return [];
     }
   };
@@ -108,15 +89,28 @@ const ProjectDetailPage = () => {
           
           // 즐겨찾기 기능은 프로젝트 목록 페이지에서만 제공
           
-          // 대안 파일 로딩 로직
-          let altFiles: ProjectFile[] = [];
+          // 파일 로딩 로직
+          let projectFiles: ProjectFile[] = [];
           const hasProjectFiles = data.projectFiles && Array.isArray(data.projectFiles) && data.projectFiles.length > 0;
           
           if (!hasProjectFiles) {
-            altFiles = await fetchAlternativeFiles(params.id as string);
+            // API 응답에 파일이 없으면 별도 파일 API 호출
+            projectFiles = await fetchProjectFiles(params.id as string);
+          } else {
+            // API 응답의 파일 데이터를 ProjectFile 타입으로 변환
+            projectFiles = (data.projectFiles || [])
+              .filter((file): file is Required<typeof file> => 
+                file.id !== undefined && file.originalName !== undefined && file.fileSize !== undefined
+              )
+              .map(file => ({
+                id: file.id,
+                originalName: file.originalName,
+                fileSize: file.fileSize,
+                uploadDate: file.uploadDate
+              }));
           }
           
-          setAlternativeFiles(altFiles);
+          setAlternativeFiles(projectFiles);
           
         } else if (response.status === 404) {
           setError('프로젝트를 찾을 수 없습니다.');
@@ -465,7 +459,7 @@ const ProjectDetailPage = () => {
                         style={{ padding: '8px 16px', backgroundColor: '#f3f4f6', color: '#374151', borderRadius: '8px', fontWeight: '500', border: 'none', cursor: 'pointer', transition: 'background-color 0.2s' }}
                         onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#e5e7eb'}
                         onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#f3f4f6'}
-                        onClick={() => handleFilePreview(project?.id?.toString() || '', file.id)}
+                        onClick={() => ProjectFileApiService.previewFile(project?.id?.toString() || '', file.id)}
                       >
                         미리보기
                       </button>
@@ -475,7 +469,7 @@ const ProjectDetailPage = () => {
                       style={{ padding: '8px 16px', backgroundColor: '#3b82f6', color: 'white', borderRadius: '8px', fontWeight: '500', border: 'none', cursor: 'pointer', transition: 'background-color 0.2s' }}
                       onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#2563eb'}
                       onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#3b82f6'}
-                      onClick={() => handleFileDownload(project?.id?.toString() || '', file.id, file.originalName)}
+                      onClick={() => ProjectFileApiService.downloadFile(project?.id?.toString() || '', file.id, file.originalName)}
                     >
                       다운로드
                     </button>
