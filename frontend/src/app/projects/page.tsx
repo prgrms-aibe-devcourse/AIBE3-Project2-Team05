@@ -906,7 +906,7 @@ const ProjectsPage = () => {
                         />
                       </div>
                     )}
-                    {project.recruitmentType && (
+                    {project.recruitmentType && getRecruitmentTypeText(project.recruitmentType) && (
                       <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded" style={{ backgroundColor: '#dcfce7', color: '#166534', fontSize: '12px', padding: '4px 8px', borderRadius: '4px' }}>
                         {getRecruitmentTypeText(project.recruitmentType)}
                       </span>
@@ -922,11 +922,13 @@ const ProjectsPage = () => {
                   </div>
                 </div>
                 
-                <div className="mb-3" style={{ marginBottom: '12px' }}>
-                  <span className="text-sm text-gray-600" style={{ fontSize: '14px', color: '#4b5563' }}>
-                    {getProjectFieldText(project.projectField)}
-                  </span>
-                </div>
+                {getProjectFieldText(project.projectField) && (
+                  <div className="mb-3" style={{ marginBottom: '12px' }}>
+                    <span className="text-sm text-gray-600" style={{ fontSize: '14px', color: '#4b5563' }}>
+                      {getProjectFieldText(project.projectField)}
+                    </span>
+                  </div>
+                )}
 
                 <div className="text-sm text-gray-600 space-y-1" style={{ fontSize: '14px', color: '#4b5563', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <div>예상비용: {getBudgetTypeText(project.budgetType)}</div>
@@ -937,7 +939,7 @@ const ProjectsPage = () => {
                   )}
                   <div className="flex items-center space-x-4" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <span>지원자수: {project.applicantCount || 0}명</span>
-                    {project.companyLocation && (
+                    {project.companyLocation && getLocationText(project.companyLocation) && (
                       <span>지역: {getLocationText(project.companyLocation)}</span>
                     )}
                   </div>
