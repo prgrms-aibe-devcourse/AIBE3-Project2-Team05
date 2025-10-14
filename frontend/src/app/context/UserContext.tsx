@@ -9,18 +9,28 @@ import {
 
 type UserContextType = {
   username: string | null;
+  memberId: number | null;
+  roles: string[]; // Role 추가
   setUsername: (name: string | null) => void;
+  setMemberId: (id: number | null) => void;
+  setRoles: (roles: string[]) => void; // Role setter 추가
   isLoaded: boolean;
 };
 
 const UserContext = createContext<UserContextType>({
   username: null,
+  memberId: null,
+  roles: [],
   setUsername: () => {},
+  setMemberId: () => {},
+  setRoles: () => {},
   isLoaded: false,
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [username, setUsernameState] = useState<string | null>(null);
+  const [memberId, setMemberIdState] = useState<number | null>(null);
+  const [roles, setRolesState] = useState<string[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -36,12 +46,18 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         if (res.ok) {
           const data = await res.json();
           setUsernameState(data.Data?.username ?? null);
+          setMemberIdState(data.Data?.id ?? null);
+          setRolesState(data.Data?.roles ?? []); // roles 세팅
         } else {
           setUsernameState(null);
+          setMemberIdState(null);
+          setRolesState([]);
         }
       } catch (err) {
         console.error(err);
         setUsernameState(null);
+        setMemberIdState(null);
+        setRolesState([]);
       } finally {
         setIsLoaded(true);
       }
@@ -53,8 +69,18 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setUsernameState(name);
   };
 
+  const setMemberId = (id: number | null) => {
+    setMemberIdState(id);
+  };
+
+  const setRoles = (roles: string[]) => {
+    setRolesState(roles);
+  };
+
   return (
-    <UserContext.Provider value={{ username, setUsername, isLoaded }}>
+    <UserContext.Provider
+      value={{ username, memberId, roles, setUsername, setMemberId, setRoles, isLoaded }}
+    >
       {children}
     </UserContext.Provider>
   );

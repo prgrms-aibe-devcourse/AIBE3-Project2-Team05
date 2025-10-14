@@ -4,9 +4,9 @@ spring:
       on-profile: dev
 
   datasource:
-    url: jdbc:mysql://localhost:3306/db_project2
+    url: jdbc:mysql://localhost:3306/fit?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
     username: root
-    password: root123414
+    password: 1111
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       auto-commit: false

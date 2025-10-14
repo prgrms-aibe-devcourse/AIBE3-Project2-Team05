@@ -1,22 +1,27 @@
 .footer-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
   width: 100%;
-  padding: 20px 0;
+  height: 100px; /* Footer 높이 */
   background: #555555;
   text-align: center;
   box-sizing: border-box;
+  padding: 20px 0;
+  z-index: 999;
 }
 
 .footer-logo {
   width: 137px;
   height: auto;
-  margin: 0 auto 10px auto; /* 중앙 정렬 */
+  margin: 0 auto 10px auto;
 }
 
 .footer-line-1,
 .footer-line-2,
 .footer-line-3 {
   display: flex;
-  justify-content: center; /* 중앙 정렬 */
+  justify-content: center;
   flex-wrap: wrap;
   gap: 10px;
   margin: 5px 0;
@@ -35,6 +40,7 @@
   font-family: "Lato", sans-serif;
   font-size: 14px;
 }
+
 .footer-line-3 .notice-text {
   color: #aaaaaa;
 }

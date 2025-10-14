@@ -34,7 +34,14 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         String method = request.getMethod();
 
         // 허용 URI/메서드 체크
-        if ((uri.equals("/member") && method.equals("POST")) ||  // 회원가입
+        if ((// OpenAPI/Swagger 관련 경로
+                uri.startsWith("/v3/api-docs") ||
+                uri.startsWith("/swagger-ui") ||
+                uri.equals("/swagger-ui.html") ||
+                uri.startsWith("/swagger-resources") ||
+                uri.startsWith("/webjars") ||
+                uri.startsWith("/webjars") ||
+                uri.equals("/member") && method.equals("POST")) ||  // 회원가입
                 (uri.equals("/member/login") && method.equals("POST")) || // 로그인
                 (uri.equals("/auth/findId/verify") && method.equals("POST")) ||
                 (uri.equals("/auth/findId/sendCode") && method.equals("POST")) ||
