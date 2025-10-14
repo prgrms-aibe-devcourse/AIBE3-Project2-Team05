@@ -768,6 +768,7 @@ export interface components {
             username?: string;
             nickname?: string;
             email?: string;
+            roles?: ("GENERAL" | "PM" | "FREELANCER")[];
         };
         RsDataMemberDto: {
             resultCode?: string;
@@ -899,7 +900,7 @@ export interface components {
         };
         ProjectFile: {
             /** Format: int64 */
-            projectId?: number;
+            id?: number;
             originalName?: string;
             storedName?: string;
             filePath?: string;
@@ -1009,9 +1010,7 @@ export interface components {
         };
         FreelancerListResponseDto: {
             /** Format: int64 */
-            userId?: number;
-            /** Format: int64 */
-            projectId?: number;
+            id?: number;
             /** Format: date-time */
             createDate?: string;
             /** Format: date-time */
@@ -1041,19 +1040,21 @@ export interface components {
             freelancerName?: string;
             /** Format: int64 */
             id?: number;
+            title?: string;
+            company?: string;
+            position?: string;
+            /** Format: date */
+            startDate?: string;
+            /** Format: date */
+            endDate?: string;
+            current?: boolean;
+            description?: string;
+        };
+        FreelancerDetailResponseDto: {
             /** Format: int64 */
-            projectId?: number;
-            /** @enum {string} */
-            techCategory?: "FRONTEND" | "BACKEND" | "DATABASE";
-            techName?: string;
+            id?: number;
             /** Format: date-time */
             createDate?: string;
-        };
-        RsDataProject: {
-            success?: boolean;
-            message?: string;
-            data?: components["schemas"]["Project"];
-            errorCode?: string;
             /** Format: date-time */
             modifyDate?: string;
             nickname?: string;
@@ -1109,8 +1110,8 @@ export interface components {
         };
         SortObject: {
             empty?: boolean;
-            sorted?: boolean;
             unsorted?: boolean;
+            sorted?: boolean;
         };
         RsDataListLong: {
             resultCode?: string;
