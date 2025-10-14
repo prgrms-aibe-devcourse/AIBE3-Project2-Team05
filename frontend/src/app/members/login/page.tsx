@@ -54,7 +54,7 @@ export default function LoginPage() {
 
   return (
     <div
-      className="w-full h-screen flex justify-center items-start pt-[100px]"
+      className="w-full h-screen flex justify-center items-center"
       style={{ backgroundColor: "var(--background)" }}
     >
       <div className="w-[448px] flex flex-col items-center">
@@ -174,7 +174,7 @@ export default function LoginPage() {
 
             {/* 회원가입 링크 */}
             <p className="text-[14px] font-[300] leading-[20px] text-center text-[#5A5549] mb-2">
-              아직 FIT 회원이 아니라면?{" "}
+              아직 fit 회원이 아니라면?{" "}
               <span
                 className="cursor-pointer hover:underline font-normal text-[#006A20]"
                 onClick={() => router.push("/members/signup")}
