@@ -22,4 +22,9 @@ public class BaseEntity {
 
     @LastModifiedDate
     private LocalDateTime modifyDate;
+
+
+    public Long getId() {
+        return this.id;
+    }
 }
