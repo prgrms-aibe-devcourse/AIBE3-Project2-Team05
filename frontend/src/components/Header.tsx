@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useUser } from "../context/UserContext";
+
+import { useUser } from "@/app/context/UserContext";
 import "./Header.css";
 
 export const Header = () => {

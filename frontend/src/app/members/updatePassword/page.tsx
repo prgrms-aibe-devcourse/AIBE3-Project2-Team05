@@ -100,7 +100,7 @@ export default function UpdatePassword() {
   };
 
   return (
-    <main className="relative w-screen h-screen bg-[var(--background)] flex justify-center items-center overflow-y-auto">
+    <main className="relative w-screen h-screen bg-[var(--background)] flex justify-center items-start pt-[100px] overflow-y-auto">
       <div className="absolute inset-0 bg-[rgba(241,234,220,0.3)] z-0"></div>
 
       <div className="relative z-10 w-[448px] flex flex-col items-center">
@@ -321,7 +321,7 @@ export default function UpdatePassword() {
             className="text-[14px] font-[300] leading-[20px] text-center mt-4"
             style={{ color: "#5A5549" }}
           >
-            이미 fit 회원이라면?{" "}
+            이미 FIT 회원이라면?{" "}
             <span
               className="cursor-pointer hover:underline font-normal"
               style={{ color: "#006A20" }}

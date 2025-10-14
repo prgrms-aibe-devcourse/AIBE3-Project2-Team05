@@ -1,7 +1,6 @@
+import { Footer } from "@/components/Footer";
+import { Header } from "@/components/Header";
 import type { Metadata } from "next";
-import { Footer } from "./components/Footer";
-import { Header } from "./components/Header";
-
 import { UserProvider } from "./context/UserContext";
 import "./globals.css";
 
@@ -20,7 +19,7 @@ export default function RootLayout({
       <body className="antialiased min-h-screen flex flex-col">
         <UserProvider>
           <Header />
-          <main className="flex-1 w-full pt-[68px] pb-[180px]">{children}</main>
+          <main className="flex-1 w-full pt-[68px] pb-[60px]">{children}</main>
           <Footer />
         </UserProvider>
       </body>
