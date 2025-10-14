@@ -16,8 +16,10 @@ spring:
     hikari:
       auto-commit: false
   jackson:
+    time-zone: Asia/Seoul
     serialization:
       fail-on-empty-beans: false
+      write-dates-as-timestamps: false
 
   jpa:
     show-sql: true
@@ -32,6 +34,12 @@ spring:
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
+  # ===== 파일 업로드 설정 =====
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 200MB
 
   mail:
     host: smtp.gmail.com
@@ -44,9 +52,16 @@ spring:
           auth: true
           starttls:
             enable: true
+# ===== Swagger =====
+springdoc:
+  default-produces-media-type: application/json;charset=UTF-8
 
 custom:
   jwt:
     secretKey: ${CUSTOM__JWT__SECRET_KEY}
   accessToken:
     expireSeconds: "#{60 * 15}"
+# ===== OpenAPI 스키마 자동 생성 설정 =====
+openapi:
+  schema:
+    enabled: ${OPENAPI_SCHEMA_ENABLED:true}

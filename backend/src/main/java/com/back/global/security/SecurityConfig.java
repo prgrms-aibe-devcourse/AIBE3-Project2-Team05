@@ -25,6 +25,7 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 이 줄 추가!
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/member/login", "/auth/findId/verify", "/member", "/auth/refresh", "/auth/findId/sendCode", "/auth/updatePassword/sendCode", "/").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/member/logout").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/auth/updatePassword/verify").permitAll()
