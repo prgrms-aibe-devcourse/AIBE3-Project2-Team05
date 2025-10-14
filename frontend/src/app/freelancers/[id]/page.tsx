@@ -14,9 +14,15 @@ export default function FreelancerDetailPage({
 }: {
   params: { id: string };
 }) {
+  // @ts-ignore: keep legacy use(params) call as requested
   const { id } = use(params); // 수정 X
   const [freelancer, setFreelancer] = useState<any | null>(null);
   const [portfolios, setPortfolios] = useState<any[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [activePortfolioId, setActivePortfolioId] = useState<string | number | null>(null);
+  const [modalPortfolio, setModalPortfolio] = useState<any | null>(null);
+  const [modalLoading, setModalLoading] = useState(false);
+  
   const [completedProjects, setCompletedProjects] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<
@@ -47,6 +53,55 @@ export default function FreelancerDetailPage({
     };
     fetchAllData();
   }, [id]);
+
+  // helper to format date similar to portfolios detail page
+  function formatDate(dateStr?: string) {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "";
+    const year = d.getFullYear().toString().slice(2);
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}년 ${month}월 ${day}일`;
+  }
+
+  // open modal and fetch portfolio detail
+  const openPortfolioModal = async (portfolioId: string | number) => {
+    setActivePortfolioId(portfolioId);
+    setModalOpen(true);
+    setModalLoading(true);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/portfolios/${portfolioId}`,
+        { method: "GET", credentials: "include" }
+      );
+      if (!res.ok) throw new Error("포트폴리오 정보를 불러올 수 없습니다.");
+      const data = await res.json();
+      setModalPortfolio(data);
+    } catch (err) {
+      console.error(err);
+      setModalPortfolio(null);
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setActivePortfolioId(null);
+    setModalPortfolio(null);
+    setModalLoading(false);
+  };
+
+  // close on esc
+  useEffect(() => {
+    if (!modalOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeModal();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [modalOpen]);
 
   return (
     <div
@@ -212,6 +267,65 @@ export default function FreelancerDetailPage({
                     {freelancer?.favoritesCount ?? 0}
                   </div>
                 </div>
+                {modalOpen && (
+                  <div
+                    role="dialog"
+                    aria-modal="true"
+                    style={{
+                      position: "fixed",
+                      inset: 0,
+                      background: "rgba(0,0,0,0.45)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 60,
+                      padding: "20px",
+                    }}
+                    onClick={closeModal}
+                  >
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      style={{
+                        width: "100%",
+                        maxWidth: 820,
+                        borderRadius: 12,
+                        overflow: "hidden",
+                        background: "#fff",
+                        boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
+                      }}
+                    >
+                      {modalLoading ? (
+                        <div style={{ padding: 40, textAlign: "center" }}>로딩 중...</div>
+                      ) : !modalPortfolio ? (
+                        <div style={{ padding: 40, textAlign: "center" }}>포트폴리오 정보를 불러올 수 없습니다.</div>
+                      ) : (
+                        <div style={{ padding: 28 }}>
+                          <h2 style={{ fontSize: "1.8rem", fontWeight: 900, textAlign: "center", marginBottom: 18 }}>{modalPortfolio.title}</h2>
+                          <div style={{ width: "100%", maxWidth: 700, height: 360, margin: "0 auto 20px", borderRadius: 12, overflow: "hidden", background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            {modalPortfolio.imageUrl ? (
+                              <img src={fullImageUrl(modalPortfolio.imageUrl)} alt={modalPortfolio.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            ) : (
+                              <div style={{ color: "#94a3b8", fontWeight: 600 }}>이미지 없음</div>
+                            )}
+                          </div>
+                          <div style={{ color: "#444", fontSize: 15, lineHeight: 1.7, marginBottom: 14 }}>{modalPortfolio.description}</div>
+                          <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 12 }}>
+                            <div style={{ color: "#555", fontWeight: 700 }}>기간: {formatDate(modalPortfolio.startDate)} ~ {formatDate(modalPortfolio.endDate)}</div>
+                            <div style={{ background: "#e7e7e7", color: "#16a34a", fontWeight: 700, borderRadius: 8, padding: "6px 10px" }}>{modalPortfolio.contribution}% 기여</div>
+                          </div>
+                          {modalPortfolio.externalUrl && (
+                            <div style={{ textAlign: "center", marginTop: 6 }}>
+                              <a href={modalPortfolio.externalUrl} target="_blank" rel="noreferrer" style={{ color: "#16a34a", fontWeight: 700 }}>포트폴리오 자세히 보기 &gt;</a>
+                            </div>
+                          )}
+                          <div style={{ display: "flex", justifyContent: "center", marginTop: 18 }}>
+                            <button onClick={closeModal} style={{ padding: "10px 14px", borderRadius: 8, border: "none", background: "#16a34a", color: "#fff", fontWeight: 700 }}>닫기</button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -351,7 +465,13 @@ export default function FreelancerDetailPage({
                       {portfolios.map((p: any) => (
                         <div
                           key={p.id}
-                          className="bg-[#f8faff] p-4 rounded-xl border border-[#e8e3d9] shadow"
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => openPortfolioModal(p.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") openPortfolioModal(p.id);
+                          }}
+                          className="bg-[#f8faff] p-4 rounded-xl border border-[#e8e3d9] shadow hover:shadow-md cursor-pointer"
                         >
                           <div className="font-bold text-[#2563eb] mb-2">
                             {p.title}

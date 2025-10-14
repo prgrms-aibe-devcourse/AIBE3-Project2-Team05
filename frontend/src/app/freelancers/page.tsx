@@ -69,7 +69,6 @@ export default function FreelancerSearchPage() {
         fontFamily: "'Pretendard', 'Inter', Arial, sans-serif",
       }}
     >
-      {/* 네비게이션은 생략/분리 */}
       <main
         style={{
           maxWidth: 1400,
@@ -195,7 +194,7 @@ export default function FreelancerSearchPage() {
               <input
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                placeholder="프리랜서 검색어를 입력하세요."
+                placeholder="검색어를 입력하세요."
                 style={{
                   flex: 1,
                   fontSize: "16.5px",
@@ -268,29 +267,44 @@ export default function FreelancerSearchPage() {
                   minHeight: "290px",
                   gap: "10px",
                 }}>
-                  {/* 프로필 이미지 */}
+                  {/* 이미지, 닉네임, 타이틀 가로배치 */}
                   <div style={{
-                    width: "70px",
-                    height: "70px",
-                    borderRadius: "14px",
-                    overflow: "hidden",
-                    background: "#f7f7f7",
-                    marginBottom: "10px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "18px",
+                    marginBottom: "14px"
                   }}>
-                    <img
-                      src={fullImageUrl(f.freelancerProfileImageUrl)}
-                      alt={f.nickname || "프리랜서"}
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    />
+                    {/* 프로필 이미지 */}
+                    <div style={{
+                      width: "70px",
+                      height: "70px",
+                      borderRadius: "14px",
+                      overflow: "hidden",
+                      background: "#f7f7f7",
+                      flexShrink: 0,
+                    }}>
+                      <img
+                        src={fullImageUrl(f.freelancerProfileImageUrl)}
+                        alt={f.nickname || "프리랜서"}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    </div>
+                    {/* 닉네임+타이틀 */}
+                    <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", flex: 1 }}>
+                      <div style={{
+                        fontWeight: 800,
+                        fontSize: "1.15rem",
+                        color: "#222",
+                        marginBottom: "3px"
+                      }}>{f.nickname}</div>
+                      <div style={{
+                        color: "#ed6a23",
+                        fontWeight: 700,
+                        fontSize: "16px",
+                        marginTop: "3px"
+                      }}>{f.freelancerTitle}</div>
+                    </div>
                   </div>
-                  {/* 이름/타이틀 */}
-                  <div style={{ fontWeight: 800, fontSize: "1.1rem", color: "#222", marginBottom: "2px" }}>{f.nickname}</div>
-                  <div style={{
-                    color: "#ed6a23",
-                    fontWeight: 700,
-                    fontSize: "16px",
-                    marginBottom: "7px"
-                  }}>{f.freelancerTitle}</div>
                   {/* 기타 정보 */}
                   <div style={{
                     display: "flex",

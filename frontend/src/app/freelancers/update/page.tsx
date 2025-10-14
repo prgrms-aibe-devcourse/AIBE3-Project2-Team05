@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 interface FreelancerInfo {
   freelancerTitle: string;
@@ -11,25 +11,38 @@ interface FreelancerInfo {
   isOnSite: boolean;
   minMonthlyRate: number;
   maxMonthlyRate: number;
+  freelancerProfileImageUrl?: string;
 }
 
-const initialState: FreelancerInfo = {
-  freelancerTitle: "",
-  type: "",
-  location: "",
-  content: "",
-  isOnSite: false,
-  minMonthlyRate: 0,
-  maxMonthlyRate: 0,
-};
-
-export default function FreelancerWritePage() {
-  const [info, setInfo] = useState<FreelancerInfo>(initialState);
+export default function FreelancerEditPage() {
+  const [info, setInfo] = useState<FreelancerInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
+
+  // 기존 정보 불러오기
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
+          { method: "GET", credentials: "include" }
+        );
+        if (!res.ok) throw new Error("정보를 불러올 수 없습니다.");
+        const data = await res.json();
+        setInfo(data);
+        if (data.freelancerProfileImageUrl) setPreviewUrl(data.freelancerProfileImageUrl);
+      } catch (e) {
+        alert("정보를 불러올 수 없습니다.");
+        setInfo(null);
+      }
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -43,6 +56,7 @@ export default function FreelancerWritePage() {
     const { name, value, type } = target;
     const checked = (target as HTMLInputElement).checked;
 
+    if (!info) return;
     setInfo({
       ...info,
       [name]:
@@ -54,8 +68,20 @@ export default function FreelancerWritePage() {
     });
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+    if (previewUrl && previewUrl.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
+    if (file) {
+      setPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setPreviewUrl(info?.freelancerProfileImageUrl ?? null);
+    }
+    setImageFile(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!info) return;
     setLoading(true);
 
     try {
@@ -67,37 +93,22 @@ export default function FreelancerWritePage() {
       if (imageFile) {
         formData.append("imageFile", imageFile);
       }
-
+      // PATCH or PUT 방식, 서버 요구에 맞게 변경 필요!
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers`,
-        { method: "POST", credentials: "include", body: formData }
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
+        { method: "PUT", credentials: "include", body: formData }
       );
-
       if (!res.ok) {
         const errorText = await res.text();
         throw new Error(
-          `등록에 실패했습니다. (응답: ${res.status}, ${errorText.substring(0, 100)}...)`
+          `수정에 실패했습니다. (응답: ${res.status}, ${errorText.substring(
+            0,
+            100
+          )}...)`
         );
       }
-
-      // try to parse response to get saved freelancer id
-      let saved: any = null;
-      try {
-        saved = await res.json();
-      } catch (e) {
-        saved = null;
-      }
-
-      alert("프리랜서 정보가 성공적으로 등록되었습니다!");
-      setInfo(initialState);
-      setImageFile(null);
-      setPreviewUrl(null);
-
-      const savedId = saved?.id ?? saved?.freelancerId ?? saved?.data?.id ?? null;
-      const target = savedId
-        ? `/freelancers/portfolios/write?freelancerId=${savedId}`
-        : `/freelancers/portfolios/write`;
-      router.push(target);
+      alert("프리랜서 정보가 성공적으로 수정되었습니다!");
+      router.push("/freelancers/me"); // 내정보 페이지로 이동
     } catch (error: any) {
       alert(error.message || "오류가 발생했습니다.");
     } finally {
@@ -105,13 +116,37 @@ export default function FreelancerWritePage() {
     }
   };
 
+  if (!info) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "#f7f5ec",
+          fontFamily: "'Pretendard', 'Inter', Arial, sans-serif",
+          display: "flex", alignItems: "center", justifyContent: "center"
+        }}
+      >
+        <div style={{
+          background: "#fff",
+          borderRadius: "13px",
+          boxShadow: "0 2px 14px #0001",
+          padding: "44px 38px",
+          maxWidth: 400,
+          width: "100%",
+          textAlign: "center",
+        }}>
+          정보를 불러오고 있습니다...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       style={{
         minHeight: "100vh",
         background: "#f7f5ec",
         fontFamily: "'Pretendard', 'Inter', Arial, sans-serif",
-        padding: "0",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -137,7 +172,7 @@ export default function FreelancerWritePage() {
             textAlign: "left",
           }}
         >
-          프리랜서 등록
+          프리랜서 정보 수정
         </h2>
         <form onSubmit={handleSubmit}>
           {/* 이미지, 닉네임, 타이틀 */}
@@ -156,18 +191,6 @@ export default function FreelancerWritePage() {
               onClick={() => inputRef.current?.click()}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
-              }}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => {
-                e.preventDefault();
-                const f = e.dataTransfer?.files?.[0] ?? null;
-                if (f && f.type.startsWith("image/")) {
-                  if (previewUrl) URL.revokeObjectURL(previewUrl);
-                  const url = URL.createObjectURL(f);
-                  setPreviewUrl(url);
-                  setImageFile(f);
-                  if (inputRef.current) inputRef.current.value = "";
-                }
               }}
               style={{
                 width: 92,
@@ -189,32 +212,22 @@ export default function FreelancerWritePage() {
                 ref={inputRef}
                 type="file"
                 accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
-                  if (previewUrl) URL.revokeObjectURL(previewUrl);
-                  if (file) {
-                    const url = URL.createObjectURL(file);
-                    setPreviewUrl(url);
-                  } else {
-                    setPreviewUrl(null);
-                  }
-                  setImageFile(file);
-                }}
+                onChange={handleImageChange}
                 style={{ display: "none" }}
               />
               {previewUrl ? (
                 <>
                   <img
                     src={previewUrl}
-                    alt="선택한 프로필 이미지 미리보기"
+                    alt="프로필 이미지 미리보기"
                     style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "16px" }}
                   />
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (previewUrl) URL.revokeObjectURL(previewUrl);
-                      setPreviewUrl(null);
+                      if (previewUrl && previewUrl.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
+                      setPreviewUrl(info.freelancerProfileImageUrl ?? null);
                       setImageFile(null);
                       if (inputRef.current) inputRef.current.value = "";
                     }}
@@ -424,7 +437,7 @@ export default function FreelancerWritePage() {
               transition: "background 0.2s",
             }}
           >
-            {loading ? "등록 중..." : "이어서 포트폴리오 등록하러 가기"}
+            {loading ? "수정 중..." : "수정 완료"}
           </button>
         </form>
       </div>
