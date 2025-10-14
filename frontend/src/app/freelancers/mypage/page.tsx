@@ -1,5 +1,5 @@
 "use client";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 function fullImageUrl(url?: string) {
   if (!url) return "/placeholder.svg";
@@ -10,12 +10,7 @@ function fullImageUrl(url?: string) {
   }${url}`;
 }
 
-export default function FreelancerMyPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const { id } = use(params); // 수정 금지
+export default function FreelancerMyPage() {
   const [freelancer, setFreelancer] = useState<any | null>(null);
   const [portfolios, setPortfolios] = useState<any[]>([]);
   const [completedProjects, setCompletedProjects] = useState<any[]>([]);
@@ -25,34 +20,24 @@ export default function FreelancerMyPage({
   >("basic");
 
   useEffect(() => {
-    // ID가 유효할 때만 실행되도록 보호
-    if (!id) return;
-
     const fetchAllData = async () => {
       try {
         // ⭐️ 1. 두 개의 Promise를 배열에 담아 준비합니다.
         const freelancerPromise = fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/${id}`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
           { method: "GET", credentials: "include" }
         ).then((res) => res.json()); // 응답 파싱까지 포함
 
-        const portfolioPromise = fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/${id}/portfolios`,
-          { method: "GET", credentials: "include" }
-        ).then((res) => res.json()); // 응답 파싱까지 포함
+        // const portfolioPromise = fetch(
+        //   `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me/portfolios`,
+        //   { method: "GET", credentials: "include" }
+        // ).then((res) => res.json()); // 응답 파싱까지 포함
 
         // ⭐️ 2. Promise.all을 사용하여 두 요청이 완료될 때까지 기다립니다. (병렬 실행)
-        const [freelancerData, portfolioData] = await Promise.all([
-          freelancerPromise,
-          portfolioPromise,
-        ]);
+        const [freelancerData] = await Promise.all([freelancerPromise]);
 
         // ⭐️ 3. 두 데이터를 한 번에 상태에 업데이트합니다.
         setFreelancer(freelancerData);
-        setPortfolios(portfolioData || []);
-
-        // ⭐️ 4. 데이터 로드 완료 후 콘솔 출력 (정확한 값)
-        console.log("Data loaded. Portfolios:", portfolioData);
       } catch (err) {
         console.error("API 호출 중 오류 발생:", err);
         // 에러 발생 시 사용자에게 적절한 피드백 제공
@@ -60,7 +45,7 @@ export default function FreelancerMyPage({
     };
 
     fetchAllData();
-  }, [id]);
+  }, []);
 
   return (
     <div
@@ -121,7 +106,7 @@ export default function FreelancerMyPage({
               </h2>
               <div
                 className="text-[#6A6558] text-[15px]"
-                style={{ marginTop: "6px", marginBottom: "12px" }}
+                style={{ marginTop: "3px", marginBottom: "8px" }}
               >
                 {freelancer?.freelancerTitle}
               </div>

@@ -5,6 +5,7 @@ import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancer.service.FreelancerService;
 import com.back.global.rsData.RsData;
 import com.back.global.security.SecurityUser;
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -28,8 +29,13 @@ public class FreelancerController {
         return freelancerService.findById(id);
     }
 
+    @GetMapping("/me")
+    public FreelancerDetailResponseDto getMyFreelancer(@AuthenticationPrincipal SecurityUser securityUser) {
+        return freelancerService.findByMemberId(securityUser.getId());
+    }
+
     @PostMapping
-    public RsData<FreelancerDto> create(@AuthenticationPrincipal SecurityUser securityUser, @RequestPart FreelancerSaveRequestDto dto, @RequestPart MultipartFile imageFile) {
+    public RsData<FreelancerDto> create(@AuthenticationPrincipal SecurityUser securityUser, @RequestPart FreelancerSaveRequestDto dto, @Nullable @RequestPart MultipartFile imageFile) {
         Freelancer freelancer = freelancerService.create(securityUser.getId(), dto, imageFile);
         return new RsData<>("201-1", "%d번 프리랜서가 생성되었습니다.".formatted(freelancer.getId()), new FreelancerDto(freelancer));
     }
