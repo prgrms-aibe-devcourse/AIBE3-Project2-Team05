@@ -54,12 +54,12 @@ export const Header = () => {
       width: "98.17px",
     },
     {
-      text: "포트폴리오 검색",
+      text: "프리랜서",
       path: "/freelancers",
       left: "50%",
       width: "98.17px",
     },
-    { text: "이용후기", path: "/reviews", left: "58%", width: "54.28px" },
+    { text: "이용후기", path: "/reviews", left: "56%", width: "54.28px" },
   ];
 
   return (

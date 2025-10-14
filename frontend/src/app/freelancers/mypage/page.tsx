@@ -14,9 +14,8 @@ export default function FreelancerDetailPage() {
   const [portfolios, setPortfolios] = useState<any[]>([]);
   const [completedProjects, setCompletedProjects] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<
-    "basic" | "portfolio" | "completed"
-  >("basic");
+  const [activeTab, setActiveTab] = useState<"basic" | "portfolio" | "completed">("basic");
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -42,6 +41,18 @@ export default function FreelancerDetailPage() {
     fetchAllData();
   }, []);
 
+  // 모달 바깥 클릭 시 닫기
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (modalOpen) {
+        const modal = document.getElementById("edit-modal");
+        if (modal && !modal.contains(e.target as Node)) setModalOpen(false);
+      }
+    }
+    if (modalOpen) document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [modalOpen]);
+
   return (
     <div
       className="min-h-screen bg-gradient-to-br from-[#f8f4eb] to-[#fafdff] flex justify-center"
@@ -59,16 +70,13 @@ export default function FreelancerDetailPage() {
             className="text-[28px] font-extrabold text-[#1E1B16] tracking-tighter"
             style={{ marginBottom: "0.4rem", letterSpacing: "-1px" }}
           >
-            프리랜서 페이지
+            내 프리랜서 정보
           </h1>
-          <p className="text-[#6A6558] text-[15px] font-[400]">
-            내 프로젝트에 딱 맞는 전문가를 만나보세요.
-          </p>
         </div>
 
         {/* 카드 레이아웃 */}
         <div
-          className="flex items-stretch"
+          className="flex items-start"
           style={{ gap: "2rem", marginTop: "2rem" }}
         >
           {/* 왼쪽 카드 (프로필) */}
@@ -78,16 +86,17 @@ export default function FreelancerDetailPage() {
               padding: "2.2rem 2rem",
               minHeight: "520px",
               maxWidth: 370,
+              position: "relative",
+              boxSizing: "border-box",
+              display: "flex",
             }}
           >
-            <div
-              className="flex flex-col items-center"
-              style={{ width: "100%" }}
-            >
+            {/* 프로필 사진 & 이름 */}
+            <div className="flex flex-col items-center" style={{ width: "100%" }}>
               <div
                 style={{
-                  width: "130px",
-                  height: "130px",
+                  width: "120px",
+                  height: "120px",
                   borderRadius: "50%",
                   overflow: "hidden",
                   background: "#f3f1ee",
@@ -106,114 +115,212 @@ export default function FreelancerDetailPage() {
                 />
               </div>
 
-              <h2 className="text-[22px] font-bold text-[#1E1B16] mb-1">
+              <h2 className="text-[23px] font-bold text-[#1E1B16] mb-1" style={{ letterSpacing: "-1px" }}>
                 {freelancer?.nickname}
               </h2>
               <div
                 className="text-[#3d7afe] text-[15px] font-semibold"
                 style={{
-                  marginTop: "2px",
+                  marginTop: "4px",
                   marginBottom: "14px",
                   background: "#e6f0ff",
-                  padding: "2px 14px",
-                  borderRadius: "8px",
+                  padding: "4px 18px",
+                  borderRadius: "10px",
                   letterSpacing: "-0.2px",
+                  fontWeight: 600,
                 }}
               >
                 {freelancer?.freelancerTitle}
               </div>
+            </div>
 
-              <div
-                style={{
-                  width: "100%",
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "1.1rem",
-                  marginTop: "0.5rem",
-                }}
-              >
-                {/* 유동 정보 */}
-                <div>
-                  <div className="text-[13px] text-[#1E1B16] font-medium mb-1">
-                    유형
-                  </div>
-                  <div className="text-[14px] text-[#6A6558]">
-                    {freelancer?.type}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[13px] text-[#1E1B16] font-medium mb-1">
-                    지역
-                  </div>
-                  <div className="text-[14px] text-[#6A6558]">
-                    {freelancer?.location}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[13px] text-[#1E1B16] font-medium mb-1">
-                    상주 여부
-                  </div>
-                  <div className="text-[14px] text-[#6A6558]">
-                    {freelancer?.isOnSite ? (
-                      <span className="bg-[#e6f0ff] text-[#2563eb] px-2 py-1 rounded-md font-semibold">
-                        상주 가능
-                      </span>
-                    ) : (
-                      <span className="bg-[#f3f4f6] text-[#888] px-2 py-1 rounded-md font-semibold">
-                        상주 불가능
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[13px] text-[#1E1B16] font-medium mb-1">
-                    월 단가
-                  </div>
-                  <div className="text-[18px] font-bold text-[#1E1B16]">
-                    {Math.round(
-                      (freelancer?.minMonthlyRate ?? 0) / 1
-                    ).toLocaleString()}{" "}
-                    ~{" "}
-                    {Math.round(
-                      (freelancer?.maxMonthlyRate ?? 0) / 1
-                    ).toLocaleString()}{" "}
-                    원
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[13px] text-[#1E1B16] font-medium mb-1">
-                    평점
-                  </div>
-                  <div className="text-[14px] text-[#6A6558] flex items-center gap-1">
-                    <span
-                      style={{
-                        color: "#f59e0b",
-                        fontWeight: 700,
-                        fontSize: 15,
-                      }}
-                    >
-                      ★
+            {/* 정보 그리드 - 각 요소 구분, 들여쓰기 강조 */}
+            <div
+              style={{
+                width: "100%",
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "1.4rem 0.8rem",
+                marginTop: "1.2rem",
+                background: "#f8faff",
+                borderRadius: 14,
+                padding: "1.3rem 1.1rem",
+                boxSizing: "border-box",
+              }}
+            >
+              <div>
+                <div className="text-[12.5px] text-[#1E1B16] font-semibold mb-1">유형</div>
+                <div className="text-[14px] text-[#6A6558]">{freelancer?.type}</div>
+              </div>
+              <div>
+                <div className="text-[12.5px] text-[#1E1B16] font-semibold mb-1">지역</div>
+                <div className="text-[14px] text-[#6A6558]">{freelancer?.location}</div>
+              </div>
+              <div>
+                <div className="text-[12.5px] text-[#1E1B16] font-semibold mb-1">상주 여부</div>
+                <div className="text-[14px] text-[#6A6558]">
+                  {freelancer?.isOnSite ? (
+                    <span className="bg-[#e6f0ff] text-[#2563eb] px-2 py-1 rounded-md font-semibold">
+                      상주 가능
                     </span>
-                    {(freelancer?.ratingAvg ?? 0).toFixed(1)}
-                  </div>
+                  ) : (
+                    <span className="bg-[#f3f4f6] text-[#888] px-2 py-1 rounded-md font-semibold">
+                      상주 불가능
+                    </span>
+                  )}
                 </div>
-                <div>
-                  <div className="text-[13px] text-[#1E1B16] font-medium mb-1">
-                    리뷰 / 관심
-                  </div>
-                  <div className="text-[14px] text-[#6A6558]">
-                    {freelancer?.reviewsCount ?? 0} /{" "}
-                    {freelancer?.favoritesCount ?? 0}
-                  </div>
+              </div>
+              <div>
+                <div className="text-[12.5px] text-[#1E1B16] font-semibold mb-1">월 단가</div>
+                <div className="text-[17px] font-bold text-[#1E1B16]">
+                  {Math.round((freelancer?.minMonthlyRate ?? 0) / 1).toLocaleString()} ~{' '}
+                  {Math.round((freelancer?.maxMonthlyRate ?? 0) / 1).toLocaleString()} 원
+                </div>
+              </div>
+              <div>
+                <div className="text-[12.5px] text-[#1E1B16] font-semibold mb-1">평점</div>
+                <div className="text-[14px] text-[#6A6558] flex items-center gap-1">
+                  <span style={{ color: "#f59e0b", fontWeight: 700, fontSize: 15 }}>★</span>
+                  {(freelancer?.ratingAvg ?? 0).toFixed(1)}
+                </div>
+              </div>
+              <div>
+                <div className="text-[12.5px] text-[#1E1B16] font-semibold mb-1">리뷰 / 관심</div>
+                <div className="text-[14px] text-[#6A6558]">
+                  {freelancer?.reviewsCount ?? 0} / {freelancer?.favoritesCount ?? 0}
                 </div>
               </div>
             </div>
+
+            {/* 편집 모달 버튼 */}
+            <div style={{ marginTop: "2.2rem", textAlign: "center" }}>
+              <button
+                type="button"
+                style={{
+                  background: "#16a34a",
+                  color: "#fff",
+                  fontWeight: 600,
+                  fontSize: "16px",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "12px 36px",
+                  boxShadow: "0 2px 8px rgba(61,122,254,0.12)",
+                  cursor: "pointer",
+                  transition: "background 0.2s",
+                }}
+                onClick={() => setModalOpen(true)}
+              >
+                프로필 편집
+              </button>
+            </div>
+
+            {/* 모달 */}
+            {modalOpen && (
+              <div
+                style={{
+                  position: "fixed",
+                  left: 0,
+                  top: 0,
+                  width: "100vw",
+                  height: "100vh",
+                  background: "rgba(20,20,20,0.16)",
+                  zIndex: 2000,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <div
+                  id="edit-modal"
+                  style={{
+                    background: "#fff",
+                    minWidth: 300,
+                    boxShadow: "0 8px 32px rgba(61,122,254,0.09)",
+                    borderRadius: "18px",
+                    padding: "32px 28px 26px 28px",
+                    textAlign: "center",
+                    position: "relative",
+                  }}
+                >
+                  <button
+                    style={{
+                      position: "absolute",
+                      right: 18,
+                      top: 16,
+                      background: "none",
+                      border: "none",
+                      fontSize: "22px",
+                      color: "#888",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => setModalOpen(false)}
+                    aria-label="닫기"
+                  >
+                    ×
+                  </button>
+                  <h4
+                    style={{
+                      fontWeight: 700,
+                      fontSize: "19px",
+                      marginBottom: "24px",
+                      letterSpacing: "-0.5px",
+                    }}
+                  >
+                    프로필 관리
+                  </h4>
+                  <button
+                    style={{
+                      background: "#3d7afe",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "8px",
+                      padding: "12px 0px",
+                      fontWeight: 600,
+                      fontSize: "16px",
+                      width: "100%",
+                      marginBottom: "16px",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      // TODO: 편집 페이지로 이동 or 편집 모달 띄우기
+                      alert("편집 기능을 구현하세요.");
+                    }}
+                  >
+                    수정하기
+                  </button>
+                  <button
+                    style={{
+                      background: "#f3f4f6",
+                      color: "#e11d48",
+                      border: "none",
+                      borderRadius: "8px",
+                      padding: "12px 0px",
+                      fontWeight: 600,
+                      fontSize: "16px",
+                      width: "100%",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      // TODO: 삭제 API 연동
+                      alert("삭제 기능을 구현하세요.");
+                    }}
+                  >
+                    삭제하기
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 오른쪽 카드 (탭) */}
           <div
             className="flex-9 bg-[#fff] border border-[#E8E3D9] rounded-[18px] shadow-[0_2px_10px_rgba(0,0,0,0.07)] flex flex-col justify-start"
-            style={{ padding: "2.2rem 2rem", minHeight: "520px" }}
+            style={{
+              padding: "2.2rem 2rem",
+              minHeight: "520px",
+              boxSizing: "border-box",
+              display: "flex",
+            }}
           >
             {/* Tabs nav - 카드 가로 전체 채우기 */}
             <nav
@@ -222,8 +329,8 @@ export default function FreelancerDetailPage() {
                 width: "100%",
                 borderBottom: "1.5px solid #E8E3D9",
                 marginBottom: 18,
-                paddingBottom: 0,
                 gap: 0,
+                boxSizing: "border-box",
               }}
             >
               {[
@@ -245,7 +352,7 @@ export default function FreelancerDetailPage() {
                     border: "none",
                     borderBottom:
                       activeTab === tab.key
-                        ? "3px solid #3d7afe"
+                        ? "3px solid #16a34a"
                         : "1.5px solid #E8E3D9",
                     background:
                       activeTab === tab.key ? "#f8faff" : "transparent",
@@ -263,7 +370,7 @@ export default function FreelancerDetailPage() {
             </nav>
 
             {/* Tab content */}
-            <div>
+            <div style={{ flex: 1 }}>
               {activeTab === "basic" && (
                 <div>
                   <h3 className="text-[17px] font-bold text-[#1E1B16] mb-3">
@@ -290,6 +397,7 @@ export default function FreelancerDetailPage() {
                               background: "#f8faff",
                               borderRadius: 8,
                               padding: "10px 15px",
+                              marginBottom: "8px",
                             }}
                           >
                             <div className="font-semibold text-[#2563eb]">

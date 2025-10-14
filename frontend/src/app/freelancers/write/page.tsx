@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 interface FreelancerInfo {
   freelancerTitle: string;
@@ -26,6 +26,8 @@ export default function FreelancerDetailPage() {
   const [info, setInfo] = useState<FreelancerInfo>(initialState);
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -114,7 +116,7 @@ export default function FreelancerDetailPage() {
           color: "#222",
         }}
       >
-        프리랜서 정보 입력
+        프리랜서 등록
       </h2>
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: 20 }}>
@@ -137,53 +139,68 @@ export default function FreelancerDetailPage() {
             }}
           />
         </div>
-        <div style={{ marginBottom: 20 }}>
-          <label style={{ fontWeight: 600, marginBottom: 6, display: "block" }}>
-            구분
-          </label>
-          <select
-            name="type"
-            value={info.type}
-            onChange={handleChange}
-            required
-            style={{
-              width: "100%",
-              padding: "11px",
-              borderRadius: 8,
-              border: "1px solid #dde1e7",
-              fontSize: "1rem",
-              background: "#fff",
-            }}
-          >
-            <option value="">선택하세요</option>
-            <option value="개인">개인</option>
-            <option value="기업">기업</option>
-            <option value="팀">팀</option>
-          </select>
+        <div
+          style={{
+            marginBottom: 20,
+            display: "flex",
+            flexDirection: "row",
+            gap: "12px",
+            alignItems: "flex-start",
+            flexWrap: "wrap",
+          }}
+        >
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <label
+              style={{ fontWeight: 600, marginBottom: 6, display: "block" }}
+            >
+              구분
+            </label>
+            <select
+              name="type"
+              value={info.type}
+              onChange={handleChange}
+              required
+              style={{
+                width: "100%",
+                padding: "11px",
+                borderRadius: 8,
+                border: "1px solid #dde1e7",
+                fontSize: "1rem",
+                background: "#fff",
+              }}
+            >
+              <option value="">선택하세요</option>
+              <option value="개인">개인</option>
+              <option value="기업">기업</option>
+              <option value="팀">팀</option>
+            </select>
+          </div>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <label
+              style={{ fontWeight: 600, marginBottom: 6, display: "block" }}
+            >
+              지역
+            </label>
+            <input
+              type="text"
+              name="location"
+              value={info.location}
+              onChange={handleChange}
+              required
+              placeholder="예: 서울, 경기"
+              style={{
+                width: "100%",
+                padding: "11px",
+                borderRadius: 8,
+                border: "1px solid #dde1e7",
+                fontSize: "1rem",
+              }}
+            />
+          </div>
         </div>
         <div style={{ marginBottom: 20 }}>
           <label style={{ fontWeight: 600, marginBottom: 6, display: "block" }}>
-            지역
-          </label>
-          <input
-            type="text"
-            name="location"
-            value={info.location}
-            onChange={handleChange}
-            required
-            placeholder="예: 서울"
-            style={{
-              width: "100%",
-              padding: "11px",
-              borderRadius: 8,
-              border: "1px solid #dde1e7",
-              fontSize: "1rem",
-            }}
-          />
-        </div>
-        <div style={{ marginBottom: 20 }}>
-          <label style={{ fontWeight: 600, marginBottom: 6, display: "block" }}>
-            상세 설명
+            소개
           </label>
           <textarea
             name="content"
@@ -210,34 +227,142 @@ export default function FreelancerDetailPage() {
             gap: 8,
           }}
         >
-          <label style={{ fontWeight: 600 }}>상주 가능</label>
+          <label style={{ fontWeight: 600 }}>상주 가능 여부</label>
           <input
             type="checkbox"
             name="isOnSite"
             checked={info.isOnSite}
             onChange={handleChange}
             style={{
-              accentColor: "#3d7afe",
+              accentColor: "#16a34a",
               width: 20,
               height: 20,
             }}
           />
           <span style={{ color: "#888", fontSize: "0.98rem" }}>
-            현장(상주) 근무 가능 여부
+            프로젝트 참여 가능한 상태라면 체크해주세요
           </span>
         </div>
         <div style={{ marginBottom: 20 }}>
-          <label style={{ fontWeight: 600, marginBottom: 6, display: "block" }}>
+          <label
+            htmlFor="profile-image"
+            style={{ fontWeight: 600, marginBottom: 6, display: "block" }}
+          >
             프로필 이미지 (선택)
           </label>
+
           <input
+            id="profile-image"
+            ref={inputRef}
             type="file"
             accept="image/*"
-            onChange={(e) =>
-              setImageFile(e.target.files ? e.target.files[0] : null)
-            }
-            style={{ width: "100%" }}
+            onChange={(e) => {
+              const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+              if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+              }
+              if (file) {
+                const url = URL.createObjectURL(file);
+                setPreviewUrl(url);
+              } else {
+                setPreviewUrl(null);
+              }
+              setImageFile(file);
+            }}
+            style={{ display: "none" }}
           />
+
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => inputRef.current?.click()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
+            }}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              const f = e.dataTransfer?.files?.[0] ?? null;
+              if (f && f.type.startsWith("image/")) {
+                if (previewUrl) URL.revokeObjectURL(previewUrl);
+                const url = URL.createObjectURL(f);
+                setPreviewUrl(url);
+                setImageFile(f);
+                // clear native input value so same file can be re-selected later if needed
+                if (inputRef.current) inputRef.current.value = "";
+              }
+            }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              gap: 12,
+              padding: 12,
+              borderRadius: 8,
+              border: "1px dashed #cfd8e3",
+              background: "#fff",
+              cursor: "pointer",
+            }}
+          >
+            {previewUrl ? (
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <img
+                  src={previewUrl}
+                  alt="선택한 프로필 이미지 미리보기"
+                  style={{ width: 88, height: 88, objectFit: "cover", borderRadius: 8 }}
+                />
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <div style={{ fontWeight: 600 }}>{imageFile?.name}</div>
+                  <div style={{ color: "#666", fontSize: "0.9rem" }}>
+                    {(imageFile && `${Math.round(imageFile.size / 1024)} KB`) || "이미지 선택됨"}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (previewUrl) URL.revokeObjectURL(previewUrl);
+                    setPreviewUrl(null);
+                    setImageFile(null);
+                    if (inputRef.current) inputRef.current.value = "";
+                  }}
+                  aria-label="이미지 제거"
+                  style={{
+                    marginLeft: 8,
+                    padding: "6px 10px",
+                    borderRadius: 6,
+                    border: "1px solid #e2e8f0",
+                    background: "#fff",
+                    cursor: "pointer",
+                  }}
+                >
+                  제거
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div
+                  style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: 8,
+                    background: "#f1f5f9",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#94a3b8",
+                    fontWeight: 600,
+                  }}
+                >
+                  IMG
+                </div>
+                <div style={{ color: "#666" }}>
+                  <div style={{ fontWeight: 600 }}>이미지를 드래그하거나 클릭하여 업로드</div>
+                  <div style={{ fontSize: "0.9rem" }}>권장: JPG, PNG (최대 5MB)</div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <div style={{ marginBottom: 20 }}>
@@ -285,7 +410,7 @@ export default function FreelancerDetailPage() {
           style={{
             width: "100%",
             padding: "14px 0",
-            background: loading ? "#8fb5ff" : "#3d7afe",
+            background: loading ? "#8fb5ff" : "#16a34a",
             color: "#fff",
             fontWeight: 700,
             fontSize: "1.08rem",
@@ -297,7 +422,7 @@ export default function FreelancerDetailPage() {
             transition: "background 0.2s",
           }}
         >
-          {loading ? "등록 중..." : "등록하기"}
+          {loading ? "등록 중..." : "이어서 포트폴리오 등록하러 가기"}
         </button>
       </form>
     </div>

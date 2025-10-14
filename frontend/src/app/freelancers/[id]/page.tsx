@@ -92,9 +92,9 @@ export default function FreelancerDetailPage({
             >
               <div
                 style={{
-                  width: "130px",
-                  height: "130px",
-                  borderRadius: "50%",
+                  width: "150px",
+                  height: "150px",
+                  borderRadius: "20%",
                   overflow: "hidden",
                   background: "#f3f1ee",
                   marginBottom: "1.2rem",
