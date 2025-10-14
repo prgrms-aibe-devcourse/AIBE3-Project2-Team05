@@ -224,7 +224,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["getMyPortfolios"];
+        get?: never;
         put?: never;
         post: operations["savePortfolio"];
         delete?: never;
@@ -434,22 +434,6 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getPortfolio"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/freelancers/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getMyFreelancer"];
         put?: never;
         post?: never;
         delete?: never;
@@ -914,6 +898,51 @@ export interface components {
             msg?: string;
             Data?: components["schemas"]["PortfolioResponseDto"];
         };
+        ProjectFile: {
+            /** Format: int64 */
+            id?: number;
+            originalName?: string;
+            storedName?: string;
+            filePath?: string;
+            /** Format: int64 */
+            fileSize?: number;
+            fileType?: string;
+            /** Format: date-time */
+            uploadDate?: string;
+        };
+        RsDataProjectFile: {
+            resultCode?: string;
+            /** Format: int32 */
+            statusCode?: number;
+            msg?: string;
+            Data?: components["schemas"]["ProjectFile"];
+        };
+        RsDataListProjectFile: {
+            resultCode?: string;
+            /** Format: int32 */
+            statusCode?: number;
+            msg?: string;
+            Data?: components["schemas"]["ProjectFile"][];
+        };
+        RsDataMapStringObject: {
+            resultCode?: string;
+            /** Format: int32 */
+            statusCode?: number;
+            msg?: string;
+            Data?: {
+                [key: string]: unknown;
+            };
+        };
+        UpdateMemberReq: {
+            email?: string;
+            nickname?: string;
+        };
+        ProjectStatusChangeRequest: {
+            /** @enum {string} */
+            status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
+            /** Format: int64 */
+            changedById?: number;
+        };
         Member: {
             /** Format: int64 */
             id?: number;
@@ -965,73 +994,6 @@ export interface components {
             /** Format: date-time */
             modifyDate?: string;
             partnerEtcDescription?: string;
-            projectTechs?: components["schemas"]["ProjectTech"][];
-            projectFiles?: components["schemas"]["ProjectFile"][];
-            projectFavorites?: components["schemas"]["ProjectFavorite"][];
-        };
-        ProjectFavorite: {
-            /** Format: int64 */
-            id?: number;
-            member?: components["schemas"]["Member"];
-            project?: unknown;
-            /** Format: date-time */
-            createDate?: string;
-        };
-        ProjectFile: {
-            /** Format: int64 */
-            id?: number;
-            project?: components["schemas"]["Project"];
-            originalName?: string;
-            storedName?: string;
-            filePath?: string;
-            /** Format: int64 */
-            fileSize?: number;
-            fileType?: string;
-            /** Format: date-time */
-            uploadDate?: string;
-        };
-        ProjectTech: {
-            /** Format: int64 */
-            id?: number;
-            project?: unknown;
-            /** @enum {string} */
-            techCategory?: "FRONTEND" | "BACKEND" | "DATABASE";
-            techName?: string;
-            /** Format: date-time */
-            createDate?: string;
-        };
-        RsDataProjectFile: {
-            resultCode?: string;
-            /** Format: int32 */
-            statusCode?: number;
-            msg?: string;
-            Data?: components["schemas"]["ProjectFile"];
-        };
-        RsDataListProjectFile: {
-            resultCode?: string;
-            /** Format: int32 */
-            statusCode?: number;
-            msg?: string;
-            Data?: components["schemas"]["ProjectFile"][];
-        };
-        RsDataMapStringObject: {
-            resultCode?: string;
-            /** Format: int32 */
-            statusCode?: number;
-            msg?: string;
-            Data?: {
-                [key: string]: unknown;
-            };
-        };
-        UpdateMemberReq: {
-            email?: string;
-            nickname?: string;
-        };
-        ProjectStatusChangeRequest: {
-            /** @enum {string} */
-            status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
-            /** Format: int64 */
-            changedById?: number;
         };
         RsDataProject: {
             resultCode?: string;
@@ -1122,14 +1084,14 @@ export interface components {
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
-            first?: boolean;
-            last?: boolean;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["ProjectResponse"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
             pageable?: components["schemas"]["PageableObject"];
@@ -1139,12 +1101,12 @@ export interface components {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
-            unpaged?: boolean;
-            paged?: boolean;
             /** Format: int32 */
             pageNumber?: number;
             /** Format: int32 */
             pageSize?: number;
+            paged?: boolean;
+            unpaged?: boolean;
         };
         SortObject: {
             empty?: boolean;
@@ -1603,26 +1565,6 @@ export interface operations {
             };
         };
     };
-    getMyPortfolios: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["PortfolioResponseDto"][];
-                };
-            };
-        };
-    };
     savePortfolio: {
         parameters: {
             query?: never;
@@ -2000,26 +1942,6 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["PortfolioResponseDto"];
-                };
-            };
-        };
-    };
-    getMyFreelancer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["FreelancerDetailResponseDto"];
                 };
             };
         };

@@ -100,7 +100,7 @@ export default function UpdatePassword() {
   };
 
   return (
-    <main className="relative w-screen h-screen bg-[var(--background)] flex justify-center items-start pt-[100px] overflow-y-auto">
+    <main className="relative w-screen h-screen bg-[var(--background)] flex justify-center items-center overflow-y-auto">
       <div className="absolute inset-0 bg-[rgba(241,234,220,0.3)] z-0"></div>
 
       <div className="relative z-10 w-[448px] flex flex-col items-center">
@@ -200,7 +200,7 @@ export default function UpdatePassword() {
           <button
             type="button"
             onClick={sendCode}
-            className="w-full h-[36px] bg-[#006A20] text-[#FBF8F1] rounded-[10px] text-[14px] font-medium mb-[20px] cursor-pointer hover:bg-[#005a1a] transition-colors"
+            className="w-full h-[36px] bg-[#16a34a] text-[#FBF8F1] rounded-[10px] text-[14px] font-medium mb-[20px] cursor-pointer hover:bg-[#005a1a] transition-colors border-none"
           >
             인증 코드 발송
           </button>
@@ -302,7 +302,7 @@ export default function UpdatePassword() {
               <button
                 type="button"
                 onClick={resetPassword}
-                className="w-full h-[36px] bg-[#006A20] text-[#FBF8F1] rounded-[10px] text-[14px] font-medium cursor-pointer hover:bg-[#005a1a] transition-colors"
+                className="w-full h-[36px] bg-[#16a34a] text-[#FBF8F1] rounded-[10px] text-[14px] font-medium cursor-pointer hover:bg-[#005a1a] transition-colors border-none"
               >
                 비밀번호 변경
               </button>
@@ -324,7 +324,7 @@ export default function UpdatePassword() {
             이미 FIT 회원이라면?{" "}
             <span
               className="cursor-pointer hover:underline font-normal"
-              style={{ color: "#006A20" }}
+              style={{ color: "#16a34a" }}
               onClick={() => router.push("/members/login")}
             >
               로그인
@@ -351,8 +351,8 @@ export default function UpdatePassword() {
               </p>
               <button
                 onClick={() => setInfoMsg("")}
-                className="px-5 py-2 bg-[#006A20] rounded-md hover:bg-[#005a1a] transition"
-                style={{ color: "#ffffff" }}
+                className="px-5 py-2 bg-[#16a34a] rounded-md hover:bg-[#005a1a] transition border-none"
+                    style={{ color: "#ffffff", fontSize: "14px", borderRadius: "5px", padding: "8px 16px", cursor: "pointer" , marginTop: "10px"}}
               >
                 확인
               </button>

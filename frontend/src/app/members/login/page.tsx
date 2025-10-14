@@ -54,7 +54,7 @@ export default function LoginPage() {
 
   return (
     <div
-      className="w-full h-screen flex justify-center items-start pt-[100px]"
+      className="w-full h-screen flex justify-center items-center"
       style={{ backgroundColor: "var(--background)" }}
     >
       <div className="w-[448px] flex flex-col items-center">
@@ -138,14 +138,14 @@ export default function LoginPage() {
               </div>
               <p className="text-[14px] font-[300] leading-[20px] text-right text-[#5A5549]">
                 <span
-                  className="cursor-pointer hover:underline font-normal text-[#006A20]"
+                  className="cursor-pointer hover:underline font-normal text-[#16a34a]"
                   onClick={() => router.push("/members/findid")}
                 >
                   아이디 찾기
                 </span>
                 {" / "}
                 <span
-                  className="cursor-pointer hover:underline font-normal text-[#006A20]"
+                  className="cursor-pointer hover:underline font-normal text-[#16a34a]"
                   onClick={() => router.push("/members/updatePassword")}
                 >
                   비밀번호 재설정
@@ -167,7 +167,7 @@ export default function LoginPage() {
             {/* 로그인 버튼 */}
             <button
               type="submit"
-              className="w-full h-[36px] bg-[#006A20] text-[#FBF8F1] rounded-[10px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-[14px] font-medium leading-[20px] cursor-pointer hover:bg-[#005a1a] transition-colors mb-[15px]"
+              className="w-full h-[36px] bg-[#16a34a] text-[#FBF8F1] rounded-[10px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-[14px] font-medium leading-[20px] cursor-pointer hover:bg-[#005a1a] transition-colors mb-[15px] border-none"
             >
               로그인
             </button>
@@ -176,7 +176,7 @@ export default function LoginPage() {
             <p className="text-[14px] font-[300] leading-[20px] text-center text-[#5A5549] mb-2">
               아직 FIT 회원이 아니라면?{" "}
               <span
-                className="cursor-pointer hover:underline font-normal text-[#006A20]"
+                className="cursor-pointer hover:underline font-normal text-[#16a34a]"
                 onClick={() => router.push("/members/signup")}
               >
                 회원가입

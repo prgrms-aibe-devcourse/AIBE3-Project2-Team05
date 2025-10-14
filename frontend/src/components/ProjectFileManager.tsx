@@ -60,13 +60,14 @@ const ProjectFileManager = ({
 
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${projectId}/files/upload`, {
                     method: 'POST',
+                    credentials: 'include',
                     body: formData,
                 });
 
                 if (response.ok) {
                     const apiResponse = await response.json();
-                    // API 응답이 ApiResponseProjectFile 형태라면 data 필드에서 파일 정보를 추출
-                    const uploadedFile = apiResponse.data || apiResponse;
+                    // API 응답이 ApiResponseProjectFile 형태라면 Data 또는 data 필드에서 파일 정보를 추출
+                    const uploadedFile = apiResponse.Data || apiResponse.data || apiResponse;
                     uploadedFiles.push(uploadedFile);
                 } else {
                     const errorData = await response.json().catch(() => ({}));
@@ -105,6 +106,7 @@ const ProjectFileManager = ({
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${projectId}/files/${fileId}`, {
                 method: 'DELETE',
+                credentials: 'include',
             });
 
             if (response.ok) {

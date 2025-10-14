@@ -77,7 +77,7 @@ export default function FindId() {
     }
   };
   return (
-    <main className="relative w-screen h-screen bg-[var(--background)] flex justify-center items-start pt-[150px] overflow-y-auto">
+    <main className="relative w-screen h-screen bg-[var(--background)] flex justify-center items-center overflow-y-auto">
       <div className="absolute inset-0 bg-[rgba(241,234,220,0.3)] z-0"></div>
 
       <div className="relative z-10 w-[480px] flex flex-col items-center">
@@ -85,13 +85,13 @@ export default function FindId() {
         <div className="w-full flex flex-col items-center mb-6">
           <h1
             className="text-[24px] font-bold leading-[32px] mb-3"
-            style={{ color: "#0F0A03", marginBottom: "10px" }}
+            style={{ color: "#0F0A03" }}
           >
             아이디 찾기
           </h1>
           <p
             className="text-[14px] font-[300] leading-[20px]"
-            style={{ color: "#5A5549", marginBottom: "10px" }}
+            style={{ color: "#5A5549" }}
           >
             등록 된 이메일로 인증번호를 발송해드려요
           </p>
@@ -145,7 +145,7 @@ export default function FindId() {
             <div className="flex justify-end mt-[10px] mb-[20px]">
               <span
                 className="text-[14px] font-normal cursor-pointer hover:underline"
-                style={{ color: "#006A20" }}
+                style={{ color: "#16a34a" }}
                 onClick={() => router.push("/members/updatePassword")}
               >
                 비밀번호 재설정
@@ -156,7 +156,7 @@ export default function FindId() {
             <button
               type="button"
               onClick={sendCode}
-              className="w-full h-[40px] bg-[#006A20] text-[#FBF8F1] rounded-[10px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-[14px] font-medium leading-[20px] cursor-pointer hover:bg-[#005a1a] transition-colors"
+              className="w-full h-[40px] bg-[#16a34a] text-[#FBF8F1] rounded-[10px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-[14px] font-medium leading-[20px] cursor-pointer hover:bg-[#005a1a] transition-colors border-none"
             >
               아이디 찾기
             </button>
@@ -207,7 +207,7 @@ export default function FindId() {
                 <button
                   type="button"
                   onClick={verifyId}
-                  className="w-full h-[40px] bg-[#006A20] text-[#FBF8F1] rounded-[10px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-[14px] font-medium leading-[20px] cursor-pointer hover:bg-[#005a1a] transition-colors"
+                  className="w-full h-[40px] bg-[#16a34a] text-[#FBF8F1] rounded-[10px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-[14px] font-medium leading-[20px] cursor-pointer hover:bg-[#005a1a] transition-colors border-none"
                 >
                   아이디 확인
                 </button>
@@ -231,8 +231,8 @@ export default function FindId() {
                   </p>
                   <button
                     onClick={() => setInfoMsg("")}
-                    className="px-5 py-2 bg-[#006A20] rounded-md hover:bg-[#005a1a] transition"
-                    style={{ color: "#ffffff" }}
+                    className="px-5 py-2 bg-[#16a34a] rounded-md hover:bg-[#005a1a] transition border-none"
+                    style={{ color: "#ffffff", fontSize: "14px", borderRadius: "5px", padding: "8px 16px", cursor: "pointer" , marginTop: "10px"}}
                   >
                     확인
                   </button>
@@ -253,7 +253,7 @@ export default function FindId() {
               아직 FIT 회원이 아니라면?{" "}
               <span
                 className="cursor-pointer hover:underline font-normal"
-                style={{ color: "#006A20" }}
+                style={{ color: "#16a34a" }}
                 onClick={() => router.push("/members/signup")}
               >
                 회원가입

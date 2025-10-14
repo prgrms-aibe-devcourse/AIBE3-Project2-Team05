@@ -1,11 +1,8 @@
 "use client";
 
-import { useUser } from '@/app/context/UserContext';
 import ErrorDisplay from '@/components/ErrorDisplay';
-import FavoriteButton from '@/components/FavoriteButton';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { components } from '@/lib/backend/schema';
-import { getFavoriteStatus } from '@/utils/favoriteUtils';
 import {
   canPreviewFile,
   getFileIcon,
@@ -39,30 +36,12 @@ type ProjectFile = {
 const ProjectDetailPage = () => {
   const params = useParams();
   const router = useRouter();
-  const { username, memberId, isLoaded } = useUser();
+
   const [project, setProject] = useState<ProjectResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [activeTab, setActiveTab] = useState('summary');
   const [alternativeFiles, setAlternativeFiles] = useState<ProjectFile[]>([]);
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [favoriteLoading, setFavoriteLoading] = useState(false);
-  
-  // 사용자 인증 시스템과 연동 - UserContext에서 사용자 정보 가져오기
-  const getCurrentUserId = () => {
-    // UserContext에서 사용자 정보를 확인
-    // 인증된 사용자의 경우 실제 사용자 ID를 반환하고, 
-    // 비인증 사용자의 경우 null을 반환하여 즐겨찾기 기능을 비활성화
-    if (username && isLoaded && memberId) {
-      return memberId;
-    }
-    return null;
-  };
-
-  // 사용자 인증 상태 확인
-  const isAuthenticated = () => {
-    return username !== null && isLoaded;
-  };
 
   // 별도 파일 API 호출 함수
   const fetchAlternativeFiles = async (projectId: string): Promise<ProjectFile[]> => {
@@ -76,8 +55,20 @@ const ProjectDetailPage = () => {
         }
       });
       if (response.ok) {
-        const files = await response.json();
-        return Array.isArray(files) ? files : [];
+        const responseText = await response.text();
+        
+        // 빈 응답 체크
+        if (!responseText || responseText.trim() === '') {
+          return [];
+        }
+        
+        try {
+          const files = JSON.parse(responseText);
+          return Array.isArray(files) ? files : [];
+        } catch (parseError) {
+          console.error('파일 API JSON 파싱 실패:', parseError);
+          return [];
+        }
       } else {
         return [];
       }
@@ -92,7 +83,6 @@ const ProjectDetailPage = () => {
       if (!params?.id) return;
       
       setLoading(true);
-      setFavoriteLoading(true);
       try {
         const response = await fetch(`/api/projects/${params.id}`, {
           method: 'GET',
@@ -104,17 +94,19 @@ const ProjectDetailPage = () => {
         });
         
         if (response.ok) {
-          const data: ProjectResponse = await response.json();
+          const responseText = await response.text();
+          
+          let data: ProjectResponse;
+          try {
+            data = JSON.parse(responseText);
+          } catch (parseError) {
+            console.error('JSON 파싱 실패:', parseError);
+            throw new Error('서버 응답을 처리할 수 없습니다.');
+          }
+          
           setProject(data);
           
-          // 즐겨찾기 상태 로드 - 인증된 사용자만
-          if (data.id && isAuthenticated()) {
-            const userId = getCurrentUserId();
-            if (userId !== null) {
-              const favoriteStatus = await getFavoriteStatus(data.id, userId);
-              setIsFavorite(favoriteStatus);
-            }
-          }
+          // 즐겨찾기 기능은 프로젝트 목록 페이지에서만 제공
           
           // 대안 파일 로딩 로직
           let altFiles: ProjectFile[] = [];
@@ -136,12 +128,13 @@ const ProjectDetailPage = () => {
         setError('프로젝트를 불러오는 중 오류가 발생했습니다.');
       } finally {
         setLoading(false);
-        setFavoriteLoading(false);
       }
     };
 
     fetchProject();
   }, [params?.id]);
+
+
 
   if (loading) {
     return <LoadingSpinner message="프로젝트를 불러오는 중..." />;
@@ -227,14 +220,7 @@ const ProjectDetailPage = () => {
                 <h1 className="text-3xl font-bold text-gray-900" style={{ fontSize: '28px', fontWeight: 'bold', color: '#111827' }}>
                   {project.title}
                 </h1>
-                {project.id && !favoriteLoading && isAuthenticated() && (
-                  <FavoriteButton
-                    projectId={project.id}
-                    isFavorite={isFavorite}
-                    userId={getCurrentUserId()!}
-                    onToggle={(newState) => setIsFavorite(newState)}
-                  />
-                )}
+
               </div>
               <span className={`px-4 py-2 rounded-full text-sm font-medium ${
                 project.status === 'RECRUITING' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
@@ -254,14 +240,18 @@ const ProjectDetailPage = () => {
             </div>
             
             <div className="flex items-center flex-wrap gap-6 text-gray-600" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '24px', color: '#4b5563' }}>
-              <span className="flex items-center gap-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span className="text-sm" style={{ fontSize: '14px' }}>분야:</span>
-                <span className="font-medium" style={{ fontWeight: '500' }}>{getProjectFieldText(project.projectField)}</span>
-              </span>
-              <span className="flex items-center gap-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span className="text-sm" style={{ fontSize: '14px' }}>모집형태:</span>
-                <span className="font-medium" style={{ fontWeight: '500' }}>{getRecruitmentTypeText(project.recruitmentType)}</span>
-              </span>
+              {getProjectFieldText(project.projectField) && (
+                <span className="flex items-center gap-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span className="text-sm" style={{ fontSize: '14px' }}>분야:</span>
+                  <span className="font-medium" style={{ fontWeight: '500' }}>{getProjectFieldText(project.projectField)}</span>
+                </span>
+              )}
+              {getRecruitmentTypeText(project.recruitmentType) && (
+                <span className="flex items-center gap-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span className="text-sm" style={{ fontSize: '14px' }}>모집형태:</span>
+                  <span className="font-medium" style={{ fontWeight: '500' }}>{getRecruitmentTypeText(project.recruitmentType)}</span>
+                </span>
+              )}
               <span className="flex items-center gap-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span className="text-sm" style={{ fontSize: '14px' }}>지원자수:</span>
                 <span className="font-medium text-blue-600" style={{ fontWeight: '500', color: '#2563eb' }}>{project.applicantCount || 0}명</span>
@@ -365,10 +355,12 @@ const ProjectDetailPage = () => {
               <span className="text-gray-600 text-sm block mb-1" style={{ color: '#4b5563', fontSize: '14px', display: 'block', marginBottom: '4px' }}>예산</span>
               <span className="font-semibold text-gray-900 text-lg" style={{ fontWeight: '600', color: '#111827', fontSize: '18px' }}>{getBudgetTypeText(project.budgetType)}</span>
             </div>
-            <div className="bg-gray-50 p-4 rounded-lg" style={{ backgroundColor: '#f9fafb', padding: '16px', borderRadius: '8px' }}>
-              <span className="text-gray-600 text-sm block mb-1" style={{ color: '#4b5563', fontSize: '14px', display: 'block', marginBottom: '4px' }}>선호파트너</span>
-              <span className="font-semibold text-gray-900 text-lg" style={{ fontWeight: '600', color: '#111827', fontSize: '18px' }}>{getPartnerTypeText(project.partnerType)}</span>
-            </div>
+            {project.partnerType && getPartnerTypeText(project.partnerType) && (
+              <div className="bg-gray-50 p-4 rounded-lg" style={{ backgroundColor: '#f9fafb', padding: '16px', borderRadius: '8px' }}>
+                <span className="text-gray-600 text-sm block mb-1" style={{ color: '#4b5563', fontSize: '14px', display: 'block', marginBottom: '4px' }}>선호파트너</span>
+                <span className="font-semibold text-gray-900 text-lg" style={{ fontWeight: '600', color: '#111827', fontSize: '18px' }}>{getPartnerTypeText(project.partnerType)}</span>
+              </div>
+            )}
             {project.companyLocation && (
               <div className="bg-gray-50 p-4 rounded-lg" style={{ backgroundColor: '#f9fafb', padding: '16px', borderRadius: '8px' }}>
                 <span className="text-gray-600 text-sm block mb-1" style={{ color: '#4b5563', fontSize: '14px', display: 'block', marginBottom: '4px' }}>지역</span>
@@ -386,45 +378,55 @@ const ProjectDetailPage = () => {
           </div>
           
           {/* 기술 스택 */}
-          {project.techStacks?.length && (
-            <div>
-              <h3 className="font-semibold mb-4 text-gray-900" style={{ fontWeight: '600', marginBottom: '16px', color: '#111827' }}>기술 스택</h3>
-              <div className="flex flex-wrap gap-3" style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-                {(() => {
-                  // 카테고리별로 기술들을 그룹화
-                  const techsByCategory: Record<string, string[]> = {};
-                  
-                  project.techStacks.forEach((tech) => {
-                    const category = tech.techCategory || getTechCategoryFromName(tech.techName) || 'OTHER';
-                    const techDisplayName = getTechStackText(tech.techName);
-                    
-                    if (!techsByCategory[category]) {
-                      techsByCategory[category] = [];
-                    }
-                    techsByCategory[category].push(techDisplayName);
-                  });
-                  
-                  // 각 카테고리별로 태그 생성
-                  return Object.entries(techsByCategory).map(([category, techs]) => (
-                    <span key={category} className={`px-4 py-2 rounded-full text-sm font-medium ${
-                      category === 'FRONTEND' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
-                      category === 'BACKEND' ? 'bg-green-100 text-green-700 border border-green-200' :
-                      category === 'DATABASE' ? 'bg-purple-100 text-purple-700 border border-purple-200' :
-                      category === 'DESIGN' ? 'bg-pink-100 text-pink-700 border border-pink-200' :
-                      'bg-gray-100 text-gray-700 border border-gray-200'
-                    }`} style={{ 
-                      padding: '8px 16px', 
-                      borderRadius: '9999px', 
-                      fontSize: '14px', 
-                      fontWeight: '500'
-                    }}>
-                      {category === 'OTHER' ? techs.join(', ') : `${category}: ${techs.join(', ')}`}
-                    </span>
-                  ));
-                })()}
+          {(() => {
+            // 기술 스택이 있는지 확인하고 유효한 기술들만 필터링
+            if (!project.techStacks?.length) return null;
+            
+            const techsByCategory: Record<string, string[]> = {};
+            
+            project.techStacks.forEach((tech) => {
+              const category = tech.techCategory || getTechCategoryFromName(tech.techName) || 'OTHER';
+              const techDisplayName = getTechStackText(tech.techName);
+              
+              // 빈 문자열이나 유효하지 않은 기술명은 제외
+              if (techDisplayName && techDisplayName.trim()) {
+                if (!techsByCategory[category]) {
+                  techsByCategory[category] = [];
+                }
+                techsByCategory[category].push(techDisplayName);
+              }
+            });
+            
+            // 유효한 기술이 하나도 없으면 null 반환
+            const hasValidTechs = Object.values(techsByCategory).some(techs => techs.length > 0);
+            if (!hasValidTechs) return null;
+            
+            return (
+              <div>
+                <h3 className="font-semibold mb-4 text-gray-900" style={{ fontWeight: '600', marginBottom: '16px', color: '#111827' }}>기술 스택</h3>
+                <div className="flex flex-wrap gap-3" style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                  {Object.entries(techsByCategory)
+                    .filter(([, techs]) => techs.length > 0)
+                    .map(([category, techs]) => (
+                      <span key={category} className={`px-4 py-2 rounded-full text-sm font-medium ${
+                        category === 'FRONTEND' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
+                        category === 'BACKEND' ? 'bg-green-100 text-green-700 border border-green-200' :
+                        category === 'DATABASE' ? 'bg-purple-100 text-purple-700 border border-purple-200' :
+                        category === 'DESIGN' ? 'bg-pink-100 text-pink-700 border border-pink-200' :
+                        'bg-gray-100 text-gray-700 border border-gray-200'
+                      }`} style={{ 
+                        padding: '8px 16px', 
+                        borderRadius: '9999px', 
+                        fontSize: '14px', 
+                        fontWeight: '500'
+                      }}>
+                        {category === 'OTHER' ? techs.join(', ') : `${category}: ${techs.join(', ')}`}
+                      </span>
+                    ))}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
 
         {/* 업무내용 섹션 */}

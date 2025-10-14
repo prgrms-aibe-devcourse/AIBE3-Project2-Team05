@@ -82,5 +82,80 @@ export const sessionStorageUtils = {
   addCacheBuster: (url: string): string => {
     const separator = url.includes('?') ? '&' : '?';
     return `${url}${separator}_t=${Date.now()}`;
+  },
+
+  // 즐겨찾기 상태 저장
+  setFavoriteStatus: (projectId: number, isFavorite: boolean): void => {
+    const favoriteKey = `favorite_${projectId}`;
+    const timeKey = `favoriteTime_${projectId}`;
+    
+    sessionStorage.setItem(favoriteKey, JSON.stringify(isFavorite));
+    sessionStorage.setItem(timeKey, Date.now().toString());
+    
+    // 즐겨찾기 변경 이벤트 발생
+    window.dispatchEvent(new CustomEvent('favoriteStatusChanged', {
+      detail: { projectId, isFavorite }
+    }));
+  },
+
+  // 즐겨찾기 상태 불러오기
+  getFavoriteStatus: (projectId: number): boolean | null => {
+    const favoriteKey = `favorite_${projectId}`;
+    
+    try {
+      const savedFavorite = sessionStorage.getItem(favoriteKey);
+      return savedFavorite ? JSON.parse(savedFavorite) : null;
+    } catch (error) {
+      console.error('세션 스토리지 즐겨찾기 파싱 실패:', error);
+      sessionStorageUtils.clearFavoriteStatus(projectId);
+      return null;
+    }
+  },
+
+  // 즐겨찾기 상태 삭제
+  clearFavoriteStatus: (projectId: number): void => {
+    const favoriteKey = `favorite_${projectId}`;
+    const timeKey = `favoriteTime_${projectId}`;
+    
+    sessionStorage.removeItem(favoriteKey);
+    sessionStorage.removeItem(timeKey);
+  },
+
+  // 전체 즐겨찾기 목록 저장
+  setFavoriteList: (userId: number, favoriteIds: number[]): void => {
+    const listKey = `favoriteList_${userId}`;
+    const timeKey = `favoriteListTime_${userId}`;
+    
+    sessionStorage.setItem(listKey, JSON.stringify(favoriteIds));
+    sessionStorage.setItem(timeKey, Date.now().toString());
+  },
+
+  // 전체 즐겨찾기 목록 불러오기
+  getFavoriteList: (userId: number): number[] | null => {
+    const listKey = `favoriteList_${userId}`;
+    const timeKey = `favoriteListTime_${userId}`;
+    
+    if (!sessionStorageUtils.isSessionValid(timeKey)) {
+      sessionStorageUtils.clearFavoriteList(userId);
+      return null;
+    }
+
+    try {
+      const savedList = sessionStorage.getItem(listKey);
+      return savedList ? JSON.parse(savedList) : null;
+    } catch (error) {
+      console.error('세션 스토리지 즐겨찾기 목록 파싱 실패:', error);
+      sessionStorageUtils.clearFavoriteList(userId);
+      return null;
+    }
+  },
+
+  // 전체 즐겨찾기 목록 삭제
+  clearFavoriteList: (userId: number): void => {
+    const listKey = `favoriteList_${userId}`;
+    const timeKey = `favoriteListTime_${userId}`;
+    
+    sessionStorage.removeItem(listKey);
+    sessionStorage.removeItem(timeKey);
   }
 };

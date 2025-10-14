@@ -5,7 +5,7 @@ import { budgetOptions } from '@/constants/projectOptions';
 import { components } from '@/lib/backend/schema';
 import { showErrorMessage, showSuccessMessage, showValidationError } from '@/utils/formValidation';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type ProjectRequest = components['schemas']['ProjectRequest'];
 
@@ -33,6 +33,14 @@ const ProjectCreatePage = () => {
   });
   const [creating, setCreating] = useState(false);
 
+  // 페이지 접근 시 로그인 체크
+  useEffect(() => {
+    if (isLoaded && !username) {
+      showErrorMessage('로그인이 필요한 페이지입니다.');
+      router.push('/members/login');
+    }
+  }, [isLoaded, username, router]);
+
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -58,8 +66,9 @@ const ProjectCreatePage = () => {
     setCreating(true);
     try {
       // 사용자 인증 확인
-      if (!memberId) {
+      if (!username || !memberId || !isLoaded) {
         showErrorMessage('로그인이 필요합니다.');
+        router.push('/members/login');
         return;
       }
 
@@ -76,6 +85,7 @@ const ProjectCreatePage = () => {
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/complete`, {
         method: 'POST',
+        credentials: 'include', // 중요: 쿠키를 포함하여 요청
         headers: {
           'Content-Type': 'application/json',
         },
@@ -84,15 +94,15 @@ const ProjectCreatePage = () => {
 
       if (response.ok) {
         const result = await response.json();
-        const projectId = result.data?.id;
+        const projectId = result.Data?.id || result.data?.id;
         
         // 세션스토리지 정리
         sessionStorage.removeItem('projectBasicData');
         
         showSuccessMessage('프로젝트가 등록되었습니다!');
         
-        // 생성된 프로젝트의 상세 페이지로 이동
-        router.push(`/user-projects/1/${projectId}`);
+        // 생성된 프로젝트의 상세 페이지로 이동 (현재 로그인한 사용자의 memberId 사용)
+        router.push(`/user-projects/${memberId}/${projectId}`);
       } else {
         const errorData = await response.json().catch(() => ({}));
         showErrorMessage(errorData.message || '프로젝트 등록에 실패했습니다.');
