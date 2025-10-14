@@ -1,5 +1,6 @@
 package com.back.domain.project.controller;
 
+import com.back.domain.member.member.service.MemberRoleService;
 import com.back.domain.project.dto.ProjectRequest;
 import com.back.domain.project.dto.ProjectResponse;
 import com.back.domain.project.dto.ProjectStatusChangeRequest;
@@ -27,6 +28,7 @@ public class ProjectController {
 
     private final ProjectManagementService projectManagementService;
     private final ProjectQueryService projectQueryService;
+    private final MemberRoleService memberRoleService;
 
     // ===== 조회 API =====
 
@@ -128,6 +130,7 @@ public class ProjectController {
 
         try {
             ProjectResponse createdProject = projectManagementService.createCompleteProject(request);
+            memberRoleService.updateRoles(request.managerId());
             return ResponseEntity.ok(new RsData<>("200-1", "프로젝트가 성공적으로 생성되었습니다.", createdProject));
         } catch (IllegalArgumentException e) {
             log.error("프로젝트 완전 생성 실패 - {}", e.getMessage());
@@ -203,6 +206,7 @@ public class ProjectController {
 
         try {
             projectManagementService.deleteProject(id, managerId);
+            memberRoleService.updateRoles(managerId);
             return ResponseEntity.ok(new RsData<>("200-1", "프로젝트가 성공적으로 삭제되었습니다."));
         } catch (IllegalArgumentException e) {
             log.error("프로젝트 삭제 실패 - {}", e.getMessage());
