@@ -1,38 +1,28 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "@/styles/globals.css";
-import { AuthProvider } from "@/global/auth/hooks/useAuth";
-import Header from "./_components/Header";
+import { Footer } from "./components/Footer";
+import { Header } from "./components/Header";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { UserProvider } from "./context/UserContext";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "FIT Platform",
-  description: "Freelancer IT Matching Platform",
+  title: "FIT",
+  description: "FIT",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="ko">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <AuthProvider>
+      <body className="antialiased min-h-screen flex flex-col">
+        <UserProvider>
           <Header />
-          <main>{children}</main>
-        </AuthProvider>
+          <main className="flex-1 w-full pt-[68px] pb-[180px]">{children}</main>
+          <Footer />
+        </UserProvider>
       </body>
     </html>
   );

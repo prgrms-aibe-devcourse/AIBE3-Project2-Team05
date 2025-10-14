@@ -2,23 +2,25 @@ package com.back.domain.member.member.dto;
 
 import com.back.domain.member.member.entity.Member;
 
-/**
- * 회원 정보 DTO
- */
+import java.time.LocalDateTime;
+
 public record MemberDto(
-        Long id,
+        long id,
+        LocalDateTime createDate,
+        LocalDateTime modifyDate,
         String username,
         String nickname,
-        String email,
-        String role  // "PM" or "FREELANCER"
+        String email
 ) {
-    public MemberDto(Member member, String role) {
+
+    public MemberDto(Member member) {
         this(
                 member.getId(),
+                member.getCreateDate(),
+                member.getModifyDate(),
                 member.getUsername(),
                 member.getNickname(),
-                member.getEmail(),
-                role
+                member.getEmail()
         );
     }
 }

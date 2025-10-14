@@ -1,60 +1,73 @@
 package com.back.domain.member.member.entity;
 
-import com.back.global.baseEntity.BaseEntity;
+import com.back.global.jpa.BaseEntity;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-/**
- * 임시 엔티티 - 매칭 시스템 개발/테스트용
- * TODO: [Member 담당자] - 정식 엔티티로 교체 필요
- * 브랜치: feature/matching-temp (main merge 대기)
- * 생성: 2025-10-12 임창기 (매칭 시스템)
- *
- * 회원 엔티티 (최소 필드만 구현)
- */
-@Entity
-@Table(name = "member")
-@Getter
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 @NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Entity
+@Table
 public class Member extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
-
-    /**
-     * 로그인 ID
-     */
-    @Column(name = "username", nullable = false, length = 50, unique = true)
+    @Column(unique = true, nullable = false)
     private String username;
 
-    /**
-     * 비밀번호
-     */
-    @Column(name = "password", nullable = false)
     private String password;
 
-    /**
-     * 닉네임
-     */
-    @Column(name = "nickname", nullable = false, length = 50)
+    @Column(unique = true)
     private String nickname;
 
-    /**
-     * 이메일
-     */
-    @Column(name = "email", nullable = false, length = 100, unique = true)
+    @Column(unique = true)
     private String email;
 
-    /**
-     * 생성자
-     */
-    public Member(String username, String password, String nickname, String email) {
+    @ElementCollection(fetch = FetchType.LAZY)
+    @Enumerated(EnumType.STRING)
+    private List<Role> roles = new ArrayList<>();
+
+    private String refreshToken;
+
+    private LocalDateTime refreshTokenExpiry;  // 만료 시간
+
+    public Member(String username, String nickname, String password, String email) {
         this.username = username;
-        this.password = password;
         this.nickname = nickname;
+        this.password = password;
         this.email = email;
+    }
+
+    public Member (long id, String username, String nickname) {
+        this.id = id;
+        this.username = username;
+        this.nickname = nickname;
+    }
+
+    public void changePassword(String newPassword, PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(newPassword);
+    }
+
+    public void updateEmail(String email) {
+        this.email = email;
+    }
+
+    public void updateNickName(String nickname) {
+        this.nickname = nickname;
+    }
+    public void issueRefreshToken() {
+        this.refreshToken = UUID.randomUUID().toString();
+        this.refreshTokenExpiry = LocalDateTime.now().plusDays(14);
+    }
+    public void logout() {
+        this.refreshToken = null;
+        this.refreshTokenExpiry = null;
     }
 }
