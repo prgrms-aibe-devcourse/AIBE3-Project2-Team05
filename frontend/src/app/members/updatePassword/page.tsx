@@ -321,7 +321,7 @@ export default function UpdatePassword() {
             className="text-[14px] font-[300] leading-[20px] text-center mt-4"
             style={{ color: "#5A5549" }}
           >
-            이미 fit 회원이라면?{" "}
+            이미 FIT 회원이라면?{" "}
             <span
               className="cursor-pointer hover:underline font-normal"
               style={{ color: "#006A20" }}

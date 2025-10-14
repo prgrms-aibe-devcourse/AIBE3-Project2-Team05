@@ -248,7 +248,7 @@ export default function FindId() {
             {/* 회원가입 링크 */}
             <p
               className="text-[14px] font-[300] leading-[20px] text-center mt-4"
-              style={{ color: "#5A5549" }}
+              style={{ color: "#5A5549", marginTop: "10px" }}
             >
               아직 FIT 회원이 아니라면?{" "}
               <span
