@@ -30,6 +30,11 @@ public class PortfolioController {
         return portfolioService.getPortfolio(id);
     }
 
+    @GetMapping("/me/portfolios")
+    public List<PortfolioResponseDto> getMyPortfolios(@AuthenticationPrincipal SecurityUser securityUser) {
+        return portfolioService.getPortfoliosByMemberId(securityUser.getId());
+    }
+
     @PostMapping("/me/portfolios")
     public RsData<PortfolioResponseDto> savePortfolio(@AuthenticationPrincipal SecurityUser securityUser, @RequestPart PortfolioSaveRequestDto dto, @RequestPart MultipartFile imageFile) {
         Portfolio portfolio = portfolioService.save(securityUser.getId(), dto, imageFile);
