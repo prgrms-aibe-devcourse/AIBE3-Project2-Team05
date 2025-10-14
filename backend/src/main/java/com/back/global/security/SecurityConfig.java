@@ -29,6 +29,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/member/login", "/auth/findId/verify", "/member", "/auth/refresh", "/auth/findId/sendCode", "/auth/updatePassword/sendCode", "/").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/member/logout").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/auth/updatePassword/verify").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/projects").permitAll()
                         .anyRequest().authenticated()
                 )
                 .csrf(AbstractHttpConfigurer::disable)
