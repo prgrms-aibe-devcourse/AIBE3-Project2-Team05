@@ -4,7 +4,7 @@ import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.matching.message.entity.Message;
 import com.back.domain.matching.message.entity.RelatedType;
 import com.back.domain.member.member.entity.Member;
-import com.back.domain.project.project.entity.Project;
+import com.back.domain.project.entity.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

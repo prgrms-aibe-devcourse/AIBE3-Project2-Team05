@@ -1,12 +1,14 @@
 package com.back.domain.matching.matchScore.dto;
 
+import com.back.domain.freelancer.career.entity.Career;
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancerTech.entity.FreelancerTech;
 import com.back.domain.matching.matchScore.entity.MatchScore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,12 +45,12 @@ public record FreelancerRecommendationDto(
                                       Long completedProjects) {
         this(
                 matchScore.getFreelancer().getId(),
-                matchScore.getFreelancer().getName(),
-                matchScore.getFreelancer().getTotalExperience(),
-                extractAverageRating(matchScore.getFreelancer().getAverageRating()),
-                matchScore.getFreelancer().getMinRate(),
-                matchScore.getFreelancer().getMaxRate(),
-                matchScore.getFreelancer().getAvailable(),
+                matchScore.getFreelancer().getMemberNickname(),
+                extractTotalExperience(matchScore.getFreelancer()),
+                extractAverageRating(matchScore.getFreelancer()),
+                matchScore.getFreelancer().getMinMonthlyRate(),
+                matchScore.getFreelancer().getMaxMonthlyRate(),
+                Boolean.TRUE,
                 matchScore.getScoreTotal().doubleValue(),
                 matchScore.getScoreSkills().doubleValue(),
                 matchScore.getScoreExperience().doubleValue(),
@@ -66,8 +68,8 @@ public record FreelancerRecommendationDto(
     private static List<FreelancerTechDto> extractSkillDtos(List<FreelancerTech> freelancerTechs) {
         return freelancerTechs.stream()
                 .map(tech -> new FreelancerTechDto(
-                        tech.getTechName(),
-                        tech.getProficiency()
+                        tech.getTech() != null ? tech.getTech().getTechName() : null,
+                        tech.getTechLevel()
                 ))
                 .collect(Collectors.toList());
     }
@@ -75,8 +77,9 @@ public record FreelancerRecommendationDto(
     /**
      * 평균 평점 추출
      */
-    private static Double extractAverageRating(BigDecimal averageRating) {
-        return (averageRating != null) ? averageRating.doubleValue() : 0.0;
+    private static Double extractAverageRating(Freelancer freelancer) {
+        double ratingAvg = freelancer.getRatingAvg();
+        return ratingAvg > 0 ? ratingAvg : 0.0;
     }
 
     /**
@@ -92,5 +95,36 @@ public record FreelancerRecommendationDto(
         } catch (Exception e) {
             return Map.of("error", "매칭 점수 기반 추천");
         }
+    }
+
+    /**
+     * 총 경력 연차 계산 (년 단위 반올림)
+     */
+    private static Integer extractTotalExperience(Freelancer freelancer) {
+        return freelancer.getCareerList().stream()
+                .mapToInt(FreelancerRecommendationDto::calculateCareerYears)
+                .sum();
+    }
+
+    private static int calculateCareerYears(Career career) {
+        if (career.getStartDate() == null) {
+            return 0;
+        }
+
+        LocalDate endDate = career.getEndDate();
+        if (Boolean.TRUE.equals(career.getCurrent()) || endDate == null) {
+            endDate = LocalDate.now();
+        }
+
+        if (endDate.isBefore(career.getStartDate())) {
+            return 0;
+        }
+
+        long months = ChronoUnit.MONTHS.between(career.getStartDate(), endDate);
+        if (months <= 0) {
+            return 0;
+        }
+
+        return (int) Math.round(months / 12.0);
     }
 }

@@ -1,16 +1,14 @@
 package com.back.domain.matching.matchScore.controller;
 
 import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
-import com.back.domain.freelancer.freelancerTech.entity.FreelancerTech;
 import com.back.domain.freelancer.freelancerTech.repository.FreelancerTechRepository;
-import com.back.domain.freelancer.portfolio.repository.PortfolioRepository;
 import com.back.domain.matching.matchScore.dto.FreelancerRecommendationDto;
 import com.back.domain.matching.matchScore.dto.RecommendationResponseDto;
 import com.back.domain.matching.matchScore.entity.MatchScore;
 import com.back.domain.matching.matchScore.repository.MatchScoreRepository;
 import com.back.domain.matching.matchScore.service.MatchScoreService;
-import com.back.domain.project.project.entity.Project;
-import com.back.domain.project.project.repository.ProjectRepository;
+import com.back.domain.project.entity.Project;
+import com.back.domain.project.repository.ProjectRepository;
 import com.back.global.exception.ServiceException;
 import com.back.global.rsData.RsData;
 import com.back.global.security.SecurityUser;
@@ -27,14 +25,13 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/v1/matching")
 @RequiredArgsConstructor
-public class ApiV1MatchingController {
+public class MatchingController {
 
     private final MatchScoreService matchScoreService;
     private final MatchScoreRepository matchScoreRepository;
     private final ProjectRepository projectRepository;
     private final FreelancerRepository freelancerRepository;
     private final FreelancerTechRepository freelancerTechRepository;
-    private final PortfolioRepository portfolioRepository;
 
     /**
      * 프리랜서 추천 조회
@@ -66,7 +63,7 @@ public class ApiV1MatchingController {
 
         // 프리랜서인 경우: 본인의 매칭 점수만 조회 (minScore 무시)
         if (user != null) {
-            var freelancerOpt = freelancerRepository.findByMember(user.getMember());
+            var freelancerOpt = freelancerRepository.findByMemberId(user.getId());
 
             if (freelancerOpt.isPresent()) {
                 // 프리랜서로 로그인한 경우, 본인의 매칭 점수만 조회
@@ -118,12 +115,10 @@ public class ApiV1MatchingController {
         List<FreelancerRecommendationDto> recommendations = matchScores.stream()
                 .map(matchScore -> {
                     // 프리랜서 기술 목록 조회
-                    List<FreelancerTech> freelancerTechs = freelancerTechRepository
-                            .findByFreelancer(matchScore.getFreelancer());
+                    var freelancerTechs = freelancerTechRepository
+                            .findByFreelancerId(matchScore.getFreelancer().getId());
 
-                    // 완료 프로젝트 수 조회
-                    Long completedProjects = portfolioRepository
-                            .countByFreelancer(matchScore.getFreelancer());
+                    long completedProjects = matchScore.getFreelancer().getCompletedProjectsCount();
 
                     return new FreelancerRecommendationDto(matchScore, freelancerTechs, completedProjects);
                 })
@@ -165,7 +160,9 @@ public class ApiV1MatchingController {
         }
 
         // PM인 경우: 전체 재계산
-        if (project.isOwner(user.getMember())) {
+        boolean isProjectOwner = project.getManager() != null && project.getManager().getId().equals(user.getId());
+
+        if (isProjectOwner) {
             int calculatedCount = matchScoreService.calculateAndSaveRecommendations(projectId);
             return new RsData<>(
                     "200-1",
@@ -174,7 +171,7 @@ public class ApiV1MatchingController {
         }
 
         // 프리랜서인 경우: 본인 것만 재계산
-        var freelancerOpt = freelancerRepository.findByMember(user.getMember());
+        var freelancerOpt = freelancerRepository.findByMemberId(user.getId());
 
         if (freelancerOpt.isEmpty()) {
             throw new ServiceException("403-1", "프로젝트 소유자 또는 프리랜서만 재계산을 요청할 수 있습니다.");

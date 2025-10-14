@@ -2,7 +2,7 @@ package com.back.domain.freelancer.portfolio.entity;
 
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.portfolio.dto.PortfolioUpdateRequestDto;
-import com.back.global.jpa.entity.BaseEntity;
+import com.back.global.jpa.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;

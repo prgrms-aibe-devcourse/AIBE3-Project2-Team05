@@ -2,7 +2,7 @@ package com.back.domain.matching.projectSubmission.repository;
 
 import com.back.domain.matching.projectSubmission.entity.ProjectSubmission;
 import com.back.domain.matching.projectSubmission.entity.SubmissionStatusHistory;
-import com.back.domain.project.project.entity.Project;
+import com.back.domain.project.entity.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

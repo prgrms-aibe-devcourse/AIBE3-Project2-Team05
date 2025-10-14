@@ -36,7 +36,7 @@ public record ProjectSubmissionDto(
                 submission.getProject().getId(),
                 submission.getProject().getTitle(),
                 submission.getFreelancer().getId(),
-                submission.getFreelancer().getName(),
+                submission.getFreelancer().getMemberNickname(),
                 submission.getCoverLetter(),
                 submission.getProposedRate(),
                 submission.getEstimatedDuration(),

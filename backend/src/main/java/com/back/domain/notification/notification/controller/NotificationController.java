@@ -1,9 +1,11 @@
 package com.back.domain.notification.notification.controller;
 
 import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.repository.MemberRepository;
 import com.back.domain.notification.notification.dto.NotificationDto;
 import com.back.domain.notification.notification.entity.Notification;
 import com.back.domain.notification.notification.service.NotificationService;
+import com.back.global.exception.ServiceException;
 import com.back.global.rsData.RsData;
 import com.back.global.security.SecurityUser;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +22,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/notifications")
 @RequiredArgsConstructor
-public class ApiV1NotificationController {
+public class NotificationController {
 
     private final NotificationService notificationService;
+    private final MemberRepository memberRepository;
 
     /**
      * 알림 목록 조회
@@ -36,7 +39,8 @@ public class ApiV1NotificationController {
             @AuthenticationPrincipal SecurityUser user,
             @RequestParam(required = false, defaultValue = "false") boolean unreadOnly
     ) {
-        Member member = user.getMember();
+        Member member = memberRepository.findById(user.getId())
+                .orElseThrow(() -> new ServiceException("404-1", "회원을 찾을 수 없습니다."));
         List<Notification> notifications = unreadOnly
                 ? notificationService.findUnreadByMember(member)
                 : notificationService.findByMember(member);
@@ -62,7 +66,8 @@ public class ApiV1NotificationController {
     public RsData<Map<String, Long>> getUnreadCount(
             @AuthenticationPrincipal SecurityUser user
     ) {
-        Member member = user.getMember();
+        Member member = memberRepository.findById(user.getId())
+                .orElseThrow(() -> new ServiceException("404-1", "회원을 찾을 수 없습니다."));
         long count = notificationService.countUnreadByMember(member);
 
         return new RsData<>(
@@ -86,7 +91,8 @@ public class ApiV1NotificationController {
             @PathVariable Long id
     ) {
         Notification notification = notificationService.findById(id);
-        notificationService.markAsRead(notification, user.getMember());
+        notificationService.markAsRead(notification, memberRepository.findById(user.getId())
+                .orElseThrow(() -> new ServiceException("404-1", "회원을 찾을 수 없습니다.")));
 
         return new RsData<>(
                 "200-1",
@@ -105,7 +111,8 @@ public class ApiV1NotificationController {
     public RsData<Map<String, Integer>> markAllAsRead(
             @AuthenticationPrincipal SecurityUser user
     ) {
-        int count = notificationService.markAllAsRead(user.getMember());
+        int count = notificationService.markAllAsRead(memberRepository.findById(user.getId())
+                .orElseThrow(() -> new ServiceException("404-1", "회원을 찾을 수 없습니다.")));
 
         return new RsData<>(
                 "200-1",
@@ -128,7 +135,8 @@ public class ApiV1NotificationController {
             @PathVariable Long id
     ) {
         Notification notification = notificationService.findById(id);
-        notificationService.delete(notification, user.getMember());
+        notificationService.delete(notification, memberRepository.findById(user.getId())
+                .orElseThrow(() -> new ServiceException("404-1", "회원을 찾을 수 없습니다.")));
 
         return new RsData<>(
                 "200-1",

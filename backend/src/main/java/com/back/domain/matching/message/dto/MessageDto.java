@@ -36,7 +36,7 @@ public record MessageDto(
                 message.getPm().getId(),
                 message.getPm().getNickname(),
                 message.getFreelancer().getId(),
-                message.getFreelancer().getName(),
+                message.getFreelancer().getMemberNickname(),
                 message.getSender().getId(),
                 message.getSender().getNickname(),
                 message.getRelatedType(),

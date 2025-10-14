@@ -14,8 +14,8 @@ import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.repository.MemberRepository;
 import com.back.domain.notification.notification.entity.NotificationType;
 import com.back.domain.notification.notification.service.NotificationService;
-import com.back.domain.project.project.entity.Project;
-import com.back.domain.project.project.repository.ProjectRepository;
+import com.back.domain.project.entity.Project;
+import com.back.domain.project.repository.ProjectRepository;
 import com.back.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -115,7 +115,7 @@ public class MessageService {
      */
     public List<Message> findByMember(Member member) {
         // 프리랜서인지 확인
-        var freelancerOpt = freelancerRepository.findByMember(member);
+        var freelancerOpt = freelancerRepository.findByMemberId(member.getId());
 
         if (freelancerOpt.isPresent()) {
             // 프리랜서가 참여한 메시지 조회
@@ -149,7 +149,7 @@ public class MessageService {
         Freelancer freelancer = freelancerRepository.findById(freelancerId)
                 .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프리랜서입니다."));
 
-        Member pm = project.getPm();
+        Member pm = project.getManager();
 
         // 현재 사용자가 PM 또는 프리랜서인지 확인
         boolean isParticipant = currentUser.getId().equals(pm.getId()) ||
@@ -238,7 +238,7 @@ public class MessageService {
         Freelancer freelancer = freelancerRepository.findById(freelancerId)
                 .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프리랜서입니다."));
 
-        Member pm = project.getPm();
+        Member pm = project.getManager();
 
         // 현재 사용자가 PM 또는 프리랜서인지 확인
         boolean isParticipant = currentUser.getId().equals(pm.getId()) ||
@@ -281,9 +281,9 @@ public class MessageService {
                 .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 지원입니다."));
 
         // 발신자/수신자가 지원의 PM 또는 프리랜서인지 확인
-        boolean senderIsParticipant = sender.getId().equals(submission.getProject().getPm().getId()) ||
+        boolean senderIsParticipant = sender.getId().equals(submission.getProject().getManager().getId()) ||
                                       sender.getId().equals(submission.getFreelancer().getMember().getId());
-        boolean receiverIsParticipant = receiver.getId().equals(submission.getProject().getPm().getId()) ||
+        boolean receiverIsParticipant = receiver.getId().equals(submission.getProject().getManager().getId()) ||
                                         receiver.getId().equals(submission.getFreelancer().getMember().getId());
 
         if (!senderIsParticipant || !receiverIsParticipant) {
@@ -292,7 +292,7 @@ public class MessageService {
 
         return new MessageContext(
                 submission.getProject(),
-                submission.getProject().getPm(),
+                submission.getProject().getManager(),
                 submission.getFreelancer()
         );
     }

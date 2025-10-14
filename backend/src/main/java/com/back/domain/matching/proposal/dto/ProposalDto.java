@@ -35,7 +35,7 @@ public record ProposalDto(
                 proposal.getPm().getId(),
                 proposal.getPm().getNickname(),
                 proposal.getFreelancer().getId(),
-                proposal.getFreelancer().getName(),
+                proposal.getFreelancer().getMemberNickname(),
                 proposal.getMessage(),
                 proposal.getStatus(),
                 proposal.getResponseMessage(),

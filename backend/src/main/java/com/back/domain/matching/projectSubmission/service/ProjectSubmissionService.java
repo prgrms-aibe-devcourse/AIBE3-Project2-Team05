@@ -10,8 +10,8 @@ import com.back.domain.freelancer.portfolio.entity.Portfolio;
 import com.back.domain.freelancer.portfolio.repository.PortfolioRepository;
 import com.back.domain.notification.notification.entity.NotificationType;
 import com.back.domain.notification.notification.service.NotificationService;
-import com.back.domain.project.project.entity.Project;
-import com.back.domain.project.project.repository.ProjectRepository;
+import com.back.domain.project.entity.Project;
+import com.back.domain.project.repository.ProjectRepository;
 import com.back.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -74,7 +74,7 @@ public class ProjectSubmissionService {
         ProjectSubmission savedSubmission = projectSubmissionRepository.save(submission);
 
         // 지원자 수 증가
-        project.incrementApplicantCount();
+        project.setApplicantCount(project.getApplicantCount() + 1);
 
         return savedSubmission;
     }
@@ -195,7 +195,8 @@ public class ProjectSubmissionService {
         submission.cancel();
 
         // 지원자 수 감소
-        submission.getProject().decrementApplicantCount();
+        Project project = submission.getProject();
+        project.setApplicantCount(project.getApplicantCount() - 1);
     }
 
     /**

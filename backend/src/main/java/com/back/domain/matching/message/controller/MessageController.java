@@ -7,6 +7,7 @@ import com.back.domain.matching.message.entity.Message;
 import com.back.domain.matching.message.entity.RelatedType;
 import com.back.domain.matching.message.service.MessageService;
 import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.repository.MemberRepository;
 import com.back.global.exception.ServiceException;
 import com.back.global.rsData.RsData;
 import com.back.global.security.SecurityUser;
@@ -24,9 +25,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/messages")
 @RequiredArgsConstructor
-public class ApiV1MessageController {
+public class MessageController {
 
     private final MessageService messageService;
+    private final MemberRepository memberRepository;
 
     /**
      * 메시지 전송
@@ -41,7 +43,8 @@ public class ApiV1MessageController {
             @AuthenticationPrincipal SecurityUser user,
             @Valid @RequestBody MessageCreateReqBody reqBody
     ) {
-        Member sender = user.getMember();
+        Member sender = memberRepository.findById(user.getId())
+                .orElseThrow(() -> new ServiceException("404-1", "회원을 찾을 수 없습니다."));
 
         Message message = messageService.send(
                 sender,
@@ -69,7 +72,8 @@ public class ApiV1MessageController {
     public RsData<List<ConversationDto>> getConversations(
             @AuthenticationPrincipal SecurityUser user
     ) {
-        Member member = user.getMember();
+        Member member = memberRepository.findById(user.getId())
+                .orElseThrow(() -> new ServiceException("404-1", "회원을 찾을 수 없습니다."));
 
         List<ConversationDto> conversations = messageService.findConversations(member);
 
@@ -96,7 +100,8 @@ public class ApiV1MessageController {
             @PathVariable Long freelancerId,
             @RequestParam(required = false, defaultValue = "50") int limit
     ) {
-        Member member = user.getMember();
+        Member member = memberRepository.findById(user.getId())
+                .orElseThrow(() -> new ServiceException("404-1", "회원을 찾을 수 없습니다."));
 
         List<Message> messages = messageService.findConversation(
                 member,
@@ -133,7 +138,8 @@ public class ApiV1MessageController {
             @RequestParam(required = false) Long relatedId,
             @RequestParam(required = false, defaultValue = "false") boolean unreadOnly
     ) {
-        Member member = user.getMember();
+        Member member = memberRepository.findById(user.getId())
+                .orElseThrow(() -> new ServiceException("404-1", "회원을 찾을 수 없습니다."));
         List<Message> messages;
 
         if (unreadOnly) {
@@ -172,9 +178,11 @@ public class ApiV1MessageController {
             @PathVariable Long id
     ) {
         Message message = messageService.findById(id);
+        Member member = memberRepository.findById(user.getId())
+                .orElseThrow(() -> new ServiceException("404-1", "회원을 찾을 수 없습니다."));
 
         // 권한 확인 (대화 참여자만 조회 가능)
-        if (!message.isParticipant(user.getMember())) {
+        if (!message.isParticipant(member)) {
             throw new ServiceException("403-1", "메시지를 볼 권한이 없습니다.");
         }
 
@@ -199,7 +207,8 @@ public class ApiV1MessageController {
             @PathVariable Long id
     ) {
         Message message = messageService.findById(id);
-        Member reader = user.getMember();
+        Member reader = memberRepository.findById(user.getId())
+                .orElseThrow(() -> new ServiceException("404-1", "회원을 찾을 수 없습니다."));
 
         messageService.markAsRead(message, reader);
 
@@ -224,7 +233,8 @@ public class ApiV1MessageController {
             @PathVariable Long projectId,
             @PathVariable Long freelancerId
     ) {
-        Member member = user.getMember();
+        Member member = memberRepository.findById(user.getId())
+                .orElseThrow(() -> new ServiceException("404-1", "회원을 찾을 수 없습니다."));
 
         messageService.markConversationAsRead(member, projectId, freelancerId);
 

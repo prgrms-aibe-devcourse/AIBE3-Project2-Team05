@@ -3,7 +3,7 @@ package com.back.domain.matching.projectSubmission.repository;
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.matching.projectSubmission.entity.ProjectSubmission;
 import com.back.domain.matching.projectSubmission.entity.SubmissionStatus;
-import com.back.domain.project.project.entity.Project;
+import com.back.domain.project.entity.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

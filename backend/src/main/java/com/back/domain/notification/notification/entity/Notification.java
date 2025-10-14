@@ -1,7 +1,7 @@
 package com.back.domain.notification.notification.entity;
 
 import com.back.domain.member.member.entity.Member;
-import com.back.global.baseEntity.BaseEntity;
+import com.back.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,11 +14,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class Notification extends BaseEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
 
     /**
      * 알림 받을 회원

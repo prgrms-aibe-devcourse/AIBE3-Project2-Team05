@@ -4,17 +4,194 @@
  */
 
 export interface paths {
-    "/api/users/{id}": {
+    "/auth/updatePassword/verify": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["getUserById"];
-        put: operations["updateUser"];
+        get?: never;
+        /** 비밀번호 인증 코드 검증 */
+        put: operations["updatePassword"];
         post?: never;
-        delete: operations["deleteUser"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/submissions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getSubmission"];
+        put: operations["modify"];
+        post?: never;
+        delete: operations["cancel"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/submissions/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateStatus"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/proposals/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["reject"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/proposals/{id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["accept"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["markAsRead"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["markAllAsRead"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messages/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["markAsRead_1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messages/conversation/{projectId}/{freelancerId}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["markConversationAsRead"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/freelancers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getItem"];
+        put: operations["update"];
+        post?: never;
+        delete: operations["delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/freelancers/me/portfolios/{portfolioId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["update_1"];
+        post?: never;
+        delete: operations["delete_1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/freelancers/me/careers/{careerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateCareer"];
+        post?: never;
+        delete: operations["deleteCareer"];
         options?: never;
         head?: never;
         patch?: never;
@@ -36,16 +213,228 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/users": {
+    "/member": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["getAllUsers"];
+        get?: never;
         put?: never;
-        post: operations["createUser"];
+        /** 회원가입 */
+        post: operations["join"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/member/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 로그인 */
+        post: operations["login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/updatePassword/sendCode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["sendResetPasswordCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** AccessToken 재발급 */
+        post: operations["refreshAccessToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/findId/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 아이디 찾기 */
+        post: operations["findId"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/findId/sendCode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["sendEmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/submissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getSubmissions"];
+        put?: never;
+        post: operations["create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/proposals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getProposals"];
+        put?: never;
+        post: operations["create_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getMessages"];
+        put?: never;
+        post: operations["send"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/matching/recommend/{projectId}/recalculate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["recalculateRecommendations"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/freelancers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getItems"];
+        put?: never;
+        post: operations["create_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/freelancers/me/techs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["addMyTech"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/freelancers/me/portfolios": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["savePortfolio"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/freelancers/me/careers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["addCareer"];
         delete?: never;
         options?: never;
         head?: never;
@@ -116,6 +505,39 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/member/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 내 정보 */
+        get: operations["me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["updateMe"];
+        trace?: never;
+    };
+    "/api/v1/freelancers/me/techs/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deleteMyTech"];
+        options?: never;
+        head?: never;
+        patch: operations["updateMyTech"];
+        trace?: never;
+    };
     "/api/projects/{id}/status": {
         parameters: {
             query?: never;
@@ -132,14 +554,14 @@ export interface paths {
         patch: operations["updateProjectStatus"];
         trace?: never;
     };
-    "/api/users/username/{username}": {
+    "/api/v1/techs": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["getUserByUsername"];
+        get: operations["searchAvailableTechs"];
         put?: never;
         post?: never;
         delete?: never;
@@ -148,14 +570,174 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/users/exists/username/{username}": {
+    "/api/v1/proposals/{id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["existsByUsername"];
+        get: operations["getProposal"];
+        put?: never;
+        post?: never;
+        delete: operations["cancel_1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getNotifications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/unread-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getUnreadCount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messages/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getMessage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messages/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getConversations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messages/conversation/{projectId}/{freelancerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getConversation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/matching/recommend/{projectId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getRecommendations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/freelancers/{freelancerId}/techs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getFreelancersTechs"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/freelancers/{freelancerId}/portfolios": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getPortfolios"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/freelancers/{freelancerId}/careers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getCareers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/freelancers/portfolios/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getPortfolio"];
         put?: never;
         post?: never;
         delete?: never;
@@ -292,17 +874,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/projects/favorites/user/{userId}": {
+    "/api/projects/favorites/member/{memberId}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["getUserFavoriteProjectIds"];
+        get: operations["getMemberFavoriteProjectIds"];
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/member/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** 로그아웃 */
+        delete: operations["logout"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["delete_2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -312,16 +927,85 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        User: {
-            /** Format: date-time */
-            createDate?: string;
-            /** Format: date-time */
-            modifyDate?: string;
-            /** Format: int64 */
-            id?: number;
+        UpdatePasswordReq: {
             username?: string;
-            password?: string;
             email?: string;
+            newPassword?: string;
+            newPasswordCheck?: string;
+            verifyCode?: string;
+        };
+        RsDataVoid: {
+            resultCode?: string;
+            msg?: string;
+            data?: unknown;
+        };
+        PortfolioItemDto: {
+            title?: string;
+            description?: string;
+            url?: string;
+            thumbnailUrl?: string;
+        };
+        ProjectSubmissionModifyReqBody: {
+            coverLetter: string;
+            /** Format: int32 */
+            proposedRate: number;
+            /** Format: int32 */
+            estimatedDuration: number;
+            portfolio?: components["schemas"]["PortfolioItemDto"][];
+        };
+        ProjectSubmissionStatusUpdateReqBody: {
+            /** @enum {string} */
+            status: "PENDING" | "ACCEPTED" | "REJECTED";
+            message?: string;
+        };
+        ProposalRejectReqBody: {
+            responseMessage?: string;
+            rejectionReason: string;
+        };
+        ProposalAcceptReqBody: {
+            responseMessage?: string;
+        };
+        RsDataMapStringInteger: {
+            resultCode?: string;
+            msg?: string;
+            data?: {
+                [key: string]: number;
+            };
+        };
+        FreelancerUpdateRequestDto: {
+            freelancerTitle: string;
+            type: string;
+            location: string;
+            content: string;
+            isOnSite: boolean;
+            /** Format: int32 */
+            minMonthlyRate: number;
+            /** Format: int32 */
+            maxMonthlyRate: number;
+            deleteExistingImage: boolean;
+        };
+        PortfolioUpdateRequestDto: {
+            title?: string;
+            description?: string;
+            /** Format: date */
+            startDate?: string;
+            /** Format: date */
+            endDate?: string;
+            /** Format: int32 */
+            contribution?: number;
+            externalUrl?: string;
+            deleteExistingImage?: boolean;
+        };
+        CareerRequestDto: {
+            title?: string;
+            company?: string;
+            position?: string;
+            /** Format: date */
+            startDate?: string;
+            /** Format: date */
+            endDate?: string;
+            current?: boolean;
+            description?: string;
         };
         ProjectRequest: {
             title?: string;
@@ -350,6 +1034,12 @@ export interface components {
             techNames?: string[];
             attachmentFileIds?: number[];
             filesToDelete?: number[];
+        };
+        MemberInfo: {
+            /** Format: int64 */
+            id?: number;
+            username?: string;
+            nickname?: string;
         };
         ProjectFileInfo: {
             /** Format: int64 */
@@ -391,8 +1081,7 @@ export interface components {
             viewCount?: number;
             /** Format: int32 */
             applicantCount?: number;
-            /** Format: int64 */
-            managerId?: number;
+            manager?: components["schemas"]["MemberInfo"];
             /** Format: date-time */
             createDate?: string;
             /** Format: date-time */
@@ -401,63 +1090,278 @@ export interface components {
             projectFiles?: components["schemas"]["ProjectFileInfo"][];
         };
         RsDataProjectResponse: {
-            success?: boolean;
-            message?: string;
+            resultCode?: string;
+            msg?: string;
             data?: components["schemas"]["ProjectResponse"];
-            errorCode?: string;
-            /** Format: date-time */
-            timestamp?: string;
         };
         TechInfo: {
             techName?: string;
             /** @enum {string} */
             techCategory?: "FRONTEND" | "BACKEND" | "DATABASE";
         };
-        ProjectFile: {
+        MemberJoinReq: {
+            username: string;
+            email: string;
+            nickname: string;
+            password: string;
+            passwordCheck: string;
+            passwordMatch?: boolean;
+        };
+        MemberDto: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: date-time */
+            createDate?: string;
+            /** Format: date-time */
+            modifyDate?: string;
+            username?: string;
+            nickname?: string;
+            email?: string;
+        };
+        RsDataMemberDto: {
+            resultCode?: string;
+            msg?: string;
+            data?: components["schemas"]["MemberDto"];
+        };
+        MemberLoginReq: {
+            username: string;
+            password: string;
+        };
+        MemberLoginRes: {
+            MemberDto?: components["schemas"]["MemberDto"];
+            refreshToken?: string;
+            accessToken?: string;
+        };
+        RsDataMemberLoginRes: {
+            resultCode?: string;
+            msg?: string;
+            data?: components["schemas"]["MemberLoginRes"];
+        };
+        SendUpdatePasswordCodeReq: {
+            username: string;
+            email: string;
+        };
+        FindIdReq: {
+            email?: string;
+            verifyCode?: string;
+        };
+        FindIdRes: {
+            username?: string;
+        };
+        RsDataFindIdRes: {
+            resultCode?: string;
+            msg?: string;
+            data?: components["schemas"]["FindIdRes"];
+        };
+        ProjectSubmissionCreateReqBody: {
+            /** Format: int64 */
+            projectId: number;
+            coverLetter: string;
+            /** Format: int32 */
+            proposedRate: number;
+            /** Format: int32 */
+            estimatedDuration: number;
+            portfolio?: components["schemas"]["PortfolioItemDto"][];
+        };
+        ProjectSubmissionDto: {
             /** Format: int64 */
             id?: number;
             /** Format: int64 */
             projectId?: number;
-            originalName?: string;
-            storedName?: string;
-            filePath?: string;
+            projectTitle?: string;
             /** Format: int64 */
-            fileSize?: number;
-            fileType?: string;
-            /** Format: date-time */
-            uploadDate?: string;
-        };
-        RsDataProjectFile: {
-            success?: boolean;
-            message?: string;
-            data?: components["schemas"]["ProjectFile"];
-            errorCode?: string;
-            /** Format: date-time */
-            timestamp?: string;
-        };
-        RsDataListProjectFile: {
-            success?: boolean;
-            message?: string;
-            data?: components["schemas"]["ProjectFile"][];
-            errorCode?: string;
-            /** Format: date-time */
-            timestamp?: string;
-        };
-        RsDataMapStringObject: {
-            success?: boolean;
-            message?: string;
-            data?: {
-                [key: string]: unknown;
-            };
-            errorCode?: string;
-            /** Format: date-time */
-            timestamp?: string;
-        };
-        ProjectStatusChangeRequest: {
+            freelancerId?: number;
+            freelancerName?: string;
+            coverLetter?: string;
+            /** Format: int32 */
+            proposedRate?: number;
+            /** Format: int32 */
+            estimatedDuration?: number;
+            portfolio?: components["schemas"]["PortfolioItemDto"][];
             /** @enum {string} */
-            status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
+            status?: "PENDING" | "ACCEPTED" | "REJECTED";
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        RsDataProjectSubmissionDto: {
+            resultCode?: string;
+            msg?: string;
+            data?: components["schemas"]["ProjectSubmissionDto"];
+        };
+        ProposalCreateReqBody: {
             /** Format: int64 */
-            changedById?: number;
+            projectId: number;
+            /** Format: int64 */
+            freelancerId: number;
+            message: string;
+        };
+        ProposalDto: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: int64 */
+            projectId?: number;
+            projectTitle?: string;
+            /** Format: int64 */
+            pmId?: number;
+            pmName?: string;
+            /** Format: int64 */
+            freelancerId?: number;
+            freelancerName?: string;
+            message?: string;
+            /** @enum {string} */
+            status?: "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED";
+            responseMessage?: string;
+            rejectionReason?: string;
+            /** Format: date-time */
+            responseDate?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        RsDataProposalDto: {
+            resultCode?: string;
+            msg?: string;
+            data?: components["schemas"]["ProposalDto"];
+        };
+        MessageCreateReqBody: {
+            /** Format: int64 */
+            receiverId: number;
+            /** @enum {string} */
+            relatedType: "SUBMISSION" | "PROPOSAL" | "PROJECT";
+            /** Format: int64 */
+            relatedId: number;
+            content: string;
+        };
+        MessageDto: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: int64 */
+            projectId?: number;
+            projectTitle?: string;
+            /** Format: int64 */
+            pmId?: number;
+            pmName?: string;
+            /** Format: int64 */
+            freelancerId?: number;
+            freelancerName?: string;
+            /** Format: int64 */
+            senderId?: number;
+            senderName?: string;
+            /** @enum {string} */
+            relatedType?: "SUBMISSION" | "PROPOSAL" | "PROJECT";
+            /** Format: int64 */
+            relatedId?: number;
+            content?: string;
+            isRead?: boolean;
+            /** Format: date-time */
+            readAt?: string;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        RsDataMessageDto: {
+            resultCode?: string;
+            msg?: string;
+            data?: components["schemas"]["MessageDto"];
+        };
+        FreelancerSaveRequestDto: {
+            freelancerTitle: string;
+            type: string;
+            location: string;
+            content: string;
+            isOnSite: boolean;
+            /** Format: int32 */
+            minMonthlyRate: number;
+            /** Format: int32 */
+            maxMonthlyRate: number;
+        };
+        FreelancerDto: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: date-time */
+            createDate?: string;
+            /** Format: date-time */
+            modifyDate?: string;
+            nickname?: string;
+            freelancerTitle?: string;
+            type?: string;
+            location?: string;
+            content?: string;
+            isOnSite?: boolean;
+            /** Format: int32 */
+            minMonthlyRate?: number;
+            /** Format: int32 */
+            maxMonthlyRate?: number;
+        };
+        RsDataFreelancerDto: {
+            resultCode?: string;
+            msg?: string;
+            data?: components["schemas"]["FreelancerDto"];
+        };
+        FreelancerTechAddDto: {
+            /** Format: int64 */
+            techId?: number;
+            techLevel?: string;
+        };
+        FreelancerTechDto: {
+            /** Format: int64 */
+            id?: number;
+            techCategory?: string;
+            techName?: string;
+            techLevel?: string;
+        };
+        RsDataFreelancerTechDto: {
+            resultCode?: string;
+            msg?: string;
+            data?: components["schemas"]["FreelancerTechDto"];
+        };
+        PortfolioSaveRequestDto: {
+            title?: string;
+            description?: string;
+            /** Format: date */
+            startDate?: string;
+            /** Format: date */
+            endDate?: string;
+            /** Format: int32 */
+            contribution?: number;
+            externalUrl?: string;
+        };
+        PortfolioResponseDto: {
+            /** Format: int64 */
+            id?: number;
+            title?: string;
+            description?: string;
+            /** Format: date */
+            startDate?: string;
+            /** Format: date */
+            endDate?: string;
+            /** Format: int32 */
+            contribution?: number;
+            imageUrl?: string;
+            externalUrl?: string;
+        };
+        RsDataPortfolioResponseDto: {
+            resultCode?: string;
+            msg?: string;
+            data?: components["schemas"]["PortfolioResponseDto"];
+        };
+        Member: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: date-time */
+            createDate?: string;
+            /** Format: date-time */
+            modifyDate?: string;
+            username?: string;
+            password?: string;
+            nickname?: string;
+            email?: string;
+            roles?: ("GENERAL" | "PM" | "FREELANCER")[];
+            refreshToken?: string;
+            /** Format: date-time */
+            refreshTokenExpiry?: string;
         };
         Project: {
             /** Format: int64 */
@@ -488,8 +1392,7 @@ export interface components {
             viewCount?: number;
             /** Format: int32 */
             applicantCount?: number;
-            /** Format: int64 */
-            managerId?: number;
+            manager?: components["schemas"]["Member"];
             /** Format: date-time */
             createDate?: string;
             /** Format: date-time */
@@ -502,45 +1405,262 @@ export interface components {
         ProjectFavorite: {
             /** Format: int64 */
             id?: number;
-            /** Format: int64 */
-            userId?: number;
-            /** Format: int64 */
-            projectId?: number;
+            member?: components["schemas"]["Member"];
+            project?: unknown;
             /** Format: date-time */
             createDate?: string;
+        };
+        ProjectFile: {
+            /** Format: int64 */
+            id?: number;
+            project?: components["schemas"]["Project"];
+            originalName?: string;
+            storedName?: string;
+            filePath?: string;
+            /** Format: int64 */
+            fileSize?: number;
+            fileType?: string;
+            /** Format: date-time */
+            uploadDate?: string;
         };
         ProjectTech: {
             /** Format: int64 */
             id?: number;
-            /** Format: int64 */
-            projectId?: number;
+            project?: unknown;
             /** @enum {string} */
             techCategory?: "FRONTEND" | "BACKEND" | "DATABASE";
             techName?: string;
             /** Format: date-time */
             createDate?: string;
         };
+        RsDataProjectFile: {
+            resultCode?: string;
+            msg?: string;
+            data?: components["schemas"]["ProjectFile"];
+        };
+        RsDataListProjectFile: {
+            resultCode?: string;
+            msg?: string;
+            data?: components["schemas"]["ProjectFile"][];
+        };
+        RsDataMapStringObject: {
+            resultCode?: string;
+            msg?: string;
+            data?: {
+                [key: string]: unknown;
+            };
+        };
+        UpdateMemberReq: {
+            email?: string;
+            nickname?: string;
+        };
+        ProjectStatusChangeRequest: {
+            /** @enum {string} */
+            status?: "RECRUITING" | "CONTRACTING" | "IN_PROGRESS" | "COMPLETED" | "SUSPENDED" | "CANCELLED";
+            /** Format: int64 */
+            changedById?: number;
+        };
         RsDataProject: {
-            success?: boolean;
-            message?: string;
+            resultCode?: string;
+            msg?: string;
             data?: components["schemas"]["Project"];
-            errorCode?: string;
+        };
+        TechDto: {
+            /** Format: int64 */
+            id?: number;
+            techCategory?: string;
+            techName?: string;
+        };
+        RsDataListProjectSubmissionDto: {
+            resultCode?: string;
+            msg?: string;
+            data?: components["schemas"]["ProjectSubmissionDto"][];
+        };
+        RsDataListProposalDto: {
+            resultCode?: string;
+            msg?: string;
+            data?: components["schemas"]["ProposalDto"][];
+        };
+        NotificationDto: {
+            /** Format: int64 */
+            id?: number;
+            /** @enum {string} */
+            notificationType?: "PROPOSAL_RECEIVED" | "PROPOSAL_ACCEPTED" | "PROPOSAL_REJECTED" | "MESSAGE_RECEIVED" | "SUBMISSION_ACCEPTED" | "SUBMISSION_REJECTED";
+            title?: string;
+            content?: string;
+            relatedType?: string;
+            /** Format: int64 */
+            relatedId?: number;
+            isRead?: boolean;
             /** Format: date-time */
-            timestamp?: string;
+            createdAt?: string;
+        };
+        RsDataListNotificationDto: {
+            resultCode?: string;
+            msg?: string;
+            data?: components["schemas"]["NotificationDto"][];
+        };
+        RsDataMapStringLong: {
+            resultCode?: string;
+            msg?: string;
+            data?: {
+                [key: string]: number;
+            };
+        };
+        RsDataListMessageDto: {
+            resultCode?: string;
+            msg?: string;
+            data?: components["schemas"]["MessageDto"][];
+        };
+        ConversationDto: {
+            /** Format: int64 */
+            projectId?: number;
+            projectTitle?: string;
+            /** Format: int64 */
+            freelancerId?: number;
+            freelancerName?: string;
+            /** Format: int64 */
+            pmId?: number;
+            pmName?: string;
+            lastMessage?: string;
+            /** Format: date-time */
+            lastMessageAt?: string;
+            /** Format: int32 */
+            unreadCount?: number;
+            lastMessagePreview?: string;
+        };
+        RsDataListConversationDto: {
+            resultCode?: string;
+            msg?: string;
+            data?: components["schemas"]["ConversationDto"][];
+        };
+        FreelancerRecommendationDto: {
+            /** Format: int64 */
+            freelancerId?: number;
+            freelancerName?: string;
+            /** Format: int32 */
+            totalExperience?: number;
+            /** Format: double */
+            averageRating?: number;
+            /** Format: int32 */
+            minRate?: number;
+            /** Format: int32 */
+            maxRate?: number;
+            available?: boolean;
+            /** Format: double */
+            matchingScore?: number;
+            /** Format: double */
+            skillScore?: number;
+            /** Format: double */
+            experienceScore?: number;
+            /** Format: double */
+            budgetScore?: number;
+            /** Format: int32 */
+            rank?: number;
+            matchingReasons?: {
+                [key: string]: unknown;
+            };
+            skills?: components["schemas"]["FreelancerTechDto"][];
+            /** Format: int64 */
+            completedProjects?: number;
+        };
+        RecommendationResponseDto: {
+            /** Format: int64 */
+            projectId?: number;
+            projectTitle?: string;
+            /** Format: int32 */
+            totalRecommendations?: number;
+            recommendations?: components["schemas"]["FreelancerRecommendationDto"][];
+        };
+        RsDataRecommendationResponseDto: {
+            resultCode?: string;
+            msg?: string;
+            data?: components["schemas"]["RecommendationResponseDto"];
+        };
+        FreelancerListResponseDto: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: date-time */
+            createDate?: string;
+            /** Format: date-time */
+            modifyDate?: string;
+            nickname?: string;
+            freelancerTitle?: string;
+            type?: string;
+            location?: string;
+            content?: string;
+            isOnSite?: boolean;
+            /** Format: int32 */
+            minMonthlyRate?: number;
+            /** Format: int32 */
+            maxMonthlyRate?: number;
+            /** Format: double */
+            ratingAvg?: number;
+            /** Format: int32 */
+            reviewsCount?: number;
+            /** Format: int32 */
+            favoritesCount?: number;
+            /** Format: int32 */
+            completedProjectsCount?: number;
+            techNameList?: string[];
+            freelancerProfileImageUrl?: string;
+        };
+        CareerResponseDto: {
+            freelancerName?: string;
+            /** Format: int64 */
+            id?: number;
+            title?: string;
+            company?: string;
+            position?: string;
+            /** Format: date */
+            startDate?: string;
+            /** Format: date */
+            endDate?: string;
+            current?: boolean;
+            description?: string;
+        };
+        FreelancerDetailResponseDto: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: date-time */
+            createDate?: string;
+            /** Format: date-time */
+            modifyDate?: string;
+            nickname?: string;
+            freelancerTitle?: string;
+            type?: string;
+            location?: string;
+            content?: string;
+            isOnSite?: boolean;
+            /** Format: int32 */
+            minMonthlyRate?: number;
+            /** Format: int32 */
+            maxMonthlyRate?: number;
+            /** Format: double */
+            ratingAvg?: number;
+            /** Format: int32 */
+            reviewsCount?: number;
+            /** Format: int32 */
+            favoritesCount?: number;
+            /** Format: int32 */
+            completedProjectsCount?: number;
+            techList?: components["schemas"]["FreelancerTechDto"][];
+            careerList?: components["schemas"]["CareerResponseDto"][];
+            freelancerProfileImageUrl?: string;
         };
         PageProjectResponse: {
             /** Format: int64 */
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["ProjectResponse"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            first?: boolean;
-            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
             pageable?: components["schemas"]["PageableObject"];
@@ -550,33 +1670,22 @@ export interface components {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
+            unpaged?: boolean;
             paged?: boolean;
             /** Format: int32 */
             pageNumber?: number;
             /** Format: int32 */
             pageSize?: number;
-            unpaged?: boolean;
         };
         SortObject: {
             empty?: boolean;
-            sorted?: boolean;
             unsorted?: boolean;
+            sorted?: boolean;
         };
         RsDataListLong: {
-            success?: boolean;
-            message?: string;
+            resultCode?: string;
+            msg?: string;
             data?: number[];
-            errorCode?: string;
-            /** Format: date-time */
-            timestamp?: string;
-        };
-        RsDataVoid: {
-            success?: boolean;
-            message?: string;
-            data?: unknown;
-            errorCode?: string;
-            /** Format: date-time */
-            timestamp?: string;
         };
     };
     responses: never;
@@ -587,7 +1696,31 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    getUserById: {
+    updatePassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePasswordReq"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    getSubmission: {
         parameters: {
             query?: never;
             header?: never;
@@ -604,12 +1737,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["User"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataProjectSubmissionDto"];
                 };
             };
         };
     };
-    updateUser: {
+    modify: {
         parameters: {
             query?: never;
             header?: never;
@@ -620,7 +1753,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["User"];
+                "application/json": components["schemas"]["ProjectSubmissionModifyReqBody"];
             };
         };
         responses: {
@@ -630,12 +1763,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["User"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
                 };
             };
         };
     };
-    deleteUser: {
+    cancel: {
         parameters: {
             query?: never;
             header?: never;
@@ -651,7 +1784,348 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    updateStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectSubmissionStatusUpdateReqBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    reject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProposalRejectReqBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProposalAcceptReqBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    markAsRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    markAllAsRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataMapStringInteger"];
+                };
+            };
+        };
+    };
+    markAsRead_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    markConversationAsRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: number;
+                freelancerId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    getItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["FreelancerDetailResponseDto"];
+                };
+            };
+        };
+    };
+    update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    dto: components["schemas"]["FreelancerUpdateRequestDto"];
+                    /** Format: binary */
+                    imageFile: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    update_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                portfolioId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    dto: components["schemas"]["PortfolioUpdateRequestDto"];
+                    /** Format: binary */
+                    imageFile: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    delete_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                portfolioId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    updateCareer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                careerId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CareerRequestDto"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    deleteCareer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                careerId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
             };
         };
     };
@@ -681,7 +2155,79 @@ export interface operations {
             };
         };
     };
-    getAllUsers: {
+    join: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MemberJoinReq"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataMemberDto"];
+                };
+            };
+        };
+    };
+    login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MemberLoginReq"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataMemberLoginRes"];
+                };
+            };
+        };
+    };
+    sendResetPasswordCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SendUpdatePasswordCodeReq"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    refreshAccessToken: {
         parameters: {
             query?: never;
             header?: never;
@@ -696,12 +2242,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["User"][];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataMemberLoginRes"];
                 };
             };
         };
     };
-    createUser: {
+    findId: {
         parameters: {
             query?: never;
             header?: never;
@@ -710,7 +2256,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["User"];
+                "application/json": components["schemas"]["FindIdReq"];
             };
         };
         responses: {
@@ -720,7 +2266,315 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["User"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataFindIdRes"];
+                };
+            };
+        };
+    };
+    sendEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FindIdReq"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    getSubmissions: {
+        parameters: {
+            query?: {
+                projectId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataListProjectSubmissionDto"];
+                };
+            };
+        };
+    };
+    create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectSubmissionCreateReqBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataProjectSubmissionDto"];
+                };
+            };
+        };
+    };
+    getProposals: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataListProposalDto"];
+                };
+            };
+        };
+    };
+    create_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProposalCreateReqBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataProposalDto"];
+                };
+            };
+        };
+    };
+    getMessages: {
+        parameters: {
+            query?: {
+                relatedType?: "SUBMISSION" | "PROPOSAL" | "PROJECT";
+                relatedId?: number;
+                unreadOnly?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataListMessageDto"];
+                };
+            };
+        };
+    };
+    send: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MessageCreateReqBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataMessageDto"];
+                };
+            };
+        };
+    };
+    recalculateRecommendations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    getItems: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["FreelancerListResponseDto"][];
+                };
+            };
+        };
+    };
+    create_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    dto: components["schemas"]["FreelancerSaveRequestDto"];
+                    /** Format: binary */
+                    imageFile: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataFreelancerDto"];
+                };
+            };
+        };
+    };
+    addMyTech: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FreelancerTechAddDto"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataFreelancerTechDto"];
+                };
+            };
+        };
+    };
+    savePortfolio: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    dto: components["schemas"]["PortfolioSaveRequestDto"];
+                    /** Format: binary */
+                    imageFile: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataPortfolioResponseDto"];
+                };
+            };
+        };
+    };
+    addCareer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CareerRequestDto"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
                 };
             };
         };
@@ -781,7 +2635,7 @@ export interface operations {
     toggleFavorite: {
         parameters: {
             query: {
-                userId: number;
+                memberId: number;
             };
             header?: never;
             path: {
@@ -826,6 +2680,98 @@ export interface operations {
             };
         };
     };
+    me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataMemberDto"];
+                };
+            };
+        };
+    };
+    updateMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMemberReq"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataMemberDto"];
+                };
+            };
+        };
+    };
+    deleteMyTech: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    updateMyTech: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": string;
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
     updateProjectStatus: {
         parameters: {
             query?: never;
@@ -852,13 +2798,13 @@ export interface operations {
             };
         };
     };
-    getUserByUsername: {
+    searchAvailableTechs: {
         parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                username: string;
+            query: {
+                keyword: string;
             };
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -869,17 +2815,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["User"];
+                    "application/json;charset=UTF-8": components["schemas"]["TechDto"][];
                 };
             };
         };
     };
-    existsByUsername: {
+    getProposal: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                username: string;
+                id: number;
             };
             cookie?: never;
         };
@@ -891,7 +2837,251 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": boolean;
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataProposalDto"];
+                };
+            };
+        };
+    };
+    cancel_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    getNotifications: {
+        parameters: {
+            query?: {
+                unreadOnly?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataListNotificationDto"];
+                };
+            };
+        };
+    };
+    getUnreadCount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataMapStringLong"];
+                };
+            };
+        };
+    };
+    getMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataMessageDto"];
+                };
+            };
+        };
+    };
+    getConversations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataListConversationDto"];
+                };
+            };
+        };
+    };
+    getConversation: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                projectId: number;
+                freelancerId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataListMessageDto"];
+                };
+            };
+        };
+    };
+    getRecommendations: {
+        parameters: {
+            query?: {
+                limit?: number;
+                minScore?: number;
+            };
+            header?: never;
+            path: {
+                projectId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataRecommendationResponseDto"];
+                };
+            };
+        };
+    };
+    getFreelancersTechs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                freelancerId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["FreelancerTechDto"][];
+                };
+            };
+        };
+    };
+    getPortfolios: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                freelancerId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["PortfolioResponseDto"][];
+                };
+            };
+        };
+    };
+    getCareers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                freelancerId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["CareerResponseDto"][];
+                };
+            };
+        };
+    };
+    getPortfolio: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["PortfolioResponseDto"];
                 };
             };
         };
@@ -1069,7 +3259,7 @@ export interface operations {
     deleteProject: {
         parameters: {
             query: {
-                requesterId: number;
+                managerId: number;
             };
             header?: never;
             path: {
@@ -1129,7 +3319,7 @@ export interface operations {
     getFavoriteStatus: {
         parameters: {
             query: {
-                userId: number;
+                memberId: number;
             };
             header?: never;
             path: {
@@ -1150,12 +3340,12 @@ export interface operations {
             };
         };
     };
-    getUserFavoriteProjectIds: {
+    getMemberFavoriteProjectIds: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                userId: number;
+                memberId: number;
             };
             cookie?: never;
         };
@@ -1168,6 +3358,48 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["RsDataListLong"];
+                };
+            };
+        };
+    };
+    logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    delete_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
                 };
             };
         };

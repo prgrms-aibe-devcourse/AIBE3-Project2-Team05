@@ -1,16 +1,16 @@
 package com.back.domain.matching.matchScore.service;
 
+import com.back.domain.freelancer.career.entity.Career;
 import com.back.domain.freelancer.career.repository.CareerRepository;
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
 import com.back.domain.freelancer.freelancerTech.entity.FreelancerTech;
 import com.back.domain.freelancer.freelancerTech.repository.FreelancerTechRepository;
-import com.back.domain.freelancer.portfolio.repository.PortfolioRepository;
 import com.back.domain.matching.matchScore.entity.MatchScore;
 import com.back.domain.matching.matchScore.repository.MatchScoreRepository;
-import com.back.domain.project.project.entity.Project;
-import com.back.domain.project.project.repository.ProjectRepository;
-import com.back.domain.project.projectTech.repository.ProjectTechRepository;
+import com.back.domain.project.entity.Project;
+import com.back.domain.project.repository.ProjectRepository;
+import com.back.domain.project.repository.ProjectTechRepository;
 import com.back.global.exception.ServiceException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,7 +40,6 @@ public class MatchScoreService {
     private final ProjectTechRepository projectTechRepository;
     private final FreelancerTechRepository freelancerTechRepository;
     private final CareerRepository careerRepository;
-    private final PortfolioRepository portfolioRepository;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -61,14 +62,17 @@ public class MatchScoreService {
                 .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프로젝트입니다."));
 
         // 프로젝트 요구 기술 조회
-        List<String> requiredTechNames = projectTechRepository.findTechNamesByProjectId(projectId);
+        List<String> requiredTechNames = projectTechRepository.findByProject_IdOrderByCreateDate(projectId)
+                .stream()
+                .map(projectTech -> projectTech.getTechName())
+                .toList();
 
         if (requiredTechNames.isEmpty()) {
             throw new ServiceException("400-1", "프로젝트에 요구 기술이 설정되지 않았습니다.");
         }
 
-        // 작업 가능한 모든 프리랜서 조회
-        List<Freelancer> availableFreelancers = freelancerRepository.findByAvailableTrue();
+        // 작업 가능한 모든 프리랜서 조회 (가용 여부 필터링 필요 시 후속 구현)
+        List<Freelancer> availableFreelancers = freelancerRepository.findAll();
 
         // 각 프리랜서별 매칭 점수 계산
         List<MatchScoreData> scoreDataList = new ArrayList<>();
@@ -108,11 +112,18 @@ public class MatchScoreService {
      * 매칭 점수 계산 (프로젝트 + 프리랜서)
      */
     private MatchScoreData calculateMatchScore(Project project, Freelancer freelancer, List<String> requiredTechNames) {
-        // 1. 스킬 점수 계산 (50점)
-        BigDecimal skillScore = calculateSkillScore(freelancer, requiredTechNames);
+        // 프리랜서 보유 기술 조회
+        List<FreelancerTech> freelancerTechs = freelancerTechRepository.findByFreelancerId(freelancer.getId());
 
-        // 2. 경력 점수 계산 (30점)
-        BigDecimal experienceScore = calculateExperienceScore(freelancer);
+        // 1. 스킬 점수 계산 (50점)
+        BigDecimal skillScore = calculateSkillScore(freelancerTechs, requiredTechNames);
+
+        // 2. 경력 관련 데이터 계산
+        int totalExperienceYears = calculateTotalExperienceYears(freelancer);
+        long completedProjects = freelancer.getCompletedProjectsCount();
+        double averageRating = freelancer.getRatingAvg();
+
+        BigDecimal experienceScore = calculateExperienceScore(totalExperienceYears, completedProjects, averageRating);
 
         // 3. 단가 점수 계산 (20점)
         BigDecimal budgetScore = calculateBudgetScore(project, freelancer);
@@ -122,7 +133,18 @@ public class MatchScoreService {
                 .setScale(2, RoundingMode.HALF_UP);
 
         // 5. 매칭 이유 생성
-        Map<String, Object> reasons = generateMatchingReasons(freelancer, requiredTechNames, skillScore, experienceScore, budgetScore, project);
+        Map<String, Object> reasons = generateMatchingReasons(
+                freelancer,
+                freelancerTechs,
+                requiredTechNames,
+                skillScore,
+                experienceScore,
+                budgetScore,
+                project,
+                totalExperienceYears,
+                completedProjects,
+                averageRating
+        );
         String reasonsJson = convertToJson(reasons);
 
         return new MatchScoreData(freelancer, totalScore, skillScore, experienceScore, budgetScore, reasonsJson);
@@ -133,10 +155,7 @@ public class MatchScoreService {
      * - 프로젝트 요구 기술과 프리랜서 보유 기술 매칭률
      * - 숙련도 가중치 적용
      */
-    private BigDecimal calculateSkillScore(Freelancer freelancer, List<String> requiredTechNames) {
-        // 프리랜서 보유 기술 조회
-        List<FreelancerTech> freelancerTechs = freelancerTechRepository.findByFreelancer(freelancer);
-
+    private BigDecimal calculateSkillScore(List<FreelancerTech> freelancerTechs, List<String> requiredTechNames) {
         if (freelancerTechs.isEmpty()) {
             return BigDecimal.ZERO;
         }
@@ -146,12 +165,12 @@ public class MatchScoreService {
 
         for (String requiredTech : requiredTechNames) {
             Optional<FreelancerTech> matchedTech = freelancerTechs.stream()
-                    .filter(ft -> ft.getTechName().equalsIgnoreCase(requiredTech))
+                    .filter(ft -> ft.getTech() != null && ft.getTech().getTechName().equalsIgnoreCase(requiredTech))
                     .findFirst();
 
             if (matchedTech.isPresent()) {
                 // 숙련도에 따른 가중치
-                double proficiencyWeight = getProficiencyWeight(matchedTech.get().getProficiency());
+                double proficiencyWeight = getProficiencyWeight(matchedTech.get().getTechLevel());
                 matchedSkillScore += proficiencyWeight;
             }
         }
@@ -182,25 +201,23 @@ public class MatchScoreService {
      * - 완료 프로젝트 수 (8점)
      * - 평균 평점 (7점)
      */
-    private BigDecimal calculateExperienceScore(Freelancer freelancer) {
+    private BigDecimal calculateExperienceScore(int totalExperienceYears, long completedProjects, double averageRating) {
         double totalScore = 0.0;
 
         // 1. 총 경력 연수 점수 (15점): 10년 이상이면 만점
-        Integer totalExperience = freelancer.getTotalExperience();
-        if (totalExperience != null && totalExperience > 0) {
-            double experienceScore = Math.min((totalExperience / 10.0) * 15, 15.0);
+        if (totalExperienceYears > 0) {
+            double experienceScore = Math.min((totalExperienceYears / 10.0) * 15, 15.0);
             totalScore += experienceScore;
         }
 
         // 2. 완료 프로젝트 수 (8점): 10개 이상이면 만점
-        long completedProjects = portfolioRepository.countByFreelancer(freelancer);
         double projectScore = Math.min((completedProjects / 10.0) * 8, 8.0);
         totalScore += projectScore;
 
         // 3. 평균 평점 (7점): 5점 만점 기준
-        BigDecimal averageRating = freelancer.getAverageRating();
-        if (averageRating != null && averageRating.compareTo(BigDecimal.ZERO) > 0) {
-            double ratingScore = averageRating.doubleValue() / 5.0 * 7.0;
+        if (averageRating > 0) {
+            double normalizedRating = Math.min(averageRating, 5.0);
+            double ratingScore = normalizedRating / 5.0 * 7.0;
             totalScore += ratingScore;
         }
 
@@ -212,18 +229,18 @@ public class MatchScoreService {
      * - 프로젝트 예산과 프리랜서 희망 단가 비교
      */
     private BigDecimal calculateBudgetScore(Project project, Freelancer freelancer) {
-        BigDecimal projectBudget = project.getBudget();
-        Integer freelancerMinRate = freelancer.getMinRate();
-        Integer freelancerMaxRate = freelancer.getMaxRate();
+        Long projectBudgetAmount = project.getBudgetAmount();
+        int freelancerMinRate = freelancer.getMinMonthlyRate();
+        int freelancerMaxRate = freelancer.getMaxMonthlyRate();
 
         // 예산이나 단가 정보가 없으면 중간 점수 (10점)
-        if (projectBudget == null || freelancerMinRate == null || freelancerMaxRate == null) {
+        if (projectBudgetAmount == null || projectBudgetAmount <= 0 || freelancerMinRate <= 0 || freelancerMaxRate <= 0) {
             return BigDecimal.valueOf(10.0);
         }
 
-        double budget = projectBudget.doubleValue();
-        double minRate = freelancerMinRate.doubleValue();
-        double maxRate = freelancerMaxRate.doubleValue();
+        double budget = projectBudgetAmount.doubleValue();
+        double minRate = freelancerMinRate;
+        double maxRate = freelancerMaxRate;
 
         double score;
 
@@ -247,31 +264,72 @@ public class MatchScoreService {
         return BigDecimal.valueOf(score).setScale(2, RoundingMode.HALF_UP);
     }
 
+    private int calculateTotalExperienceYears(Freelancer freelancer) {
+        List<Career> careers = careerRepository.findAllByFreelancerId(freelancer.getId());
+
+        long totalMonths = 0;
+        for (Career career : careers) {
+            if (career.getStartDate() == null) {
+                continue;
+            }
+
+            LocalDate endDate = career.getEndDate();
+            if (Boolean.TRUE.equals(career.getCurrent()) || endDate == null) {
+                endDate = LocalDate.now();
+            }
+
+            if (endDate.isBefore(career.getStartDate())) {
+                continue;
+            }
+
+            long months = ChronoUnit.MONTHS.between(career.getStartDate(), endDate);
+            if (months > 0) {
+                totalMonths += months;
+            }
+        }
+
+        if (totalMonths <= 0) {
+            return 0;
+        }
+
+        return (int) Math.round(totalMonths / 12.0);
+    }
+
     /**
      * 매칭 이유 생성 (JSON)
      */
-    private Map<String, Object> generateMatchingReasons(Freelancer freelancer, List<String> requiredTechNames,
-                                                         BigDecimal skillScore, BigDecimal experienceScore,
-                                                         BigDecimal budgetScore, Project project) {
+    private Map<String, Object> generateMatchingReasons(
+            Freelancer freelancer,
+            List<FreelancerTech> freelancerTechs,
+            List<String> requiredTechNames,
+            BigDecimal skillScore,
+            BigDecimal experienceScore,
+            BigDecimal budgetScore,
+            Project project,
+            int totalExperienceYears,
+            long completedProjects,
+            double averageRating
+    ) {
         Map<String, Object> reasons = new HashMap<>();
 
         // 매칭된 기술 목록
-        List<FreelancerTech> freelancerTechs = freelancerTechRepository.findByFreelancer(freelancer);
         List<String> matchedSkills = freelancerTechs.stream()
-                .map(FreelancerTech::getTechName)
+                .map(FreelancerTech::getTech)
+                .filter(Objects::nonNull)
+                .map(com.back.domain.tech.entity.Tech::getTechName)
                 .filter(requiredTechNames::contains)
                 .collect(Collectors.toList());
 
         reasons.put("matched_skills", matchedSkills);
         reasons.put("skill_score", skillScore.doubleValue());
-        reasons.put("experience_years", freelancer.getTotalExperience());
+        reasons.put("experience_years", totalExperienceYears);
         reasons.put("experience_score", experienceScore.doubleValue());
-        reasons.put("completed_projects", portfolioRepository.countByFreelancer(freelancer));
-        reasons.put("average_rating", freelancer.getAverageRating());
+        reasons.put("completed_projects", completedProjects);
+        reasons.put("average_rating", averageRating);
         reasons.put("budget_score", budgetScore.doubleValue());
-        reasons.put("project_budget", project.getBudget());
-        reasons.put("freelancer_min_rate", freelancer.getMinRate());
-        reasons.put("freelancer_max_rate", freelancer.getMaxRate());
+        reasons.put("project_budget", project.getBudgetAmount());
+        reasons.put("freelancer_min_rate", freelancer.getMinMonthlyRate());
+        reasons.put("freelancer_max_rate", freelancer.getMaxMonthlyRate());
 
         return reasons;
     }
@@ -305,7 +363,10 @@ public class MatchScoreService {
                 .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프리랜서입니다."));
 
         // 프로젝트 요구 기술 조회
-        List<String> requiredTechNames = projectTechRepository.findTechNamesByProjectId(projectId);
+        List<String> requiredTechNames = projectTechRepository.findByProject_IdOrderByCreateDate(projectId)
+                .stream()
+                .map(projectTech -> projectTech.getTechName())
+                .toList();
 
         if (requiredTechNames.isEmpty()) {
             throw new ServiceException("400-1", "프로젝트에 요구 기술이 설정되지 않았습니다.");

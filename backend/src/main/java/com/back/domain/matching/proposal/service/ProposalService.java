@@ -8,8 +8,8 @@ import com.back.domain.matching.proposal.repository.ProposalRepository;
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.notification.notification.entity.NotificationType;
 import com.back.domain.notification.notification.service.NotificationService;
-import com.back.domain.project.project.entity.Project;
-import com.back.domain.project.project.repository.ProjectRepository;
+import com.back.domain.project.entity.Project;
+import com.back.domain.project.repository.ProjectRepository;
 import com.back.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -176,7 +176,7 @@ public class ProposalService {
                 proposal.getPm(),
                 NotificationType.PROPOSAL_ACCEPTED,
                 "제안이 수락되었습니다",
-                String.format("%s님이 '%s' 프로젝트 제안을 수락했습니다.", freelancer.getName(), proposal.getProject().getTitle()),
+                String.format("%s님이 '%s' 프로젝트 제안을 수락했습니다.", freelancer.getMemberNickname(), proposal.getProject().getTitle()),
                 "PROPOSAL",
                 proposal.getId()
         );
@@ -210,7 +210,7 @@ public class ProposalService {
                 proposal.getPm(),
                 NotificationType.PROPOSAL_REJECTED,
                 "제안이 거절되었습니다",
-                String.format("%s님이 '%s' 프로젝트 제안을 거절했습니다.", freelancer.getName(), proposal.getProject().getTitle()),
+                String.format("%s님이 '%s' 프로젝트 제안을 거절했습니다.", freelancer.getMemberNickname(), proposal.getProject().getTitle()),
                 "PROPOSAL",
                 proposal.getId()
         );

@@ -8,8 +8,9 @@ import com.back.domain.matching.projectSubmission.dto.ProjectSubmissionModifyReq
 import com.back.domain.matching.projectSubmission.dto.ProjectSubmissionStatusUpdateReqBody;
 import com.back.domain.matching.projectSubmission.entity.ProjectSubmission;
 import com.back.domain.matching.projectSubmission.service.ProjectSubmissionService;
-import com.back.domain.project.project.entity.Project;
-import com.back.domain.project.project.service.ProjectService;
+import com.back.domain.project.entity.Project;
+import com.back.domain.project.repository.ProjectRepository;
+import com.back.domain.project.service.ProjectService;
 import com.back.global.exception.ServiceException;
 import com.back.global.rsData.RsData;
 import com.back.global.security.SecurityUser;
@@ -28,10 +29,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/submissions")
 @RequiredArgsConstructor
-public class ApiV1ProjectSubmissionController {
+public class ProjectSubmissionController {
 
     private final ProjectSubmissionService projectSubmissionService;
     private final ProjectService projectService;
+    private final ProjectRepository projectRepository;
     private final FreelancerRepository freelancerRepository;
     private final ObjectMapper objectMapper;
 
@@ -49,7 +51,7 @@ public class ApiV1ProjectSubmissionController {
             @Valid @RequestBody ProjectSubmissionCreateReqBody reqBody
     ) {
         // FreelancerRepository로 Freelancer 조회
-        Freelancer freelancer = freelancerRepository.findByMember(user.getMember())
+        Freelancer freelancer = freelancerRepository.findByMemberId(user.getId())
                 .orElseThrow(() -> new ServiceException("403-1", "프리랜서 권한이 필요합니다."));
 
         // Portfolio 데이터를 JSON 문자열로 변환
@@ -98,15 +100,16 @@ public class ApiV1ProjectSubmissionController {
         // TODO: 프리랜서/PM 구분 로직 구현 필요
         if (projectId != null) {
             // PM이 프로젝트의 지원자 목록 조회
-            Project project = projectService.findById(projectId);
+            Project project = projectRepository.findById(projectId)
+                    .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프로젝트입니다."));
 
             // 프로젝트 소유자 확인
-            // TODO: project.isOwner(user.getMember()) 구현 필요
+            // TODO: project.getManager().getId()와 user.getId() 비교 로직 구현 필요
 
             submissions = projectSubmissionService.findActiveSubmissionsByProject(projectId);
         } else {
             // 프리랜서가 자신의 지원 목록 조회
-            Freelancer freelancer = freelancerRepository.findByMember(user.getMember())
+            Freelancer freelancer = freelancerRepository.findByMemberId(user.getId())
                     .orElseThrow(() -> new ServiceException("403-1", "프리랜서 권한이 필요합니다."));
             submissions = projectSubmissionService.findActiveSubmissionsByFreelancer(freelancer);
         }
@@ -160,7 +163,7 @@ public class ApiV1ProjectSubmissionController {
             @PathVariable Long id,
             @Valid @RequestBody ProjectSubmissionModifyReqBody reqBody
     ) {
-        Freelancer freelancer = freelancerRepository.findByMember(user.getMember())
+        Freelancer freelancer = freelancerRepository.findByMemberId(user.getId())
                 .orElseThrow(() -> new ServiceException("403-1", "프리랜서 권한이 필요합니다."));
         ProjectSubmission submission = projectSubmissionService.findById(id);
 
@@ -202,7 +205,7 @@ public class ApiV1ProjectSubmissionController {
             @AuthenticationPrincipal SecurityUser user,
             @PathVariable Long id
     ) {
-        Freelancer freelancer = freelancerRepository.findByMember(user.getMember())
+        Freelancer freelancer = freelancerRepository.findByMemberId(user.getId())
                 .orElseThrow(() -> new ServiceException("403-1", "프리랜서 권한이 필요합니다."));
         ProjectSubmission submission = projectSubmissionService.findById(id);
 

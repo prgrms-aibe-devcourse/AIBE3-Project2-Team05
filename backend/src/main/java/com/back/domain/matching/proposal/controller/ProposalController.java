@@ -9,6 +9,7 @@ import com.back.domain.matching.proposal.dto.ProposalRejectReqBody;
 import com.back.domain.matching.proposal.entity.Proposal;
 import com.back.domain.matching.proposal.service.ProposalService;
 import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.repository.MemberRepository;
 import com.back.global.exception.ServiceException;
 import com.back.global.rsData.RsData;
 import com.back.global.security.SecurityUser;
@@ -26,10 +27,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/proposals")
 @RequiredArgsConstructor
-public class ApiV1ProposalController {
+public class ProposalController {
 
     private final ProposalService proposalService;
     private final FreelancerRepository freelancerRepository;
+    private final MemberRepository memberRepository;
 
     /**
      * 프로젝트 제안 생성 (PM 전용)
@@ -44,7 +46,8 @@ public class ApiV1ProposalController {
             @AuthenticationPrincipal SecurityUser user,
             @Valid @RequestBody ProposalCreateReqBody reqBody
     ) {
-        Member pm = user.getMember();
+        Member pm = memberRepository.findById(user.getId())
+                .orElseThrow(() -> new ServiceException("401-1", "회원 정보를 찾을 수 없습니다."));
 
         Proposal proposal = proposalService.create(
                 pm,
@@ -75,14 +78,16 @@ public class ApiV1ProposalController {
         List<Proposal> proposals;
 
         // 프리랜서인지 확인
-        var freelancerOpt = freelancerRepository.findByMember(user.getMember());
+        var freelancerOpt = freelancerRepository.findByMemberId(user.getId());
 
         if (freelancerOpt.isPresent()) {
             // 프리랜서가 받은 제안 목록
             proposals = proposalService.findByFreelancer(freelancerOpt.get());
         } else {
             // PM이 보낸 제안 목록
-            proposals = proposalService.findByPm(user.getMember());
+            Member pm = memberRepository.findById(user.getId())
+                    .orElseThrow(() -> new ServiceException("401-1", "회원 정보를 찾을 수 없습니다."));
+            proposals = proposalService.findByPm(pm);
         }
 
         List<ProposalDto> dtos = proposals.stream()
@@ -134,7 +139,7 @@ public class ApiV1ProposalController {
             @PathVariable Long id,
             @RequestBody ProposalAcceptReqBody reqBody
     ) {
-        Freelancer freelancer = freelancerRepository.findByMember(user.getMember())
+        Freelancer freelancer = freelancerRepository.findByMemberId(user.getId())
                 .orElseThrow(() -> new ServiceException("403-1", "프리랜서 권한이 필요합니다."));
         Proposal proposal = proposalService.findById(id);
 
@@ -161,7 +166,7 @@ public class ApiV1ProposalController {
             @PathVariable Long id,
             @Valid @RequestBody ProposalRejectReqBody reqBody
     ) {
-        Freelancer freelancer = freelancerRepository.findByMember(user.getMember())
+        Freelancer freelancer = freelancerRepository.findByMemberId(user.getId())
                 .orElseThrow(() -> new ServiceException("403-1", "프리랜서 권한이 필요합니다."));
         Proposal proposal = proposalService.findById(id);
 
@@ -191,7 +196,8 @@ public class ApiV1ProposalController {
             @AuthenticationPrincipal SecurityUser user,
             @PathVariable Long id
     ) {
-        Member pm = user.getMember();
+        Member pm = memberRepository.findById(user.getId())
+                .orElseThrow(() -> new ServiceException("401-1", "회원 정보를 찾을 수 없습니다."));
         Proposal proposal = proposalService.findById(id);
 
         proposalService.cancel(proposal, pm);

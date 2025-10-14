@@ -2,8 +2,8 @@ package com.back.domain.matching.message.entity;
 
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.member.member.entity.Member;
-import com.back.domain.project.project.entity.Project;
-import com.back.global.baseEntity.BaseEntity;
+import com.back.domain.project.entity.Project;
+import com.back.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

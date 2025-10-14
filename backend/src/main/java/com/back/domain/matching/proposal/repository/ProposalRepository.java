@@ -4,7 +4,7 @@ import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.matching.proposal.entity.Proposal;
 import com.back.domain.matching.proposal.entity.ProposalStatus;
 import com.back.domain.member.member.entity.Member;
-import com.back.domain.project.project.entity.Project;
+import com.back.domain.project.entity.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

@@ -1,7 +1,7 @@
 package com.back.domain.matching.matchScore.entity;
 
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
-import com.back.domain.project.project.entity.Project;
+import com.back.domain.project.entity.Project;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
