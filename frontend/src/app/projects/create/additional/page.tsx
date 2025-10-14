@@ -97,6 +97,7 @@ const ProjectCreateAdditionalPage = () => {
 
   // 임시 파일 선택 핸들러 - create 모드에서 실제 파일 저장
   const handleTempFilesChange = (files: File[]) => {
+    console.log('파일 선택됨:', files.map(f => ({ name: f.name, size: f.size, type: f.type })));
     setSelectedFiles(files);
     // 파일 정보를 ProjectFileManager 형태로 변환
     const fileInfos: FileItem[] = files.map((file) => ({
@@ -120,6 +121,13 @@ const ProjectCreateAdditionalPage = () => {
       router.push('/members/login');
       return;
     }
+
+    console.log('프로젝트 생성 시작:', {
+      selectedFilesCount: selectedFiles.length,
+      projectFilesCount: projectFiles.length,
+      selectedFiles: selectedFiles.map(f => f.name),
+      projectFiles: projectFiles.map(f => f.originalName)
+    });
 
     setCreating(true);
     try {
@@ -158,24 +166,63 @@ const ProjectCreateAdditionalPage = () => {
 
       if (response.ok) {
         const result = await response.json();
-        const projectId = result.data?.id;
+        console.log('서버 응답 전체 구조:', JSON.stringify(result, null, 2));
+        
+        // 여러 가능한 경로에서 프로젝트 ID 찾기 (서버 응답에서 Data 필드 확인)
+        const projectId = result.Data?.id || result.data?.id || result.id || result.data?.projectId || result.projectId;
+        
+        console.log('프로젝트 생성 응답:', {
+          result: result,
+          resultKeys: Object.keys(result),
+          hasData: !!result.data,
+          hasDataCapital: !!result.Data,
+          dataKeys: result.data ? Object.keys(result.data) : null,
+          DataKeys: result.Data ? Object.keys(result.Data) : null,
+          projectId: projectId,
+          hasProjectId: !!projectId,
+          DataId: result.Data?.id,
+          dataId: result.data?.id
+        });
         
         // 프로젝트 생성 성공 후 파일 업로드
         let uploadedFilesCount = 0;
         const failedFiles: string[] = [];
         
+        console.log('파일 업로드 조건 체크:', {
+          selectedFilesLength: selectedFiles.length,
+          projectId: projectId,
+          hasProjectId: !!projectId,
+          condition: selectedFiles.length > 0 && projectId
+        });
+        
         if (selectedFiles.length > 0 && projectId) {
+          console.log('파일 업로드 시작:', {
+            filesCount: selectedFiles.length,
+            projectId: projectId,
+            files: selectedFiles.map(f => ({ name: f.name, size: f.size, type: f.type }))
+          });
+          
           setUploadingFiles(true);
           setUploadProgress({ current: 0, total: selectedFiles.length });
           
           try {
             for (let i = 0; i < selectedFiles.length; i++) {
               const file = selectedFiles[i];
+              console.log(`파일 업로드 시도 (${i + 1}/${selectedFiles.length}):`, file.name);
               setUploadProgress({ current: i + 1, total: selectedFiles.length });
               const formData = new FormData();
               formData.append('file', file);
               
-              const fileUploadResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${projectId}/files/upload`, {
+              console.log('파일 업로드 요청:', {
+                url: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${projectId}/files/upload`,
+                fileName: file.name,
+                fileSize: file.size,
+                fileType: file.type,
+                projectId: projectId,
+                projectIdType: typeof projectId
+              });
+              
+              const fileUploadResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${String(projectId)}/files/upload`, {
                 method: 'POST',
                 credentials: 'include', // 파일 업로드도 인증 필요
                 body: formData,
@@ -186,14 +233,30 @@ const ProjectCreateAdditionalPage = () => {
                 
                 // 업로드 성공한 파일 정보를 세션 스토리지에 저장 (상세 페이지에서 즉시 표시용)
                 const uploadResult = await fileUploadResponse.json();
-                if (uploadResult.data) {
+                console.log('파일 업로드 성공:', file.name, uploadResult);
+                
+                const fileData = uploadResult.Data || uploadResult.data;
+                if (fileData) {
                   // 기존 파일 리스트에 새 파일 추가
-                  const existingFiles = sessionStorageUtils.getProjectFiles(projectId) || [];
-                  existingFiles.push(uploadResult.data);
-                  sessionStorageUtils.setProjectFiles(projectId, existingFiles);
+                  const existingFiles = sessionStorageUtils.getProjectFiles(String(projectId)) || [];
+                  existingFiles.push(fileData);
+                  sessionStorageUtils.setProjectFiles(String(projectId), existingFiles);
+                  console.log('세션 스토리지에 파일 저장:', {
+                    projectId: projectId,
+                    fileName: fileData.originalName,
+                    totalFiles: existingFiles.length
+                  });
+                } else {
+                  console.warn('업로드 응답에 Data/data가 없음:', uploadResult);
                 }
               } else {
-                console.error('파일 업로드 실패:', file.name);
+                // 상세한 에러 정보 로그
+                const errorResponse = await fileUploadResponse.json().catch(() => ({}));
+                console.error('파일 업로드 실패:', file.name, {
+                  status: fileUploadResponse.status,
+                  statusText: fileUploadResponse.statusText,
+                  error: errorResponse
+                });
                 failedFiles.push(file.name);
               }
             }
@@ -203,15 +266,29 @@ const ProjectCreateAdditionalPage = () => {
             setUploadingFiles(false);
             setUploadProgress({ current: 0, total: 0 });
           }
+        } else {
+          console.log('파일 업로드 건너뜀:', {
+            selectedFilesLength: selectedFiles.length,
+            hasProjectId: !!projectId,
+            projectId: projectId,
+            reason: selectedFiles.length === 0 ? '파일이 선택되지 않음' : '프로젝트 ID가 없음'
+          });
         }
         
         // 프로젝트 생성 완료 플래그 설정
-        sessionStorageUtils.setProjectUpdated(projectId);
+        sessionStorageUtils.setProjectUpdated(String(projectId));
         
         // 세션스토리지 정리
         sessionStorage.removeItem('projectBasicData');
         
         // 업로드 결과에 따른 메시지 표시
+        console.log('최종 업로드 결과:', {
+          selectedFilesCount: selectedFiles.length,
+          uploadedFilesCount: uploadedFilesCount,
+          failedFilesCount: failedFiles.length,
+          failedFiles: failedFiles
+        });
+        
         if (selectedFiles.length > 0) {
           if (failedFiles.length === 0) {
             alert(`프로젝트가 등록되었습니다! (파일 ${uploadedFilesCount}개 업로드 완료)`);
@@ -224,8 +301,8 @@ const ProjectCreateAdditionalPage = () => {
           alert('프로젝트가 등록되었습니다!');
         }
         
-        // 생성된 프로젝트의 상세 페이지로 이동
-        router.push(`/user-projects/1/${projectId}`);
+        // 생성된 프로젝트의 상세 페이지로 이동 (현재 로그인한 사용자의 memberId 사용)
+        router.push(`/user-projects/${memberId}/${projectId}`);
       } else {
         const errorData = await response.json().catch(() => ({}));
         alert(errorData.message || '프로젝트 등록에 실패했습니다.');
@@ -405,6 +482,7 @@ const ProjectCreateAdditionalPage = () => {
                     disabled={creating}
                     onChange={(e) => {
                       const files = Array.from(e.target.files || []);
+                      console.log('파일 입력 이벤트:', { filesCount: files.length, files: files.map(f => f.name) });
                       if (files.length > 0) {
                         handleTempFilesChange(files);
                       }

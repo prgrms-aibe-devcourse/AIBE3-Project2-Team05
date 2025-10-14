@@ -94,15 +94,15 @@ const ProjectCreatePage = () => {
 
       if (response.ok) {
         const result = await response.json();
-        const projectId = result.data?.id;
+        const projectId = result.Data?.id || result.data?.id;
         
         // 세션스토리지 정리
         sessionStorage.removeItem('projectBasicData');
         
         showSuccessMessage('프로젝트가 등록되었습니다!');
         
-        // 생성된 프로젝트의 상세 페이지로 이동
-        router.push(`/user-projects/1/${projectId}`);
+        // 생성된 프로젝트의 상세 페이지로 이동 (현재 로그인한 사용자의 memberId 사용)
+        router.push(`/user-projects/${memberId}/${projectId}`);
       } else {
         const errorData = await response.json().catch(() => ({}));
         showErrorMessage(errorData.message || '프로젝트 등록에 실패했습니다.');

@@ -65,8 +65,8 @@ const ProjectFileManager = ({
 
                 if (response.ok) {
                     const apiResponse = await response.json();
-                    // API 응답이 ApiResponseProjectFile 형태라면 data 필드에서 파일 정보를 추출
-                    const uploadedFile = apiResponse.data || apiResponse;
+                    // API 응답이 ApiResponseProjectFile 형태라면 Data 또는 data 필드에서 파일 정보를 추출
+                    const uploadedFile = apiResponse.Data || apiResponse.data || apiResponse;
                     uploadedFiles.push(uploadedFile);
                 } else {
                     const errorData = await response.json().catch(() => ({}));
