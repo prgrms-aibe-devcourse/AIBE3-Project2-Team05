@@ -2,6 +2,7 @@ package com.back.domain.project.entity;
 
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.project.entity.enums.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -85,12 +86,15 @@ public class Project {
 
     // 연관관계 매핑
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<ProjectTech> projectTechs;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<ProjectFile> projectFiles;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<ProjectFavorite> projectFavorites;
 
     @PrePersist
