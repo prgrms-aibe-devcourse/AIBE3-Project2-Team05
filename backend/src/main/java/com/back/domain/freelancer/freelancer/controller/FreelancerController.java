@@ -24,15 +24,6 @@ public class FreelancerController {
         return freelancerService.findAll();
     }
 
-    @GetMapping("/me")
-    public RsData<FreelancerDto> getMyFreelancer(@AuthenticationPrincipal SecurityUser securityUser) {
-        Freelancer freelancer = freelancerService.findByMemberId(securityUser.getId());
-        if (freelancer == null) {
-            return new RsData<>("404-1", "프리랜서 프로필이 없습니다.", null);
-        }
-        return new RsData<>("200-1", "프리랜서 정보 조회 성공", new FreelancerDto(freelancer));
-    }
-
     @GetMapping("/{id}")
     public FreelancerDetailResponseDto getItem(@PathVariable Long id) {
         return freelancerService.findById(id);
