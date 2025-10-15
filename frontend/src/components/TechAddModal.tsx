@@ -58,7 +58,12 @@ export default function TechAddModal({
           body: JSON.stringify({ techId: tech.id, techLevel }),
         }
       );
-      if (!res.ok) throw new Error("기술스택 추가 실패");
+      const data = await res.json();
+      if (data.statusCode == 400) {
+        alert("이미 추가된 기술스택입니다.");
+        setLoading(false);
+        return;
+      }
       onAdd({ ...tech, techLevel });
       onClose();
       alert("기술스택이 성공적으로 추가되었습니다.");
