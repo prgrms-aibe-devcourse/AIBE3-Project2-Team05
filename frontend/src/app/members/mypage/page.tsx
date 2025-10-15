@@ -28,7 +28,7 @@ export default function MyPage() {
           return;
         }
 
-        const member = data.Data;
+        const member = data.data;
         if (member) {
           setUsername(member.username ?? "");
           setNickname(member.nickname ?? "");
@@ -177,7 +177,7 @@ export default function MyPage() {
                   </div>
                   <div className="flex flex-col flex-1">
                     <h3 className="text-[#1E1B16] font-semibold text-[13px]" style={{ marginBottom: "0.5rem" }}>
-                      포트폴리오
+                      내 프리랜서 정보
                     </h3>
                     <p className="text-[#6A6558] text-[12px] leading-snug">
                       나의 작업물과 경력을 관리하고 업데이트하세요

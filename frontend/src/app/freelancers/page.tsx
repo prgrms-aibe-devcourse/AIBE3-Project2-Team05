@@ -4,511 +4,402 @@ import { apiFetch } from "@/lib/backend/client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const IMAGE_HOST = "http://localhost:8080";
-
+// 이미지 처리 함수 
 function fullImageUrl(url?: string) {
   if (!url) return "/placeholder.svg";
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  // treat as relative path from backend
-  return `${IMAGE_HOST}${url.startsWith("/") ? "" : "/"}${url}`;
+  return `http://localhost:8080${url.startsWith("/") ? "" : "/"}${url}`;
 }
+
+const TYPE_OPTIONS = ["전체", "개인", "기업", "팀"];
+const LOCATION_OPTIONS = [
+  "전체", "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"
+];
 
 export default function FreelancerSearchPage() {
   const [freelancers, setFreelancers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // filter state
-  const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set());
+  const [selectedType, setSelectedType] = useState<string>("전체");
+  const [selectedLocation, setSelectedLocation] = useState<string>("전체");
   const [showOnlyResident, setShowOnlyResident] = useState<boolean>(false);
-  const [selectedLocations, setSelectedLocations] = useState<Set<string>>(
-    new Set()
-  );
-
-  function toggleType(type: string) {
-    setSelectedTypes((prev) => {
-      const next = new Set(prev);
-      if (next.has(type)) next.delete(type);
-      else next.add(type);
-      return next;
-    });
-  }
-
-  function toggleLocation(loc: string) {
-    setSelectedLocations((prev) => {
-      const next = new Set(prev);
-      if (next.has(loc)) next.delete(loc);
-      else next.add(loc);
-      return next;
-    });
-  }
-
-  useEffect(() => {
-    // (data) => setPosts(data) == setPosts
-    apiFetch("/api/v1/freelancers").then(setFreelancers);
-  }, []);
-
   const [query, setQuery] = useState("");
 
+  useEffect(() => {
+    setLoading(true);
+    apiFetch("/api/v1/freelancers")
+      .then(setFreelancers)
+      .catch(e => setError("데이터를 불러오지 못했습니다."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  // 검색/필터
   const filtered = freelancers.filter((f) => {
-    if (!query) return true;
-    const q = query.toLowerCase();
-    // user said they changed mock data field names — use those names
-    const name = (f.nickname || "").toString();
-    const title = (f.freelancerTitle || "").toString();
-    const skills = (f.skills || []).join(" ");
-    return (
-      name.toLowerCase().includes(q) ||
-      title.toLowerCase().includes(q) ||
-      skills.toLowerCase().includes(q)
-    );
-  });
-
-  // apply structured filters (type, isOnSite/상주, location)
-  const filteredWithFilters = filtered.filter((f) => {
-    // type filter
-    if (selectedTypes.size > 0) {
-      const t = f.type || f.freelancerType || "";
-      if (!selectedTypes.has(t)) return false;
+    // 검색어
+    if (query) {
+      const q = query.toLowerCase();
+      const name = (f.nickname || "").toString();
+      const title = (f.freelancerTitle || "").toString();
+      const skills = (f.skills || []).join(" ");
+      if (
+        !(
+          name.toLowerCase().includes(q) ||
+          title.toLowerCase().includes(q) ||
+          skills.toLowerCase().includes(q)
+        )
+      ) return false;
     }
-
-    // resident / 상주 filter
-    if (showOnlyResident) {
-      // API field isOnSite was used earlier but user clarified: this means resident availability
-      if (!f.isOnSite && !f.isResident && !f.isOnsite) return false;
-      // treat truthy values as available
-    }
-
-    // location filter
-    if (selectedLocations.size > 0) {
-      const loc = (f.location || "").toString();
-      if (!selectedLocations.has(loc)) return false;
-    }
-
+    // 유형
+    if (selectedType !== "전체" && f.type !== selectedType) return false;
+    // 지역
+    if (selectedLocation !== "전체" && f.location !== selectedLocation)
+      return false;
+    // 상주
+    if (showOnlyResident && !f.isOnSite && !f.isResident && !f.isOnsite)
+      return false;
     return true;
   });
 
   return (
     <div
-      className="bg-gray-100 min-h-screen"
-      style={{ backgroundColor: "var(--background)" }}
+      style={{
+        minHeight: "100vh",
+        background: "#f7f5ec",
+        padding: "0",
+        fontFamily: "'Pretendard', 'Inter', Arial, sans-serif",
+      }}
     >
       <main
-        className="container mx-auto px-4 py-8"
-        style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 16px" }}
+        style={{
+          maxWidth: 1400,
+          margin: "0 auto",
+          padding: "40px 0",
+          display: "flex",
+          gap: "32px",
+        }}
       >
-        <h2
-          className="text-xl font-bold text-gray-800 mb-4"
+        {/* 좌측 필터 */}
+        <aside
           style={{
-            fontSize: "24px",
-            fontWeight: "bold",
-            color: "#374151",
-            marginBottom: "16px",
+            width: 320,
+            minWidth: 260,
+            background: "#fff",
+            borderRadius: "13px",
+            boxShadow: "0 2px 12px #0001",
+            padding: "32px 24px",
+            marginTop: "10px",
+            height: "fit-content",
           }}
         >
-          프리랜서 목록
-        </h2>
-
-        {/* top search bar */}
-        <div
-          style={{
-            marginBottom: "20px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "16px",
-          }}
-        >
-          <div style={{ flex: 1 }}>
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="프리랜서 검색..."
-              className="w-full rounded-md border px-3 py-2"
-            />
-          </div>
-          <div>
-            <select className="rounded-md border px-3 py-2">
-              <option>최신순</option>
-              <option>평점순</option>
-              <option>가격순</option>
-            </select>
-          </div>
-        </div>
-
-        <div
-          className="flex space-x-8"
-          style={{ display: "flex", gap: "32px" }}
-        >
-          {/* 좌측 필터 */}
-          <aside
-            className="w-1/4 bg-white shadow-md rounded-lg p-4"
-            style={{
-              width: "25%",
-              backgroundColor: "white",
-              boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-              borderRadius: "8px",
-              padding: "16px",
-            }}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3
-                className="text-lg font-bold text-gray-800"
-                style={{
-                  fontSize: "18px",
-                  fontWeight: "bold",
-                  color: "#374151",
-                }}
-              >
-                필터
-              </h3>
-              <button
-                className="p-1 text-sm"
-                style={{ border: "none", backgroundColor: "transparent" }}
-              >
-                초기화
-              </button>
-            </div>
-
-            {/* filters: checkbox-style controls */}
-            <div className="mb-6">
-              <h4 className="font-semibold text-gray-700 mb-3">유형</h4>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "10px",
-                }}
-              >
-                {[
-                  "개인 프리랜서",
-                  "팀 프리랜서",
-                  "개인사업자",
-                  "법인사업자",
-                ].map((t) => (
-                  <label
-                    key={t}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedTypes.has(t)}
-                      onChange={() => toggleType(t)}
-                    />
-                    <span style={{ fontSize: "14px", color: "#111827" }}>
-                      {t}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div
-              style={{
-                height: "1px",
-                background: "var(--border)",
-                margin: "12px 0",
-              }}
-            />
-
-            <div className="mb-6">
-              <h4 className="font-semibold text-gray-700 mb-3">지역</h4>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "10px",
-                }}
-              >
-                {["서울", "경기", "강원", "세종", "부산"].map((loc) => (
-                  <label
-                    key={loc}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedLocations.has(loc)}
-                      onChange={() => toggleLocation(loc)}
-                    />
-                    <span style={{ fontSize: "14px", color: "#111827" }}>
-                      {loc}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div
-              style={{
-                height: "1px",
-                background: "var(--border)",
-                margin: "12px 0",
-              }}
-            />
-
-            <div className="mb-4">
-              <h4 className="font-semibold text-gray-700 mb-3">상주 가능</h4>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  cursor: "pointer",
-                }}
-              >
+          <h2 style={{
+            fontSize: "1.35rem",
+            fontWeight: 800,
+            marginBottom: "22px",
+            color: "#444",
+            letterSpacing: "-1px"
+          }}>
+            프리랜서 필터
+          </h2>
+          {/* 유형 */}
+          <div style={{ marginBottom: "26px" }}>
+            <div style={{ fontWeight: 700, marginBottom: "10px", fontSize: "1.05rem", color: "#525252" }}>유형</div>
+            {TYPE_OPTIONS.map((t) => (
+              <label key={t} style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "8px",
+                fontWeight: t === selectedType ? 700 : 500,
+                color: t === selectedType ? "#1a3c2b" : "#666",
+                cursor: "pointer",
+                fontSize: "15px",
+              }}>
                 <input
-                  type="checkbox"
-                  checked={showOnlyResident}
-                  onChange={() => setShowOnlyResident((s) => !s)}
+                  type="radio"
+                  name="type"
+                  checked={selectedType === t}
+                  onChange={() => setSelectedType(t)}
+                  style={{ accentColor: "#ed6a23", marginRight: "8px" }}
                 />
-                <span style={{ fontSize: "14px", color: "#111827" }}>
-                  상주 가능한 프리랜서만
-                </span>
+                {t}
               </label>
-            </div>
-          </aside>
-
-          <section className="flex-1">
-            <div
-              className="bg-white rounded-lg shadow-sm p-6"
+            ))}
+          </div>
+          {/* 지역 */}
+          <div style={{ marginBottom: "26px" }}>
+            <div style={{ fontWeight: 700, marginBottom: "10px", fontSize: "1.05rem", color: "#525252" }}>지역</div>
+            <select
+              value={selectedLocation}
+              onChange={e => setSelectedLocation(e.target.value)}
               style={{
-                backgroundColor: "white",
-                borderRadius: "8px",
-                padding: "24px",
-                boxShadow: "0 4px 6px -1px rgba(0,0,0,0.06)",
+                width: "100%",
+                padding: "8px",
+                borderRadius: "7px",
+                border: "1px solid #e7e7e7",
+                background: "#f7f7f7",
+                fontSize: "15px",
+                color: "#444",
               }}
             >
-              {/* results list */}
+              {LOCATION_OPTIONS.map(loc =>
+                <option key={loc} value={loc}>{loc}</option>
+              )}
+            </select>
+          </div>
+          {/* 상주 필터 */}
+          <div style={{ marginBottom: "22px" }}>
+            <label style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              fontWeight: 600,
+              cursor: "pointer",
+              fontSize: "15px",
+              color: showOnlyResident ? "#ed6a23" : "#444"
+            }}>
+              <input
+                type="checkbox"
+                checked={showOnlyResident}
+                onChange={() => setShowOnlyResident(s => !s)}
+                style={{ accentColor: "#ed6a23" }}
+              />
+              상주 가능만 보기
+            </label>
+          </div>
+        </aside>
 
-              <div className="space-y-6">
-                {loading ? (
-                  <div>로딩중...</div>
-                ) : error ? (
-                  <div className="text-red-600">에러: {error}</div>
-                ) : filteredWithFilters.length === 0 ? (
-                  <div className="text-gray-600">검색 결과가 없습니다.</div>
-                ) : (
-                  filteredWithFilters.map((f) => (
-                    <div
-                      key={f.id}
-                      className="bg-white border rounded-lg p-6 shadow-sm hover:shadow-md"
-                      style={{
-                        display: "flex",
-                        gap: "24px",
-                        alignItems: "flex-start",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: "72px",
-                          height: "72px",
-                          borderRadius: "9999px",
-                          overflow: "hidden",
-                          background: "#f3f1ee",
-                        }}
-                      >
-                        <img
-                          src={fullImageUrl(f.freelancerProfileImageUrl)}
-                          alt={f.nickname || "프리랜서"}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "contain",
-                          }}
-                        />
-                      </div>
-
-                      <div style={{ flex: 1 }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "flex-start",
-                          }}
-                        >
-                          <div>
-                            <div
-                              style={{
-                                display: "flex",
-                                gap: "12px",
-                                alignItems: "center",
-                              }}
-                            >
-                              <h3 style={{ fontSize: "18px", fontWeight: 700 }}>
-                                {f.nickname}
-                              </h3>
-                              <div
-                                style={{ color: "#6b7280", fontSize: "14px" }}
-                              >
-                                {f.freelancerTitle}
-                              </div>
-                            </div>
-
-                            <div
-                              style={{
-                                marginTop: "12px",
-                                display: "flex",
-                                gap: "12px",
-                                color: "#6b7280",
-                                fontSize: "14px",
-                              }}
-                            >
-                              <div>
-                                ⭐{" "}
-                                <strong style={{ color: "#f59e0b" }}>
-                                  {f.ratingAvg ?? f.rating}
-                                </strong>{" "}
-                                ({f.reviewCount ?? 0})
-                              </div>
-                              <div>📍 {f.location}</div>
-                              <div>
-                                💼 프로젝트 {f.completedProjectsCount ?? 0}건
-                              </div>
-                            </div>
-
-                            <p style={{ marginTop: "12px", color: "#374151" }}>
-                              {f.content ?? f.description}
-                            </p>
-
-                            <div
-                              style={{
-                                marginTop: "12px",
-                                display: "flex",
-                                gap: "6px",
-                                flexWrap: "wrap",
-                              }}
-                            >
-                              {(f.skills || []).map((s: string) => (
-                                <span
-                                  key={s}
-                                  style={{
-                                    fontSize: "12px",
-                                    background: "#f1f1f1",
-                                    padding: "4px 8px",
-                                    borderRadius: "9999px",
-                                  }}
-                                >
-                                  {s}
-                                </span>
-                              ))}
-                            </div>
-
-                            {/* badges: type and resident availability */}
-                            <div
-                              style={{
-                                marginTop: "12px",
-                                display: "flex",
-                                gap: "8px",
-                                alignItems: "center",
-                              }}
-                            >
-                              {f.type ? (
-                                <span
-                                  style={{
-                                    fontSize: "12px",
-                                    padding: "6px 10px",
-                                    borderRadius: "8px",
-                                    background: "#f3f4f6",
-                                    color: "#374151",
-                                  }}
-                                >
-                                  {f.type}
-                                </span>
-                              ) : null}
-                              <span
-                                style={{
-                                  fontSize: "12px",
-                                  padding: "6px 10px",
-                                  borderRadius: "8px",
-                                  background:
-                                    f.isOnSite || f.isResident || f.isOnsite
-                                      ? "#e6f0ff"
-                                      : "#f3f4f6",
-                                  color:
-                                    f.isOnSite || f.isResident || f.isOnsite
-                                      ? "#1e3a8a"
-                                      : "#6b7280",
-                                }}
-                              >
-                                {f.isOnSite || f.isResident || f.isOnsite
-                                  ? "상주 가능"
-                                  : "상주 불가능"}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div style={{ textAlign: "right" }}>
-                            <button
-                              style={{
-                                display: "block",
-                                marginBottom: "8px",
-                                borderRadius: "9999px",
-                                padding: "8px",
-                                border: "1px solid #e5e7eb",
-                              }}
-                            >
-                              ♡
-                            </button>
-                            <div
-                              style={{
-                                fontSize: "22px",
-                                fontWeight: 800,
-                                textAlign: "right",
-                              }}
-                            >
-                              {Math.round(
-                                (f.minMonthlyRate ?? f.minRate ?? 0) / 10000
-                              ).toLocaleString()}
-                              만 ~{" "}
-                              {Math.round(
-                                (f.maxMonthlyRate ?? f.maxRate ?? 0) / 10000
-                              ).toLocaleString()}
-                              만
-                            </div>
-                            <div
-                              style={{
-                                color: "#6b7280",
-                                fontSize: "12px",
-                                textAlign: "right",
-                              }}
-                            >
-                              월 단가
-                            </div>
-
-                            <div
-                              style={{
-                                display: "flex",
-                                gap: "8px",
-                                justifyContent: "flex-end",
-                                marginTop: "12px",
-                              }}
-                            >
-                              <button>
-                                <Link href={`/freelancers/${f.id}`}>
-                                  프로필 보기
-                                </Link>
-                              </button>
-                              <button>연락하기</button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
+        {/* 우측 결과 */}
+        <section style={{ flex: 1 }}>
+          <div style={{
+            marginBottom: "32px",
+            padding: "0 16px",
+          }}>
+            <h2 style={{
+              fontSize: "1.7rem",
+              fontWeight: 800,
+              color: "#333",
+              marginBottom: "18px",
+              letterSpacing: "-1px",
+            }}>
+              프리랜서를 찾아보세요.
+            </h2>
+            <div style={{
+              padding: "16px 18px",
+              background: "#fff",
+              borderRadius: "13px",
+              boxShadow: "0 2px 12px #0001",
+              display: "flex",
+              alignItems: "center",
+              gap: "16px"
+            }}>
+              <input
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder="검색어를 입력하세요."
+                style={{
+                  flex: 1,
+                  fontSize: "16.5px",
+                  padding: "11px 16px",
+                  borderRadius: "8px",
+                  border: "1px solid #e7e7e7",
+                  background: "#f8f8f8",
+                  color: "#333",
+                  marginRight: "10px"
+                }}
+              />
+              <button
+                type="button"
+                style={{
+                  background: "#ed6a23",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontWeight: 700,
+                  fontSize: "16px",
+                  padding: "9px 26px",
+                  boxShadow: "0 1px 6px #ed6a2322",
+                  cursor: "pointer"
+                }}
+                onClick={() => setQuery(query)}
+              >검색</button>
             </div>
-          </section>
-        </div>
+          </div>
+
+          {/* 프리랜서 카드 리스트 */}
+          <div style={{
+            minHeight: 350,
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gap: "32px"
+          }}>
+            {loading ? (
+              <div style={{
+                gridColumn: "1/4",
+                textAlign: "center",
+                color: "#ed6a23",
+                fontSize: "1.2rem",
+                padding: "60px 0"
+              }}>로딩중...</div>
+            ) : error ? (
+              <div style={{
+                gridColumn: "1/4",
+                textAlign: "center",
+                color: "#e11d48",
+                fontSize: "1.2rem",
+                padding: "60px 0"
+              }}>{error}</div>
+            ) : filtered.length === 0 ? (
+              <div style={{
+                gridColumn: "1/4",
+                textAlign: "center",
+                color: "#888",
+                fontSize: "1.2rem",
+                padding: "60px 0"
+              }}>검색 결과가 없습니다.</div>
+            ) : (
+              filtered.map(f => (
+                <div key={f.id} style={{
+                  background: "#fff",
+                  borderRadius: "13px",
+                  boxShadow: "0 2px 12px #0001",
+                  padding: "32px 26px",
+                  display: "flex",
+                  flexDirection: "column",
+                  minHeight: "290px",
+                  gap: "10px",
+                }}>
+                  {/* 이미지, 닉네임, 타이틀 가로배치 */}
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "18px",
+                    marginBottom: "14px"
+                  }}>
+                    {/* 프로필 이미지 */}
+                    <div style={{
+                      width: "70px",
+                      height: "70px",
+                      borderRadius: "14px",
+                      overflow: "hidden",
+                      background: "#f7f7f7",
+                      flexShrink: 0,
+                    }}>
+                      <img
+                        src={
+                    f?.freelancerProfileImageUrl
+                            ? fullImageUrl(f.freelancerProfileImageUrl)
+                            : "/logo-full.png"
+                        }
+                        alt={f.nickname || "프리랜서"}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    </div>
+                    {/* 닉네임+타이틀 */}
+                    <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", flex: 1 }}>
+                      <div style={{
+                        fontWeight: 800,
+                        fontSize: "1.15rem",
+                        color: "#222",
+                        marginBottom: "3px"
+                      }}>{f.nickname}</div>
+                      <div style={{
+                        color: "#ed6a23",
+                        fontWeight: 700,
+                        fontSize: "16px",
+                        marginTop: "3px"
+                      }}>{f.freelancerTitle}</div>
+                    </div>
+                  </div>
+                  {/* 기타 정보 */}
+                  <div style={{
+                    display: "flex",
+                    gap: "12px",
+                    fontSize: "15px",
+                    color: "#666",
+                    marginBottom: "7px"
+                  }}>
+                    <span>★ {f.ratingAvg ?? f.rating ?? "0.0"}</span>
+                    <span>📍 {f.location}</span>
+                  </div>
+                  {/* 카드 본문 */}
+                  <div style={{
+                    color: "#555",
+                    fontSize: "15px",
+                    marginBottom: "10px",
+                    minHeight: "38px"
+                  }}>{f.content ?? f.description}</div>
+                  {/* 기술 태그 */}
+                  <div style={{
+                    display: "flex",
+                    gap: "7px",
+                    flexWrap: "wrap",
+                    marginBottom: "10px"
+                  }}>
+                    {(f.skills || []).map((s: string) => (
+                      <span
+                        key={s}
+                        style={{
+                          background: "#f7f7f7",
+                          color: "#ed6a23",
+                          fontWeight: 600,
+                          borderRadius: "8px",
+                          padding: "5px 13px",
+                          fontSize: "13px",
+                        }}
+                      >{s}</span>
+                    ))}
+                  </div>
+                  {/* 액션/단가 */}
+                  <div style={{
+                    marginTop: "auto",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}>
+                    <div>
+                      <div style={{
+                        fontWeight: 800,
+                        color: "#ed6a23",
+                        fontSize: "1.1rem",
+                      }}>
+                        {Math.round((f.minMonthlyRate ?? f.minRate ?? 0) / 10000).toLocaleString()}만 ~{" "}
+                        {Math.round((f.maxMonthlyRate ?? f.maxRate ?? 0) / 10000).toLocaleString()}만
+                      </div>
+                      <div style={{ fontSize: "13px", color: "#999" }}>월 단가</div>
+                    </div>
+                    <div style={{ display: "flex", gap: "7px" }}>
+                      <Link href={`/freelancers/${f.id}`}>
+                        <button
+                          style={{
+                            background: "#ed6a23",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "8px",
+                            padding: "7px 18px",
+                            fontWeight: 700,
+                            fontSize: "15px",
+                            cursor: "pointer",
+                          }}
+                        >프로필</button>
+                      </Link>
+                      <button
+                        style={{
+                          background: "#f7f7f7",
+                          color: "#ed6a23",
+                          border: "none",
+                          borderRadius: "8px",
+                          padding: "7px 18px",
+                          fontWeight: 700,
+                          fontSize: "15px",
+                          cursor: "pointer",
+                        }}
+                      >연락</button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
       </main>
     </div>
   );

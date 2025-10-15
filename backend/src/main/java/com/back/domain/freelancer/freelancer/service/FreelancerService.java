@@ -43,6 +43,12 @@ public class FreelancerService {
         return new FreelancerDetailResponseDto(freelancer);
     }
 
+    @Transactional(readOnly = true)
+    public FreelancerDetailResponseDto findByMemberId(long memberId) {
+        Freelancer freelancer = freelancerFinder.findFreelancerByMemberId(memberId);
+        return new FreelancerDetailResponseDto(freelancer);
+    }
+
     @Transactional
     public Freelancer create(Long memberId, FreelancerSaveRequestDto dto, MultipartFile imageFile) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));

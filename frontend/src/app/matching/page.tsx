@@ -1,18 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/global/auth/hooks/useAuth'
+import { useEffect, useState } from 'react'
+// import { useAuth } from '@/global/auth/hooks/useAuth'
 import {
-  Briefcase,
-  Users,
-  Clock,
-  CheckCircle,
   AlertCircle,
+  Briefcase,
+  CheckCircle,
+  Clock,
+  FileText,
   List,
-  Star,
   Send,
-  FileText
+  Star,
+  Users
 } from 'lucide-react'
 
 interface ProjectSummary {

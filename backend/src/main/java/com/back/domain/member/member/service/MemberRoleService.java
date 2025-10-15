@@ -1,5 +1,7 @@
 package com.back.domain.member.member.service;
 
+import com.back.domain.freelancer.freelancer.entity.Freelancer;
+import com.back.domain.freelancer.freelancer.service.FreelancerFinder;
 import com.back.domain.freelancer.portfolio.entity.Portfolio;
 import com.back.domain.freelancer.portfolio.repository.PortfolioRepository;
 import com.back.domain.member.member.entity.Member;
@@ -20,6 +22,7 @@ public class MemberRoleService {
     private final MemberRepository memberRepository;
     private final ProjectRepository projectRepository;
     private final PortfolioRepository portfolioRepository;
+    private final FreelancerFinder freelancerFinder;
 
     @Transactional
     public void updateRoles(Long memberId) {
@@ -28,7 +31,8 @@ public class MemberRoleService {
         List<Project> projects = projectRepository.findByManager_IdOrderByCreateDateDesc(memberId);
         boolean hasProject = !projects.isEmpty();
 
-        List<Portfolio> portfolios = portfolioRepository.findAllByFreelancerId(memberId);
+        Freelancer freelancer = freelancerFinder.findFreelancerByMemberId(memberId);
+        List<Portfolio> portfolios = portfolioRepository.findAllByFreelancerId(freelancer.getId());
         boolean hasPortfolio = !portfolios.isEmpty();
 
         member.getRoles().clear();
