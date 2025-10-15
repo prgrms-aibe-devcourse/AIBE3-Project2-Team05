@@ -48,7 +48,7 @@ const UserProjectsPage = () => {
     if (params?.managerId) {
       const paramManagerId = Number(params.managerId);
       setManagerId(paramManagerId);
-      
+
       // 현재 로그인한 사용자가 해당 프로젝트의 관리자인지 확인
       if (memberId && memberId !== paramManagerId) {
         // 다른 사용자의 프로젝트에 접근하려고 하는 경우
@@ -68,7 +68,7 @@ const UserProjectsPage = () => {
 
     try {
       const counts: Record<string, number> = {};
-      
+
       // 전체 개수 조회
       const allResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/manager/${managerId}?size=1`, {
         credentials: 'include',
@@ -201,14 +201,14 @@ const UserProjectsPage = () => {
               {statusOptions.map((option) => {
                 const count = getStatusCount(option.key);
                 const isActive = activeStatus === option.key;
-                
+
                 return (
                   <button
                     key={option.key}
                     onClick={() => setActiveStatus(option.key)}
                     className={`px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 border ${
-                      isActive 
-                        ? 'bg-blue-500 text-white border-blue-500 shadow-md transform scale-105' 
+                      isActive
+                        ? 'bg-blue-500 text-white border-blue-500 shadow-md transform scale-105'
                         : `${option.color} hover:shadow-sm hover:scale-102`
                     }`}
                     style={{
@@ -227,8 +227,8 @@ const UserProjectsPage = () => {
                   >
                     {option.label}
                     <span className={`ml-2 px-2 py-1 rounded-full text-xs ${
-                      isActive 
-                        ? 'bg-white bg-opacity-20 text-white' 
+                      isActive
+                        ? 'bg-white bg-opacity-20 text-white'
                         : 'bg-white bg-opacity-60'
                     }`} style={{
                       marginLeft: '8px',
@@ -251,15 +251,15 @@ const UserProjectsPage = () => {
           <button
             onClick={() => router.push('/projects/create')}
             className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-            style={{ 
+            style={{
               background: 'linear-gradient(to right, #f97316, #ef4444)',
-              color: 'white', 
-              padding: '12px 24px', 
+              color: 'white',
+              padding: '12px 24px',
               borderRadius: '12px',
               fontWeight: '500',
               boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-              border: 'none', 
-              cursor: 'pointer', 
+              border: 'none',
+              cursor: 'pointer',
               transition: 'all 0.2s',
               transform: 'scale(1)'
             }}
@@ -299,13 +299,13 @@ const UserProjectsPage = () => {
                     <div
                       key={project.id}
                       className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:border-blue-200 transition-all duration-300 cursor-pointer group"
-                      style={{ 
-                        backgroundColor: 'white', 
-                        borderRadius: '12px', 
-                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', 
-                        border: '1px solid #e5e7eb', 
-                        overflow: 'hidden', 
-                        cursor: 'pointer', 
+                      style={{
+                        backgroundColor: 'white',
+                        borderRadius: '12px',
+                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                        border: '1px solid #e5e7eb',
+                        overflow: 'hidden',
+                        cursor: 'pointer',
                         transition: 'all 0.3s'
                       }}
                       onClick={() => router.push(`/user-projects/${managerId}/${project.id}`)}
@@ -313,7 +313,7 @@ const UserProjectsPage = () => {
                       {/* 프로젝트 헤더 */}
                       <div className="p-6 pb-4" style={{ padding: '24px 24px 16px 24px' }}>
                         <div className="flex justify-between items-start mb-3" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                          <h3 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors" 
+                          <h3 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors"
                               style={{ fontSize: '18px', fontWeight: 'bold', color: '#111827', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', transition: 'color 0.2s' }}>
                             {project.title}
                           </h3>
@@ -324,18 +324,18 @@ const UserProjectsPage = () => {
                             project.status === 'COMPLETED' ? 'bg-purple-100 text-purple-700' :
                             project.status === 'SUSPENDED' ? 'bg-yellow-100 text-yellow-700' :
                             'bg-red-100 text-red-700'
-                          }`} style={{ 
-                            padding: '4px 12px', 
-                            borderRadius: '9999px', 
-                            fontSize: '12px', 
-                            fontWeight: '500', 
-                            marginLeft: '12px', 
-                            flexShrink: 0 
+                          }`} style={{
+                            padding: '4px 12px',
+                            borderRadius: '9999px',
+                            fontSize: '12px',
+                            fontWeight: '500',
+                            marginLeft: '12px',
+                            flexShrink: 0
                           }}>
                             {getStatusText(project.status)}
                           </span>
                         </div>
-                        
+
                         <div className="flex items-center gap-4 text-sm text-gray-600 mb-4" style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '14px', color: '#4b5563', marginBottom: '16px' }}>
                           <span className="bg-gray-100 px-2 py-1 rounded-md" style={{ backgroundColor: '#f3f4f6', padding: '4px 8px', borderRadius: '6px' }}>
                             {getProjectFieldText(project.projectField)}
@@ -365,7 +365,7 @@ const UserProjectsPage = () => {
                             <div className="font-medium text-gray-900" style={{ fontWeight: '500', color: '#111827' }}>{project.applicantCount || 0}명</div>
                           </div>
                         </div>
-                        
+
                         {project.startDate && project.endDate && (
                           <div className="mt-3 pt-3 border-t border-gray-200" style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e5e7eb' }}>
                             <span className="text-gray-500 text-sm" style={{ color: '#6b7280', fontSize: '14px' }}>기간</span>
@@ -385,17 +385,17 @@ const UserProjectsPage = () => {
                               router.push(`/user-projects/${managerId}/${project.id}`);
                             }}
                             className="flex-1 px-3 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
-                            style={{ 
+                            style={{
                               flex: 1,
-                              padding: '8px 12px', 
-                              backgroundColor: '#3b82f6', 
-                              color: 'white', 
-                              borderRadius: '8px', 
+                              padding: '8px 12px',
+                              backgroundColor: '#3b82f6',
+                              color: 'white',
+                              borderRadius: '8px',
                               fontSize: '14px',
                               fontWeight: '500',
-                              border: 'none', 
-                              cursor: 'pointer', 
-                              transition: 'background-color 0.2s' 
+                              border: 'none',
+                              cursor: 'pointer',
+                              transition: 'background-color 0.2s'
                             }}
                           >
                             상세보기
@@ -403,35 +403,64 @@ const UserProjectsPage = () => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              // 진행중이거나 완료된 프로젝트 수정 제한
+                              if (project.status === 'IN_PROGRESS') {
+                                alert('진행중인 프로젝트는 상태 변경 외에 수정할 수 없습니다.');
+                                return;
+                              } else if (project.status === 'COMPLETED') {
+                                alert('완료된 프로젝트는 수정할 수 없습니다.');
+                                return;
+                              }
                               router.push(`/user-projects/${managerId}/${project.id}/edit`);
                             }}
-                            className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
-                            style={{ 
+                            disabled={project.status === 'IN_PROGRESS' || project.status === 'COMPLETED'}
+                            className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              project.status === 'IN_PROGRESS' || project.status === 'COMPLETED'
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                            style={{
                               flex: 1,
-                              padding: '8px 12px', 
-                              backgroundColor: '#f3f4f6', 
-                              color: '#374151', 
-                              borderRadius: '8px', 
+                              padding: '8px 12px',
+                              backgroundColor: project.status === 'IN_PROGRESS' || project.status === 'COMPLETED' ? '#d1d5db' : '#f3f4f6',
+                              color: project.status === 'IN_PROGRESS' || project.status === 'COMPLETED' ? '#6b7280' : '#374151',
+                              borderRadius: '8px',
                               fontSize: '14px',
                               fontWeight: '500',
-                              border: 'none', 
-                              cursor: 'pointer', 
-                              transition: 'background-color 0.2s' 
+                              border: 'none',
+                              cursor: project.status === 'IN_PROGRESS' || project.status === 'COMPLETED' ? 'not-allowed' : 'pointer',
+                              transition: 'background-color 0.2s',
+                              opacity: project.status === 'IN_PROGRESS' || project.status === 'COMPLETED' ? 0.6 : 1
                             }}
+                            title={
+                              project.status === 'IN_PROGRESS'
+                                ? '진행중인 프로젝트는 수정할 수 없습니다'
+                                : project.status === 'COMPLETED'
+                                  ? '완료된 프로젝트는 수정할 수 없습니다'
+                                  : project.status === 'CONTRACTING'
+                                    ? '계약중인 프로젝트는 필수 정보 수정이 제한됩니다'
+                                    : '프로젝트 수정'
+                            }
                           >
                             수정
                           </button>
                           <button
                             onClick={async (e) => {
                               e.stopPropagation();
+                              // 계약중 또는 진행중 상태일 때 삭제 제한
+                              if (project.status === 'CONTRACTING' || project.status === 'IN_PROGRESS') {
+                                alert('계약중 또는 진행중인 프로젝트는 삭제할 수 없습니다.');
+                                return;
+                              }
+
                               if (window.confirm(`"${project.title}" 프로젝트를 정말 삭제하시겠습니까?`)) {
                                 try {
                                   console.log('프로젝트 삭제 시작:', { projectId: project.id, managerId });
-                                  
+
                                   // DELETE API로 프로젝트 삭제
                                   const deleteUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${project.id}?managerId=${managerId}`;
                                   console.log('삭제 API URL:', deleteUrl);
-                                  
+
                                   const deleteResponse = await fetch(deleteUrl, {
                                     method: 'DELETE',
                                     headers: {
@@ -439,13 +468,13 @@ const UserProjectsPage = () => {
                                     },
                                     credentials: 'include',
                                   });
-                                  
+
                                   console.log('DELETE API 응답:', {
                                     status: deleteResponse.status,
                                     statusText: deleteResponse.statusText,
                                     ok: deleteResponse.ok
                                   });
-                                  
+
                                   if (deleteResponse.ok) {
                                     alert('프로젝트가 삭제되었습니다.');
                                     fetchMyProjects(currentPage, activeStatus); // 현재 페이지 새로고침
@@ -470,16 +499,16 @@ const UserProjectsPage = () => {
                               }
                             }}
                             className="px-3 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors"
-                            style={{ 
-                              padding: '8px 12px', 
-                              backgroundColor: '#fee2e2', 
-                              color: '#dc2626', 
-                              borderRadius: '8px', 
+                            style={{
+                              padding: '8px 12px',
+                              backgroundColor: '#fee2e2',
+                              color: '#dc2626',
+                              borderRadius: '8px',
                               fontSize: '14px',
                               fontWeight: '500',
-                              border: 'none', 
-                              cursor: 'pointer', 
-                              transition: 'background-color 0.2s' 
+                              border: 'none',
+                              cursor: 'pointer',
+                              transition: 'background-color 0.2s'
                             }}
                           >
                             삭제
@@ -495,14 +524,14 @@ const UserProjectsPage = () => {
                   <div className="flex justify-center space-x-2 mt-8" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '32px' }}>
                     <button
                       className="px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      style={{ 
-                        padding: '8px 16px', 
-                        border: '1px solid #d1d5db', 
-                        borderRadius: '8px', 
+                      style={{
+                        padding: '8px 16px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
                         fontWeight: '500',
                         color: '#374151',
                         backgroundColor: 'white',
-                        cursor: currentPage === 0 ? 'not-allowed' : 'pointer', 
+                        cursor: currentPage === 0 ? 'not-allowed' : 'pointer',
                         opacity: currentPage === 0 ? 0.5 : 1,
                         transition: 'background-color 0.2s'
                       }}
@@ -511,11 +540,11 @@ const UserProjectsPage = () => {
                     >
                       이전
                     </button>
-                    
+
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                       const pageNum = Math.max(0, Math.min(totalPages - 5, currentPage - 2)) + i;
                       const isCurrentPage = currentPage === pageNum;
-                      
+
                       return (
                         <button
                           key={pageNum}
@@ -543,14 +572,14 @@ const UserProjectsPage = () => {
 
                     <button
                       className="px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      style={{ 
-                        padding: '8px 16px', 
-                        border: '1px solid #d1d5db', 
-                        borderRadius: '8px', 
+                      style={{
+                        padding: '8px 16px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
                         fontWeight: '500',
                         color: '#374151',
                         backgroundColor: 'white',
-                        cursor: currentPage >= totalPages - 1 ? 'not-allowed' : 'pointer', 
+                        cursor: currentPage >= totalPages - 1 ? 'not-allowed' : 'pointer',
                         opacity: currentPage >= totalPages - 1 ? 0.5 : 1,
                         transition: 'background-color 0.2s'
                       }}

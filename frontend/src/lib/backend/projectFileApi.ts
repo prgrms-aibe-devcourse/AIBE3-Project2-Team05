@@ -10,19 +10,19 @@ type RsDataListProjectFile = components['schemas']['RsDataListProjectFile'];
  * 서버에서 직접 파일을 관리하는 방식으로 변경됨
  */
 export class ProjectFileApiService {
-  
+
   /**
    * 프로젝트의 파일 목록을 조회합니다
    */
   static async getProjectFiles(projectId: string): Promise<ProjectFile[]> {
     try {
       const response: RsDataListProjectFile = await apiFetch(`/api/projects/${projectId}/files`);
-      
+
       // 성공 조건을 더 명확하게 처리
       if (response.resultCode?.startsWith('200') || response.statusCode === 200) {
-        return response.Data || []; // Data가 null/undefined이면 빈 배열 반환
+        return response.data || []; // Data가 null/undefined이면 빈 배열 반환
       }
-      
+
       throw new Error(response.msg || '파일 목록을 불러오지 못했습니다.');
     } catch (error) {
       console.error('파일 목록 조회 실패:', error);
@@ -49,11 +49,11 @@ export class ProjectFileApiService {
       }
 
       const apiResponse: RsDataProjectFile = await response.json();
-      
-      if ((apiResponse.resultCode?.startsWith('200') || apiResponse.statusCode === 200) && apiResponse.Data) {
-        return apiResponse.Data;
+
+      if ((apiResponse.resultCode?.startsWith('200') || apiResponse.statusCode === 200) && apiResponse.data) {
+        return apiResponse.data;
       }
-      
+
       throw new Error(apiResponse.msg || '파일 업로드에 실패했습니다.');
     } catch (error) {
       console.error('단일 파일 업로드 실패:', error);
@@ -82,11 +82,11 @@ export class ProjectFileApiService {
       }
 
       const apiResponse: RsDataListProjectFile = await response.json();
-      
-      if ((apiResponse.resultCode?.startsWith('200') || apiResponse.statusCode === 200) && apiResponse.Data) {
-        return apiResponse.Data;
+
+      if ((apiResponse.resultCode?.startsWith('200') || apiResponse.statusCode === 200) && apiResponse.data) {
+        return apiResponse.data;
       }
-      
+
       throw new Error(apiResponse.msg || '파일 업로드에 실패했습니다.');
     } catch (error) {
       console.error('다중 파일 업로드 실패:', error);
@@ -109,7 +109,7 @@ export class ProjectFileApiService {
       }
 
       const apiResponse = await response.json();
-      
+
       if (!(apiResponse.resultCode?.startsWith('200') || apiResponse.statusCode === 200)) {
         throw new Error(apiResponse.msg || '파일 삭제에 실패했습니다.');
       }
@@ -125,11 +125,11 @@ export class ProjectFileApiService {
   static async getFileDetails(projectId: string, fileId: number): Promise<ProjectFile> {
     try {
       const response: RsDataProjectFile = await apiFetch(`/api/projects/${projectId}/files/${fileId}`);
-      
-      if ((response.resultCode?.startsWith('200') || response.statusCode === 200) && response.Data) {
-        return response.Data;
+
+      if ((response.resultCode?.startsWith('200') || response.statusCode === 200) && response.data) {
+        return response.data;
       }
-      
+
       throw new Error(response.msg || '파일 정보를 불러오지 못했습니다.');
     } catch (error) {
       console.error('파일 상세 조회 실패:', error);
