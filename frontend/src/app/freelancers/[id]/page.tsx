@@ -39,6 +39,15 @@ export default function FreelancerDetailPage({
   const [careerEditModalOpen, setCareerEditModalOpen] = useState(false);
   const [techEditModalOpen, setTechEditModalOpen] = useState(false);
 
+// full-year format: "2025년 02월"
+function formatFullDate(dateStr?: string) {
+  if (!dateStr) return "-";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "-";
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  return `${year}년 ${month}월`;
+}
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -380,94 +389,174 @@ export default function FreelancerDetailPage({
             {/* Tab content */}
             <div style={{ flex: 1 }}>
               {activeTab === "basic" && (
-                <div>
-                  <h3 style={{
-                    fontWeight: 800,
-                    fontSize: "1.12rem",
-                    color: "#222",
-                    marginBottom: "15px"
-                  }}>
-                    소개
-                  </h3>
-                  <p style={{
-                    color: "#555",
-                    marginBottom: "22px",
-                    fontSize: "15.5px",
-                    lineHeight: "1.75",
-                  }}>
-                    {freelancer?.content}
-                  </p>
-                  {/* 경력 */}
-                  <div style={{ marginBottom: "24px" }}>
-                    <h3 style={{
-                    fontWeight: 800,
-                    fontSize: "1.12rem",
-                    color: "#222",
-                    marginBottom: "15px"
-                  }}>
-                    경력
-                  </h3>
-                    {Array.isArray(freelancer?.careerList) && freelancer?.careerList.length > 0 ? (
-                      <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
-                        {freelancer.careerList.map((c: any) => (
-                          <li key={c.id}
-                            style={{
-                              background: "#f8faff",
+                              <div>
+                                <h3 style={{
+                                  fontWeight: 800,
+                                  fontSize: "1.12rem",
+                                  color: "#222",
+                                  marginBottom: "10px"
+                                }}>
+                                  소개
+                                </h3>
+                                <p style={{
+                                  background: "#f8faff",
+                                  color: "#555",
+                                  borderRadius: 8,
+                                  padding: "10px 15px",
+                                  marginBottom: "40px",
+                                  fontSize: "16px",
+                                  lineHeight: "1.75",
+                                  whiteSpace: "pre-wrap",
+                                  wordBreak: "break-word",
+                                }}>
+                                  {freelancer?.content}
+                                </p>
+                                {/* 경력 */}
+                                <div>
+                                <div style={{ display: "flex", alignItems: "center", marginBottom: "5px" }}>
+                                  <h3 style={{
+                                  fontWeight: 800,
+                                  fontSize: "1.12rem",
+                                  color: "#222",
+                                  marginBottom: "10px",
+                                  flex: 1
+                                }}>
+                                  경력
+                                </h3>
+                                  </div>
+                                  {Array.isArray(freelancer?.careerList) && freelancer?.careerList.length > 0 ? (
+                                      <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
+                                          {freelancer.careerList
+                                            .slice()
+                                            .sort((a: any, b: any) => {
+                                              const da = new Date(a?.startDate);
+                                              const db = new Date(b?.startDate);
+                                              const ta = isNaN(da.getTime()) ? Infinity : da.getTime();
+                                              const tb = isNaN(db.getTime()) ? Infinity : db.getTime();
+                                              return ta - tb; // earlier start first
+                                            })
+                                            .map((c: any, idx: number) => (
+                            <li
+                              key={c.id ?? `${c.title}-${c.company}-${c.startDate}-${idx}`}
+                              style={{
                               borderRadius: 8,
-                              padding: "10px 15px",
+                              padding: "12px 14px",
                               marginBottom: "10px",
-                              fontSize: "15px"
-                            }}>
-                            <div style={{ fontWeight: 700}}>
-                              {c.title} · {c.company}
-                            </div>
-                            <div style={{ color: "#888", fontSize: "14px", marginTop: "2px" }}>
-                              {c.startDate} - {c.endDate} {c.current ? "(재직중)" : ""}
-                            </div>
-                            {c.description && (
-                              <div style={{ marginTop: "5px", color: "#444" }}>{c.description}</div>
+                              fontSize: "15px",
+                              position: "relative",
+                              display: "flex",
+                              gap: "12px",
+                              alignItems: "flex-start",
+                              }}
+                            >
+                              {/* Left: stacked dates (start on top, end below) */}
+                              <div style={{ width: 120, minWidth: 100, textAlign: "left", color: "#666" }}>
+                                <div style={{ fontSize: "16px", color: "#888", textAlign: "center" }}>{formatFullDate(c.startDate)}</div>
+                                <div style={{ fontSize: "12px", color: "#ccc", margin: "4px 0", textAlign: "center" }}>|</div>
+                                <div style={{ marginTop: "1px", fontSize: "16px", color: "#888", textAlign: "center" }}>
+                                  {c.endDate ? formatFullDate(c.endDate) : (c.current ? "재직중" : "-")}
+                                </div>
+                              </div>
+              
+                              {/* Right: company/title on top, description below */}
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontWeight: 700, color: "#222", display: "flex", gap: "8px", alignItems: "center" }}>
+                                  <span style={{ fontSize: "18px", marginRight: "12px" }}>{c.company}</span>
+                                  <span style={{ fontSize: "16px", color: "#555", fontWeight: 600 }}>{c.title}</span>
+                                </div>
+                                {c.description && (
+                                  <div style={{ marginTop: "8px", color: "#444", lineHeight: 1.5 }}>{c.description}</div>
+                                )}
+                              </div>
+              
+                  
+                            </li>
+                                          ))}
+                                      </ul>
+                                      ) : (
+                                      <div style={{ color: "#888" }}>경력 정보가 없습니다.</div>
+                                      )}
+              
+                                
+                      
+                                </div>
+                                {/* 스킬 */}
+                                <div>
+                                <div style={{ marginBottom: "2px", marginTop: "28px", display: "flex", alignItems: "center" }}>
+                                  <h3 style={{
+                                  fontWeight: 800,
+                                  fontSize: "1.12rem",
+                                  color: "#222",
+                                  marginTop: "20px",
+                                  marginBottom: "15px",
+                                  flex: 1
+                                }}
+                                >
+                                  기술스택
+                                </h3>
+                              
+                                  </div>
+                                  <div style={{ display: "flex", gap: "18px", flexWrap: "wrap" }}>
+                                    {((freelancer?.techList || []) as any[]).length > 0 ? (
+                                      (() => {
+                                        // group by techLevel -> display order: HIGH, MID, LOW, 기타
+                                        const groups: Record<string, any[]> = { HIGH: [], MID: [], LOW: [], OTHER: [] };
+                                        // Expect backend to use: BEGINNER, INTERMEDIATE, ADVANCED
+                                        (freelancer!.techList || []).forEach((t: any) => {
+                                          const lvl = (t.techLevel || t.level || "").toString().toUpperCase();
+                                          if (lvl === "ADVANCED" || lvl === "ADV") groups.HIGH.push(t);
+                                          else if (lvl === "INTERMEDIATE" || lvl === "MID") groups.MID.push(t);
+                                          else if (lvl === "BEGINNER" || lvl === "LOW") groups.LOW.push(t);
+                                          else groups.OTHER.push(t);
+                                        });
+              
+                                        const renderGroup = (label: string, items: any[]) => {
+                                          if (!items || items.length === 0) return null;
+                                          return (
+                                            <div style={{ display: "flex", flexDirection: "column", gap: 8 }} key={label}>
+                                              <div style={{ fontSize: 12, color: "#666", fontWeight: 700 }}>{label}</div>
+                                              <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
+                                                {items.map((tech: any) => (
+                                                  <span
+                                                    key={tech.id ?? tech.techName}
+                                                    style={{
+                                                      background: "#f7f7f7",
+                                                      color: "#72a685ff",
+                                                      fontWeight: 600,
+                                                      borderRadius: "8px",
+                                                      padding: "5px 13px",
+                                                      fontSize: "13px",
+                                                      display: "inline-flex",
+                                                      alignItems: "center",
+                                                      gap: 8,
+                                                    }}
+                                                  >
+                                                    <span>{tech.techName ?? tech}</span>
+                                                    
+                                                  </span>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          );
+                                        };
+              
+                                        return (
+                                          <>
+                                            {renderGroup("고급", groups.HIGH)}
+                                            {renderGroup("중급", groups.MID)}
+                                            {renderGroup("초급", groups.LOW)}
+                                            {renderGroup("기타", groups.OTHER)}
+                                          </>
+                                        );
+                                      })()
+                                    ) : (
+                                      <div style={{ color: "#888" }}>등록된 스킬이 없습니다.</div>
+                                    )}
+                                  </div>
+                                  
+                                </div>
+                              </div>
                             )}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <div style={{ color: "#888" }}>경력 정보가 없습니다.</div>
-                    )}
-                  </div>
-                  {/* 스킬 */}
-                  <div>
-                    <h3 style={{
-                    fontWeight: 800,
-                    fontSize: "1.12rem",
-                    color: "#222",
-                    marginBottom: "15px"
-                  }}>
-                    기술스택
-                  </h3>
-                    <div style={{ display: "flex", gap: "7px", flexWrap: "wrap" }}>
-                      {(freelancer?.techList || []).length > 0 ? (
-                        freelancer?.techList.map((tech: any) => (
-                          <span
-                            key={tech.id ?? tech.techName}
-                            style={{
-                              background: "#f7f7f7",
-                              color: "#72a685ff",
-                              fontWeight: 600,
-                              borderRadius: "8px",
-                              padding: "5px 13px",
-                              fontSize: "13px",
-                            }}
-                          >
-                            {tech.techName ?? tech}
-                          </span>
-                        ))
-                      ) : (
-                        <div style={{ color: "#888" }}>등록된 스킬이 없습니다.</div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
               {activeTab === "portfolio" && (
                 <div style={{ minHeight: 220 }}>
                   {portfolios.length > 0 ? (
