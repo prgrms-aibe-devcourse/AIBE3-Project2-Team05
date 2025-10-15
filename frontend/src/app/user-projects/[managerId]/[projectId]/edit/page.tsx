@@ -78,6 +78,7 @@ const UserProjectEditPage = () => {
         const url = sessionStorageUtils.addCacheBuster(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}`);
         const response = await fetch(url, {
           cache: 'no-store',
+          credentials: 'include',
           headers: sessionStorageUtils.getCacheBustingHeaders()
         });
         
@@ -89,21 +90,9 @@ const UserProjectEditPage = () => {
           console.log('기술 스택 데이터:', data.techStacks);
           console.log('파일 데이터:', data.projectFiles);
           
-          // 세션 스토리지에서 파일 상태 복원 시도
-          const savedFiles = sessionStorageUtils.getProjectFiles<FileItem>(params.projectId as string);
-          let finalFiles: FileItem[] = [];
-          
-          if (savedFiles && (!data.projectFiles || data.projectFiles.length === 0)) {
-            finalFiles = savedFiles;
-            console.log('세션 스토리지에서 파일 복원:', savedFiles);
-          } else if (data.projectFiles && data.projectFiles.length > 0) {
-            finalFiles = data.projectFiles;
-            sessionStorageUtils.clearProjectFiles(params.projectId as string);
-            console.log('API 응답 파일 사용:', data.projectFiles);
-          } else {
-            finalFiles = data.projectFiles || [];
-            console.log('API 응답 파일만 사용:', data.projectFiles);
-          }
+          // 서버 응답의 파일 데이터를 사용 (세션 스토리지 의존성 제거)
+          const finalFiles: FileItem[] = data.projectFiles || [];
+          console.log('API 응답 파일 사용:', finalFiles);
           
           setProject({
             ...data,
@@ -206,6 +195,7 @@ const UserProjectEditPage = () => {
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}/complete`, {
         method: 'PUT',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -217,6 +207,7 @@ const UserProjectEditPage = () => {
         const updatedUrl = sessionStorageUtils.addCacheBuster(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${params.projectId}`);
         const updatedResponse = await fetch(updatedUrl, {
           cache: 'no-store',
+          credentials: 'include',
           headers: sessionStorageUtils.getCacheBustingHeaders()
         });
         if (updatedResponse.ok) {
@@ -235,15 +226,6 @@ const UserProjectEditPage = () => {
         }
         
         showSuccessMessage('프로젝트가 수정되었습니다.');
-        
-        // 세션 스토리지에 업데이트 플래그 및 파일 상태 설정
-        sessionStorageUtils.setProjectUpdated(params.projectId as string);
-        
-        if (projectFiles && projectFiles.length > 0) {
-          sessionStorageUtils.setProjectFiles(params.projectId as string, projectFiles);
-        } else {
-          sessionStorageUtils.clearProjectFiles(params.projectId as string);
-        }
         
         // 완전한 페이지 새로고침으로 캐시 문제 방지
         window.location.href = `/user-projects/${params.managerId}/${params.projectId}`;

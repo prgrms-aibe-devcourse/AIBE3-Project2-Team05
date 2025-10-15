@@ -1,4 +1,4 @@
-package com.back.global.jpa;
+package com.back.global.jpa.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -15,11 +15,16 @@ public class BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected Long id;
+    protected long id;
 
     @CreatedDate
     private LocalDateTime createDate;
 
     @LastModifiedDate
     private LocalDateTime modifyDate;
+
+
+    public Long getId() {
+        return this.id;
+    }
 }

@@ -1,11 +1,10 @@
 "use client";
 
+import { ProjectFileApiService } from '@/lib/backend/projectFileApi';
 import { components } from '@/lib/backend/schema';
 import {
     canPreviewFile,
-    getFileIcon,
-    handleFileDownload,
-    handleFilePreview
+    getFileIcon
 } from '@/utils/filePreviewUtils';
 import { useEffect, useState } from 'react';
 
@@ -32,64 +31,71 @@ const ProjectFileManager = ({
                             }: ProjectFileManagerProps) => {
     const [uploadingFiles, setUploadingFiles] = useState(false);
     const [currentFiles, setCurrentFiles] = useState<FileItem[]>(projectFiles);
+    const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        setCurrentFiles(projectFiles);
-    }, [projectFiles, projectId, mode]);
-
-    // 파일 목록이 변경될 때 부모 컴포넌트에 알림
-    const notifyFilesChange = (newFiles: FileItem[]) => {
-        setCurrentFiles(newFiles);
-        if (onFilesChange) {
-            onFilesChange(newFiles);
+    // 서버에서 파일 목록 가져오기
+    const fetchProjectFiles = async () => {
+        if (!projectId || projectId === 'undefined' || projectId === 'null') return;
+        
+        setLoading(true);
+        try {
+            const files = await ProjectFileApiService.getProjectFiles(projectId);
+            setCurrentFiles(files);
+            if (onFilesChange) {
+                onFilesChange(files);
+            }
+        } catch (error) {
+            console.error('파일 목록을 불러오지 못했습니다:', error);
+            // 에러 발생 시에도 빈 배열로 설정하여 로딩 상태를 종료
+            setCurrentFiles([]);
+            if (onFilesChange) {
+                onFilesChange([]);
+            }
+        } finally {
+            setLoading(false);
         }
     };
 
-    // 파일 업로드 함수
+    // 초기 로딩
+    useEffect(() => {
+        if (projectId && projectId !== 'undefined' && projectId !== 'null') {
+            // 프로젝트 ID가 있으면 서버에서 파일 목록을 가져옴
+            fetchProjectFiles();
+        } else {
+            // 프로젝트 ID가 없으면 props로 전달된 파일 목록 사용
+            setCurrentFiles(projectFiles);
+            setLoading(false);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [projectId]); // projectFiles와 onFilesChange는 의도적으로 제외
+
+    // projectFiles가 변경되었을 때만 업데이트 (프로젝트 ID가 없는 경우)
+    useEffect(() => {
+        if (!projectId || projectId === 'undefined' || projectId === 'null') {
+            setCurrentFiles(projectFiles);
+        }
+    }, [projectFiles, projectId]);
+
+
+
+    // 파일 업로드 함수 - 서버 직접 저장
     const handleFileUpload = async (files: File[]) => {
         if (!files.length || !projectId || disabled) return;
 
         setUploadingFiles(true);
         try {
-            const uploadedFiles = [];
-
-            // 각 파일을 개별적으로 업로드
-            for (const file of files) {
-                const formData = new FormData();
-                formData.append('file', file);
-
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${projectId}/files/upload`, {
-                    method: 'POST',
-                    body: formData,
-                });
-
-                if (response.ok) {
-                    const apiResponse = await response.json();
-                    // API 응답이 ApiResponseProjectFile 형태라면 data 필드에서 파일 정보를 추출
-                    const uploadedFile = apiResponse.data || apiResponse;
-                    uploadedFiles.push(uploadedFile);
-                } else {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || `파일 "${file.name}" 업로드에 실패했습니다.`);
-                }
+            if (files.length > 1) {
+                // 다중 파일 업로드
+                await ProjectFileApiService.uploadMultipleFiles(projectId, files);
+                alert(`${files.length}개의 파일이 업로드되었습니다.`);
+            } else {
+                // 단일 파일 업로드
+                await ProjectFileApiService.uploadSingleFile(projectId, files[0]);
+                alert('파일이 업로드되었습니다.');
             }
-
-            // 업로드된 파일들을 현재 파일 목록에 추가
-            const newFiles = [...currentFiles, ...uploadedFiles];
-            notifyFilesChange(newFiles);
-
-            // 파일 변경 플래그 및 파일 상태 설정 (TTL 포함)
-            const projectUpdateKey = `projectUpdated_${projectId}`;
-            const projectUpdateTimeKey = `projectUpdateTime_${projectId}`;
-            const projectFilesKey = `projectFiles_${projectId}`;
-            const projectFilesTimeKey = `projectFilesTime_${projectId}`;
             
-            sessionStorage.setItem(projectUpdateKey, 'true');
-            sessionStorage.setItem(projectUpdateTimeKey, Date.now().toString());
-            sessionStorage.setItem(projectFilesKey, JSON.stringify(newFiles));
-            sessionStorage.setItem(projectFilesTimeKey, Date.now().toString());
-
-            alert(`${uploadedFiles.length}개의 파일이 업로드되었습니다.`);
+            // 서버에서 업데이트된 파일 목록을 다시 가져옴
+            await fetchProjectFiles();
         } catch (error) {
             console.error('파일 업로드 실패:', error);
             alert(error instanceof Error ? error.message : '파일 업로드 중 오류가 발생했습니다.');
@@ -98,45 +104,18 @@ const ProjectFileManager = ({
         }
     };
 
-    // 파일 삭제 함수
+    // 파일 삭제 함수 - 서버에서 직접 삭제
     const handleFileDelete = async (fileId: number) => {
         if (!projectId || disabled) return;
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${projectId}/files/${fileId}`, {
-                method: 'DELETE',
-            });
-
-            if (response.ok) {
-                // 삭제된 파일을 목록에서 제거
-                const newFiles = currentFiles.filter(file => file.id !== fileId);
-                notifyFilesChange(newFiles);
-
-                // 파일 변경 플래그 및 파일 상태 설정 (TTL 포함)
-                const projectUpdateKey = `projectUpdated_${projectId}`;
-                const projectUpdateTimeKey = `projectUpdateTime_${projectId}`;
-                const projectFilesKey = `projectFiles_${projectId}`;
-                const projectFilesTimeKey = `projectFilesTime_${projectId}`;
-                
-                sessionStorage.setItem(projectUpdateKey, 'true');
-                sessionStorage.setItem(projectUpdateTimeKey, Date.now().toString());
-                
-                if (newFiles.length > 0) {
-                    sessionStorage.setItem(projectFilesKey, JSON.stringify(newFiles));
-                    sessionStorage.setItem(projectFilesTimeKey, Date.now().toString());
-                } else {
-                    sessionStorage.removeItem(projectFilesKey);
-                    sessionStorage.removeItem(projectFilesTimeKey);
-                }
-
-                alert('파일이 삭제되었습니다.');
-            } else {
-                const errorData = await response.json().catch(() => ({}));
-                alert(errorData.message || '파일 삭제에 실패했습니다.');
-            }
+            await ProjectFileApiService.deleteFile(projectId, fileId);
+            // 서버에서 업데이트된 파일 목록을 다시 가져옴
+            await fetchProjectFiles();
+            alert('파일이 삭제되었습니다.');
         } catch (error) {
             console.error('파일 삭제 실패:', error);
-            alert('파일 삭제 중 오류가 발생했습니다.');
+            alert(error instanceof Error ? error.message : '파일 삭제 중 오류가 발생했습니다.');
         }
     };
 
@@ -205,7 +184,11 @@ const ProjectFileManager = ({
             )}
 
             {/* 파일 목록 표시 */}
-            {currentFiles && currentFiles.length > 0 ? (
+            {loading ? (
+                <div className="mt-4 text-center py-8 text-gray-500">
+                    파일 목록을 불러오는 중...
+                </div>
+            ) : currentFiles && currentFiles.length > 0 ? (
                 <div className="mt-4">
                     <h5 className="text-sm font-semibold text-gray-700 mb-2">
                         {mode === 'view' ? '첨부파일' : '업로드된 파일'} ({currentFiles.length}개)
@@ -231,7 +214,7 @@ const ProjectFileManager = ({
                                             type="button"
                                             onClick={() => {
                                                 if (file.id) {
-                                                    handleFilePreview(projectId, file.id);
+                                                    ProjectFileApiService.previewFile(projectId, file.id);
                                                 }
                                             }}
                                             className="text-gray-500 hover:text-gray-700 text-sm font-medium"
@@ -245,7 +228,7 @@ const ProjectFileManager = ({
                                         type="button"
                                         onClick={() => {
                                             if (file.id && file.originalName) {
-                                                handleFileDownload(projectId, file.id, file.originalName);
+                                                ProjectFileApiService.downloadFile(projectId, file.id, file.originalName);
                                             }
                                         }}
                                         className="text-blue-500 hover:text-blue-700 text-sm font-medium"

@@ -1,5 +1,6 @@
 "use client";
 
+import { useUser } from '@/app/context/UserContext';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { components } from '@/lib/backend/schema';
 import {
@@ -18,9 +19,10 @@ type PageProjectResponse = components['schemas']['PageProjectResponse'];
 const UserProjectsPage = () => {
   const router = useRouter();
   const params = useParams();
+  const { memberId, isLoaded } = useUser();
   const [projects, setProjects] = useState<ProjectResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [managerId, setManagerId] = useState<string>('1');
+  const [managerId, setManagerId] = useState<number | null>(null);
   const [activeStatus, setActiveStatus] = useState<string>('ALL');
   // 페이징 상태 추가
   const [currentPage, setCurrentPage] = useState(0);
@@ -39,22 +41,38 @@ const UserProjectsPage = () => {
     { key: 'CANCELLED', label: '취소', color: 'bg-red-100 text-red-700 border-red-300' }
   ];
 
-  // URL 파라미터에서 managerId 설정
+  // URL 파라미터에서 managerId 설정 및 권한 확인
   useEffect(() => {
+    if (!isLoaded) return; // 사용자 정보 로딩 대기
+
     if (params?.managerId) {
-      setManagerId(params.managerId as string);
+      const paramManagerId = Number(params.managerId);
+      setManagerId(paramManagerId);
+      
+      // 현재 로그인한 사용자가 해당 프로젝트의 관리자인지 확인
+      if (memberId && memberId !== paramManagerId) {
+        // 다른 사용자의 프로젝트에 접근하려고 하는 경우
+        console.warn('권한이 없는 사용자가 프로젝트에 접근을 시도했습니다.');
+        router.push(`/user-projects/${memberId}`); // 자신의 프로젝트 페이지로 리다이렉트
+        return;
+      }
+    } else if (memberId) {
+      // URL에 managerId가 없으면 현재 로그인한 사용자의 ID로 설정
+      setManagerId(memberId);
     }
-  }, [params?.managerId]);
+  }, [params?.managerId, memberId, isLoaded, router]);
 
   // 각 상태별 프로젝트 개수 조회
   const fetchStatusCounts = useCallback(async () => {
-    if (!managerId) return;
+    if (!managerId || !isLoaded) return;
 
     try {
       const counts: Record<string, number> = {};
       
       // 전체 개수 조회
-      const allResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/manager/${managerId}?size=1`);
+      const allResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/manager/${managerId}?size=1`, {
+        credentials: 'include',
+      });
       if (allResponse.ok) {
         const allData: PageProjectResponse = await allResponse.json();
         counts['ALL'] = allData.totalElements || 0;
@@ -63,7 +81,9 @@ const UserProjectsPage = () => {
       // 각 상태별 개수 조회
       const statuses = ['RECRUITING', 'CONTRACTING', 'IN_PROGRESS', 'COMPLETED', 'SUSPENDED', 'CANCELLED'];
       for (const status of statuses) {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/manager/${managerId}?status=${status}&size=1`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/manager/${managerId}?status=${status}&size=1`, {
+          credentials: 'include',
+        });
         if (response.ok) {
           const data: PageProjectResponse = await response.json();
           counts[status] = data.totalElements || 0;
@@ -74,11 +94,11 @@ const UserProjectsPage = () => {
     } catch (error) {
       console.error('상태별 개수 조회 실패:', error);
     }
-  }, [managerId]);
+  }, [managerId, isLoaded]);
 
   // 백엔드에서 프로젝트 목록 가져오기 (페이징 및 상태 필터 통합)
   const fetchMyProjects = useCallback(async (page = 0, status = activeStatus) => {
-    if (!managerId) return;
+    if (!managerId || !isLoaded) return;
 
     setLoading(true);
     try {
@@ -96,7 +116,9 @@ const UserProjectsPage = () => {
       console.log('API 호출 URL:', url);
       console.log('현재 페이지:', page, '상태:', status);
 
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        credentials: 'include',
+      });
       if (response.ok) {
         const data: PageProjectResponse = await response.json();
         console.log('API 응답 데이터:', data);
@@ -105,13 +127,19 @@ const UserProjectsPage = () => {
         setCurrentPage(page);
       } else {
         console.error('API 호출 실패:', response.status, response.statusText);
+        if (response.status === 403) {
+          console.error('권한이 없습니다. 로그인 상태를 확인해주세요.');
+          // 403 오류 시 로그인 페이지로 리다이렉트
+          router.push('/members/login');
+          return;
+        }
       }
     } catch (error) {
       console.error('내 프로젝트 조회 실패:', error);
     } finally {
       setLoading(false);
     }
-  }, [managerId, activeStatus]);
+  }, [managerId, activeStatus, isLoaded, router]);
 
   // 관리자 ID가 변경되면 초기 로드 및 상태별 개수 조회
   useEffect(() => {
@@ -132,6 +160,26 @@ const UserProjectsPage = () => {
   const getStatusCount = (status: string) => {
     return statusCounts[status] || 0;
   };
+
+  // 로그인하지 않은 사용자 처리
+  if (isLoaded && !memberId) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+          <div className="text-gray-400 text-6xl mb-4">🔒</div>
+          <div className="text-gray-600 text-lg mb-6">
+            프로젝트를 관리하려면 로그인이 필요합니다.
+          </div>
+          <button
+            onClick={() => router.push('/members/login')}
+            className="bg-blue-500 text-white px-8 py-3 rounded-xl font-medium hover:bg-blue-600 transition-colors"
+          >
+            로그인하기
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50" style={{ backgroundColor: "var(--background)" }}>
@@ -378,27 +426,46 @@ const UserProjectsPage = () => {
                               e.stopPropagation();
                               if (window.confirm(`"${project.title}" 프로젝트를 정말 삭제하시겠습니까?`)) {
                                 try {
-                                  const statusResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${project.id}/status`, {
-                                    method: 'PATCH',
+                                  console.log('프로젝트 삭제 시작:', { projectId: project.id, managerId });
+                                  
+                                  // DELETE API로 프로젝트 삭제
+                                  const deleteUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${project.id}?managerId=${managerId}`;
+                                  console.log('삭제 API URL:', deleteUrl);
+                                  
+                                  const deleteResponse = await fetch(deleteUrl, {
+                                    method: 'DELETE',
                                     headers: {
                                       'Content-Type': 'application/json',
                                     },
-                                    body: JSON.stringify({ 
-                                      status: 'CANCELLED',
-                                      changedById: Number(managerId)
-                                    }),
+                                    credentials: 'include',
                                   });
                                   
-                                  if (statusResponse.ok) {
-                                    alert('프로젝트가 취소되었습니다.');
+                                  console.log('DELETE API 응답:', {
+                                    status: deleteResponse.status,
+                                    statusText: deleteResponse.statusText,
+                                    ok: deleteResponse.ok
+                                  });
+                                  
+                                  if (deleteResponse.ok) {
+                                    alert('프로젝트가 삭제되었습니다.');
                                     fetchMyProjects(currentPage, activeStatus); // 현재 페이지 새로고침
                                   } else {
-                                    const errorData = await statusResponse.json().catch(() => ({}));
-                                    alert(errorData.message || '프로젝트 삭제에 실패했습니다.');
+                                    let errorMessage = '';
+                                    try {
+                                      const errorData = await deleteResponse.json();
+                                      console.error('삭제 API 오류:', errorData);
+                                      errorMessage = errorData.message || errorData.msg || '';
+                                    } catch {
+                                      const errorText = await deleteResponse.text();
+                                      console.error('삭제 API 오류 텍스트:', errorText);
+                                      errorMessage = errorText;
+                                    }
+                                    alert(errorMessage || '프로젝트 삭제에 실패했습니다.');
                                   }
                                 } catch (error) {
-                                  console.error('삭제 오류:', error);
-                                  alert('프로젝트 삭제 중 오류가 발생했습니다.');
+                                  console.error('프로젝트 삭제 중 예외 발생:', error);
+                                  const errorMessage = error instanceof Error ? error.message : String(error);
+                                  alert('프로젝트 삭제 중 오류가 발생했습니다: ' + errorMessage);
                                 }
                               }
                             }}

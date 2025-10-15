@@ -1,6 +1,6 @@
 package com.back.domain.member.member.entity;
 
-import com.back.global.jpa.BaseEntity;
+import com.back.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

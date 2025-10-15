@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useUser } from "../context/UserContext";
+
+import { useUser } from "@/app/context/UserContext";
 import "./Header.css";
 
 export const Header = () => {
@@ -67,7 +68,7 @@ export const Header = () => {
       <img
         src="/logo-text.png"
         alt="Logo"
-        className="absolute left-[13.2%] top-[14px] w-[174px] h-[44px] object-cover cursor-pointer"
+        className="absolute left-[13.2%] top-[8px] w-[220px] h-[52px] object-cover cursor-pointer hover:opacity-80 transition-opacity duration-200"
         onClick={() => router.push("/")}
       />
       {navigationItems.map((item, index) => (

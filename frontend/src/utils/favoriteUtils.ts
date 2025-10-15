@@ -32,7 +32,8 @@ export const toggleFavorite = async (projectId: number, memberId: number): Promi
     if (response.ok) {
       const data = await response.json();
       console.log('즐겨찾기 토글 응답 데이터:', data);
-      return data.success === true; // success가 true일 때만 true로 간주
+      // API 응답 구조에 맞게 성공 여부 확인
+      return data.resultCode === '200-1' || data.statusCode === 200 || data.msg === '성공';
     } else {
       const errorText = await response.text();
       console.error('즐겨찾기 토글 실패:', {
@@ -71,7 +72,8 @@ export const getFavoriteStatus = async (projectId: number, memberId: number): Pr
     if (response.ok) {
       const data = await response.json();
       console.log('즐겨찾기 상태 조회 응답 데이터:', data);
-      return data.data?.isFavorite || data.isFavorite || false;
+      // API 응답 구조에 맞게 즐겨찾기 상태 확인
+      return data.Data?.isFavorite || data.data?.isFavorite || data.isFavorite || false;
     } else {
       const errorText = await response.text();
       console.error('즐겨찾기 상태 조회 실패:', {
@@ -118,8 +120,8 @@ export const getUserFavoriteProjectIds = async (memberId: number): Promise<numbe
       
       console.log('사용자 즐겨찾기 목록 조회 응답 데이터:', data);
       
-      // 다양한 응답 구조 대응
-      const projectIds = data?.data || data?.result || data || [];
+      // 다양한 응답 구조 대응 (Data 대문자 포함)
+      const projectIds = data?.Data || data?.data || data?.result || data || [];
       
       // 숫자 배열인지 확인하고 반환
       if (Array.isArray(projectIds)) {

@@ -2,6 +2,10 @@
 
 // 예산 타입을 한국어로 변환
 export const getBudgetTypeText = (budgetType?: string): string => {
+  if (!budgetType || budgetType.trim() === '' || budgetType === '0') {
+    return '미정';
+  }
+  
   const budgetMap: Record<string, string> = {
     'RANGE_1_100': '1만원 ~ 100만원',
     'RANGE_100_200': '100만원 ~ 200만원',
@@ -15,30 +19,42 @@ export const getBudgetTypeText = (budgetType?: string): string => {
     'OVER_1_EUK': '1억원 이상',
     'NEGOTIABLE': '협의'
   };
-  return budgetMap[budgetType || ''] || '미정';
+  return budgetMap[budgetType] || '미정';
 };
 
 // 프로젝트 필드를 한국어로 변환
 export const getProjectFieldText = (field?: string): string => {
+  if (!field || field.trim() === '' || field === '0') {
+    return '';
+  }
+  
   const fieldMap: Record<string, string> = {
     'PLANNING': '기획',
     'DESIGN': '디자인',
     'DEVELOPMENT': '개발'
   };
-  return fieldMap[field || ''] || field || '';
+  return fieldMap[field] || field;
 };
 
 // 모집 형태를 한국어로 변환
 export const getRecruitmentTypeText = (recruitmentType?: string): string => {
+  if (!recruitmentType || recruitmentType.trim() === '' || recruitmentType === '0') {
+    return '';
+  }
+  
   const recruitmentMap: Record<string, string> = {
     'PROJECT_CONTRACT': '외주',
     'PERSONAL_CONTRACT': '상주'
   };
-  return recruitmentMap[recruitmentType || ''] || '';
+  return recruitmentMap[recruitmentType] || '';
 };
 
 // 지역을 한국어로 변환
 export const getLocationText = (location?: string): string => {
+  if (!location || location.trim() === '' || location === '0') {
+    return '';
+  }
+  
   const locationMap: Record<string, string> = {
     'SEOUL': '서울',
     'BUSAN': '부산',
@@ -59,11 +75,15 @@ export const getLocationText = (location?: string): string => {
     'JEJU': '제주',
     'OVERSEAS': '해외'
   };
-  return locationMap[location || ''] || location || '';
+  return locationMap[location] || location;
 };
 
 // 파트너 타입을 한국어로 변환
 export const getPartnerTypeText = (partnerType?: string): string => {
+  if (!partnerType || partnerType.trim() === '' || partnerType === '0') {
+    return '';
+  }
+  
   const partnerMap: Record<string, string> = {
     'INDIVIDUAL_FREELANCER': '개인 프리랜서',
     'INDIVIDUAL_OR_TEAM_FREELANCER': '개인 또는 팀 프리랜서',
@@ -71,11 +91,15 @@ export const getPartnerTypeText = (partnerType?: string): string => {
     'ANY_TYPE': '상관없음',
     'ETC': '기타'
   };
-  return partnerMap[partnerType || ''] || '';
+  return partnerMap[partnerType] || '';
 };
 
 // 프로젝트 상태를 한국어로 변환
 export const getStatusText = (status?: string): string => {
+  if (!status || status.trim() === '' || status === '0') {
+    return '';
+  }
+  
   const statusMap: Record<string, string> = {
     'RECRUITING': '모집중',
     'CONTRACTING': '계약중',
@@ -84,21 +108,29 @@ export const getStatusText = (status?: string): string => {
     'SUSPENDED': '보류',
     'CANCELLED': '취소'
   };
-  return statusMap[status || ''] || status || '';
+  return statusMap[status] || status;
 };
 
 // 진행상황을 한국어로 변환
 export const getProgressStatusText = (status?: string): string => {
+  if (!status || status.trim() === '' || status === '0') {
+    return '';
+  }
+  
   const statusMap: Record<string, string> = {
     'IDEA_STAGE': '아이디어 구상 단계에요.',
     'CONTENT_ORGANIZED': '필요한 내용이 정리되었어요.',
     'DETAILED_PLAN': '상세 기획서가 있어요.'
   };
-  return statusMap[status || ''] || status || '';
+  return statusMap[status] || status;
 };
 
 // 기술스택을 한국어로 변환
 export const getTechStackText = (techStack?: string): string => {
+  if (!techStack || techStack.trim() === '' || techStack === '0') {
+    return '';
+  }
+  
   const techMap: Record<string, string> = {
     // Frontend
     'REACT': 'React',
@@ -141,7 +173,7 @@ export const getTechStackText = (techStack?: string): string => {
     'ELASTICSEARCH': 'Elasticsearch',
     'FIREBASE': 'Firebase'
   };
-  return techMap[techStack || ''] || techStack || '';
+  return techMap[techStack] || techStack;
 };
 
 // 기술 이름으로 카테고리 자동 판단

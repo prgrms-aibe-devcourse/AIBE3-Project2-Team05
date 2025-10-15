@@ -14,6 +14,7 @@ import {
   getRecruitmentTypeText,
   getStatusText
 } from '@/utils/projectUtils';
+import { sessionStorageUtils } from '@/utils/sessionStorageUtils';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -65,7 +66,7 @@ const ProjectsPage = () => {
       // 인증된 사용자인 경우에만 즐겨찾기 로드
       if (!isAuthenticated()) {
         setFavoriteProjectIds([]);
-        // 즐겨찾기 정렬도 해제
+        // 즐겨찾기 정렬도 해제 (로그인하지 않은 사용자는 정렬 기능 비활성화)
         setSortByFavorite(false);
         return;
       }
@@ -78,8 +79,12 @@ const ProjectsPage = () => {
           return;
         }
 
+        // 항상 서버에서 최신 즐겨찾기 목록을 가져와서 baseinitdata와 동기화 보장
         const favoriteIds = await getUserFavoriteProjectIds(userId);
         setFavoriteProjectIds(favoriteIds);
+        
+        // sessionStorage에 저장 (페이지 간 동기화용)
+        sessionStorageUtils.setFavoriteList(userId, favoriteIds);
       } catch (error) {
         console.error('즐겨찾기 목록 로드 실패:', error);
         setFavoriteProjectIds([]);
@@ -88,7 +93,53 @@ const ProjectsPage = () => {
     };
 
     loadFavorites();
-  }, [username, isLoaded]); // username과 isLoaded 상태 변화에 따라 재실행
+  }, [username, isLoaded, memberId]);
+
+  // 즐겨찾기 상태 변경 이벤트 리스너
+  useEffect(() => {
+    const handleFavoriteChange = async (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const { projectId, isFavorite } = customEvent.detail;
+      
+      // 서버에서 최신 즐겨찾기 목록을 다시 로드
+      const userId = getCurrentUserId();
+      if (userId !== null && isAuthenticated()) {
+        try {
+          // 서버에서 최신 즐겨찾기 목록 가져오기
+          const favoriteIds = await getUserFavoriteProjectIds(userId);
+          setFavoriteProjectIds(favoriteIds);
+          
+          // sessionStorage 업데이트 (캐시 갱신)
+          sessionStorageUtils.setFavoriteList(userId, favoriteIds);
+        } catch (error) {
+          console.error('즐겨찾기 목록 갱신 실패:', error);
+          
+          // 서버 요청 실패 시 로컬 상태만 업데이트
+          setFavoriteProjectIds(prev => {
+            let newIds: number[];
+            if (isFavorite) {
+              newIds = prev.includes(projectId) ? prev : [...prev, projectId];
+            } else {
+              newIds = prev.filter(id => id !== projectId);
+            }
+            
+            // sessionStorage 업데이트
+            if (userId !== null) {
+              sessionStorageUtils.setFavoriteList(userId, newIds);
+            }
+            
+            return newIds;
+          });
+        }
+      }
+    };
+
+    window.addEventListener('favoriteStatusChanged', handleFavoriteChange);
+    
+    return () => {
+      window.removeEventListener('favoriteStatusChanged', handleFavoriteChange);
+    };
+  }, []);
 
   // 데이터 로드 및 필터 변경 처리
   useEffect(() => {
@@ -111,12 +162,7 @@ const ProjectsPage = () => {
         // 상태 필터 처리
         if (currentFilters.status) {
           params.append('status', currentFilters.status);
-        }
-
-        console.log('API 호출 URL:', `/api/projects?${params}`);
-        console.log('현재 필터:', currentFilters);
-
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects?${params}`, {
+        }      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects?${params}`, {
           method: 'GET',
           credentials: 'include',
           headers: {
@@ -125,13 +171,19 @@ const ProjectsPage = () => {
           }
         });
         if (response.ok) {
-          const data: PageProjectResponse = await response.json();
-          console.log('API 응답 데이터:', data);
-          console.log('프로젝트 상태들:', data.content?.map(p => p.status));
+          const responseText = await response.text();
+          
+          let data: PageProjectResponse;
+          try {
+            data = JSON.parse(responseText);
+          } catch (parseError) {
+            console.error('프로젝트 목록 JSON 파싱 실패:', parseError);
+            throw new Error('서버 응답을 처리할 수 없습니다.');
+          }
           let projectList = data.content || [];
           
           // 즐겨찾기 순으로 정렬이 활성화된 경우 (로그인된 사용자만)
-          if (sortByFavorite && projectList.length > 0 && isAuthenticated()) {
+          if (sortByFavorite && projectList.length > 0 && isAuthenticated() && favoriteProjectIds.length > 0) {
             const validProjects = projectList.filter((p): p is ProjectResponse & { id: number } => 
               typeof p.id === 'number'
             );
@@ -177,8 +229,7 @@ const ProjectsPage = () => {
         params.append('status', currentFilters.status);
       }
 
-      console.log('API 호출 URL:', `/api/projects?${params}`);
-      console.log('현재 필터:', currentFilters);
+
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects?${params}`, {
         method: 'GET',
@@ -190,12 +241,10 @@ const ProjectsPage = () => {
       });
       if (response.ok) {
         const data: PageProjectResponse = await response.json();
-        console.log('API 응답 데이터:', data);
-        console.log('프로젝트 상태들:', data.content?.map(p => p.status));
         let projectList = data.content || [];
         
         // 즐겨찾기 순으로 정렬이 활성화된 경우 (로그인된 사용자만)
-        if (sortByFavorite && projectList.length > 0 && isAuthenticated()) {
+        if (sortByFavorite && projectList.length > 0 && isAuthenticated() && favoriteProjectIds.length > 0) {
           const validProjects = projectList.filter((p): p is ProjectResponse & { id: number } => 
             typeof p.id === 'number'
           );
@@ -224,7 +273,36 @@ const ProjectsPage = () => {
     }));
   };
 
+  // 페이지 visibility 변경 시 즐겨찾기 상태 갱신 (탭 전환, 뒤로가기 등) - 로그인된 사용자만
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible' && isLoaded && isAuthenticated()) {
+        const userId = getCurrentUserId();
+        if (userId !== null) {
+          try {
+            // 서버에서 최신 즐겨찾기 목록 가져오기
+            const favoriteIds = await getUserFavoriteProjectIds(userId);
+            setFavoriteProjectIds(favoriteIds);
+            
+            // sessionStorage 업데이트
+            sessionStorageUtils.setFavoriteList(userId, favoriteIds);
+          } catch (error) {
+            console.error('페이지 재활성화 시 즐겨찾기 목록 갱신 실패:', error);
+          }
+        }
+      } else if (document.visibilityState === 'visible' && isLoaded && !isAuthenticated()) {
+        // 로그인하지 않은 사용자는 즐겨찾기 상태 초기화
+        setFavoriteProjectIds([]);
+        setSortByFavorite(false);
+      }
+    };
 
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isLoaded, username, memberId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="bg-gray-100 min-h-screen" style={{ backgroundColor: "var(--background)" }}>
@@ -237,7 +315,7 @@ const ProjectsPage = () => {
               <button
                 onClick={() => {
                   if (!isAuthenticated()) {
-                    alert('로그인이 필요한 기능입니다.');
+                    alert('즐겨찾기 정렬 기능을 사용하려면 로그인이 필요합니다.');
                     router.push('/members/login');
                     return;
                   }
@@ -250,10 +328,10 @@ const ProjectsPage = () => {
                   backgroundColor: 'transparent',
                   boxShadow: 'none'
                 }}
-                title={sortByFavorite ? '좋아요 정렬 해제' : '좋아요 순으로 정렬'}
+                title={isAuthenticated() ? (sortByFavorite ? '좋아요 정렬 해제' : '좋아요 순으로 정렬') : '로그인 후 이용 가능'}
               >
                 <span className="text-20xl transition-all duration-200">
-                  {sortByFavorite ? '❤️' : '🤍'}
+                  {isAuthenticated() && sortByFavorite ? '❤️' : '🤍'}
                 </span>
               </button>
             </div>
@@ -805,30 +883,60 @@ const ProjectsPage = () => {
                 className="relative bg-white shadow-md rounded-lg p-6 mb-4 hover:shadow-lg transition-shadow" 
                 style={{ position: 'relative', backgroundColor: 'white', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', borderRadius: '8px', padding: '24px', marginBottom: '16px', cursor: 'pointer', transition: 'box-shadow 0.3s' }}
                 onClick={() => {
+                  // 프로젝트 상세 페이지 접근 시 로그인 체크
+                  if (!isAuthenticated()) {
+                    alert('프로젝트 상세 정보를 보려면 로그인이 필요합니다.');
+                    router.push('/members/login');
+                    return;
+                  }
                   router.push(`/projects/${project.id}`);
                 }}
               >
                 <div className="flex justify-between items-start mb-2" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                   <h3 className="text-lg font-bold text-gray-800 mb-2" style={{ fontSize: '18px', fontWeight: 'bold', color: '#374151', marginBottom: '8px' }}>{project.title}</h3>
                   <div className="flex items-center space-x-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    {/* 북마크 버튼 */}
-                    {project.id && isAuthenticated() && (
+                    {/* 북마크 버튼 - 항상 표시하되 로그인 상태에 따라 동작 다름 */}
+                    {project.id && (
                       <div onClick={(e) => e.stopPropagation()}>
-                        <FavoriteButton 
-                          projectId={project.id} 
-                          isFavorite={favoriteProjectIds.includes(project.id)}
-                          userId={getCurrentUserId()!}
-                          onToggle={(newState) => {
-                            if (newState) {
-                              setFavoriteProjectIds(prev => [...prev, project.id!]);
-                            } else {
-                              setFavoriteProjectIds(prev => prev.filter(id => id !== project.id));
-                            }
-                          }}
-                        />
+                        {isAuthenticated() ? (
+                          <FavoriteButton 
+                            projectId={project.id} 
+                            isFavorite={favoriteProjectIds.includes(project.id)}
+                            userId={getCurrentUserId()!}
+                            onToggle={(newState) => {
+                              // sessionStorage에 개별 프로젝트 즐겨찾기 상태 저장
+                              sessionStorageUtils.setFavoriteStatus(project.id!, newState);
+                              
+                              // 로컬 상태 업데이트
+                              if (newState) {
+                                setFavoriteProjectIds(prev => [...prev, project.id!]);
+                              } else {
+                                setFavoriteProjectIds(prev => prev.filter(id => id !== project.id));
+                              }
+                            }}
+                          />
+                        ) : (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              alert('즐겨찾기 기능을 사용하려면 로그인이 필요합니다.');
+                              router.push('/members/login');
+                            }}
+                            className="p-2 transition-all duration-200 hover:scale-110 cursor-pointer"
+                            style={{
+                              border: 'none',
+                              outline: 'none',
+                              backgroundColor: 'transparent',
+                              boxShadow: 'none'
+                            }}
+                            title="로그인 후 즐겨찾기를 사용할 수 있습니다"
+                          >
+                            <span className="text-lg">🤍</span>
+                          </button>
+                        )}
                       </div>
                     )}
-                    {project.recruitmentType && (
+                    {project.recruitmentType && getRecruitmentTypeText(project.recruitmentType) && (
                       <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded" style={{ backgroundColor: '#dcfce7', color: '#166534', fontSize: '12px', padding: '4px 8px', borderRadius: '4px' }}>
                         {getRecruitmentTypeText(project.recruitmentType)}
                       </span>
@@ -844,11 +952,13 @@ const ProjectsPage = () => {
                   </div>
                 </div>
                 
-                <div className="mb-3" style={{ marginBottom: '12px' }}>
-                  <span className="text-sm text-gray-600" style={{ fontSize: '14px', color: '#4b5563' }}>
-                    {getProjectFieldText(project.projectField)}
-                  </span>
-                </div>
+                {getProjectFieldText(project.projectField) && (
+                  <div className="mb-3" style={{ marginBottom: '12px' }}>
+                    <span className="text-sm text-gray-600" style={{ fontSize: '14px', color: '#4b5563' }}>
+                      {getProjectFieldText(project.projectField)}
+                    </span>
+                  </div>
+                )}
 
                 <div className="text-sm text-gray-600 space-y-1" style={{ fontSize: '14px', color: '#4b5563', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <div>예상비용: {getBudgetTypeText(project.budgetType)}</div>
@@ -859,7 +969,7 @@ const ProjectsPage = () => {
                   )}
                   <div className="flex items-center space-x-4" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <span>지원자수: {project.applicantCount || 0}명</span>
-                    {project.companyLocation && (
+                    {project.companyLocation && getLocationText(project.companyLocation) && (
                       <span>지역: {getLocationText(project.companyLocation)}</span>
                     )}
                   </div>

@@ -49,6 +49,20 @@ spring:
           auth: true
           starttls:
             enable: true
+
+# ===== 프로젝트 파일 저장 설정 =====
+project:
+  file:
+    # 파일 저장 방식: DATABASE (데이터베이스), FILE_SYSTEM (파일시스템)
+    storage-type: DATABASE
+    # 파일시스템 저장시 업로드 디렉토리 (DATABASE 모드에서는 사용하지 않음)
+    upload-dir: uploads/projects
+    # 허용되는 파일 확장자
+    allowed-extensions: pdf,doc,docx,xls,xlsx,ppt,pptx,txt,md,zip,rar,jpg,jpeg,png,gif,webp,bmp,svg,mp4,avi,mov,mp3,wav,flac,html,htm,css,js,json,xml,csv
+    # 파일당 최대 크기 (50MB)
+    max-file-size: 52428800
+    # 프로젝트당 총 파일 크기 제한 (500MB)
+    max-total-size: 524288000
 # ===== Swagger =====
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8
