@@ -7,7 +7,7 @@ import { Card } from '@/ui/card'
 import { Button } from '@/ui/button'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ChatModal } from '@/app/components/ChatModal'
+import { ChatModal } from '@/components/ChatModal'
 
 interface Submission {
   id: number

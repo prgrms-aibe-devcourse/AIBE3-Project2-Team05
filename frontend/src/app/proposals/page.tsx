@@ -6,7 +6,7 @@ import { apiClient } from '@/global/backend/client'
 import { useRouter } from 'next/navigation'
 import { ProposalCard } from './_components/ProposalCard'
 import { AcceptRejectModal } from './_components/AcceptRejectModal'
-import { ChatModal } from '@/app/components/ChatModal'
+import { ChatModal } from '@/components/ChatModal'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 

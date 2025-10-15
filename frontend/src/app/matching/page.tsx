@@ -468,15 +468,15 @@ export default function MatchingDashboardPage() {
             {/* 버튼 그룹 */}
             <div className="grid grid-cols-2 gap-4" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <button
-                className="flex items-center justify-center gap-2 py-3 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition font-medium"
+                className="flex items-center justify-center gap-2 py-3 border-2 border-green-600 text-green-600 rounded-lg hover:bg-green-50 transition font-medium"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
                   padding: '12px',
-                  border: '2px solid #2563eb',
-                  color: '#2563eb',
+                  border: '2px solid #16a34a',
+                  color: '#16a34a',
                   borderRadius: '8px',
                   backgroundColor: 'white',
                   fontWeight: 500,
@@ -484,21 +484,21 @@ export default function MatchingDashboardPage() {
                   transition: 'background-color 0.2s'
                 }}
                 onClick={() => setActiveTab('projects')}
-                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#eff6ff')}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#dcfce7')}
                 onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'white')}
               >
                 <List className="w-5 h-5" style={{ width: '20px', height: '20px' }} />
                 전체 프로젝트 목록
               </button>
               <button
-                className="flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                className="flex items-center justify-center gap-2 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
                   padding: '12px',
-                  backgroundColor: '#2563eb',
+                  backgroundColor: '#16a34a',
                   color: 'white',
                   borderRadius: '8px',
                   border: 'none',
@@ -507,8 +507,8 @@ export default function MatchingDashboardPage() {
                   transition: 'background-color 0.2s'
                 }}
                 onClick={() => router.push('/projects/create')}
-                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#1d4ed8')}
-                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#2563eb')}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#15803d')}
+                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#16a34a')}
               >
                 <Briefcase className="w-5 h-5" style={{ width: '20px', height: '20px' }} />
                 새 프로젝트
@@ -632,11 +632,11 @@ export default function MatchingDashboardPage() {
 
             {/* 버튼 */}
             <button
-              className="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium"
+              className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
               style={{
                 width: '100%',
                 padding: '12px',
-                backgroundColor: '#9333ea',
+                backgroundColor: '#16a34a',
                 color: 'white',
                 borderRadius: '8px',
                 border: 'none',
@@ -645,8 +645,8 @@ export default function MatchingDashboardPage() {
                 transition: 'background-color 0.2s'
               }}
               onClick={() => router.push('/applications')}
-              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#7e22ce')}
-              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#9333ea')}
+              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#15803d')}
+              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#16a34a')}
             >
               모든 지원자 목록 보기
             </button>
@@ -667,14 +667,14 @@ export default function MatchingDashboardPage() {
                 </p>
               </div>
               <button
-                className="flex items-center justify-center gap-2 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                className="flex items-center justify-center gap-2 py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
                   padding: '8px 16px',
-                  backgroundColor: '#2563eb',
+                  backgroundColor: '#16a34a',
                   color: 'white',
                   borderRadius: '8px',
                   border: 'none',
@@ -683,8 +683,8 @@ export default function MatchingDashboardPage() {
                   transition: 'background-color 0.2s'
                 }}
                 onClick={() => router.push('/projects/create')}
-                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#1d4ed8')}
-                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#2563eb')}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#15803d')}
+                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#16a34a')}
               >
                 <Briefcase className="w-5 h-5" style={{ width: '20px', height: '20px' }} />
                 새 프로젝트
@@ -1029,7 +1029,7 @@ function FreelancerMatchingDashboard({ user, router }: { user: { id: number; use
                 <button
                   onClick={() => router.push('/projects')}
                   style={{
-                    backgroundColor: '#2563eb',
+                    backgroundColor: '#16a34a',
                     color: 'white',
                     padding: '12px 24px',
                     borderRadius: '8px',
@@ -1166,7 +1166,7 @@ function FreelancerMatchingDashboard({ user, router }: { user: { id: number; use
                     style={{
                       width: '100%',
                       padding: '10px',
-                      backgroundColor: project.hasApplied ? '#9ca3af' : '#2563eb',
+                      backgroundColor: project.hasApplied ? '#9ca3af' : '#16a34a',
                       color: 'white',
                       border: 'none',
                       borderRadius: '6px',
@@ -1175,8 +1175,8 @@ function FreelancerMatchingDashboard({ user, router }: { user: { id: number; use
                       fontWeight: 600,
                       transition: 'background-color 0.2s'
                     }}
-                    onMouseOver={(e) => !project.hasApplied && (e.currentTarget.style.backgroundColor = '#1d4ed8')}
-                    onMouseOut={(e) => !project.hasApplied && (e.currentTarget.style.backgroundColor = '#2563eb')}
+                    onMouseOver={(e) => !project.hasApplied && (e.currentTarget.style.backgroundColor = '#15803d')}
+                    onMouseOut={(e) => !project.hasApplied && (e.currentTarget.style.backgroundColor = '#16a34a')}
                   >
                     {project.hasApplied ? '지원완료' : '지원하기'}
                   </button>
@@ -1242,7 +1242,7 @@ function FreelancerMatchingDashboard({ user, router }: { user: { id: number; use
                 style={{
                   flex: 1,
                   padding: '12px',
-                  backgroundColor: '#2563eb',
+                  backgroundColor: '#16a34a',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',

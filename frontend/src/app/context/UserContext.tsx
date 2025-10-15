@@ -45,9 +45,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         );
         if (res.ok) {
           const data = await res.json();
-          setUsernameState(data.Data?.username ?? null);
-          setMemberIdState(data.Data?.id ?? null);
-          setRolesState(data.Data?.roles ?? []); // roles 세팅
+          setUsernameState(data.data?.username ?? null);
+          setMemberIdState(data.data?.id ?? null);
+          setRolesState(data.data?.roles ?? []); // roles 세팅
         } else {
           setUsernameState(null);
           setMemberIdState(null);
