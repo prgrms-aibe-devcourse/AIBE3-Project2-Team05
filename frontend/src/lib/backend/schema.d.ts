@@ -1711,10 +1711,10 @@ export interface components {
             empty?: boolean;
         };
         PageableObject: {
+            paged?: boolean;
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
-            paged?: boolean;
             /** Format: int32 */
             pageSize?: number;
             /** Format: int32 */
@@ -1722,8 +1722,8 @@ export interface components {
             unpaged?: boolean;
         };
         SortObject: {
-            empty?: boolean;
             sorted?: boolean;
+            empty?: boolean;
             unsorted?: boolean;
         };
         RsDataListLong: {
