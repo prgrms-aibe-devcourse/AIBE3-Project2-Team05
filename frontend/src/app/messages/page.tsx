@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/global/auth/hooks/useAuth'
 import { useConversations } from '@/hooks/useConversations'
 import { ConversationCard } from './_components/ConversationCard'
-import { ChatModal } from '@/app/_components/ChatModal'
+import { ChatModal } from '@/app/components/ChatModal'
 import { Card } from '@/ui/card'
 import { Input } from '@/ui/input'
 import { Button } from '@/ui/button'
@@ -18,9 +18,36 @@ export default function MessagesPage() {
   const [selectedConversation, setSelectedConversation] = useState<{
     projectId: number
     freelancerId: number
+    receiverId: number
     receiverName: string
     projectTitle: string
   } | null>(null)
+  const [isFreelancer, setIsFreelancer] = useState<boolean | null>(null)
+
+  // PM 여부 확인
+  useEffect(() => {
+    const checkRole = async () => {
+      if (!user || authLoading) return
+
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
+          { credentials: 'include' }
+        )
+
+        if (res.ok) {
+          const data = await res.json()
+          setIsFreelancer(data.resultCode?.startsWith('200'))
+        } else {
+          setIsFreelancer(false)
+        }
+      } catch {
+        setIsFreelancer(false)
+      }
+    }
+
+    checkRole()
+  }, [user, authLoading])
 
   // 검색 필터링
   const filteredConversations = conversations.filter((conv) => {
@@ -35,15 +62,15 @@ export default function MessagesPage() {
   })
 
   const handleConversationClick = useCallback((conversation: typeof conversations[0]) => {
-    const isUserPm = user?.role !== 'FREELANCER'
     setSelectedConversation({
       projectId: conversation.projectId,
       freelancerId: conversation.freelancerId,
-      receiverName: isUserPm ? conversation.freelancerName : conversation.pmName,
+      receiverId: isFreelancer ? conversation.pmId : conversation.freelancerId,
+      receiverName: isFreelancer ? conversation.pmName : conversation.freelancerName,
       projectTitle: conversation.projectTitle
     })
     setChatModalOpen(true)
-  }, [user?.role])
+  }, [isFreelancer])
 
   const handleCloseChat = useCallback(() => {
     setChatModalOpen(false)
@@ -142,6 +169,7 @@ export default function MessagesPage() {
           onClose={handleCloseChat}
           projectId={selectedConversation.projectId}
           freelancerId={selectedConversation.freelancerId}
+          receiverId={selectedConversation.receiverId}
           receiverName={selectedConversation.receiverName}
           projectTitle={selectedConversation.projectTitle}
         />

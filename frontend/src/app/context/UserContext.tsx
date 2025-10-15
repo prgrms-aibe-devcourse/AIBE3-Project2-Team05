@@ -39,9 +39,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           }
         );
         if (res.ok) {
-          const data = await res.json();
-          setUsernameState(data.Data?.username ?? null);
-          setMemberIdState(data.Data?.id ?? null);
+          const response = await res.json();
+          setUsernameState(response.data?.username ?? null);
+          setMemberIdState(response.data?.id ?? null);
         } else {
           setUsernameState(null);
           setMemberIdState(null);

@@ -11,9 +11,19 @@ spring:
     hikari:
       auto-commit: false
 
+  data:
     redis:
       host: localhost
       port: 6379
+      password: ${REDIS_PASSWORD}
+
+  # ===== SQL 초기화 설정 (개발 환경) =====
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:data-test.sql
+      encoding: UTF-8
+      continue-on-error: true
 
 # ===== 개발용 로깅 =====
 logging:

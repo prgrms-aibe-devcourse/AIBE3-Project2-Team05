@@ -28,22 +28,59 @@ export default function EditSubmissionPage() {
   const [submission, setSubmission] = useState<Submission | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isFreelancer, setIsFreelancer] = useState<boolean | null>(null)
 
   const [coverLetter, setCoverLetter] = useState('')
   const [proposedRate, setProposedRate] = useState('')
   const [estimatedDuration, setEstimatedDuration] = useState('')
 
+  // Freelancer 여부 확인
   useEffect(() => {
-    if (!authLoading && user?.role !== 'FREELANCER') {
-      alert('프리랜서만 접근할 수 있습니다.')
-      router.push('/submissions')
+    const checkRole = async () => {
+      if (!user || authLoading) return
+
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
+          { credentials: 'include' }
+        )
+
+        if (res.ok) {
+          const data = await res.json()
+          const isSuccess = data.resultCode?.startsWith('200')
+          setIsFreelancer(isSuccess)
+        } else {
+          setIsFreelancer(false)
+        }
+      } catch {
+        setIsFreelancer(false)
+      }
+    }
+
+    checkRole()
+  }, [user, authLoading])
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/members/login')
       return
     }
 
-    if (!authLoading) {
+    // isFreelancer가 null이면 아직 역할 확인 중
+    if (isFreelancer === null) {
+      return
+    }
+
+    if (!authLoading && user && isFreelancer === false) {
+      alert('프리랜서만 접근할 수 있습니다.')
+      router.push('/')
+      return
+    }
+
+    if (!authLoading && user && isFreelancer === true) {
       loadSubmission()
     }
-  }, [submissionId, authLoading, user])
+  }, [submissionId, authLoading, user, isFreelancer, router])
 
   const loadSubmission = async () => {
     try {
@@ -100,7 +137,7 @@ export default function EditSubmissionPage() {
     }
   }
 
-  if (authLoading || isLoading) {
+  if (authLoading || isLoading || isFreelancer === null) {
     return (
       <div className="container mx-auto px-4 py-16">
         <div className="text-center">로딩 중...</div>

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 import { Button } from '@/ui/button'
 import { Badge } from '@/ui/badge'
 import { useRouter } from 'next/navigation'
-import { ChatModal } from '@/app/_components/ChatModal'
+import { ChatModal } from '@/app/components/ChatModal'
 
 interface ProjectListItem {
   id: number
@@ -37,39 +37,87 @@ export default function ApplicationsPage() {
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null)
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isFreelancer, setIsFreelancer] = useState<boolean | null>(null)
   const [chatModalOpen, setChatModalOpen] = useState(false)
   const [chatTarget, setChatTarget] = useState<{
     freelancerId: number
+    receiverId: number
     receiverName: string
     projectId: number
     projectTitle: string
   } | null>(null)
 
+  // PM 여부 확인
   useEffect(() => {
-    // PM이 아니면 홈으로 리다이렉트
-    if (!authLoading && user?.role === 'FREELANCER') {
-      alert('PM만 접근 가능한 페이지입니다.')
-      router.push('/')
-      return
+    const checkRole = async () => {
+      if (!user || authLoading) return
+
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
+          { credentials: 'include' }
+        )
+
+        if (res.ok) {
+          const data = await res.json()
+          const isFreelancerUser = data.resultCode?.startsWith('200')
+          setIsFreelancer(isFreelancerUser)
+
+          if (isFreelancerUser) {
+            alert('PM만 접근 가능한 페이지입니다.')
+            router.push('/')
+          }
+        } else {
+          setIsFreelancer(false)
+        }
+      } catch {
+        setIsFreelancer(false)
+      }
     }
 
-    if (!authLoading && user) {
+    checkRole()
+  }, [user, authLoading, router])
+
+  // 프로젝트 로드
+  useEffect(() => {
+    if (!authLoading && user && isFreelancer === false) {
       loadProjects()
     }
-  }, [user, authLoading, router])
+  }, [user, authLoading, isFreelancer])
 
   const loadProjects = async () => {
     try {
-      const response = await apiClient.get<ProjectListItem[]>('/api/v1/projects')
-      setProjects(response.data)
+      if (!user) return
 
-      // 첫 번째 프로젝트 자동 선택
-      if (response.data.length > 0) {
-        setSelectedProjectId(response.data[0].id)
-        loadSubmissions(response.data[0].id)
+      // PM의 프로젝트 목록 조회
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/manager/${user.id}`,
+        {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
+
+      if (response.ok) {
+        const data = await response.json()
+        const projectList = data.content || []
+        setProjects(projectList)
+
+        // 첫 번째 프로젝트 자동 선택
+        if (projectList.length > 0) {
+          setSelectedProjectId(projectList[0].id)
+          loadSubmissions(projectList[0].id)
+        }
+      } else {
+        console.error('Failed to load projects:', response.status)
+        setProjects([])
       }
     } catch (error) {
       console.error('Failed to load projects:', error)
+      setProjects([])
     } finally {
       setIsLoading(false)
     }
@@ -133,6 +181,7 @@ export default function ApplicationsPage() {
 
     setChatTarget({
       freelancerId: submission.freelancerId,
+      receiverId: submission.freelancerId,  // PM이 프리랜서에게 메시지 보냄
       receiverName: submission.freelancerName,
       projectId: submission.projectId,
       projectTitle: submission.projectTitle
@@ -299,6 +348,7 @@ export default function ApplicationsPage() {
           onClose={() => setChatModalOpen(false)}
           projectId={chatTarget.projectId}
           freelancerId={chatTarget.freelancerId}
+          receiverId={chatTarget.receiverId}
           receiverName={chatTarget.receiverName}
           projectTitle={chatTarget.projectTitle}
         />

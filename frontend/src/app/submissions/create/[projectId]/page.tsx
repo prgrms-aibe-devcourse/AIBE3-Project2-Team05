@@ -27,29 +27,71 @@ export default function ApplyPage() {
   const [project, setProject] = useState<Project | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isFreelancer, setIsFreelancer] = useState<boolean | null>(null)
 
   const [coverLetter, setCoverLetter] = useState('')
   const [proposedRate, setProposedRate] = useState('')
   const [estimatedDuration, setEstimatedDuration] = useState('')
 
+  // Freelancer 여부 확인
   useEffect(() => {
-    if (!authLoading && user?.role !== 'FREELANCER') {
-      alert('프리랜서만 지원할 수 있습니다.')
-      router.push('/projects')
+    const checkRole = async () => {
+      if (!user || authLoading) return
+
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
+          { credentials: 'include' }
+        )
+
+        if (res.ok) {
+          const data = await res.json()
+          const isSuccess = data.resultCode?.startsWith('200')
+          setIsFreelancer(isSuccess)
+        } else {
+          setIsFreelancer(false)
+        }
+      } catch {
+        setIsFreelancer(false)
+      }
+    }
+
+    checkRole()
+  }, [user, authLoading])
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/members/login')
       return
     }
 
-    if (!authLoading) {
+    // isFreelancer가 null이면 아직 역할 확인 중
+    if (isFreelancer === null) {
+      return
+    }
+
+    if (!authLoading && user && isFreelancer === false) {
+      alert('프리랜서만 지원할 수 있습니다.')
+      router.push('/')
+      return
+    }
+
+    if (!authLoading && user && isFreelancer === true) {
       loadProject()
     }
-  }, [projectId, authLoading, user])
+  }, [projectId, authLoading, user, isFreelancer, router])
 
   const loadProject = async () => {
     try {
-      const response = await apiClient.get<Project[]>('/api/v1/projects')
-      const found = response.data.find(p => p.id === projectId)
-      if (found) {
-        setProject(found)
+      // /api/projects는 페이징된 응답을 반환 (content 배열)
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${projectId}`,
+        { credentials: 'include' }
+      )
+
+      if (response.ok) {
+        const data = await response.json()
+        setProject(data)
       } else {
         alert('프로젝트를 찾을 수 없습니다.')
         router.push('/projects')
@@ -94,7 +136,7 @@ export default function ApplyPage() {
     }
   }
 
-  if (authLoading || isLoading) {
+  if (authLoading || isLoading || isFreelancer === null) {
     return (
       <div className="container mx-auto px-4 py-16">
         <div className="text-center">로딩 중...</div>

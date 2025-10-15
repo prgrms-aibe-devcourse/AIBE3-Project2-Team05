@@ -13,6 +13,7 @@ export interface ChatMessage {
 interface UseChatMessagesProps {
   projectId: number
   freelancerId: number
+  receiverId: number  // 실제 수신자 회원 ID
   currentUserId: number
   isOpen: boolean
 }
@@ -20,6 +21,7 @@ interface UseChatMessagesProps {
 export function useChatMessages({
   projectId,
   freelancerId,
+  receiverId,
   currentUserId,
   isOpen
 }: UseChatMessagesProps) {
@@ -35,15 +37,12 @@ export function useChatMessages({
     setError(null)
 
     try {
-      const response = await apiClient.get<{
-        resultCode: string
-        msg: string
-        data: ChatMessage[]
-      }>(`/api/v1/messages/conversation/${projectId}/${freelancerId}`)
+      const response = await apiClient.get<ChatMessage[]>(
+        `/api/v1/messages/conversation/${projectId}/${freelancerId}`
+      )
 
-      if (response.data) {
-        setMessages(response.data.data)
-      }
+      // apiClient.get은 RsData를 자동으로 unwrap하므로 response.data가 곧 ChatMessage[]
+      setMessages(response.data ?? [])
     } catch (err) {
       setError(err instanceof Error ? err.message : '메시지를 불러오는데 실패했습니다.')
       console.error('Failed to fetch messages:', err)
@@ -69,13 +68,9 @@ export function useChatMessages({
 
       setMessages(prev => [...prev, tempMessage])
 
-      // Send to server
-      const response = await apiClient.post<{
-        resultCode: string
-        msg: string
-        data: ChatMessage
-      }>('/api/v1/messages', {
-        receiverId: freelancerId,
+      // Send to server - receiverId는 실제 수신자의 회원 ID
+      const response = await apiClient.post<ChatMessage>('/api/v1/messages', {
+        receiverId: receiverId,  // 수정: freelancerId → receiverId
         relatedType: 'PROJECT',
         relatedId: projectId,
         content: content.trim()
@@ -85,7 +80,7 @@ export function useChatMessages({
       if (response.data) {
         setMessages(prev =>
           prev.map(msg =>
-            msg.id === tempMessage.id ? response.data.data : msg
+            msg.id === tempMessage.id ? response.data : msg  // 수정: response.data.data → response.data
           )
         )
       }
@@ -94,7 +89,7 @@ export function useChatMessages({
       setMessages(prev => prev.filter(msg => msg.id !== Date.now()))
       throw err
     }
-  }, [projectId, freelancerId, currentUserId])
+  }, [projectId, receiverId, currentUserId])
 
   // Fetch messages when modal opens
   useEffect(() => {

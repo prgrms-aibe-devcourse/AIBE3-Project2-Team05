@@ -7,7 +7,7 @@ import { Card } from '@/ui/card'
 import { Button } from '@/ui/button'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ChatModal } from '@/app/_components/ChatModal'
+import { ChatModal } from '@/app/components/ChatModal'
 
 interface Submission {
   id: number
@@ -40,27 +40,66 @@ export default function SubmissionsPage() {
   const [chatModalOpen, setChatModalOpen] = useState(false)
   const [chatTarget, setChatTarget] = useState<{
     freelancerId: number
+    receiverId: number
     receiverName: string
     projectId: number
     projectTitle: string
   } | null>(null)
+  const [isFreelancer, setIsFreelancer] = useState<boolean | null>(null)
+
+  // Freelancer 여부 확인
+  useEffect(() => {
+    const checkRole = async () => {
+      if (!user || authLoading) return
+
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
+          { credentials: 'include' }
+        )
+
+        if (res.ok) {
+          const data = await res.json()
+          // RsData 응답: resultCode가 200으로 시작하면 프리랜서
+          const isSuccess = data.resultCode?.startsWith('200')
+          setIsFreelancer(isSuccess)
+        } else {
+          setIsFreelancer(false)
+        }
+      } catch {
+        setIsFreelancer(false)
+      }
+    }
+
+    checkRole()
+  }, [user, authLoading])
 
   useEffect(() => {
-    if (!authLoading && user?.role !== 'FREELANCER') {
+    if (!authLoading && !user) {
+      router.push('/members/login')
+      return
+    }
+
+    // isFreelancer가 null이면 아직 역할 확인 중
+    if (isFreelancer === null) {
+      return
+    }
+
+    if (!authLoading && user && isFreelancer === false) {
       router.push('/')
       return
     }
 
-    if (!authLoading && user) {
+    if (!authLoading && user && isFreelancer === true) {
       loadSubmissions()
     }
-  }, [user, authLoading, router])
+  }, [user, authLoading, isFreelancer, router])
 
   const loadSubmissions = async () => {
     try {
       const [submissionsRes, projectsRes, freelancerRes] = await Promise.all([
         apiClient.get<Submission[]>('/api/v1/submissions'),
-        apiClient.get<Project[]>('/api/v1/projects'),
+        apiClient.get<Project[]>('/api/projects'),
         apiClient.get<{ id: number }>('/api/v1/freelancers/me')
       ])
       setSubmissions(submissionsRes.data)
@@ -87,6 +126,7 @@ export default function SubmissionsPage() {
 
     setChatTarget({
       freelancerId: freelancerId,
+      receiverId: project.pmId,  // 프리랜서가 PM에게 메시지 보냄
       receiverName: project.pmName,
       projectId: submission.projectId,
       projectTitle: submission.projectTitle
@@ -121,7 +161,7 @@ export default function SubmissionsPage() {
     )
   }
 
-  if (authLoading || isLoading) {
+  if (authLoading || isLoading || isFreelancer === null) {
     return (
       <div className="container mx-auto px-4 py-16">
         <div className="text-center">로딩 중...</div>
@@ -179,11 +219,6 @@ export default function SubmissionsPage() {
               </div>
 
               <div className="flex gap-2 justify-end">
-                <Link href={`/matching/${submission.projectId}`}>
-                  <Button variant="outline" size="sm">
-                    매칭 결과 보기
-                  </Button>
-                </Link>
                 {submission.status === 'PENDING' && (
                   <>
                     <Button
@@ -223,6 +258,7 @@ export default function SubmissionsPage() {
           onClose={() => setChatModalOpen(false)}
           projectId={chatTarget.projectId}
           freelancerId={chatTarget.freelancerId}
+          receiverId={chatTarget.receiverId}
           receiverName={chatTarget.receiverName}
           projectTitle={chatTarget.projectTitle}
         />

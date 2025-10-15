@@ -1,143 +1,125 @@
-@import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap");
+@import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@custom-variant dark (&:is(.dark *));
 
-/* 전역 리셋 */
-* {
-  box-sizing: border-box;
-}
-
-/* 라이트 모드 전용 CSS 변수 */
 :root {
-  /* 기본 색상 */
-  --background: #f8f4eb;
-  --foreground: #252525;
-  --card: #ffffff;
-  --card-foreground: #252525;
-  --popover: #ffffff;
-  --popover-foreground: #252525;
-
-  /* 버튼 색상 */
-  --primary: #006a20;
-  --primary-foreground: #ffffff;
-  --secondary: #f1eadc;
-  --secondary-foreground: #252525;
-
-  /* 강조 및 상태 색상 */
-  --muted: #f8f4eb;
-  --muted-foreground: #5a5549;
-  --accent: #fcc800;
-  --accent-foreground: #252525;
-  --destructive: #dc8a94;
-  --destructive-foreground: #ffffff;
-
-  /* 입력 및 테두리 */
-  --border: #ddd7c9;
-  --input: #ffffff;
-  --ring: #006a20;
-
-  /* 차트 색상 */
-  --chart-1: #006a20;
-  --chart-2: #fcc800;
-  --chart-3: #0f0a03;
-  --chart-4: #016830;
-  --chart-5: #00c950;
-
-  /* 사이드바 색상 */
-  --sidebar: #ffffff;
-  --sidebar-foreground: #252525;
-  --sidebar-primary: #006a20;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f1eadc;
-  --sidebar-accent-foreground: #252525;
-  --sidebar-border: #ddd7c9;
-  --sidebar-ring: #006a20;
+  /* Updated color scheme inspired by Casa Portofornia design */
+  --background: oklch(0.98 0.01 85); /* Warm cream background */
+  --foreground: oklch(0.15 0.02 85); /* Dark warm text */
+  --card: oklch(0.99 0.005 85); /* Slightly warmer white */
+  --card-foreground: oklch(0.15 0.02 85);
+  --popover: oklch(0.99 0.005 85);
+  --popover-foreground: oklch(0.15 0.02 85);
+  --primary: oklch(0.45 0.15 150); /* Warm forest green */
+  --primary-foreground: oklch(0.98 0.01 85);
+  --secondary: oklch(0.75 0.08 25); /* Soft coral/pink */
+  --secondary-foreground: oklch(0.15 0.02 85);
+  --muted: oklch(0.94 0.02 85); /* Muted cream */
+  --muted-foreground: oklch(0.45 0.02 85);
+  --accent: oklch(0.75 0.08 25); /* Coral accent */
+  --accent-foreground: oklch(0.15 0.02 85);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.98 0.01 85);
+  --border: oklch(0.88 0.02 85); /* Warm border */
+  --input: oklch(0.95 0.02 85); /* Input background */
+  --ring: oklch(0.45 0.15 150); /* Green focus ring */
+  --chart-1: oklch(0.45 0.15 150);
+  --chart-2: oklch(0.75 0.08 25);
+  --chart-3: oklch(0.65 0.12 200);
+  --chart-4: oklch(0.55 0.18 300);
+  --chart-5: oklch(0.85 0.06 50);
+  --radius: 0.75rem; /* Slightly more rounded */
+  --sidebar: oklch(0.97 0.01 85);
+  --sidebar-foreground: oklch(0.15 0.02 85);
+  --sidebar-primary: oklch(0.45 0.15 150);
+  --sidebar-primary-foreground: oklch(0.98 0.01 85);
+  --sidebar-accent: oklch(0.94 0.02 85);
+  --sidebar-accent-foreground: oklch(0.15 0.02 85);
+  --sidebar-border: oklch(0.88 0.02 85);
+  --sidebar-ring: oklch(0.45 0.15 150);
 }
 
-/* ✅ 글로벌 기본 스타일 */
-html,
-body {
-  font-family: "Lato", sans-serif;
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.dark {
+  --background: oklch(0.12 0.02 85);
+  --foreground: oklch(0.95 0.01 85);
+  --card: oklch(0.15 0.02 85);
+  --card-foreground: oklch(0.95 0.01 85);
+  --popover: oklch(0.15 0.02 85);
+  --popover-foreground: oklch(0.95 0.01 85);
+  --primary: oklch(0.65 0.15 150);
+  --primary-foreground: oklch(0.12 0.02 85);
+  --secondary: oklch(0.25 0.02 85);
+  --secondary-foreground: oklch(0.95 0.01 85);
+  --muted: oklch(0.25 0.02 85);
+  --muted-foreground: oklch(0.65 0.02 85);
+  --accent: oklch(0.75 0.08 25);
+  --accent-foreground: oklch(0.12 0.02 85);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.95 0.01 85);
+  --border: oklch(0.25 0.02 85);
+  --input: oklch(0.22 0.02 85);
+  --ring: oklch(0.65 0.15 150);
+  --chart-1: oklch(0.65 0.15 150);
+  --chart-2: oklch(0.75 0.08 25);
+  --chart-3: oklch(0.65 0.12 200);
+  --chart-4: oklch(0.55 0.18 300);
+  --chart-5: oklch(0.85 0.06 50);
+  --sidebar: oklch(0.18 0.02 85);
+  --sidebar-foreground: oklch(0.95 0.01 85);
+  --sidebar-primary: oklch(0.65 0.15 150);
+  --sidebar-primary-foreground: oklch(0.12 0.02 85);
+  --sidebar-accent: oklch(0.25 0.02 85);
+  --sidebar-accent-foreground: oklch(0.95 0.01 85);
+  --sidebar-border: oklch(0.25 0.02 85);
+  --sidebar-ring: oklch(0.65 0.15 150);
 }
 
-.card {
-  background: var(--card);
-  color: var(--card-foreground);
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
-.popover {
-  background-color: #ffffff;
-  color: var(--popover-foreground);
-}
-
-/* 버튼 */
-.btn-primary {
-  background-color: var(--primary);
-  color: var(--primary-foreground);
-  cursor: pointer;
-}
-
-.btn-secondary {
-  background: var(--secondary);
-  color: var(--secondary-foreground);
-}
-
-.btn-accent {
-  background: var(--accent);
-  color: var(--accent-foreground);
-}
-
-.btn-destructive {
-  background: var(--destructive);
-  color: var(--destructive-foreground);
-}
-
-/* 입력창 */
-.input {
-  background: var(--input);
-  border: 1px solid var(--border);
-  outline: none;
-}
-
-.input:focus {
-  border-color: var(--ring);
-  box-shadow: 0 0 0 2px var(--ring);
-}
-
-/* 사이드바 */
-.sidebar {
-  background: var(--sidebar);
-  color: var(--sidebar-foreground);
-  border: 1px solid var(--sidebar-border);
-}
-
-.sidebar-primary {
-  background: var(--sidebar-primary);
-  color: var(--sidebar-primary-foreground);
-}
-
-.sidebar-accent {
-  background: var(--sidebar-accent);
-  color: var(--sidebar-accent-foreground);
-}
-
-/* 차트 색상 */
-.chart-1 {
-  color: var(--chart-1);
-}
-.chart-2 {
-  color: var(--chart-2);
-}
-.chart-3 {
-  color: var(--chart-3);
-}
-.chart-4 {
-  color: var(--chart-4);
-}
-.chart-5 {
-  color: var(--chart-5);
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

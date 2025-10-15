@@ -6,7 +6,7 @@ import { apiClient } from '@/global/backend/client'
 import { useRouter } from 'next/navigation'
 import { ProposalCard } from './_components/ProposalCard'
 import { AcceptRejectModal } from './_components/AcceptRejectModal'
-import { ChatModal } from '@/app/_components/ChatModal'
+import { ChatModal } from '@/app/components/ChatModal'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 
@@ -38,24 +38,58 @@ export default function ProposalsPage() {
   const [chatModalOpen, setChatModalOpen] = useState(false)
   const [chatTarget, setChatTarget] = useState<{
     freelancerId: number
+    receiverId: number  // 실제 수신자 회원 ID
     receiverName: string
     projectId: number
     projectTitle: string
   } | null>(null)
+  const [isFreelancer, setIsFreelancer] = useState<boolean | null>(null)
 
-  const isPm = user?.role !== 'FREELANCER'
+  const isPm = isFreelancer === false
+
+  // Freelancer 여부 확인
+  useEffect(() => {
+    const checkRole = async () => {
+      if (!user || authLoading) return
+
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
+          { credentials: 'include' }
+        )
+
+        if (res.ok) {
+          const data = await res.json()
+          // RsData 응답: resultCode가 200으로 시작하면 프리랜서
+          const isSuccess = data.resultCode?.startsWith('200')
+          setIsFreelancer(isSuccess)
+        } else {
+          setIsFreelancer(false)
+        }
+      } catch {
+        setIsFreelancer(false)
+      }
+    }
+
+    checkRole()
+  }, [user, authLoading])
 
   useEffect(() => {
     if (!authLoading && !user) {
       alert('로그인이 필요합니다.')
-      router.push('/login')
+      router.push('/members/login')
+      return
+    }
+
+    // isFreelancer가 null이면 아직 역할 확인 중
+    if (isFreelancer === null) {
       return
     }
 
     if (!authLoading && user) {
       loadProposals()
     }
-  }, [user, authLoading, router])
+  }, [user, authLoading, isFreelancer, router])
 
   // URL 쿼리 파라미터에서 ID를 읽어서 해당 제안으로 스크롤
   useEffect(() => {
@@ -131,9 +165,9 @@ export default function ProposalsPage() {
     }
   }
 
-  const handleSendMessage = (freelancerId: number, receiverName: string, projectId: number, projectTitle: string) => {
+  const handleSendMessage = (freelancerId: number, receiverId: number, receiverName: string, projectId: number, projectTitle: string) => {
     // 채팅 모달 열기
-    setChatTarget({ freelancerId, receiverName, projectId, projectTitle })
+    setChatTarget({ freelancerId, receiverId, receiverName, projectId, projectTitle })
     setChatModalOpen(true)
   }
 
@@ -149,7 +183,7 @@ export default function ProposalsPage() {
     }
   }
 
-  if (authLoading || isLoading) {
+  if (authLoading || isLoading || isFreelancer === null) {
     return (
       <div className="container mx-auto py-8 px-4">
         <LoadingSpinner />
@@ -192,7 +226,8 @@ export default function ProposalsPage() {
                 onReject={handleReject}
                 onCancel={handleCancel}
                 onSendMessage={() => handleSendMessage(
-                  isPm ? proposal.freelancerId : proposal.pmId,
+                  proposal.freelancerId,  // conversation key (항상 프리랜서 ID)
+                  isPm ? proposal.freelancerId : proposal.pmId,  // receiverId (실제 수신자 회원 ID)
                   isPm ? proposal.freelancerName : proposal.pmName,
                   proposal.projectId,
                   proposal.projectTitle
@@ -224,6 +259,7 @@ export default function ProposalsPage() {
           onClose={() => setChatModalOpen(false)}
           projectId={chatTarget.projectId}
           freelancerId={chatTarget.freelancerId}
+          receiverId={chatTarget.receiverId}
           receiverName={chatTarget.receiverName}
           projectTitle={chatTarget.projectTitle}
         />

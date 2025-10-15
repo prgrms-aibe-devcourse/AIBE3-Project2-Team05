@@ -13,6 +13,7 @@ interface ChatModalProps {
   onClose: () => void
   projectId: number
   freelancerId: number
+  receiverId: number  // 실제 수신자 회원 ID
   receiverName: string
   projectTitle: string
 }
@@ -22,6 +23,7 @@ export function ChatModal({
   onClose,
   projectId,
   freelancerId,
+  receiverId,
   receiverName,
   projectTitle
 }: ChatModalProps) {
@@ -34,6 +36,7 @@ export function ChatModal({
   const { messages, isLoading, error, sendMessage, refetch } = useChatMessages({
     projectId,
     freelancerId,
+    receiverId,  // receiverId 추가
     currentUserId: user?.id || 0,
     isOpen
   })

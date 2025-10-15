@@ -58,7 +58,8 @@ export const Header = () => {
       left: "50%",
       width: "98.17px",
     },
-    { text: "이용후기", path: "/reviews", left: "58%", width: "54.28px" },
+    { text: "매칭 서비스", path: "/matching", left: "58%", width: "75px" },
+    { text: "이용후기", path: "/reviews", left: "65%", width: "54.28px" },
   ];
 
   return (
@@ -85,7 +86,7 @@ export const Header = () => {
         </a>
       ))}
 
-      <div className="absolute right-[28%] top-[calc(50%-24px/2+1px)] flex items-center gap-x-[24px]">
+      <div className="absolute right-[15%] top-[calc(50%-24px/2+1px)] flex items-center gap-x-[24px]">
         {username ? (
           <>
             <div className="flex items-center">

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Button } from '@/ui/button'
 import { FreelancerCard } from './_components/FreelancerCard'
 import { FreelancerProfileModal } from './_components/FreelancerProfileModal'
 import { ProposalMessageModal } from './_components/ProposalMessageModal'
@@ -23,9 +22,34 @@ export default function MatchingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isProposalModalOpen, setIsProposalModalOpen] = useState(false)
   const [proposalTargetFreelancer, setProposalTargetFreelancer] = useState<{ id: number; name: string } | null>(null)
+  const [isFreelancer, setIsFreelancer] = useState<boolean | null>(null)
 
-  const isFreelancer = user?.role === 'FREELANCER'
-  const isPm = user?.role !== 'FREELANCER' && user !== null // PM 또는 일반 사용자
+  const isPm = isFreelancer === false
+
+  // 역할 확인
+  useEffect(() => {
+    const checkRole = async () => {
+      if (!user || authLoading) return
+
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
+          { credentials: 'include' }
+        )
+
+        if (res.ok) {
+          const data = await res.json()
+          setIsFreelancer(data.resultCode?.startsWith('200'))
+        } else {
+          setIsFreelancer(false)
+        }
+      } catch {
+        setIsFreelancer(false)
+      }
+    }
+
+    checkRole()
+  }, [user, authLoading])
 
   // 로그인 체크
   useEffect(() => {
@@ -36,16 +60,23 @@ export default function MatchingPage() {
   }, [authLoading, user, router])
 
   useEffect(() => {
-    if (user) {
-      fetchRecommendations()
+    // isFreelancer가 결정된 후에만 실행
+    if (user && isFreelancer !== null) {
+      // PM일 때는 자동 재계산, 프리랜서일 때는 GET만 수행
+      fetchRecommendations(isPm)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId, user])
+  }, [projectId, user, isFreelancer])
 
-  const fetchRecommendations = async () => {
+  const fetchRecommendations = async (autoRecalculate = false) => {
     try {
       setLoading(true)
       setError(null)
+
+      // PM이고 자동 재계산이 활성화된 경우 먼저 재계산 수행
+      if (autoRecalculate) {
+        await apiClient.post(`/api/v1/matching/recommend/${projectId}/recalculate`)
+      }
 
       const response = await apiClient.get<RecommendationResponseDto>(
         `/api/v1/matching/recommend/${projectId}`
@@ -97,9 +128,7 @@ export default function MatchingPage() {
   }
 
   const handleViewAllFreelancers = () => {
-    // TODO: 프리랜서 담당 개발자가 /freelancers 페이지 구현 후 활성화
-    alert('전체 프리랜서 목록 페이지는 추후 구현 예정입니다.')
-    // window.location.href = '/freelancers'
+    router.push('/freelancers')
   }
 
   const handleViewProfile = (freelancer: FreelancerRecommendationDto) => {
@@ -107,14 +136,14 @@ export default function MatchingPage() {
     setIsModalOpen(true)
   }
 
-  if (authLoading || loading) {
+  if (authLoading || loading || isFreelancer === null) {
     return (
-      <div className="container mx-auto py-8 px-4">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
             <p className="text-muted-foreground">
-              {authLoading ? '로그인 확인 중...' : '추천 프리랜서를 찾고 있습니다...'}
+              {authLoading ? '로그인 확인 중...' : isFreelancer === null ? '역할 확인 중...' : '추천 프리랜서를 찾고 있습니다...'}
             </p>
           </div>
         </div>
@@ -129,14 +158,19 @@ export default function MatchingPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto py-8 px-4">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center space-y-4">
-            <div className="text-4xl">⚠️</div>
+          <div className="text-center">
+            <div className="text-5xl mb-4">⚠️</div>
             <div>
-              <h2 className="text-xl font-semibold mb-2">오류가 발생했습니다</h2>
+              <h2 className="text-xl font-semibold text-foreground mb-2">오류가 발생했습니다</h2>
               <p className="text-muted-foreground mb-4">{error}</p>
-              <Button onClick={fetchRecommendations}>다시 시도</Button>
+              <button
+                onClick={fetchRecommendations}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+              >
+                다시 시도
+              </button>
             </div>
           </div>
         </div>
@@ -146,16 +180,21 @@ export default function MatchingPage() {
 
   if (!data || data.recommendations.length === 0) {
     return (
-      <div className="container mx-auto py-8 px-4">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center space-y-4">
-            <div className="text-4xl">🔍</div>
+          <div className="text-center">
+            <div className="text-5xl mb-4">🔍</div>
             <div>
-              <h2 className="text-xl font-semibold mb-2">추천할 프리랜서가 없습니다</h2>
+              <h2 className="text-xl font-semibold text-foreground mb-2">추천할 프리랜서가 없습니다</h2>
               <p className="text-muted-foreground mb-4">
                 프로젝트 요구 기술을 확인하고 다시 시도해주세요.
               </p>
-              <Button onClick={handleRecalculate}>다시 계산하기</Button>
+              <button
+                onClick={handleRecalculate}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+              >
+                다시 계산하기
+              </button>
             </div>
           </div>
         </div>
@@ -164,49 +203,55 @@ export default function MatchingPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold mb-2">{data.projectTitle}</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">{data.projectTitle}</h1>
             <p className="text-muted-foreground">
               {isFreelancer
                 ? '이 프로젝트와의 매칭 점수입니다'
-                : `총 ${data.recommendations.length}명의 프리랜서를 추천합니다 (TOP 10, 최소 60점 이상)`}
+                : `총 ${data.recommendations.length}명의 프리랜서를 추천합니다 (TOP 10)`}
             </p>
           </div>
           <div className="flex gap-2">
             {isPm && (
-              <Button onClick={handleViewAllFreelancers} variant="outline">
+              <button
+                onClick={handleViewAllFreelancers}
+                className="px-4 py-2 bg-card text-card-foreground border border-border rounded-md text-sm font-medium hover:bg-accent hover:border-primary transition-colors"
+              >
                 전체 프리랜서 목록
-              </Button>
+              </button>
             )}
-            <Button onClick={handleRecalculate} variant="outline">
+            <button
+              onClick={handleRecalculate}
+              className="px-4 py-2 bg-card text-card-foreground border border-border rounded-md text-sm font-medium hover:bg-accent hover:border-primary transition-colors"
+            >
               {isFreelancer ? '내 점수 업데이트' : '전체 재계산'}
-            </Button>
+            </button>
           </div>
         </div>
 
         {/* Info Card */}
-        <div className="bg-muted/50 rounded-lg p-4 border">
-          <h3 className="font-semibold mb-2">📊 매칭 점수 산정 기준</h3>
+        <div className="bg-muted/50 rounded-lg p-4 border border-border">
+          <h3 className="font-semibold mb-2 text-foreground">📊 매칭 점수 산정 기준</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div>
               <span className="font-medium text-primary">스킬 매칭 (50점)</span>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mt-1">
                 요구 기술 보유 여부 및 숙련도
               </p>
             </div>
             <div>
               <span className="font-medium text-primary">경력 (30점)</span>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mt-1">
                 총 경력 연수, 완료 프로젝트 수, 평균 평점
               </p>
             </div>
             <div>
               <span className="font-medium text-primary">단가 (20점)</span>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mt-1">
                 프로젝트 예산과 희망 단가 일치도
               </p>
             </div>

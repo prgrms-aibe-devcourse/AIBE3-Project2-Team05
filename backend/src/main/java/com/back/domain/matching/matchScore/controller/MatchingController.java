@@ -89,10 +89,11 @@ public class MatchingController {
                     int calculatedCount = matchScoreService.calculateAndSaveRecommendations(projectId);
 
                     if (calculatedCount == 0) {
-                        throw new ServiceException("404-1", "추천할 프리랜서가 없습니다. 프로젝트 요구 기술을 확인해주세요.");
+                        // 프리랜서가 없는 경우 빈 리스트 반환 (정상 처리)
+                        matchScores = List.of();
+                    } else {
+                        matchScores = matchScoreService.getRecommendations(projectId, limit, null);
                     }
-
-                    matchScores = matchScoreService.getRecommendations(projectId, limit, null);
                 }
             }
         } else {
@@ -104,10 +105,11 @@ public class MatchingController {
                 int calculatedCount = matchScoreService.calculateAndSaveRecommendations(projectId);
 
                 if (calculatedCount == 0) {
-                    throw new ServiceException("404-1", "추천할 프리랜서가 없습니다. 프로젝트 요구 기술을 확인해주세요.");
+                    // 프리랜서가 없는 경우 빈 리스트 반환 (정상 처리)
+                    matchScores = List.of();
+                } else {
+                    matchScores = matchScoreService.getRecommendations(projectId, limit, null);
                 }
-
-                matchScores = matchScoreService.getRecommendations(projectId, limit, null);
             }
         }
 
