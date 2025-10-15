@@ -1,8 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-// import { useAuth } from '@/global/auth/hooks/useAuth'
+import { useUser } from '@/app/context/UserContext'
 import {
   AlertCircle,
   Briefcase,
@@ -61,7 +60,7 @@ interface MatchedProject {
 
 export default function MatchingDashboardPage() {
   const router = useRouter()
-  const { user, isLoading: authLoading } = useAuth()
+  const { user, isLoading: authLoading } = useUser()
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'applicants' | 'messages'>('overview')
   const [stats, setStats] = useState<DashboardStats>({

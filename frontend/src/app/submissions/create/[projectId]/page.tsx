@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { useAuth } from '@/global/auth/hooks/useAuth'
-import { apiClient } from '@/global/backend/client'
+import { useUser } from '@/app/context/UserContext'
+import { apiClient } from '@/lib/backend/client'
 import { Card } from '@/ui/card'
 import { Button } from '@/ui/button'
 import { Input } from '@/ui/input'
@@ -22,7 +22,7 @@ export default function ApplyPage() {
   const params = useParams()
   const projectId = Number(params.projectId)
   const router = useRouter()
-  const { user, isLoading: authLoading } = useAuth()
+  const { user, isLoading: authLoading } = useUser()
 
   const [project, setProject] = useState<Project | null>(null)
   const [isLoading, setIsLoading] = useState(true)

@@ -1,14 +1,14 @@
 'use client'
 
 import { ChatModal } from '@/components/ChatModal'
-import { useAuth } from '@/global/auth/hooks/useAuth'
-import { apiClient } from '@/global/backend/client'
+import { useUser } from '@/app/context/UserContext'
+import { useState, useEffect } from 'react'
+import { apiClient } from '@/lib/backend/client'
 import '@/styles/applications-messages.css'
-import { Badge } from '@/ui/badge'
-import { Button } from '@/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
+import { Button } from '@/ui/button'
+import { Badge } from '@/ui/badge'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
 
 interface ProjectListItem {
   id: number
@@ -32,7 +32,7 @@ interface Submission {
 }
 
 export default function ApplicationsPage() {
-  const { user, isLoading: authLoading } = useAuth()
+  const { user, isLoading: authLoading } = useUser()
   const router = useRouter()
   const [projects, setProjects] = useState<ProjectListItem[]>([])
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null)

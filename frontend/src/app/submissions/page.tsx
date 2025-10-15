@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAuth } from '@/global/auth/hooks/useAuth'
-import { apiClient } from '@/global/backend/client'
+import { useUser } from '@/app/context/UserContext'
+import { apiClient } from '@/lib/backend/client'
 import { Card } from '@/ui/card'
 import { Button } from '@/ui/button'
 import { useRouter } from 'next/navigation'
@@ -31,7 +31,7 @@ interface Project {
 }
 
 export default function SubmissionsPage() {
-  const { user, isLoading: authLoading } = useAuth()
+  const { user, isLoading: authLoading } = useUser()
   const router = useRouter()
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [projects, setProjects] = useState<Project[]>([])
