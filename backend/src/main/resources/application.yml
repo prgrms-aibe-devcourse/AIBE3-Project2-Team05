@@ -71,7 +71,7 @@ custom:
   jwt:
     secretKey: ${CUSTOM__JWT__SECRET_KEY}
   accessToken:
-    expireSeconds: "#{60 * 15}"
+    expireSeconds: "#{60 * 60}"
 # ===== OpenAPI 스키마 자동 생성 설정 =====
 openapi:
   schema:

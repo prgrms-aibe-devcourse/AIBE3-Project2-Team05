@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 
@@ -42,20 +43,23 @@ public class MemberService {
 
         checkPassword(member, req.getPassword());
 
-        member.issueRefreshToken();
+        // ✅ RefreshToken 없거나 만료됐을 때만 발급
+        if (member.getRefreshToken() == null || member.getRefreshTokenExpiry().isBefore(LocalDateTime.now())) {
+            member.issueRefreshToken();
+        }
+
         memberRepository.save(member);
 
+        // AccessToken은 항상 새로 발급
         String accessToken = authTokenService.genAccessToken(member);
 
         rq.setCookie("refreshToken", member.getRefreshToken());
         rq.setCookie("accessToken", accessToken);
 
-
         System.out.println("refreshToken = " + member.getRefreshToken());
         System.out.println("accessToken = " + accessToken);
 
         return new MemberLoginRes(new MemberDto(member), member.getRefreshToken(), accessToken);
-
     }
 
 
