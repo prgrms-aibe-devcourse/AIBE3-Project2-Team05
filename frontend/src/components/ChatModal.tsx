@@ -5,8 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/dialog'
 import { Button } from '@/ui/button'
 import { Input } from '@/ui/input'
 import { useChatMessages } from '@/hooks/useChatMessages'
-import { useAuth } from '@/global/auth/hooks/useAuth'
-import { apiClient } from '@/global/backend/client'
+import { useUser } from '@/app/context/UserContext'
+import { apiClient } from '@/lib/backend/client'
 
 interface ChatModalProps {
   isOpen: boolean
@@ -27,7 +27,7 @@ export function ChatModal({
   receiverName,
   projectTitle
 }: ChatModalProps) {
-  const { user } = useAuth()
+  const { user } = useUser()
   const [inputMessage, setInputMessage] = useState('')
   const [isSending, setIsSending] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)

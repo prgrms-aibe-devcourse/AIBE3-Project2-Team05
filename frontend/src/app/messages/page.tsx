@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useAuth } from '@/global/auth/hooks/useAuth'
+import { useUser } from '@/app/context/UserContext'
 import { useConversations } from '@/hooks/useConversations'
 import { ConversationCard } from './_components/ConversationCard'
 import { ChatModal } from '@/components/ChatModal'
@@ -10,7 +10,7 @@ import { Input } from '@/ui/input'
 import { Button } from '@/ui/button'
 
 export default function MessagesPage() {
-  const { user, isLoading: authLoading } = useAuth()
+  const { user, isLoading: authLoading } = useUser()
   const { conversations, isLoading, error, refetch } = useConversations()
   const [searchQuery, setSearchQuery] = useState('')
   const [showUnreadOnly, setShowUnreadOnly] = useState(false)

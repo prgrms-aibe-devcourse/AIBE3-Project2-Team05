@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { apiClient } from '@/global/backend/client'
+import { apiClient } from '@/lib/backend/client'
 import { Button } from '@/ui/button'
 import {
   DropdownMenu,

@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/ui/dialog'
-import type { FreelancerRecommendationDto } from '@/global/backend/apiV1/types'
+import type { FreelancerRecommendationDto } from '@/lib/backend/apiV1/types'
 
 interface FreelancerProfileModalProps {
   freelancer: FreelancerRecommendationDto | null

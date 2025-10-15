@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { useAuth } from '@/global/auth/hooks/useAuth'
-import { apiClient } from '@/global/backend/client'
+import { useUser } from '@/app/context/UserContext'
+import { apiClient } from '@/lib/backend/client'
 import { Card } from '@/ui/card'
 import { Button } from '@/ui/button'
 import { Input } from '@/ui/input'
@@ -23,7 +23,7 @@ export default function EditSubmissionPage() {
   const params = useParams()
   const submissionId = Number(params.id)
   const router = useRouter()
-  const { user, isLoading: authLoading } = useAuth()
+  const { user, isLoading: authLoading } = useUser()
 
   const [submission, setSubmission] = useState<Submission | null>(null)
   const [isLoading, setIsLoading] = useState(true)

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 
 export default function MyPage() {
-  const { username, memberId, roles, setUsername, isLoaded } = useUser();
+  const { user, memberId, roles, isLoaded } = useUser();
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState("");
@@ -15,36 +15,19 @@ export default function MyPage() {
   const hasFreelancer = roles.includes("FREELANCER");
 
   useEffect(() => {
-    const fetchMe = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/member/me`,
-          { method: "GET", credentials: "include" }
-        );
-        const data = await res.json();
-
-        if (!res.ok) {
-          setMsg(data.msg || "정보를 불러오지 못했습니다.");
-          return;
-        }
-
-        const member = data.Data;
-        if (member) {
-          setUsername(member.username ?? "");
-          setNickname(member.nickname ?? "");
-          setEmail(member.email ?? "");
-        } else {
-          setMsg("회원 정보를 불러올 수 없습니다.");
-        }
-      } catch (err) {
-        console.error(err);
-        setMsg("정보 불러오기 중 오류 발생");
-      }
-    };
-
     if (!isLoaded) return;
-    fetchMe();
-  }, [setUsername, isLoaded]);
+
+    if (!user) {
+      setMsg("로그인이 필요합니다.");
+      setNickname("");
+      setEmail("");
+      return;
+    }
+
+    setMsg("");
+    setNickname(user.nickname ?? "");
+    setEmail(user.email ?? "");
+  }, [isLoaded, user]);
 
   const handleProjectClick = () => {
     if (hasPM) {
@@ -72,6 +55,16 @@ export default function MyPage() {
 
   if (!isLoaded)
     return <p className="text-center mt-20 text-gray-600">로딩 중...</p>;
+
+  if (!user) {
+    return (
+      <p className="text-center mt-20 text-gray-600">
+        {msg || "로그인이 필요합니다."}
+      </p>
+    );
+  }
+
+  const username = user.username;
 
   return (
     <div

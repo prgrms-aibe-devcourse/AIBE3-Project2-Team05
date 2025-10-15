@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAuth } from '@/global/auth/hooks/useAuth'
-import { apiClient } from '@/global/backend/client'
+import { useUser } from '@/app/context/UserContext'
+import { apiClient } from '@/lib/backend/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 import { Button } from '@/ui/button'
 import { Badge } from '@/ui/badge'
@@ -31,7 +31,7 @@ interface Submission {
 }
 
 export default function ApplicationsPage() {
-  const { user, isLoading: authLoading } = useAuth()
+  const { user, isLoading: authLoading } = useUser()
   const router = useRouter()
   const [projects, setProjects] = useState<ProjectListItem[]>([])
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null)
