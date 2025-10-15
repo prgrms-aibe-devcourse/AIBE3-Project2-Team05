@@ -2,12 +2,20 @@
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
 
+// 날짜 포맷 변환 함수: "2025-07-01" -> "25년 07월"
+function formatDate(dateStr?: string) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "";
+  const year = d.getFullYear().toString().slice(2); // "25"
+  const month = String(d.getMonth() + 1).padStart(2, "0"); // "07"
+  return `${year}년 ${month}월`;
+}
+
 function fullImageUrl(url?: string) {
   if (!url) return "/placeholder.svg";
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  return `${process.env.NEXT_PUBLIC_API_BASE_URL}${
-    url.startsWith("/") ? "" : "/"
-  }${url}`;
+  return `${process.env.NEXT_PUBLIC_API_BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
 }
 
 export default function FreelancerDetailPage({
@@ -15,25 +23,24 @@ export default function FreelancerDetailPage({
 }: {
   params: { id: string };
 }) {
-  // @ts-ignore: keep legacy use(params) call as requested
   const { id } = use(params); // 수정 X
+  const router = useRouter();
   const [freelancer, setFreelancer] = useState<any | null>(null);
   const [portfolios, setPortfolios] = useState<any[]>([]);
+  const [completedProjects, setCompletedProjects] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<"basic" | "portfolio" | "completed" | "review">("basic");
   const [modalOpen, setModalOpen] = useState(false);
+  const [portfolioModalOpen, setPortfolioModalOpen] = useState(false);
   const [activePortfolioId, setActivePortfolioId] = useState<string | number | null>(null);
   const [modalPortfolio, setModalPortfolio] = useState<any | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
   const [showActionMenu, setShowActionMenu] = useState(false);
-  const router = useRouter();
-  
-  const [completedProjects, setCompletedProjects] = useState<any[]>([]);
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<
-    "basic" | "portfolio" | "completed"
-  >("basic");
+  const [careerEditModalOpen, setCareerEditModalOpen] = useState(false);
+  const [techEditModalOpen, setTechEditModalOpen] = useState(false);
+
 
   useEffect(() => {
-    if (!id) return;
     const fetchAllData = async () => {
       try {
         const freelancerPromise = fetch(
@@ -44,6 +51,7 @@ export default function FreelancerDetailPage({
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/${id}/portfolios`,
           { method: "GET", credentials: "include" }
         ).then((res) => res.json());
+        // 리뷰, 완료프로젝트 API가 있다면 여기에 추가
         const [freelancerData, portfolioData] = await Promise.all([
           freelancerPromise,
           portfolioPromise,
@@ -55,23 +63,23 @@ export default function FreelancerDetailPage({
       }
     };
     fetchAllData();
-  }, [id]);
+  }, []);
 
-  // helper to format date similar to portfolios detail page
-  function formatDate(dateStr?: string) {
-    if (!dateStr) return "";
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return "";
-    const year = d.getFullYear().toString().slice(2);
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${year}년 ${month}월 ${day}일`;
-  }
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (modalOpen) {
+        const modal = document.getElementById("edit-modal");
+        if (modal && !modal.contains(e.target as Node)) setModalOpen(false);
+      }
+    }
+    if (modalOpen) document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [modalOpen]);
 
-  // open modal and fetch portfolio detail
+  // portfolio modal: fetch and show portfolio detail
   const openPortfolioModal = async (portfolioId: string | number) => {
     setActivePortfolioId(portfolioId);
-    setModalOpen(true);
+    setPortfolioModalOpen(true);
     setModalLoading(true);
     try {
       const res = await fetch(
@@ -89,355 +97,279 @@ export default function FreelancerDetailPage({
     }
   };
 
-  const closeModal = () => {
-    setModalOpen(false);
+  const closePortfolioModal = () => {
+    setPortfolioModalOpen(false);
     setActivePortfolioId(null);
     setModalPortfolio(null);
     setModalLoading(false);
   };
 
-  // close on esc
   useEffect(() => {
-    if (!modalOpen) return;
+    if (!portfolioModalOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeModal();
+      if (e.key === "Escape") closePortfolioModal();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [modalOpen]);
+  }, [portfolioModalOpen]);
 
   return (
     <div
-      className="min-h-screen bg-gradient-to-br from-[#f8f4eb] to-[#fafdff] flex justify-center"
       style={{
-        paddingTop: "68px",
-        paddingBottom: "180px",
-        paddingLeft: "1.5rem",
-        paddingRight: "1.5rem",
+        minHeight: "100vh",
+        background: "#f7f5ec",
+        fontFamily: "'Pretendard', 'Inter', Arial, sans-serif",
+        padding: "0",
       }}
+      className="flex justify-center items-start"
     >
-      <div className="w-full max-w-[1100px]">
+      <div className="w-full" style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 0" }}>
         {/* 제목 */}
-        <div>
+        <div style={{ marginBottom: "34px", paddingLeft: "8px" }}>
           <h1
-            className="text-[28px] font-extrabold text-[#1E1B16] tracking-tighter"
-            style={{ marginBottom: "0.4rem", letterSpacing: "-1px" }}
-          >
-            프리랜서 페이지
-          </h1>
-          <p className="text-[#6A6558] text-[15px] font-[400]">
-            내 프로젝트에 딱 맞는 전문가를 만나보세요.
-          </p>
-        </div>
-
-        {/* 카드 레이아웃 */}
-        <div
-          className="flex items-stretch"
-          style={{ gap: "2rem", marginTop: "2rem" }}
-        >
-          {/* 왼쪽 카드 (프로필) */}
-          <div
-            className="flex-2 bg-[#fff] border border-[#E8E3D9] rounded-[18px] shadow-[0_2px_10px_rgba(0,0,0,0.08)] flex flex-col justify-start"
             style={{
-              padding: "2.2rem 2rem",
-              minHeight: "520px",
-              maxWidth: 370,
+              fontSize: "2rem",
+              fontWeight: 800,
+              color: "#333",
+              marginBottom: "10px",
+              letterSpacing: "-1px",
             }}
           >
-            <div
-              className="flex flex-col items-center"
-              style={{ width: "100%" }}
-            >
-              <div
-                style={{
-                  width: "150px",
-                  height: "150px",
-                  borderRadius: "20%",
-                  overflow: "hidden",
-                  background: "#f3f1ee",
-                  marginBottom: "1.2rem",
-                  boxShadow: "0 2px 8px #e8e3d9",
-                }}
-              >
+            내 프리랜서 정보
+          </h1>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: "32px",
+            alignItems: "flex-start",
+          }}
+        >
+          {/* 프로필 카드 - 리스트 페이지 분위기로 */}
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: "13px",
+              boxShadow: "0 2px 12px #0001",
+              padding: "36px 32px",
+              minWidth: 340,
+              maxWidth: 400,
+              flexShrink: 0,
+              display: "flex",
+              flexDirection: "column",
+              gap: "20px",
+              height: "fit-content",
+            }}
+          >
+            <div style={{
+              width: "150px", // 기존보다 조금 더 크게
+              height: "150px",
+              borderRadius: "22px",
+              overflow: "hidden",
+              background: "#f7f7f7",
+              flexShrink: 0,
+              boxShadow: "0 1px 10px #0001",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 12px auto"
+            }}>
                 <img
-                  src={fullImageUrl(freelancer?.freelancerProfileImageUrl)}
+                  src={
+                    freelancer?.freelancerProfileImageUrl
+                      ? fullImageUrl(freelancer.freelancerProfileImageUrl)
+                      : "/logo-full.png"
+                  }
                   alt={freelancer?.nickname || "프리랜서"}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               </div>
-
-              <h2 className="text-[22px] font-bold text-[#1E1B16] mb-1">
-                {freelancer?.nickname}
-              </h2>
-              <div
-                className="text-[#3d7afe] text-[15px] font-semibold"
-                style={{
-                  marginTop: "2px",
-                  marginBottom: "14px",
-                  background: "#e6f0ff",
-                  padding: "2px 14px",
-                  borderRadius: "8px",
-                  letterSpacing: "-0.2px",
-                }}
-              >
-                {freelancer?.freelancerTitle}
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "22px",
+              marginBottom: "10px"
+            }}>
+            
+              {/* 닉네임/타이틀 */}
+              <div style={{ display: "flex", textAlign: "center", flexDirection: "column", justifyContent: "center", flex: 1 }}>
+                <div style={{
+                  fontWeight: 800,
+                  fontSize: "1.5rem",
+                  color: "#222",
+                  marginBottom: "4px"
+                }}>{freelancer?.nickname}</div>
+                <div style={{
+                  fontWeight: 700,
+                  fontSize: "15px",
+                  marginTop: "10px"
+                }}>{freelancer?.freelancerTitle}</div>
               </div>
-
-              <div
-                style={{
-                  width: "100%",
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "1.1rem",
-                  marginTop: "0.5rem",
-                }}
-              >
-                {/* 유동 정보 */}
-                <div>
-                  <div className="text-[13px] text-[#1E1B16] font-medium mb-1">
-                    유형
-                  </div>
-                  <div className="text-[14px] text-[#6A6558]">
-                    {freelancer?.type}
+            </div>
+            {/* 정보 1~3열 배치 */}
+            <div style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "15px",
+              marginBottom: "10px",
+            }}>
+              {/* 1열: 유형, 지역, 상주여부(표시) - 좌우폭 맞춤, 내용 강조 */}
+              <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: "0px",
+                width: "100%",
+                marginBottom: "10px",
+              }}>
+                {/* 유형 */}
+                <div style={{ flex: 1, minWidth: 0, textAlign: "center" }}>
+                  <span style={{
+                    display: "block",
+                    fontSize: "16px",
+                    fontWeight: 800,
+                    color: "#222",
+                  }}>{freelancer?.type}</span>
+                  <span style={{
+                    display: "block",
+                    fontSize: "12px",
+                    color: "#aaa",
+                    fontWeight: 500,
+                    marginTop: "2px"
+                  }}>유형</span>
+                </div>
+                {/* 지역 */}
+                <div style={{ flex: 1, minWidth: 0, textAlign: "center" }}>
+                  <span style={{
+                    display: "block",
+                    fontSize: "16px",
+                    fontWeight: 800,
+                    color: "#222",
+                  }}>{freelancer?.location}</span>
+                  <span style={{
+                    display: "block",
+                    fontSize: "12px",
+                    color: "#aaa",
+                    fontWeight: 500,
+                    marginTop: "2px"
+                  }}>지역</span>
+                </div>
+                {/* 상주여부 (문구만) */}
+                <div style={{ flex: 1, minWidth: 0, textAlign: "center", background: "#f8faff",
+                borderRadius: "11px",
+                padding: "14px 0",
+                fontSize: "22px",
+                fontWeight: 800,
+                color: "#16a34a",
+                letterSpacing: "-1px",
+                position: "relative", }}>
+                  <span style={{
+                    display: "block",
+                    fontSize: "15px",
+                    fontWeight: 800,
+                    color: freelancer?.isOnSite ? "#16a34a" : "#e11d48",
+                  }}>
+                    {freelancer?.isOnSite ? "상주 가능" : "상주 불가능"}
+                  </span>
+                </div>
+              </div>
+              {/* 2열: 평점, 리뷰/관심 (기존 유지), 좌우폭 100%로 맞춤 */}
+              <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: "0px",
+                width: "100%",
+                fontSize: "15px",
+                marginBottom: "10px",
+              }}>
+                <div style={{ flex: 1, minWidth: 0, textAlign: "center", alignItems: "center", display: "flex", justifyContent: "center", gap: "6px" }}>
+                  <div style={{ color: "#444", fontWeight: 700, fontSize: "13px", marginBottom: "2px" }}>평점</div>
+                  <div style={{ color: "#f59e0b", fontWeight: 700, display: "flex", alignItems: "center", gap: "2px" }}>
+                    ★ {(freelancer?.ratingAvg ?? 0).toFixed(1)}
                   </div>
                 </div>
-                <div>
-                  <div className="text-[13px] text-[#1E1B16] font-medium mb-1">
-                    지역
-                  </div>
-                  <div className="text-[14px] text-[#6A6558]">
-                    {freelancer?.location}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ color: "#444", fontWeight: 700, fontSize: "13px", marginBottom: "2px" }}>후기 / 관심</div>
+                  <div style={{ color: "#666", fontWeight: 600 }}>
+                    {freelancer?.reviewsCount ?? 0} / {freelancer?.favoritesCount ?? 0}
                   </div>
                 </div>
-                <div>
-                  <div className="text-[13px] text-[#1E1B16] font-medium mb-1">
-                    상주 여부
-                  </div>
-                  <div className="text-[14px] text-[#6A6558]">
-                    {freelancer?.isOnSite ? (
-                      <span className="bg-[#e6f0ff] text-[#2563eb] px-2 py-1 rounded-md font-semibold">
-                        상주 가능
-                      </span>
-                    ) : (
-                      <span className="bg-[#f3f4f6] text-[#888] px-2 py-1 rounded-md font-semibold">
-                        상주 불가능
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[13px] text-[#1E1B16] font-medium mb-1">
-                    월 단가
-                  </div>
-                  <div className="text-[18px] font-bold text-[#1E1B16]">
-                    {Math.round(
-                      (freelancer?.minMonthlyRate ?? 0) / 1
-                    ).toLocaleString()}{" "}
-                    ~{" "}
-                    {Math.round(
-                      (freelancer?.maxMonthlyRate ?? 0) / 1
-                    ).toLocaleString()}{" "}
-                    원
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[13px] text-[#1E1B16] font-medium mb-1">
-                    평점
-                  </div>
-                  <div className="text-[14px] text-[#6A6558] flex items-center gap-1">
-                    <span
-                      style={{
-                        color: "#f59e0b",
-                        fontWeight: 700,
-                        fontSize: 15,
-                      }}
-                    >
-                      ★
-                    </span>
-                    {(freelancer?.ratingAvg ?? 0).toFixed(1)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[13px] text-[#1E1B16] font-medium mb-1">
-                    리뷰 / 관심
-                  </div>
-                  <div className="text-[14px] text-[#6A6558]">
-                    {freelancer?.reviewsCount ?? 0} /{" "}
-                    {freelancer?.favoritesCount ?? 0}
-                  </div>
-                </div>
-                {modalOpen && (
-                  <div
-                    role="dialog"
-                    aria-modal="true"
-                    style={{
-                      position: "fixed",
-                      inset: 0,
-                      background: "rgba(0,0,0,0.45)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      zIndex: 60,
-                      padding: "20px",
-                    }}
-                    onClick={closeModal}
-                  >
-                    <div
-                      onClick={(e) => e.stopPropagation()}
-                      style={{
-                        width: "100%",
-                        maxWidth: 820,
-                        borderRadius: 12,
-                        overflow: "hidden",
-                        background: "#fff",
-                        boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
-                        position: "relative",
-                      }}
-                    >
-                      {modalLoading ? (
-                        <div style={{ padding: 40, textAlign: "center" }}>로딩 중...</div>
-                      ) : !modalPortfolio ? (
-                        <div style={{ padding: 40, textAlign: "center" }}>포트폴리오 정보를 불러올 수 없습니다.</div>
-                      ) : (
-                        <div style={{ padding: 28 }}>
-                          {/* action menu button (compact) */}
-                          <div style={{ position: "absolute", top: 10, right: 10 }}>
-                            <button
-                              aria-label="더보기"
-                              onClick={() => setShowActionMenu((s) => !s)}
-                              style={{
-                                width: 36,
-                                height: 36,
-                                borderRadius: 18,
-                                border: "1px solid #e6e6e6",
-                                background: "#fff",
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontWeight: 700,
-                              }}
-                            >
-                              ⋯
-                            </button>
-                            {showActionMenu && (
-                              <div style={{ marginTop: 8, right: 0, position: "absolute", background: "#fff", border: "1px solid #e6e6e6", borderRadius: 8, boxShadow: "0 6px 16px rgba(0,0,0,0.12)", overflow: "hidden" }}>
-                                <button
-                                  onClick={() => {
-                                    // edit
-                                    setShowActionMenu(false);
-                                    router.push(`/freelancers/portfolios/write?editId=${activePortfolioId}`);
-                                  }}
-                                  style={{ display: "block", padding: "10px 14px", width: "100%", textAlign: "left", background: "transparent", border: "none", cursor: "pointer", fontWeight: 700 }}
-                                >
-                                  수정
-                                </button>
-                                <button
-                                  onClick={async () => {
-                                    setShowActionMenu(false);
-                                    const ok = window.confirm("정말 이 포트폴리오를 삭제하시겠습니까? 삭제하면 복구할 수 없습니다.");
-                                    if (!ok) return;
-                                    try {
-                                      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/portfolios/${activePortfolioId}`, { method: "DELETE", credentials: "include" });
-                                      if (!res.ok) {
-                                        const txt = await res.text();
-                                        throw new Error(`삭제 실패: ${res.status} ${txt}`);
-                                      }
-                                      // remove from list
-                                      setPortfolios((prev) => prev.filter((x) => String(x.id) !== String(activePortfolioId)));
-                                      alert("포트폴리오가 삭제되었습니다.");
-                                      closeModal();
-                                    } catch (err: any) {
-                                      console.error(err);
-                                      alert(err?.message || "삭제 중 오류가 발생했습니다.");
-                                    }
-                                  }}
-                                  style={{ display: "block", padding: "10px 14px", width: "100%", textAlign: "left", background: "transparent", border: "none", cursor: "pointer", color: "#e11d48", fontWeight: 700 }}
-                                >
-                                  삭제
-                                </button>
-                              </div>
-                            )}
-                          </div>
-
-                          <h2 style={{ fontSize: "1.8rem", fontWeight: 900, textAlign: "center", marginBottom: 18 }}>{modalPortfolio.title}</h2>
-                          <div style={{ width: "100%", maxWidth: 700, height: 360, margin: "0 auto 20px", borderRadius: 12, overflow: "hidden", background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            {modalPortfolio.imageUrl ? (
-                              <img src={fullImageUrl(modalPortfolio.imageUrl)} alt={modalPortfolio.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                            ) : (
-                              <div style={{ color: "#94a3b8", fontWeight: 600 }}>이미지 없음</div>
-                            )}
-                          </div>
-                          <div style={{ color: "#444", fontSize: 15, lineHeight: 1.7, marginBottom: 14 }}>{modalPortfolio.description}</div>
-                          <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 12 }}>
-                            <div style={{ color: "#555", fontWeight: 700 }}>기간: {formatDate(modalPortfolio.startDate)} ~ {formatDate(modalPortfolio.endDate)}</div>
-                            <div style={{ background: "#e7e7e7", color: "#16a34a", fontWeight: 700, borderRadius: 8, padding: "6px 10px" }}>{modalPortfolio.contribution}% 기여</div>
-                          </div>
-                          {modalPortfolio.externalUrl && (
-                            <div style={{ textAlign: "center", marginTop: 6 }}>
-                              <a href={modalPortfolio.externalUrl} target="_blank" rel="noreferrer" style={{ color: "#16a34a", fontWeight: 700 }}>포트폴리오 자세히 보기 &gt;</a>
-                            </div>
-                          )}
-                          <div style={{ display: "flex", justifyContent: "center", marginTop: 18 }}>
-                            <button onClick={closeModal} style={{ padding: "10px 14px", borderRadius: 8, border: "none", background: "#16a34a", color: "#fff", fontWeight: 700 }}>닫기</button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
+              </div>
+              {/* 3열: 월단가(크게!), 표시는 연하게 */}
+              <div style={{
+                background: "#f8faff",
+                borderRadius: "11px",
+                padding: "14px 0",
+                textAlign: "center",
+                fontSize: "20px",
+                fontWeight: 800,
+                letterSpacing: "-1px",
+                position: "relative",
+              }}>
+                <span style={{
+                  position: "absolute",
+                  left: 18,
+                  top: 10,
+                  fontSize: "13px",
+                  color: "#aaa",
+                  fontWeight: 500,
+                  opacity: 0.7,
+                  letterSpacing: "-0.5px"
+                }}>
+                  월단가
+                </span>
+                {Math.round((freelancer?.minMonthlyRate ?? 0) / 1).toLocaleString()} ~ {Math.round((freelancer?.maxMonthlyRate ?? 0) / 1).toLocaleString()} 만원
               </div>
             </div>
           </div>
 
-          {/* 오른쪽 카드 (탭) */}
+          {/* 오른쪽 상세/탭 카드 */}
           <div
-            className="flex-9 bg-[#fff] border border-[#E8E3D9] rounded-[18px] shadow-[0_2px_10px_rgba(0,0,0,0.07)] flex flex-col justify-start"
-            style={{ padding: "2.2rem 2rem", minHeight: "520px" }}
+            style={{
+              background: "#fff",
+              borderRadius: "13px",
+              boxShadow: "0 2px 12px #0001",
+              padding: "36px 32px",
+              flex: 1,
+              minHeight: "520px",
+              display: "flex",
+              flexDirection: "column",
+            }}
           >
-            {/* Tabs nav - 카드 가로 전체 채우기 */}
+            {/* 탭 */}
             <nav
               style={{
                 display: "flex",
                 width: "100%",
-                borderBottom: "1.5px solid #E8E3D9",
+                borderBottom: "1.5px solid #e7e7e7",
                 marginBottom: 18,
-                paddingBottom: 0,
                 gap: 0,
+                boxSizing: "border-box",
               }}
             >
               {[
                 { key: "basic", label: "기본정보" },
                 { key: "portfolio", label: "포트폴리오" },
                 { key: "completed", label: "완료 프로젝트" },
+                { key: "review", label: "후기" }
               ].map((tab, idx) => (
                 <button
                   key={tab.key}
-                  className={`transition-all font-semibold text-[16px] py-4
-                    ${
-                      activeTab === tab.key
-                        ? "text-[#1E1B16] border-b-3 border-[#3d7afe] bg-[#f8faff]"
-                        : "text-[#6A6558] bg-transparent hover:bg-[#f8faff]"
-                    }
-                  `}
                   style={{
                     flex: 1,
                     border: "none",
-                    borderBottom:
-                      activeTab === tab.key
-                        ? "3px solid #3d7afe"
-                        : "1.5px solid #E8E3D9",
-                    background:
-                      activeTab === tab.key ? "#f8faff" : "transparent",
-                    color: activeTab === tab.key ? "#1E1B16" : "#6A6558",
-                    outline: "none",
+                    borderBottom: activeTab === tab.key ? "3px solid #16a34a" : "1.5px solid #e7e7e7",
+                    background: activeTab === tab.key ? "#f8faff" : "transparent",
+                    color: activeTab === tab.key ? "#16a34a" : "#666",
+                    fontWeight: 700,
+                    fontSize: "16px",
                     cursor: "pointer",
-                    borderTopLeftRadius: idx === 0 ? "12px" : "0",
-                    borderTopRightRadius: idx === 2 ? "12px" : "0",
+                    borderTopLeftRadius: idx === 0 ? "11px" : "0",
+                    borderTopRightRadius: idx === 3 ? "11px" : "0",
+                    padding: "15px 0",
+                    transition: "background 0.2s, border-color 0.2s",
                   }}
                   onClick={() => setActiveTab(tab.key as typeof activeTab)}
                 >
@@ -445,166 +377,326 @@ export default function FreelancerDetailPage({
                 </button>
               ))}
             </nav>
-
             {/* Tab content */}
-            <div>
+            <div style={{ flex: 1 }}>
               {activeTab === "basic" && (
                 <div>
-                  <h3 className="text-[17px] font-bold text-[#1E1B16] mb-3">
-                    프리랜서 소개
+                  <h3 style={{
+                    fontWeight: 800,
+                    fontSize: "1.12rem",
+                    color: "#222",
+                    marginBottom: "15px"
+                  }}>
+                    소개
                   </h3>
-                  <p
-                    className="text-[#6A6558] mb-5"
-                    style={{ lineHeight: "1.8", fontSize: "16px" }}
-                  >
+                  <p style={{
+                    color: "#555",
+                    marginBottom: "22px",
+                    fontSize: "15.5px",
+                    lineHeight: "1.75",
+                  }}>
                     {freelancer?.content}
                   </p>
-
-                  <div className="mb-5">
-                    <h4 className="text-[14px] font-semibold text-[#1E1B16] mb-2">
-                      경력
-                    </h4>
-                    {Array.isArray(freelancer?.careerList) &&
-                    freelancer?.careerList.length > 0 ? (
-                      <ul className="space-y-4">
+                  {/* 경력 */}
+                  <div style={{ marginBottom: "24px" }}>
+                    <h3 style={{
+                    fontWeight: 800,
+                    fontSize: "1.12rem",
+                    color: "#222",
+                    marginBottom: "15px"
+                  }}>
+                    경력
+                  </h3>
+                    {Array.isArray(freelancer?.careerList) && freelancer?.careerList.length > 0 ? (
+                      <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
                         {freelancer.careerList.map((c: any) => (
-                          <li
-                            key={c.id}
+                          <li key={c.id}
                             style={{
                               background: "#f8faff",
                               borderRadius: 8,
                               padding: "10px 15px",
-                            }}
-                          >
-                            <div className="font-semibold text-[#2563eb]">
+                              marginBottom: "10px",
+                              fontSize: "15px"
+                            }}>
+                            <div style={{ fontWeight: 700}}>
                               {c.title} · {c.company}
                             </div>
-                            <div className="text-[#6b7280] text-sm mt-1">
-                              {c.startDate} - {c.endDate}{" "}
-                              {c.current ? "(재직중)" : ""}
+                            <div style={{ color: "#888", fontSize: "14px", marginTop: "2px" }}>
+                              {c.startDate} - {c.endDate} {c.current ? "(재직중)" : ""}
                             </div>
-                            {c.description ? (
-                              <div className="mt-1 text-[#374151]">
-                                {c.description}
-                              </div>
-                            ) : null}
+                            {c.description && (
+                              <div style={{ marginTop: "5px", color: "#444" }}>{c.description}</div>
+                            )}
                           </li>
                         ))}
                       </ul>
                     ) : (
-                      <div className="text-[#6A6558]">
-                        경력 정보가 없습니다.
-                      </div>
+                      <div style={{ color: "#888" }}>경력 정보가 없습니다.</div>
                     )}
                   </div>
-
+                  {/* 스킬 */}
                   <div>
-                    <h4 className="text-[14px] font-semibold text-[#1E1B16] mb-2">
-                      보유 스킬
-                    </h4>
-                    <div className="flex gap-2 flex-wrap">
+                    <h3 style={{
+                    fontWeight: 800,
+                    fontSize: "1.12rem",
+                    color: "#222",
+                    marginBottom: "15px"
+                  }}>
+                    기술스택
+                  </h3>
+                    <div style={{ display: "flex", gap: "7px", flexWrap: "wrap" }}>
                       {(freelancer?.techList || []).length > 0 ? (
                         freelancer?.techList.map((tech: any) => (
                           <span
                             key={tech.id ?? tech.techName}
-                            className="bg-[#e6f0ff] px-4 py-[7px] rounded-full text-[#2563eb] font-semibold text-[13px] border border-[#dbeafe]"
+                            style={{
+                              background: "#f7f7f7",
+                              color: "#72a685ff",
+                              fontWeight: 600,
+                              borderRadius: "8px",
+                              padding: "5px 13px",
+                              fontSize: "13px",
+                            }}
                           >
                             {tech.techName ?? tech}
                           </span>
                         ))
                       ) : (
-                        <div className="text-[#6A6558]">
-                          등록된 스킬이 없습니다.
-                        </div>
+                        <div style={{ color: "#888" }}>등록된 스킬이 없습니다.</div>
                       )}
                     </div>
                   </div>
                 </div>
               )}
-
               {activeTab === "portfolio" && (
                 <div style={{ minHeight: 220 }}>
                   {portfolios.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-7">
+                    <div style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "32px",
+                      marginBottom: "38px"
+                    }}>
                       {portfolios.map((p: any) => (
                         <div
                           key={p.id}
                           role="button"
                           tabIndex={0}
                           onClick={() => openPortfolioModal(p.id)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") openPortfolioModal(p.id);
+                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") openPortfolioModal(p.id); }}
+                          style={{
+                            background: "#f8faff",
+                            padding: "24px",
+                            borderRadius: "13px",
+                            border: "1px solid #ececec",
+                            boxShadow: "0 2px 8px #16a34a22",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            minHeight: "320px",
+                            cursor: "pointer",
                           }}
-                          className="bg-[#f8faff] p-4 rounded-xl border border-[#e8e3d9] shadow hover:shadow-md cursor-pointer"
                         >
-                          <div className="font-bold text-[#2563eb] mb-2">
-                            {p.title}
+                          {/* 이미지 (비중 크게) */}
+                          <div style={{
+                            width: "100%",
+                            maxWidth: "320px",
+                            height: "210px",
+                            borderRadius: "10px",
+                            overflow: "hidden",
+                            background: "#ededed",
+                            marginBottom: "18px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            boxShadow: "0 1px 10px #0001",
+                          }}>
+                            {p.imageUrl ? (
+                              <img
+                                src={fullImageUrl(p.imageUrl)}
+                                alt={p.title}
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                  borderRadius: "10px",
+                                }}
+                              />
+                            ) : (
+                              <span style={{ color: "#aaa", fontSize: "13px" }}>이미지 없음</span>
+                            )}
                           </div>
-                          <div className="mb-2 text-[#1E1B16]">
-                            {p.description}
-                          </div>
-                          {p.imageUrl && (
-                            <img
-                              src={fullImageUrl(p.imageUrl)}
-                              alt={p.title}
-                              style={{
-                                maxWidth: "100%",
-                                maxHeight: "130px",
-                                objectFit: "cover",
-                                borderRadius: "8px",
-                              }}
-                            />
-                          )}
-                          <div className="mt-2 text-xs text-[#6b7280]">
-                            {p.link}
+                          {/* 제목 */}
+                          <div style={{
+                            fontWeight: 700,
+                            fontSize: "1.09rem",
+                            color: "#222",
+                            marginBottom: "12px",
+                            textAlign: "center",
+                            maxWidth: "92%",
+                            overflowWrap: "break-word"
+                          }}>{p.title}</div>
+                          {/* 기간 + 기여도(비중 낮춤) */}
+                          <div style={{
+                            display: "flex",
+                            width: "100%",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            gap: "10px",
+                            fontSize: "15px",
+                            marginTop: "8px",
+                          }}>
+                            <span style={{ color: "#555" }}>
+                              {formatDate(p.startDate)} ~ {formatDate(p.endDate)}
+                            </span>
+                            <span style={{
+                              background: "#e7e7e7",
+                              color: "#16a34a",
+                              fontWeight: 500,
+                              borderRadius: "8px",
+                              padding: "5px 10px",
+                              fontSize: "14px"
+                            }}>
+                              {p.contribution}% 기여
+                            </span>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div
-                      style={{ minHeight: 220 }}
-                      className="flex items-center justify-center text-[#6A6558]"
-                    >
+                    <div style={{
+                      minHeight: 220,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#888"
+                    }}>
                       포트폴리오 정보가 없습니다.
                     </div>
                   )}
                 </div>
               )}
-
               {activeTab === "completed" && (
                 <div style={{ minHeight: 220 }}>
                   {completedProjects.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-7">
+                    <div style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "18px"
+                    }}>
                       {completedProjects.map((cp: any) => (
                         <div
                           key={cp.id}
-                          className="bg-[#f8faff] p-4 rounded-xl border border-[#e8e3d9] shadow"
+                          style={{
+                            background: "#f8faff",
+                            padding: "14px",
+                            borderRadius: "9px",
+                            border: "1px solid #ececec",
+                            boxShadow: "0 2px 8px #16a34a22",
+                          }}
                         >
-                          <div className="font-bold text-[#2563eb] mb-2">
-                            {cp.title}
-                          </div>
-                          <div className="mb-2 text-[#1E1B16]">
+                          <div style={{
+                            fontWeight: 700,
+                            color: "#16a34a",
+                            marginBottom: "8px",
+                            fontSize: "15px"
+                          }}>{cp.title}</div>
+                          <div style={{ color: "#222", fontSize: "15px", marginBottom: "7px" }}>
                             {cp.description}
                           </div>
-                          <div className="mt-2 text-xs text-[#6b7280]">
-                            {cp.period}
-                          </div>
+                          <div style={{ fontSize: "13px", color: "#888", marginTop: "2px" }}>{cp.period}</div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div
-                      style={{ minHeight: 220 }}
-                      className="flex items-center justify-center text-[#6A6558]"
-                    >
+                    <div style={{
+                      minHeight: 220,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#888"
+                    }}>
                       완료된 프로젝트 정보가 없습니다.
                     </div>
                   )}
                 </div>
               )}
+              {activeTab === "review" && (
+                <div style={{
+                  minHeight: 220,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#888",
+                  fontSize: "17px"
+                }}>
+                  후기 기능을 구현하세요.
+                </div>
+              )}
             </div>
           </div>
+          {/* 포트폴리오 상세 모달 */}
+          {portfolioModalOpen && (
+            <div
+              role="dialog"
+              aria-modal="true"
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(0,0,0,0.45)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 60,
+                padding: "20px",
+              }}
+              onClick={closePortfolioModal}
+            >
+              <div
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  width: "100%",
+                  maxWidth: 820,
+                  borderRadius: 12,
+                  overflow: "hidden",
+                  background: "#fff",
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
+                  position: "relative",
+                }}
+              >
+                
+                {modalLoading ? (
+                  <div style={{ padding: 40, textAlign: "center" }}>로딩 중...</div>
+                ) : !modalPortfolio ? (
+                  <div style={{ padding: 40, textAlign: "center" }}>포트폴리오 정보를 불러올 수 없습니다.</div>
+                ) : (
+                  <div style={{ padding: 28 }}>
+                    <h2 style={{ fontSize: "1.8rem", fontWeight: 900, textAlign: "center", marginBottom: 18 }}>{modalPortfolio.title}</h2>
+                    <div style={{ width: "100%", maxWidth: 700, height: 360, margin: "0 auto 20px", borderRadius: 12, overflow: "hidden", background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {modalPortfolio.imageUrl ? (
+                        <img src={fullImageUrl(modalPortfolio.imageUrl)} alt={modalPortfolio.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        <div style={{ color: "#94a3b8", fontWeight: 600 }}>이미지 없음</div>
+                      )}
+                    </div>
+                    <div style={{ color: "#444", fontSize: 15, lineHeight: 1.7, marginBottom: 14 }}>{modalPortfolio.description}</div>
+                    <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 12 }}>
+                      <div style={{ color: "#555", fontWeight: 700 }}>기간: {formatDate(modalPortfolio.startDate)} ~ {formatDate(modalPortfolio.endDate)}</div>
+                      <div style={{ background: "#e7e7e7", color: "#16a34a", fontWeight: 700, borderRadius: 8, padding: "6px 10px" }}>{modalPortfolio.contribution}% 기여</div>
+                    </div>
+                    {modalPortfolio.externalUrl && (
+                      <div style={{ textAlign: "center", marginTop: 6 }}>
+                        <a href={modalPortfolio.externalUrl} target="_blank" rel="noreferrer" style={{ color: "#16a34a", fontWeight: 700 }}>포트폴리오 자세히 보기 &gt;</a>
+                      </div>
+                    )}
+                    <div style={{ display: "flex", justifyContent: "center", marginTop: 18 }}>
+                      <button onClick={closePortfolioModal} style={{ padding: "10px 14px", borderRadius: 8, border: "none", background: "#16a34a", color: "#fff", fontWeight: 700 }}>닫기</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
