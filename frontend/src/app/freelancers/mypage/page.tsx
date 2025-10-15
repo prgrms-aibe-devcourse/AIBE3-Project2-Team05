@@ -11,10 +11,10 @@ function PortfolioAddButton() {
         background: "#16a34a",
         color: "#fff",
         fontWeight: 700,
-        fontSize: "16px",
         border: "none",
+        fontSize: "14px", // 기존보다 작게
+        padding: "8px 22px", // 기존보다 작게
         borderRadius: "8px",
-        padding: "13px 38px",
         boxShadow: "0 2px 8px #16a34a22",
         cursor: "pointer",
         transition: "background 0.2s",
@@ -219,23 +219,19 @@ export default function FreelancerMyPage() {
               height: "fit-content",
             }}
           >
-            {/* 가로배치: 이미지(좌) + 닉네임/타이틀(우) */}
             <div style={{
+              width: "150px", // 기존보다 조금 더 크게
+              height: "150px",
+              borderRadius: "22px",
+              overflow: "hidden",
+              background: "#f7f7f7",
+              flexShrink: 0,
+              boxShadow: "0 1px 10px #0001",
               display: "flex",
               alignItems: "center",
-              gap: "22px",
-              marginBottom: "10px"
+              justifyContent: "center",
+              margin: "0 auto 12px auto"
             }}>
-              {/* 이미지 */}
-              <div style={{
-                width: "86px",
-                height: "86px",
-                borderRadius: "18px",
-                overflow: "hidden",
-                background: "#f7f7f7",
-                flexShrink: 0,
-                boxShadow: "0 1px 10px #0001",
-              }}>
                 <img
                   src={
                     freelancer?.freelancerProfileImageUrl
@@ -246,79 +242,156 @@ export default function FreelancerMyPage() {
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               </div>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "22px",
+              marginBottom: "10px"
+            }}>
+            
               {/* 닉네임/타이틀 */}
-              <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", flex: 1 }}>
+              <div style={{ display: "flex", textAlign: "center", flexDirection: "column", justifyContent: "center", flex: 1 }}>
                 <div style={{
                   fontWeight: 800,
-                  fontSize: "1.25rem",
+                  fontSize: "1.5rem",
                   color: "#222",
                   marginBottom: "4px"
                 }}>{freelancer?.nickname}</div>
                 <div style={{
-                  color: "#16a34a",
                   fontWeight: 700,
-                  fontSize: "17px",
-                  marginTop: "4px"
+                  fontSize: "15px",
+                  marginTop: "10px"
                 }}>{freelancer?.freelancerTitle}</div>
               </div>
             </div>
-            {/* 주요 정보 */}
+            {/* 정보 1~3열 배치 */}
             <div style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "16px 14px",
-              background: "#f8faff",
-              borderRadius: "11px",
-              padding: "18px 11px",
-              marginBottom: "7px",
-              fontSize: "15px"
+              display: "flex",
+              flexDirection: "column",
+              gap: "15px",
+              marginBottom: "10px",
             }}>
-              <div>
-                <div style={{ color: "#444", fontWeight: 700, fontSize: "13px", marginBottom: "2px" }}>유형</div>
-                <div style={{ color: "#666" }}>{freelancer?.type}</div>
-              </div>
-              <div>
-                <div style={{ color: "#444", fontWeight: 700, fontSize: "13px", marginBottom: "2px" }}>지역</div>
-                <div style={{ color: "#666" }}>{freelancer?.location}</div>
-              </div>
-              <div>
-                <div style={{ color: "#444", fontWeight: 700, fontSize: "13px", marginBottom: "2px" }}>상주 여부</div>
-                <div style={{ color: "#16a34a", fontWeight: 600 }}>
-                  {freelancer?.isOnSite ? "상주 가능" : "상주 불가능"}
+              {/* 1열: 유형, 지역, 상주여부(표시) - 좌우폭 맞춤, 내용 강조 */}
+              <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: "0px",
+                width: "100%",
+                marginBottom: "10px",
+              }}>
+                {/* 유형 */}
+                <div style={{ flex: 1, minWidth: 0, textAlign: "center" }}>
+                  <span style={{
+                    display: "block",
+                    fontSize: "16px",
+                    fontWeight: 800,
+                    color: "#222",
+                  }}>{freelancer?.type}</span>
+                  <span style={{
+                    display: "block",
+                    fontSize: "12px",
+                    color: "#aaa",
+                    fontWeight: 500,
+                    marginTop: "2px"
+                  }}>유형</span>
+                </div>
+                {/* 지역 */}
+                <div style={{ flex: 1, minWidth: 0, textAlign: "center" }}>
+                  <span style={{
+                    display: "block",
+                    fontSize: "16px",
+                    fontWeight: 800,
+                    color: "#222",
+                  }}>{freelancer?.location}</span>
+                  <span style={{
+                    display: "block",
+                    fontSize: "12px",
+                    color: "#aaa",
+                    fontWeight: 500,
+                    marginTop: "2px"
+                  }}>지역</span>
+                </div>
+                {/* 상주여부 (문구만) */}
+                <div style={{ flex: 1, minWidth: 0, textAlign: "center", background: "#f8faff",
+                borderRadius: "11px",
+                padding: "14px 0",
+                fontSize: "22px",
+                fontWeight: 800,
+                color: "#16a34a",
+                letterSpacing: "-1px",
+                position: "relative", }}>
+                  <span style={{
+                    display: "block",
+                    fontSize: "15px",
+                    fontWeight: 800,
+                    color: freelancer?.isOnSite ? "#16a34a" : "#e11d48",
+                  }}>
+                    {freelancer?.isOnSite ? "상주 가능" : "상주 불가능"}
+                  </span>
                 </div>
               </div>
-              <div>
-                <div style={{ color: "#444", fontWeight: 700, fontSize: "13px", marginBottom: "2px" }}>월 단가</div>
-                <div style={{ color: "#16a34a", fontWeight: 700 }}>
-                  {Math.round((freelancer?.minMonthlyRate ?? 0) / 1).toLocaleString()} ~{" "}
-                  {Math.round((freelancer?.maxMonthlyRate ?? 0) / 1).toLocaleString()} 원
+              {/* 2열: 평점, 리뷰/관심 (기존 유지), 좌우폭 100%로 맞춤 */}
+              <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: "0px",
+                width: "100%",
+                fontSize: "15px",
+                marginBottom: "10px",
+              }}>
+                <div style={{ flex: 1, minWidth: 0, textAlign: "center", alignItems: "center", display: "flex", justifyContent: "center", gap: "6px" }}>
+                  <div style={{ color: "#444", fontWeight: 700, fontSize: "13px", marginBottom: "2px" }}>평점</div>
+                  <div style={{ color: "#f59e0b", fontWeight: 700, display: "flex", alignItems: "center", gap: "2px" }}>
+                    ★ {(freelancer?.ratingAvg ?? 0).toFixed(1)}
+                  </div>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ color: "#444", fontWeight: 700, fontSize: "13px", marginBottom: "2px" }}>후기 / 관심</div>
+                  <div style={{ color: "#666", fontWeight: 600 }}>
+                    {freelancer?.reviewsCount ?? 0} / {freelancer?.favoritesCount ?? 0}
+                  </div>
                 </div>
               </div>
-              <div>
-                <div style={{ color: "#444", fontWeight: 700, fontSize: "13px", marginBottom: "2px" }}>평점</div>
-                <div style={{ color: "#f59e0b", fontWeight: 700, display: "flex", alignItems: "center", gap: "2px" }}>
-                  ★ {(freelancer?.ratingAvg ?? 0).toFixed(1)}
-                </div>
-              </div>
-              <div>
-                <div style={{ color: "#444", fontWeight: 700, fontSize: "13px", marginBottom: "2px" }}>리뷰 / 관심</div>
-                <div style={{ color: "#666" }}>
-                  {freelancer?.reviewsCount ?? 0} / {freelancer?.favoritesCount ?? 0}
-                </div>
+              {/* 3열: 월단가(크게!), 표시는 연하게 */}
+              <div style={{
+                background: "#f8faff",
+                borderRadius: "11px",
+                padding: "14px 0",
+                textAlign: "center",
+                fontSize: "20px",
+                fontWeight: 800,
+                letterSpacing: "-1px",
+                position: "relative",
+              }}>
+                <span style={{
+                  position: "absolute",
+                  left: 18,
+                  top: 10,
+                  fontSize: "13px",
+                  color: "#aaa",
+                  fontWeight: 500,
+                  opacity: 0.7,
+                  letterSpacing: "-0.5px"
+                }}>
+                  월단가
+                </span>
+                {Math.round((freelancer?.minMonthlyRate ?? 0) / 1).toLocaleString()} ~ {Math.round((freelancer?.maxMonthlyRate ?? 0) / 1).toLocaleString()} 만원
               </div>
             </div>
             {/* 편집 버튼 */}
-            <div style={{ textAlign: "center", marginTop: "12px" }}>
+            <div style={{ textAlign: "center"}}>
               <button
                 type="button"
                 style={{
                   background: "#16a34a",
                   color: "#fff",
                   fontWeight: 700,
-                  fontSize: "16px",
+                  fontSize: "14px", // 기존보다 작게
                   border: "none",
-                  borderRadius: "8px",
-                  padding: "12px 36px",
+                  borderRadius: "7px", // 라운드도 약간 줄임
+                  padding: "8px 22px", // 기존보다 작게
                   boxShadow: "0 2px 8px #16a34a22",
                   cursor: "pointer",
                   transition: "background 0.2s",
@@ -489,7 +562,7 @@ export default function FreelancerMyPage() {
                     color: "#222",
                     marginBottom: "15px"
                   }}>
-                    프리랜서 소개
+                    소개
                   </h3>
                   <p style={{
                     color: "#555",
@@ -501,12 +574,14 @@ export default function FreelancerMyPage() {
                   </p>
                   {/* 경력 */}
                   <div style={{ marginBottom: "24px" }}>
-                    <h4 style={{
-                      fontWeight: 700,
-                      fontSize: "15px",
-                      color: "#16a34a",
-                      marginBottom: "10px"
-                    }}>경력</h4>
+                    <h3 style={{
+                    fontWeight: 800,
+                    fontSize: "1.12rem",
+                    color: "#222",
+                    marginBottom: "15px"
+                  }}>
+                    경력
+                  </h3>
                     {Array.isArray(freelancer?.careerList) && freelancer?.careerList.length > 0 ? (
                       <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
                         {freelancer.careerList.map((c: any) => (
@@ -518,7 +593,7 @@ export default function FreelancerMyPage() {
                               marginBottom: "10px",
                               fontSize: "15px"
                             }}>
-                            <div style={{ fontWeight: 700, color: "#16a34a" }}>
+                            <div style={{ fontWeight: 700}}>
                               {c.title} · {c.company}
                             </div>
                             <div style={{ color: "#888", fontSize: "14px", marginTop: "2px" }}>
@@ -536,12 +611,14 @@ export default function FreelancerMyPage() {
                   </div>
                   {/* 스킬 */}
                   <div>
-                    <h4 style={{
-                      fontWeight: 700,
-                      fontSize: "15px",
-                      color: "#16a34a",
-                      marginBottom: "10px"
-                    }}>보유 스킬</h4>
+                    <h3 style={{
+                    fontWeight: 800,
+                    fontSize: "1.12rem",
+                    color: "#222",
+                    marginBottom: "15px"
+                  }}>
+                    기술스택
+                  </h3>
                     <div style={{ display: "flex", gap: "7px", flexWrap: "wrap" }}>
                       {(freelancer?.techList || []).length > 0 ? (
                         freelancer?.techList.map((tech: any) => (
@@ -549,7 +626,7 @@ export default function FreelancerMyPage() {
                             key={tech.id ?? tech.techName}
                             style={{
                               background: "#f7f7f7",
-                              color: "#16a34a",
+                              color: "#72a685ff",
                               fontWeight: 600,
                               borderRadius: "8px",
                               padding: "5px 13px",
