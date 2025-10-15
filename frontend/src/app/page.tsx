@@ -55,7 +55,7 @@ export default function HomePage() {
           <div className="max-w-6xl mx-auto">
             <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-10" style={{
               fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
-              fontWeight: '300',
+              fontWeight: '700',
               color: '#111827',
               marginBottom: '48px',
               lineHeight: '1.2'
@@ -69,7 +69,7 @@ export default function HomePage() {
                   display: 'inline-block',
                   minWidth: '200px',
                   textAlign: 'center',
-                  fontWeight: '300',
+                  fontWeight: '800',
                   textShadow: '0 2px 4px rgba(22, 163, 74, 0.2)',
                   background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
                   WebkitBackgroundClip: 'text',
@@ -87,12 +87,11 @@ export default function HomePage() {
                 background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                fontWeight: '300',
+                backgroundClip: 'text'
               }}>FIT</span>하게 찾아드려요
             </h1>
             <p className="text-xl text-gray-600 mb-16" style={{
-              fontSize: 'clamp(1.25rem, 2.5vw, 0.5rem)',
+              fontSize: 'clamp(1.25rem, 2.5vw, 1.5rem)',
               color: '#6b7280',
               marginBottom: '72px',
               lineHeight: '1.7'
