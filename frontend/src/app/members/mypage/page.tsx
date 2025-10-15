@@ -120,7 +120,7 @@ export default function MyPage() {
               <div className="grid grid-cols-2" style={{ columnGap: "2rem", rowGap: "2.5rem", marginTop: "1.5rem" }}>
                 <div>
                   <label className="text-[13px] text-[#1E1B16] font-medium block" style={{ marginBottom: "0.75rem" }}>
-                    이름
+                    닉네임
                   </label>
                   <input type="text" value={nickname} readOnly className="w-full h-[46px] rounded-md border border-[#E8E3D9] bg-[#FAF9F6] px-3 text-sm text-[#1E1B16] focus:outline-none cursor-not-allowed" />
                 </div>

@@ -3,18 +3,98 @@ header {
   position: fixed;
   top: 0;
   left: 0;
+  right: 0;
   width: 100%;
-  height: 68px;
+  height: 75px; /* 큰 로고와 텍스트에 맞춰 높이 증가 */
   background-color: #ffffff !important;
   display: flex;
   align-items: center;
   justify-content: space-between;
   z-index: 1000; /* 항상 위로 */
   margin: 0 !important;
-  padding: 0 20px !important;
+  padding: 0 8% !important; /* 데스크톱에서 패딩을 8%로 설정 */
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .header-text {
   font-family: "Lato", sans-serif;
+}
+
+/* 데스크톱 - 기본 스타일 (절대 위치) */
+@media (min-width: 1025px) {
+  header {
+    padding: 0 8% !important; /* 양쪽 패딩을 8%로 설정 */
+  }
+  
+  .navigation-items {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 50px; /* 네비게이션 간격 증가 */
+    align-items: center;
+  }
+  
+  .login-logout-area {
+    margin-left: auto;
+    gap: 24px; /* 로그인/회원가입 간격 증가 */
+  }
+  
+  .navigation-text {
+    font-size: 16px; /* 폰트 크기 조금 줄임 */
+    font-weight: 600; /* 폰트 굵기 증가 */
+  }
+}
+
+/* 태블릿 및 모바일 - Flex 레이아웃 */
+@media (max-width: 1024px) {
+  header {
+    padding: 0 15px !important;
+  }
+  
+  .navigation-items {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex: 1;
+    justify-content: center;
+    margin: 0 30px; /* 양쪽 마진을 늘려서 로그인 영역과 더 많은 여백 확보 */
+  }
+  
+  .login-logout-area {
+    flex-shrink: 0;
+  }
+  
+  .navigation-text {
+    font-size: 14px;
+    font-weight: 500;
+  }
+}
+
+/* 더 작은 화면 - 간격 조정 */
+@media (max-width: 768px) {
+  header {
+    padding: 0 10px !important;
+  }
+  
+  .navigation-items {
+    gap: 15px;
+    margin: 0 20px; /* 여백을 늘려서 로그인 영역과 충분한 거리 확보 */
+  }
+  
+  .navigation-text {
+    font-size: 13px;
+  }
+}
+
+/* 매우 작은 화면 - 최소 간격 */
+@media (max-width: 480px) {
+  .navigation-items {
+    gap: 10px;
+    margin: 0 15px; /* 매우 작은 화면에서도 적절한 여백 유지 */
+  }
+  
+  .navigation-text {
+    font-size: 12px;
+  }
 }

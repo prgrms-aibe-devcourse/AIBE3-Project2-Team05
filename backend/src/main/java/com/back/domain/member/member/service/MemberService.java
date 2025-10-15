@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 
@@ -35,27 +36,29 @@ public class MemberService {
         return memberRepository.save(member);
 
     }
+
     @Transactional
     public MemberLoginRes login(MemberLoginReq req) {
-        Member member = memberRepository.findByUsername(req.getUsername())
-                .orElseThrow(() -> new ServiceException("400-3", "존재하지 않는 회원입니다."));
+        Member member = memberRepository.findByUsername(req.getUsername()).orElseThrow(() -> new ServiceException("400-3", "존재하지 않는 회원입니다."));
 
         checkPassword(member, req.getPassword());
 
-        member.issueRefreshToken();
+        if (member.getRefreshToken() == null || member.getRefreshTokenExpiry().isBefore(LocalDateTime.now())) {
+            member.issueRefreshToken();
+        }
+
         memberRepository.save(member);
 
+        // AccessToken은 항상 새로 발급
         String accessToken = authTokenService.genAccessToken(member);
 
         rq.setCookie("refreshToken", member.getRefreshToken());
         rq.setCookie("accessToken", accessToken);
 
-
         System.out.println("refreshToken = " + member.getRefreshToken());
         System.out.println("accessToken = " + accessToken);
 
         return new MemberLoginRes(new MemberDto(member), member.getRefreshToken(), accessToken);
-
     }
 
 

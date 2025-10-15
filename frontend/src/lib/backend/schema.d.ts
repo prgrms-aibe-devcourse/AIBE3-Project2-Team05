@@ -21,134 +21,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/submissions/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getSubmission"];
-        put: operations["modify"];
-        post?: never;
-        delete: operations["cancel"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/submissions/{id}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: operations["updateStatus"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/proposals/{id}/reject": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: operations["reject"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/proposals/{id}/accept": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: operations["accept"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/notifications/{id}/read": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: operations["markAsRead"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/notifications/read-all": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: operations["markAllAsRead"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/messages/{id}/read": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: operations["markAsRead_1"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/messages/conversation/{projectId}/{freelancerId}/read": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: operations["markConversationAsRead"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/freelancers/{id}": {
         parameters: {
             query?: never;
@@ -313,70 +185,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/submissions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getSubmissions"];
-        put?: never;
-        post: operations["create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/proposals": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getProposals"];
-        put?: never;
-        post: operations["create_1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/messages": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getMessages"];
-        put?: never;
-        post: operations["send"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/matching/recommend/{projectId}/recalculate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["recalculateRecommendations"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/freelancers": {
         parameters: {
             query?: never;
@@ -386,7 +194,7 @@ export interface paths {
         };
         get: operations["getItems"];
         put?: never;
-        post: operations["create_2"];
+        post: operations["create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -570,118 +378,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/proposals/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getProposal"];
-        put?: never;
-        post?: never;
-        delete: operations["cancel_1"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/notifications": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getNotifications"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/notifications/unread-count": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getUnreadCount"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/messages/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getMessage"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/messages/conversations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getConversations"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/messages/conversation/{projectId}/{freelancerId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getConversation"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/matching/recommend/{projectId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getRecommendations"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/freelancers/{freelancerId}/techs": {
         parameters: {
             query?: never;
@@ -738,22 +434,6 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getPortfolio"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/freelancers/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getMyFreelancer"];
         put?: never;
         post?: never;
         delete?: never;
@@ -923,22 +603,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/notifications/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete: operations["delete_2"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -952,41 +616,10 @@ export interface components {
         };
         RsDataVoid: {
             resultCode?: string;
-            msg?: string;
-            data?: unknown;
-        };
-        PortfolioItemDto: {
-            title?: string;
-            description?: string;
-            url?: string;
-            thumbnailUrl?: string;
-        };
-        ProjectSubmissionModifyReqBody: {
-            coverLetter: string;
             /** Format: int32 */
-            proposedRate: number;
-            /** Format: int32 */
-            estimatedDuration: number;
-            portfolio?: components["schemas"]["PortfolioItemDto"][];
-        };
-        ProjectSubmissionStatusUpdateReqBody: {
-            /** @enum {string} */
-            status: "PENDING" | "ACCEPTED" | "REJECTED";
-            message?: string;
-        };
-        ProposalRejectReqBody: {
-            responseMessage?: string;
-            rejectionReason: string;
-        };
-        ProposalAcceptReqBody: {
-            responseMessage?: string;
-        };
-        RsDataMapStringInteger: {
-            resultCode?: string;
+            statusCode?: number;
             msg?: string;
-            data?: {
-                [key: string]: number;
-            };
+            Data?: unknown;
         };
         FreelancerUpdateRequestDto: {
             freelancerTitle: string;
@@ -1107,8 +740,10 @@ export interface components {
         };
         RsDataProjectResponse: {
             resultCode?: string;
+            /** Format: int32 */
+            statusCode?: number;
             msg?: string;
-            data?: components["schemas"]["ProjectResponse"];
+            Data?: components["schemas"]["ProjectResponse"];
         };
         TechInfo: {
             techName?: string;
@@ -1137,8 +772,10 @@ export interface components {
         };
         RsDataMemberDto: {
             resultCode?: string;
+            /** Format: int32 */
+            statusCode?: number;
             msg?: string;
-            data?: components["schemas"]["MemberDto"];
+            Data?: components["schemas"]["MemberDto"];
         };
         MemberLoginReq: {
             username: string;
@@ -1151,8 +788,10 @@ export interface components {
         };
         RsDataMemberLoginRes: {
             resultCode?: string;
+            /** Format: int32 */
+            statusCode?: number;
             msg?: string;
-            data?: components["schemas"]["MemberLoginRes"];
+            Data?: components["schemas"]["MemberLoginRes"];
         };
         SendUpdatePasswordCodeReq: {
             username: string;
@@ -1167,121 +806,10 @@ export interface components {
         };
         RsDataFindIdRes: {
             resultCode?: string;
-            msg?: string;
-            data?: components["schemas"]["FindIdRes"];
-        };
-        ProjectSubmissionCreateReqBody: {
-            /** Format: int64 */
-            projectId: number;
-            coverLetter: string;
             /** Format: int32 */
-            proposedRate: number;
-            /** Format: int32 */
-            estimatedDuration: number;
-            portfolio?: components["schemas"]["PortfolioItemDto"][];
-        };
-        ProjectSubmissionDto: {
-            /** Format: int64 */
-            id?: number;
-            /** Format: int64 */
-            projectId?: number;
-            projectTitle?: string;
-            /** Format: int64 */
-            freelancerId?: number;
-            freelancerName?: string;
-            coverLetter?: string;
-            /** Format: int32 */
-            proposedRate?: number;
-            /** Format: int32 */
-            estimatedDuration?: number;
-            portfolio?: components["schemas"]["PortfolioItemDto"][];
-            /** @enum {string} */
-            status?: "PENDING" | "ACCEPTED" | "REJECTED";
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
-            updatedAt?: string;
-        };
-        RsDataProjectSubmissionDto: {
-            resultCode?: string;
+            statusCode?: number;
             msg?: string;
-            data?: components["schemas"]["ProjectSubmissionDto"];
-        };
-        ProposalCreateReqBody: {
-            /** Format: int64 */
-            projectId: number;
-            /** Format: int64 */
-            freelancerId: number;
-            message: string;
-        };
-        ProposalDto: {
-            /** Format: int64 */
-            id?: number;
-            /** Format: int64 */
-            projectId?: number;
-            projectTitle?: string;
-            /** Format: int64 */
-            pmId?: number;
-            pmName?: string;
-            /** Format: int64 */
-            freelancerId?: number;
-            freelancerName?: string;
-            message?: string;
-            /** @enum {string} */
-            status?: "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED";
-            responseMessage?: string;
-            rejectionReason?: string;
-            /** Format: date-time */
-            responseDate?: string;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
-            updatedAt?: string;
-        };
-        RsDataProposalDto: {
-            resultCode?: string;
-            msg?: string;
-            data?: components["schemas"]["ProposalDto"];
-        };
-        MessageCreateReqBody: {
-            /** Format: int64 */
-            receiverId: number;
-            /** @enum {string} */
-            relatedType: "SUBMISSION" | "PROPOSAL" | "PROJECT";
-            /** Format: int64 */
-            relatedId: number;
-            content: string;
-        };
-        MessageDto: {
-            /** Format: int64 */
-            id?: number;
-            /** Format: int64 */
-            projectId?: number;
-            projectTitle?: string;
-            /** Format: int64 */
-            pmId?: number;
-            pmName?: string;
-            /** Format: int64 */
-            freelancerId?: number;
-            freelancerName?: string;
-            /** Format: int64 */
-            senderId?: number;
-            senderName?: string;
-            /** @enum {string} */
-            relatedType?: "SUBMISSION" | "PROPOSAL" | "PROJECT";
-            /** Format: int64 */
-            relatedId?: number;
-            content?: string;
-            isRead?: boolean;
-            /** Format: date-time */
-            readAt?: string;
-            /** Format: date-time */
-            createdAt?: string;
-        };
-        RsDataMessageDto: {
-            resultCode?: string;
-            msg?: string;
-            data?: components["schemas"]["MessageDto"];
+            Data?: components["schemas"]["FindIdRes"];
         };
         FreelancerSaveRequestDto: {
             freelancerTitle: string;
@@ -1314,8 +842,10 @@ export interface components {
         };
         RsDataFreelancerDto: {
             resultCode?: string;
+            /** Format: int32 */
+            statusCode?: number;
             msg?: string;
-            data?: components["schemas"]["FreelancerDto"];
+            Data?: components["schemas"]["FreelancerDto"];
         };
         FreelancerTechAddDto: {
             /** Format: int64 */
@@ -1331,8 +861,10 @@ export interface components {
         };
         RsDataFreelancerTechDto: {
             resultCode?: string;
+            /** Format: int32 */
+            statusCode?: number;
             msg?: string;
-            data?: components["schemas"]["FreelancerTechDto"];
+            Data?: components["schemas"]["FreelancerTechDto"];
         };
         PortfolioSaveRequestDto: {
             title?: string;
@@ -1361,8 +893,10 @@ export interface components {
         };
         RsDataPortfolioResponseDto: {
             resultCode?: string;
+            /** Format: int32 */
+            statusCode?: number;
             msg?: string;
-            data?: components["schemas"]["PortfolioResponseDto"];
+            Data?: components["schemas"]["PortfolioResponseDto"];
         };
         ProjectFile: {
             /** Format: int64 */
@@ -1381,18 +915,24 @@ export interface components {
         };
         RsDataProjectFile: {
             resultCode?: string;
+            /** Format: int32 */
+            statusCode?: number;
             msg?: string;
-            data?: components["schemas"]["ProjectFile"];
+            Data?: components["schemas"]["ProjectFile"];
         };
         RsDataListProjectFile: {
             resultCode?: string;
+            /** Format: int32 */
+            statusCode?: number;
             msg?: string;
-            data?: components["schemas"]["ProjectFile"][];
+            Data?: components["schemas"]["ProjectFile"][];
         };
         RsDataMapStringObject: {
             resultCode?: string;
+            /** Format: int32 */
+            statusCode?: number;
             msg?: string;
-            data?: {
+            Data?: {
                 [key: string]: unknown;
             };
         };
@@ -1460,120 +1000,16 @@ export interface components {
         };
         RsDataProject: {
             resultCode?: string;
+            /** Format: int32 */
+            statusCode?: number;
             msg?: string;
-            data?: components["schemas"]["Project"];
+            Data?: components["schemas"]["Project"];
         };
         TechDto: {
             /** Format: int64 */
             id?: number;
             techCategory?: string;
             techName?: string;
-        };
-        RsDataListProjectSubmissionDto: {
-            resultCode?: string;
-            msg?: string;
-            data?: components["schemas"]["ProjectSubmissionDto"][];
-        };
-        RsDataListProposalDto: {
-            resultCode?: string;
-            msg?: string;
-            data?: components["schemas"]["ProposalDto"][];
-        };
-        NotificationDto: {
-            /** Format: int64 */
-            id?: number;
-            /** @enum {string} */
-            notificationType?: "PROPOSAL_RECEIVED" | "PROPOSAL_ACCEPTED" | "PROPOSAL_REJECTED" | "MESSAGE_RECEIVED" | "SUBMISSION_ACCEPTED" | "SUBMISSION_REJECTED";
-            title?: string;
-            content?: string;
-            relatedType?: string;
-            /** Format: int64 */
-            relatedId?: number;
-            isRead?: boolean;
-            /** Format: date-time */
-            createdAt?: string;
-        };
-        RsDataListNotificationDto: {
-            resultCode?: string;
-            msg?: string;
-            data?: components["schemas"]["NotificationDto"][];
-        };
-        RsDataMapStringLong: {
-            resultCode?: string;
-            msg?: string;
-            data?: {
-                [key: string]: number;
-            };
-        };
-        RsDataListMessageDto: {
-            resultCode?: string;
-            msg?: string;
-            data?: components["schemas"]["MessageDto"][];
-        };
-        ConversationDto: {
-            /** Format: int64 */
-            projectId?: number;
-            projectTitle?: string;
-            /** Format: int64 */
-            freelancerId?: number;
-            freelancerName?: string;
-            /** Format: int64 */
-            pmId?: number;
-            pmName?: string;
-            lastMessage?: string;
-            /** Format: date-time */
-            lastMessageAt?: string;
-            /** Format: int32 */
-            unreadCount?: number;
-            lastMessagePreview?: string;
-        };
-        RsDataListConversationDto: {
-            resultCode?: string;
-            msg?: string;
-            data?: components["schemas"]["ConversationDto"][];
-        };
-        FreelancerRecommendationDto: {
-            /** Format: int64 */
-            freelancerId?: number;
-            freelancerName?: string;
-            /** Format: int32 */
-            totalExperience?: number;
-            /** Format: double */
-            averageRating?: number;
-            /** Format: int32 */
-            minRate?: number;
-            /** Format: int32 */
-            maxRate?: number;
-            available?: boolean;
-            /** Format: double */
-            matchingScore?: number;
-            /** Format: double */
-            skillScore?: number;
-            /** Format: double */
-            experienceScore?: number;
-            /** Format: double */
-            budgetScore?: number;
-            /** Format: int32 */
-            rank?: number;
-            matchingReasons?: {
-                [key: string]: unknown;
-            };
-            skills?: components["schemas"]["FreelancerTechDto"][];
-            /** Format: int64 */
-            completedProjects?: number;
-        };
-        RecommendationResponseDto: {
-            /** Format: int64 */
-            projectId?: number;
-            projectTitle?: string;
-            /** Format: int32 */
-            totalRecommendations?: number;
-            recommendations?: components["schemas"]["FreelancerRecommendationDto"][];
-        };
-        RsDataRecommendationResponseDto: {
-            resultCode?: string;
-            msg?: string;
-            data?: components["schemas"]["RecommendationResponseDto"];
         };
         FreelancerListResponseDto: {
             /** Format: int64 */
@@ -1651,14 +1087,14 @@ export interface components {
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
-            first?: boolean;
-            last?: boolean;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["ProjectResponse"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
             pageable?: components["schemas"]["PageableObject"];
@@ -1668,12 +1104,12 @@ export interface components {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
-            unpaged?: boolean;
             paged?: boolean;
             /** Format: int32 */
             pageNumber?: number;
             /** Format: int32 */
             pageSize?: number;
+            unpaged?: boolean;
         };
         SortObject: {
             empty?: boolean;
@@ -1682,8 +1118,10 @@ export interface components {
         };
         RsDataListLong: {
             resultCode?: string;
+            /** Format: int32 */
+            statusCode?: number;
             msg?: string;
-            data?: number[];
+            Data?: number[];
         };
     };
     responses: never;
@@ -1706,241 +1144,6 @@ export interface operations {
                 "application/json": components["schemas"]["UpdatePasswordReq"];
             };
         };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
-                };
-            };
-        };
-    };
-    getSubmission: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataProjectSubmissionDto"];
-                };
-            };
-        };
-    };
-    modify: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProjectSubmissionModifyReqBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
-                };
-            };
-        };
-    };
-    cancel: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
-                };
-            };
-        };
-    };
-    updateStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProjectSubmissionStatusUpdateReqBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
-                };
-            };
-        };
-    };
-    reject: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProposalRejectReqBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
-                };
-            };
-        };
-    };
-    accept: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProposalAcceptReqBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
-                };
-            };
-        };
-    };
-    markAsRead: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
-                };
-            };
-        };
-    };
-    markAllAsRead: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataMapStringInteger"];
-                };
-            };
-        };
-    };
-    markAsRead_1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
-                };
-            };
-        };
-    };
-    markConversationAsRead: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                projectId: number;
-                freelancerId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
         responses: {
             /** @description OK */
             200: {
@@ -2293,166 +1496,6 @@ export interface operations {
             };
         };
     };
-    getSubmissions: {
-        parameters: {
-            query?: {
-                projectId?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataListProjectSubmissionDto"];
-                };
-            };
-        };
-    };
-    create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProjectSubmissionCreateReqBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataProjectSubmissionDto"];
-                };
-            };
-        };
-    };
-    getProposals: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataListProposalDto"];
-                };
-            };
-        };
-    };
-    create_1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProposalCreateReqBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataProposalDto"];
-                };
-            };
-        };
-    };
-    getMessages: {
-        parameters: {
-            query?: {
-                relatedType?: "SUBMISSION" | "PROPOSAL" | "PROJECT";
-                relatedId?: number;
-                unreadOnly?: boolean;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataListMessageDto"];
-                };
-            };
-        };
-    };
-    send: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MessageCreateReqBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataMessageDto"];
-                };
-            };
-        };
-    };
-    recalculateRecommendations: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                projectId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
-                };
-            };
-        };
-    };
     getItems: {
         parameters: {
             query?: never;
@@ -2473,7 +1516,7 @@ export interface operations {
             };
         };
     };
-    create_2: {
+    create: {
         parameters: {
             query?: never;
             header?: never;
@@ -2818,184 +1861,6 @@ export interface operations {
             };
         };
     };
-    getProposal: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataProposalDto"];
-                };
-            };
-        };
-    };
-    cancel_1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
-                };
-            };
-        };
-    };
-    getNotifications: {
-        parameters: {
-            query?: {
-                unreadOnly?: boolean;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataListNotificationDto"];
-                };
-            };
-        };
-    };
-    getUnreadCount: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataMapStringLong"];
-                };
-            };
-        };
-    };
-    getMessage: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataMessageDto"];
-                };
-            };
-        };
-    };
-    getConversations: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataListConversationDto"];
-                };
-            };
-        };
-    };
-    getConversation: {
-        parameters: {
-            query?: {
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                projectId: number;
-                freelancerId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataListMessageDto"];
-                };
-            };
-        };
-    };
-    getRecommendations: {
-        parameters: {
-            query?: {
-                limit?: number;
-                minScore?: number;
-            };
-            header?: never;
-            path: {
-                projectId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataRecommendationResponseDto"];
-                };
-            };
-        };
-    };
     getFreelancersTechs: {
         parameters: {
             query?: never;
@@ -3080,26 +1945,6 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["PortfolioResponseDto"];
-                };
-            };
-        };
-    };
-    getMyFreelancer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataFreelancerDto"];
                 };
             };
         };
@@ -3385,28 +2230,6 @@ export interface operations {
             query?: never;
             header?: never;
             path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
-                };
-            };
-        };
-    };
-    delete_2: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
             cookie?: never;
         };
         requestBody?: never;

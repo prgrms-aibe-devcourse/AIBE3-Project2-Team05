@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -28,11 +29,10 @@ export const Header = () => {
       );
 
       // 서버가 빈 응답일 수도 있으니 JSON 파싱은 선택적으로
-      let data = null;
       const text = await res.text();
       if (text) {
         try {
-          data = JSON.parse(text);
+          JSON.parse(text);
         } catch {
           console.log("JSON 파싱 실패, 빈 응답일 수 있음");
         }
@@ -46,67 +46,59 @@ export const Header = () => {
   };
 
   const navigationItems = [
-    { text: "프로젝트", path: "/projects", left: "35%", width: "54.28px" },
-    {
-      text: "프로젝트 생성",
-      path: "/projects/create",
-      left: "42%",
-      width: "98.17px",
-    },
-    {
-      text: "포트폴리오 검색",
-      path: "/freelancers",
-      left: "50%",
-      width: "98.17px",
-    },
-    { text: "매칭 서비스", path: "/matching", left: "58%", width: "75px" },
-    { text: "이용후기", path: "/reviews", left: "65%", width: "54.28px" },
+    { text: "프로젝트", path: "/projects" },
+    { text: "프리랜서", path: "/freelancers" },
+    { text: "매칭 서비스", path: "/matching" },
+    { text: "이용후기", path: "/reviews" },
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 w-full h-[68px] bg-white z-50">
-      <img
+    <header className="header-text">
+      {/* 로고 */}
+      <Image
         src="/logo-text.png"
         alt="Logo"
-        className="absolute left-[13.2%] top-[8px] w-[220px] h-[52px] object-cover cursor-pointer hover:opacity-80 transition-opacity duration-200"
+        width={300}
+        height={70}
+        className="w-[210px] lg:w-[300px] h-[49px] lg:h-[70px] object-cover cursor-pointer hover:opacity-80 transition-opacity duration-200"
         onClick={() => router.push("/")}
+        priority
       />
-      {navigationItems.map((item, index) => (
-        <a
-          key={index}
-          href={item.path}
-          className="absolute text-[#424953] text-[14.6px] leading-[27px] flex items-center cursor-pointer hover:text-[#006A20] transition-colors"
-          style={{
-            left: item.left,
-            width: item.width,
-            height: "21px",
-            top: "calc(50% - 21px/2 + 0.5px)",
-          }}
-        >
-          {item.text}
-        </a>
-      ))}
+      
+      {/* 네비게이션 */}
+      <nav className="navigation-items">
+        {navigationItems.map((item, index) => (
+          <a
+            key={index}
+            href={item.path}
+            className="navigation-text text-[#424953] hover:text-[#006A20] transition-colors whitespace-nowrap"
+          >
+            {item.text}
+          </a>
+        ))}
+      </nav>
 
-      <div className="absolute right-[15%] top-[calc(50%-24px/2+1px)] flex items-center gap-x-[24px]">
+      {/* 로그인/회원가입 영역 */}
+      <div className="login-logout-area flex items-center gap-x-4 lg:gap-x-8">
         {username ? (
           <>
             <div className="flex items-center">
-              <span className="text-[#666] text-[13.1px] leading-[24px] whitespace-nowrap">
+              <span className="text-[#666] text-[14px] md:text-[16px] lg:text-[18px] leading-[26px] whitespace-nowrap">
                 {username}님
               </span>
-              <span className="mx-2 text-[#666] text-[14px] leading-[21px] font-normal">
+              <span className="mx-2 lg:mx-3 text-[#666] text-[14px] lg:text-[18px] leading-[22px] font-normal">
                 |
               </span>
               <a
                 href="/members/mypage"
-                className="text-[#666] text-[13.1px] leading-[24px] hover:text-[#006A20] transition-colors whitespace-nowrap"
+                className="text-[#666] text-[14px] md:text-[16px] lg:text-[18px] leading-[26px] hover:text-[#006A20] transition-colors whitespace-nowrap"
               >
                 마이페이지
               </a>
             </div>
             <span
               onClick={handleLogout}
-              className="text-[#666] text-[13.1px] leading-[24px] cursor-pointer hover:text-[#006A20] transition-colors whitespace-nowrap"
+              className="text-[#666] text-[14px] md:text-[16px] lg:text-[18px] leading-[26px] cursor-pointer hover:text-[#006A20] transition-colors whitespace-nowrap"
             >
               로그아웃
             </span>
@@ -115,16 +107,16 @@ export const Header = () => {
           <>
             <a
               href="/members/login"
-              className="text-[#666] text-[13.1px] leading-[24px] hover:text-[#006A20] transition-colors whitespace-nowrap"
+              className="text-[#666] text-[14px] md:text-[16px] lg:text-[18px] leading-[26px] hover:text-[#006A20] transition-colors whitespace-nowrap"
             >
               로그인
             </a>
-            <span className="mx-2 text-[#666] text-[14px] leading-[21px] font-normal">
+            <span className="mx-2 lg:mx-3 text-[#666] text-[14px] lg:text-[18px] leading-[22px] font-normal">
               |
             </span>
             <a
               href="/members/signup"
-              className="text-[#666] text-[13.1px] leading-[24px] hover:text-[#006A20] transition-colors whitespace-nowrap"
+              className="text-[#666] text-[14px] md:text-[16px] lg:text-[18px] leading-[26px] hover:text-[#006A20] transition-colors whitespace-nowrap"
             >
               회원가입
             </a>
