@@ -4,6 +4,7 @@ import com.back.domain.freelancer.freelancerTech.entity.FreelancerTech;
 
 public record FreelancerTechDto(
         long id,
+        long techId,
         String techCategory,
         String techName,
         String techLevel
@@ -11,9 +12,10 @@ public record FreelancerTechDto(
     public FreelancerTechDto(FreelancerTech freelancerTech) {
         this(
                 freelancerTech.getId(),
+                freelancerTech.getTech().getId(),
                 freelancerTech.getTech().getTechCategory(),
                 freelancerTech.getTech().getTechName(),
-                freelancerTech.getTechLevel()
+                freelancerTech.getTechLevel().name()
         );
     }
 }

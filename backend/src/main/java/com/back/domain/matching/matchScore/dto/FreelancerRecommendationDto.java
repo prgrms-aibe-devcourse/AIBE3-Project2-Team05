@@ -69,7 +69,7 @@ public record FreelancerRecommendationDto(
         return freelancerTechs.stream()
                 .map(tech -> new FreelancerTechDto(
                         tech.getTech() != null ? tech.getTech().getTechName() : null,
-                        tech.getTechLevel()
+                        tech.getTechLevel().name()
                 ))
                 .collect(Collectors.toList());
     }
