@@ -361,8 +361,8 @@ export default function FreelancerSearchPage() {
                         color: "#ed6a23",
                         fontSize: "1.1rem",
                       }}>
-                        {Math.round(f.minMonthlyRate ?? f.minRate ?? 0).toLocaleString()}만 ~{" "}
-                        {Math.round(f.maxMonthlyRate ?? f.maxRate ?? 0).toLocaleString()}만
+                        {Math.round((f.minMonthlyRate ?? f.minRate ?? 0) / 10000).toLocaleString()}만 ~{" "}
+                        {Math.round((f.maxMonthlyRate ?? f.maxRate ?? 0) / 10000).toLocaleString()}만
                       </div>
                       <div style={{ fontSize: "13px", color: "#999" }}>월 단가</div>
                     </div>

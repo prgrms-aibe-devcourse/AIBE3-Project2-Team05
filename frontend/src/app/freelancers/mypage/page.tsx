@@ -377,7 +377,7 @@ export default function FreelancerMyPage() {
                 }}>
                   월단가
                 </span>
-                {Math.round((freelancer?.minMonthlyRate ?? 0) / 1).toLocaleString()} ~ {Math.round((freelancer?.maxMonthlyRate ?? 0) / 1).toLocaleString()} 만원
+                {Math.round((freelancer?.minMonthlyRate ?? 0) / 10000).toLocaleString()} ~ {Math.round((freelancer?.maxMonthlyRate ?? 0) / 10000).toLocaleString()} 만원
               </div>
             </div>
             {/* 편집 버튼 */}

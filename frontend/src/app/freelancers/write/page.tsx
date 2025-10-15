@@ -373,7 +373,7 @@ export default function FreelancerWritePage() {
               <input
                 type="number"
                 name="minMonthlyRate"
-                value={info.minMonthlyRate}
+                value={info.minMonthlyRate * 10000}
                 onChange={handleChange}
                 required
                 min={0}
