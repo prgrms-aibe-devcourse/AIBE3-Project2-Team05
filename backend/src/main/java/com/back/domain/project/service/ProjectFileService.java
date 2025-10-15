@@ -10,11 +10,13 @@ import com.back.global.exception.ProjectNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -42,6 +44,9 @@ public class ProjectFileService {
 
     @Value("${project.file.allowed-extensions:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,md,zip,rar,jpg,jpeg,png,gif}")
     private String allowedExtensionsStr;
+
+    @Value("${project.file.storage-type:DATABASE}")
+    private String storageType;
 
     // 파일당 최대 크기 (50MB)
     private static final long MAX_FILE_SIZE = 50 * 1024 * 1024L;
@@ -76,7 +81,7 @@ public class ProjectFileService {
     }
 
     /**
-     * 파일 다운로드를 위한 Resource 조회
+     * 파일 다운로드를 위한 Resource 조회 (데이터베이스 및 파일 시스템 지원)
      */
     @Transactional(readOnly = true)
     public Resource getFileAsResource(Long fileId) {
@@ -84,6 +89,16 @@ public class ProjectFileService {
 
         ProjectFile projectFile = getProjectFile(fileId);
 
+        // 데이터베이스에 저장된 파일인 경우
+        if (projectFile.getStorageType() == ProjectFile.StorageType.DATABASE) {
+            if (projectFile.getFileData() != null) {
+                return new ByteArrayResource(projectFile.getFileData());
+            } else {
+                throw new FileUploadException("데이터베이스에서 파일 데이터를 찾을 수 없습니다: " + projectFile.getOriginalName(), "FILE_DATA_NOT_FOUND");
+            }
+        }
+
+        // 파일 시스템에 저장된 파일인 경우 (기존 호환성)
         try {
             Path filePath = Paths.get(projectFile.getFilePath()).normalize();
             Resource resource = new UrlResource(filePath.toUri());
@@ -100,7 +115,7 @@ public class ProjectFileService {
     }
 
     /**
-     * 파일 업로드
+     * 파일 업로드 (데이터베이스 저장)
      */
     @Transactional
     public ProjectFile uploadFile(Long projectId, MultipartFile file) {
@@ -118,37 +133,35 @@ public class ProjectFileService {
         fileValidator.validateFile(file, allowedExtensionsStr);
 
         try {
-            // 파일 저장
+            // 파일 바이너리 데이터 읽기
+            byte[] fileData = file.getBytes();
+
+            // 파일 저장명 생성
             String storedFileName = generateStoredFileName(file.getOriginalFilename());
-            Path uploadPath = Paths.get(uploadDir);
 
-            // 업로드 디렉토리 생성
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
+            // MIME 타입 결정
+            String contentType = determineContentType(file);
 
-            Path filePath = uploadPath.resolve(storedFileName);
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            // 파일 정보 저장
+            // 데이터베이스에 파일 정보 및 바이너리 데이터 저장
             ProjectFile projectFile = new ProjectFile(
                     project,
                     file.getOriginalFilename(),
                     storedFileName,
-                    filePath.toString(),
                     file.getSize(),
-                    getFileExtension(file.getOriginalFilename())
+                    getFileExtension(file.getOriginalFilename()),
+                    contentType,
+                    fileData
             );
 
             ProjectFile savedFile = projectFileRepository.save(projectFile);
-            log.info("파일 업로드 완료 - projectId: {}, fileId: {}, fileName: {}",
-                    projectId, savedFile.getId(), savedFile.getOriginalName());
+            log.info("파일 업로드 완료 (데이터베이스) - projectId: {}, fileId: {}, fileName: {}, size: {}bytes",
+                    projectId, savedFile.getId(), savedFile.getOriginalName(), savedFile.getFileSize());
 
             return savedFile;
 
         } catch (IOException e) {
-            log.error("파일 저장 중 오류 발생 - projectId: {}, fileName: {}", projectId, file.getOriginalFilename(), e);
-            throw new FileUploadException("파일 저장에 실패했습니다: " + e.getMessage(), e);
+            log.error("파일 데이터 읽기 중 오류 발생 - projectId: {}, fileName: {}", projectId, file.getOriginalFilename(), e);
+            throw new FileUploadException("파일 데이터 읽기에 실패했습니다: " + e.getMessage(), e);
         }
     }
 
@@ -173,7 +186,7 @@ public class ProjectFileService {
     }
 
     /**
-     * 파일 삭제
+     * 파일 삭제 (데이터베이스 및 파일 시스템 지원)
      */
     @Transactional
     public void deleteFile(Long fileId) {
@@ -182,11 +195,16 @@ public class ProjectFileService {
         ProjectFile projectFile = getProjectFile(fileId);
 
         try {
-            // 실제 파일 삭제
-            deleteFileFromStorage(projectFile.getFilePath());
+            // 파일 시스템에 저장된 파일인 경우 실제 파일도 삭제
+            if (projectFile.getStorageType() == ProjectFile.StorageType.FILE_SYSTEM
+                && projectFile.getFilePath() != null) {
+                deleteFileFromStorage(projectFile.getFilePath());
+            }
 
-            // DB에서 삭제
+            // DB에서 삭제 (데이터베이스 저장 파일의 경우 바이너리 데이터도 함께 삭제됨)
             projectFileRepository.deleteById(fileId);
+
+            log.info("파일 삭제 완료 - fileId: {}, storageType: {}", fileId, projectFile.getStorageType());
 
         } catch (IOException e) {
             log.error("파일 삭제 실패 - fileId: {}", fileId, e);
@@ -247,6 +265,36 @@ public class ProjectFileService {
 
         Long totalSize = projectFileRepository.getTotalFileSizeByProjectId(projectId);
         return totalSize != null ? totalSize : 0L;
+    }
+
+    /**
+     * MIME 타입 결정
+     */
+    private String determineContentType(MultipartFile file) {
+        String contentType = file.getContentType();
+        if (contentType != null && !contentType.isEmpty()) {
+            return contentType;
+        }
+
+        // 파일 확장자로부터 MIME 타입 추론
+        String extension = getFileExtension(file.getOriginalFilename()).toLowerCase();
+        return switch (extension) {
+            case "pdf" -> "application/pdf";
+            case "doc" -> "application/msword";
+            case "docx" -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            case "xls" -> "application/vnd.ms-excel";
+            case "xlsx" -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            case "ppt" -> "application/vnd.ms-powerpoint";
+            case "pptx" -> "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+            case "txt" -> "text/plain";
+            case "md" -> "text/markdown";
+            case "jpg", "jpeg" -> "image/jpeg";
+            case "png" -> "image/png";
+            case "gif" -> "image/gif";
+            case "zip" -> "application/zip";
+            case "rar" -> "application/x-rar-compressed";
+            default -> "application/octet-stream";
+        };
     }
 
     private String generateStoredFileName(String originalFilename) {

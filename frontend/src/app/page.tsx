@@ -1,12 +1,28 @@
 "use client";
 
+import { useUser } from '@/app/context/UserContext';
 import { useEffect, useState } from "react";
 
 export default function HomePage() {
+  const { username, isLoaded } = useUser();
+  
   // 회전하는 텍스트를 위한 상태
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
-  const rotatingTexts = ["프리랜서", "프로젝트", "AI 매칭"];
+  const rotatingTexts = ["프리랜서", "프로젝트", "전문 매칭"];
+
+  // 프로젝트 카드 클릭 핸들러
+  const handleProjectClick = (projectId: number) => {
+    if (!isLoaded) return; // 로딩 중이면 대기
+    
+    if (!username) {
+      alert('프로젝트 상세 정보를 보려면 로그인이 필요합니다.');
+      window.location.href = '/members/login';
+      return;
+    }
+    
+    window.location.href = `/projects/${projectId}`;
+  };
 
   // 텍스트 자동 회전 효과
   useEffect(() => {
@@ -179,17 +195,22 @@ export default function HomePage() {
               }}>
                 다양한 분야의 흥미로운 프로젝트들이 여러분을 기다리고 있습니다.
               </p>
-            </div>            <div className="grid grid-cols-1 md:grid-cols-3 gap-10" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '40px' }}>
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-500 ease-out cursor-pointer" style={{
-                backgroundColor: 'white',
-                borderRadius: '20px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                border: '1px solid #e5e7eb',
-                overflow: 'hidden',
-                transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
-              }}>
-                <div className="p-8" style={{ padding: '32px' }}>
-                  <div className="flex justify-between items-start mb-4" style={{ marginBottom: '16px' }}>
+            </div>            <div className="grid grid-cols-1 md:grid-cols-3 gap-12" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '48px' }}>
+              {/* 프로젝트 1: 웹 애니메이션 라이브러리 */}
+              <div 
+                className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-500 ease-out cursor-pointer" 
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: '20px',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                  border: '1px solid #e5e7eb',
+                  overflow: 'hidden',
+                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+                onClick={() => handleProjectClick(23)}
+              >
+                <div className="p-10" style={{ padding: '40px' }}>
+                  <div className="flex justify-between items-start mb-6" style={{ marginBottom: '20px' }}>
                     <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm" style={{
                       padding: '6px 14px',
                       backgroundColor: '#dcfce7',
@@ -200,77 +221,73 @@ export default function HomePage() {
                       모집중
                     </span>
                     <div className="text-sm text-gray-500" style={{ fontSize: '14px', color: '#6b7280' }}>
-                      2024.02.15
+                      2025.10.07
                     </div>
                   </div>
                   <h3 className="font-bold text-lg mb-3" style={{ fontWeight: '700', fontSize: '18px', marginBottom: '12px', color: '#111827' }}>
-                    모바일 앱 UI/UX 디자인
+                    웹 애니메이션 라이브러리
                   </h3>
                   <p className="text-gray-600 text-sm mb-4" style={{ color: '#6b7280', fontSize: '14px', marginBottom: '16px', lineHeight: '1.6' }}>
-                    핀테크 스타트업의 모바일 앱 전체 UI/UX 디자인을 담당해주실 디자이너를 찾습니다. 사용자 경험을 중시하는 디자인이 필요합니다.
+                    CSS3와 JavaScript를 활용한 고성능 웹 애니메이션 라이브러리를 개발합니다. 사용하기 쉽고 확장 가능한 애니메이션 솔루션을 만들어보세요.
                   </p>
                   <div className="flex flex-wrap gap-2 mb-4" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-                    <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs" style={{
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs" style={{
                       padding: '4px 8px',
-                      backgroundColor: '#fecaca',
-                      color: '#991b1b',
+                      backgroundColor: '#dbeafe',
+                      color: '#1e40af',
                       borderRadius: '4px',
                       fontSize: '12px'
-                    }}>UI/UX</span>
-                    <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs" style={{
+                    }}>개발</span>
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs" style={{
                       padding: '4px 8px',
-                      backgroundColor: '#fecaca',
-                      color: '#991b1b',
+                      backgroundColor: '#dbeafe',
+                      color: '#1e40af',
                       borderRadius: '4px',
                       fontSize: '12px'
-                    }}>Figma</span>
-                    <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs" style={{
+                    }}>JavaScript</span>
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs" style={{
                       padding: '4px 8px',
-                      backgroundColor: '#fecaca',
-                      color: '#991b1b',
+                      backgroundColor: '#dbeafe',
+                      color: '#1e40af',
                       borderRadius: '4px',
                       fontSize: '12px'
-                    }}>프로토타이핑</span>
+                    }}>CSS3</span>
                   </div>
-                  <div className="flex justify-between items-center text-sm text-gray-500" style={{ fontSize: '14px', color: '#6b7280' }}>
+                  <div className="flex justify-between items-center text-sm text-gray-500 mb-4" style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
                     <div className="flex items-center gap-1" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span>💰 300-500만원</span>
+                      <span>💰 250만원</span>
                     </div>
                     <div className="flex items-center gap-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span>📍 서울 강남구</span>
+                      <span>📍 상주</span>
                     </div>
                   </div>
-                  <div className="mt-6 flex items-center justify-between" style={{ marginTop: '24px' }}>
+                  <div className="flex justify-between items-center text-sm" style={{ fontSize: '14px' }}>
                     <div className="flex items-center gap-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div className="w-10 h-10 bg-gray-300 rounded-full" style={{ width: '40px', height: '40px', backgroundColor: '#d1d5db', borderRadius: '50%' }}></div>
-                      <span className="text-sm text-gray-700" style={{ fontSize: '14px', color: '#374151' }}>김대표</span>
+                      <span className="text-gray-700" style={{ color: '#374151' }}>박승규</span>
                     </div>
-                    <button className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors" style={{
-                      padding: '8px 16px',
-                      backgroundColor: '#16a34a',
-                      color: 'white',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}>
-                      자세히 보기
-                    </button>
+                    <div className="flex items-center gap-2 text-gray-500" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#6b7280' }}>
+                      <span>👀 456</span>
+                      <span>📝 9</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-500 ease-out cursor-pointer" style={{
-                backgroundColor: 'white',
-                borderRadius: '20px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                border: '1px solid #e5e7eb',
-                overflow: 'hidden',
-                transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
-              }}>
-                <div className="p-8" style={{ padding: '32px' }}>
-                  <div className="flex justify-between items-start mb-4" style={{ marginBottom: '16px' }}>
+              {/* 프로젝트 2: AI 챗봇 개발 프로젝트 */}
+              <div 
+                className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-500 ease-out cursor-pointer" 
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: '20px',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                  border: '1px solid #e5e7eb',
+                  overflow: 'hidden',
+                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+                onClick={() => handleProjectClick(24)}
+              >
+                <div className="p-10" style={{ padding: '40px' }}>
+                  <div className="flex justify-between items-start mb-6" style={{ marginBottom: '20px' }}>
                     <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm" style={{
                       padding: '6px 14px',
                       backgroundColor: '#dcfce7',
@@ -281,14 +298,14 @@ export default function HomePage() {
                       모집중
                     </span>
                     <div className="text-sm text-gray-500" style={{ fontSize: '14px', color: '#6b7280' }}>
-                      2024.03.01
+                      2025.10.05
                     </div>
                   </div>
                   <h3 className="font-bold text-lg mb-3" style={{ fontWeight: '700', fontSize: '18px', marginBottom: '12px', color: '#111827' }}>
-                    React 웹 개발 프로젝트
+                    AI 챗봇 개발 프로젝트
                   </h3>
                   <p className="text-gray-600 text-sm mb-4" style={{ color: '#6b7280', fontSize: '14px', marginBottom: '16px', lineHeight: '1.6' }}>
-                    기업용 대시보드 웹 애플리케이션 개발 프로젝트입니다. TypeScript와 Next.js를 활용한 모던 웹 개발 경험이 필요합니다.
+                    자연어 처리 기술을 활용한 고도화된 챗봇을 개발합니다. 고객 서비스 자동화와 사용자 만족도 향상을 목표로 하는 프로젝트입니다.
                   </p>
                   <div className="flex flex-wrap gap-2 mb-4" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
                     <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs" style={{
@@ -297,59 +314,57 @@ export default function HomePage() {
                       color: '#1e40af',
                       borderRadius: '4px',
                       fontSize: '12px'
-                    }}>React</span>
+                    }}>개발</span>
                     <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs" style={{
                       padding: '4px 8px',
                       backgroundColor: '#dbeafe',
                       color: '#1e40af',
                       borderRadius: '4px',
                       fontSize: '12px'
-                    }}>TypeScript</span>
+                    }}>AI</span>
                     <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs" style={{
                       padding: '4px 8px',
                       backgroundColor: '#dbeafe',
                       color: '#1e40af',
                       borderRadius: '4px',
                       fontSize: '12px'
-                    }}>Next.js</span>
+                    }}>NLP</span>
                   </div>
-                  <div className="flex justify-between items-center text-sm text-gray-500" style={{ fontSize: '14px', color: '#6b7280' }}>
+                  <div className="flex justify-between items-center text-sm text-gray-500 mb-4" style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
                     <div className="flex items-center gap-1" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span>💰 800-1200만원</span>
+                      <span>💰 1,800만원</span>
                     </div>
                     <div className="flex items-center gap-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span>📍 원격 근무</span>
+                      <span>📍 외주</span>
                     </div>
                   </div>
-                  <div className="mt-6 flex items-center justify-between" style={{ marginTop: '24px' }}>
+                  <div className="flex justify-between items-center text-sm" style={{ fontSize: '14px' }}>
                     <div className="flex items-center gap-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div className="w-10 h-10 bg-gray-300 rounded-full" style={{ width: '40px', height: '40px', backgroundColor: '#d1d5db', borderRadius: '50%' }}></div>
-                      <span className="text-sm text-gray-700" style={{ fontSize: '14px', color: '#374151' }}>박팀장</span>
-                    </div>                    <button className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors" style={{
-                      padding: '8px 16px',
-                      backgroundColor: '#16a34a',
-                      color: 'white',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}>
-                      자세히 보기
-                    </button>
+                      <span className="text-gray-700" style={{ color: '#374151' }}>이민호</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-500" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#6b7280' }}>
+                      <span>👀 2,134</span>
+                      <span>📝 38</span>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-500 ease-out cursor-pointer" style={{
-                backgroundColor: 'white',
-                borderRadius: '20px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                border: '1px solid #e5e7eb',
-                overflow: 'hidden',
-                transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
-              }}>
-                <div className="p-8" style={{ padding: '32px' }}>
-                  <div className="flex justify-between items-start mb-4" style={{ marginBottom: '16px' }}>
+
+              {/* 프로젝트 3: 블록체인 투표 시스템 */}
+              <div 
+                className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-500 ease-out cursor-pointer" 
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: '20px',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                  border: '1px solid #e5e7eb',
+                  overflow: 'hidden',
+                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+                onClick={() => handleProjectClick(25)}
+              >
+                <div className="p-10" style={{ padding: '40px' }}>
+                  <div className="flex justify-between items-start mb-6" style={{ marginBottom: '20px' }}>
                     <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm" style={{
                       padding: '6px 14px',
                       backgroundColor: '#dcfce7',
@@ -360,80 +375,75 @@ export default function HomePage() {
                       모집중
                     </span>
                     <div className="text-sm text-gray-500" style={{ fontSize: '14px', color: '#6b7280' }}>
-                      2024.02.20
+                      2025.10.09
                     </div>
                   </div>
                   <h3 className="font-bold text-lg mb-3" style={{ fontWeight: '700', fontSize: '18px', marginBottom: '12px', color: '#111827' }}>
-                    브랜드 아이덴티티 디자인
+                    블록체인 투표 시스템
                   </h3>
                   <p className="text-gray-600 text-sm mb-4" style={{ color: '#6b7280', fontSize: '14px', marginBottom: '16px', lineHeight: '1.6' }}>
-                    새로운 카페 브랜드의 로고, 명함, 메뉴판 등 전체 브랜드 아이덴티티 디자인을 의뢰합니다. 따뜻하고 친근한 느낌을 원합니다.
+                    투명하고 안전한 온라인 투표 시스템을 블록체인 기술로 구현합니다. 탈중앙화된 투표 프로세스로 신뢰성 있는 결과를 보장합니다.
                   </p>
                   <div className="flex flex-wrap gap-2 mb-4" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-                    <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs" style={{
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs" style={{
                       padding: '4px 8px',
-                      backgroundColor: '#e9d5ff',
-                      color: '#6b21a8',
+                      backgroundColor: '#dbeafe',
+                      color: '#1e40af',
                       borderRadius: '4px',
                       fontSize: '12px'
-                    }}>브랜딩</span>
-                    <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs" style={{
+                    }}>개발</span>
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs" style={{
                       padding: '4px 8px',
-                      backgroundColor: '#e9d5ff',
-                      color: '#6b21a8',
+                      backgroundColor: '#dbeafe',
+                      color: '#1e40af',
                       borderRadius: '4px',
                       fontSize: '12px'
-                    }}>로고 디자인</span>
-                    <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs" style={{
+                    }}>블록체인</span>
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs" style={{
                       padding: '4px 8px',
-                      backgroundColor: '#e9d5ff',
-                      color: '#6b21a8',
+                      backgroundColor: '#dbeafe',
+                      color: '#1e40af',
                       borderRadius: '4px',
                       fontSize: '12px'
-                    }}>인쇄물 디자인</span>
+                    }}>보안</span>
                   </div>
-                  <div className="flex justify-between items-center text-sm text-gray-500" style={{ fontSize: '14px', color: '#6b7280' }}>
+                  <div className="flex justify-between items-center text-sm text-gray-500 mb-4" style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
                     <div className="flex items-center gap-1" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span>💰 200-300만원</span>
+                      <span>💰 950만원</span>
                     </div>
                     <div className="flex items-center gap-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span>📍 부산 해운대구</span>
+                      <span>📍 외주</span>
                     </div>
                   </div>
-                  <div className="mt-6 flex items-center justify-between" style={{ marginTop: '24px' }}>
+                  <div className="flex justify-between items-center text-sm" style={{ fontSize: '14px' }}>
                     <div className="flex items-center gap-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div className="w-10 h-10 bg-gray-300 rounded-full" style={{ width: '40px', height: '40px', backgroundColor: '#d1d5db', borderRadius: '50%' }}></div>
-                      <span className="text-sm text-gray-700" style={{ fontSize: '14px', color: '#374151' }}>이사장</span>
+                      <span className="text-gray-700" style={{ color: '#374151' }}>정수현</span>
                     </div>
-                    <button className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors" style={{
-                      padding: '8px 16px',
-                      backgroundColor: '#16a34a',
-                      color: 'white',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}>
-                      자세히 보기
-                    </button>
+                    <div className="flex items-center gap-2 text-gray-500" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#6b7280' }}>
+                      <span>👀 834</span>
+                      <span>📝 16</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
             <div className="text-center mt-16" style={{ marginTop: '64px' }}>
-              <button className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 hover:transform hover:scale-105 transition-all duration-300 ease-out shadow-lg hover:shadow-xl font-semibold text-base" style={{
-                padding: '12px 24px',
-                backgroundColor: '#16a34a',
-                color: 'white',
-                borderRadius: '12px',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                fontSize: '16px',
-                fontWeight: '600',
-                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
-              }}>
+              <button 
+                className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 hover:transform hover:scale-105 transition-all duration-300 ease-out shadow-lg hover:shadow-xl font-semibold text-base" 
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: '#16a34a',
+                  color: 'white',
+                  borderRadius: '12px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+                }}
+                onClick={() => window.location.href = '/projects'}
+              >
                 모든 프로젝트 보기 →
               </button>
             </div>

@@ -224,7 +224,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["getMyPortfolios"];
+        get?: never;
         put?: never;
         post: operations["savePortfolio"];
         delete?: never;
@@ -434,22 +434,6 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getPortfolio"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/freelancers/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getMyFreelancer"];
         put?: never;
         post?: never;
         delete?: never;
@@ -925,6 +909,9 @@ export interface components {
             fileType?: string;
             /** Format: date-time */
             uploadDate?: string;
+            contentType?: string;
+            /** @enum {string} */
+            storageType?: "FILE_SYSTEM" | "DATABASE";
         };
         RsDataProjectFile: {
             resultCode?: string;
@@ -1100,14 +1087,14 @@ export interface components {
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
-            first?: boolean;
-            last?: boolean;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["ProjectResponse"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
             pageable?: components["schemas"]["PageableObject"];
@@ -1119,9 +1106,9 @@ export interface components {
             sort?: components["schemas"]["SortObject"];
             paged?: boolean;
             /** Format: int32 */
-            pageNumber?: number;
-            /** Format: int32 */
             pageSize?: number;
+            /** Format: int32 */
+            pageNumber?: number;
             unpaged?: boolean;
         };
         SortObject: {
@@ -1581,26 +1568,6 @@ export interface operations {
             };
         };
     };
-    getMyPortfolios: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["PortfolioResponseDto"][];
-                };
-            };
-        };
-    };
     savePortfolio: {
         parameters: {
             query?: never;
@@ -1982,26 +1949,6 @@ export interface operations {
             };
         };
     };
-    getMyFreelancer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["FreelancerDetailResponseDto"];
-                };
-            };
-        };
-    };
     getAllProjects: {
         parameters: {
             query?: {
@@ -2053,7 +2000,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["ProjectFile"][];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataListProjectFile"];
                 };
             };
         };
