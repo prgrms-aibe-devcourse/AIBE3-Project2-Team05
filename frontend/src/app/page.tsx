@@ -9,7 +9,7 @@ export default function HomePage() {
   // 회전하는 텍스트를 위한 상태
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
-  const rotatingTexts = ["프리랜서", "프로젝트", "AI 매칭"];
+  const rotatingTexts = ["프리랜서", "프로젝트", "전문 매칭"];
 
   // 프로젝트 카드 클릭 핸들러
   const handleProjectClick = (projectId: number) => {
