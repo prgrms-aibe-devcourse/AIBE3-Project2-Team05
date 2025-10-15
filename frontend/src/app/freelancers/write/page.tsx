@@ -49,7 +49,7 @@ export default function FreelancerWritePage() {
         type === "checkbox"
           ? checked
           : name === "minMonthlyRate" || name === "maxMonthlyRate"
-          ? Number(value)
+          ? Number(value) * 10000
           : value,
     });
   };
@@ -373,7 +373,7 @@ export default function FreelancerWritePage() {
               <input
                 type="number"
                 name="minMonthlyRate"
-                value={info.minMonthlyRate * 10000}
+                value={info.minMonthlyRate ? info.minMonthlyRate / 10000 : ""}
                 onChange={handleChange}
                 required
                 min={0}
@@ -390,7 +390,7 @@ export default function FreelancerWritePage() {
               <input
                 type="number"
                 name="maxMonthlyRate"
-                value={info.maxMonthlyRate}
+                value={info.maxMonthlyRate ? info.maxMonthlyRate / 10000 : ""}
                 onChange={handleChange}
                 required
                 min={0}
