@@ -73,11 +73,11 @@ const UserProjectDetailPage = () => {
                 });
                 if (response.ok) {
                     const data: ProjectResponse = await response.json();
-                    
+
                     // 파일 로딩 로직 - projects/[id]/page.tsx와 동일하게 처리
                     let finalFiles: FileItem[] = [];
                     const hasProjectFiles = data.projectFiles && Array.isArray(data.projectFiles) && data.projectFiles.length > 0;
-                    
+
                     if (!hasProjectFiles) {
                         // API 응답에 파일이 없으면 별도 파일 API 호출
                         try {
@@ -96,7 +96,7 @@ const UserProjectDetailPage = () => {
                     } else {
                         // API 응답의 파일 데이터를 사용
                         finalFiles = (data.projectFiles || [])
-                            .filter((file): file is Required<typeof file> => 
+                            .filter((file): file is Required<typeof file> =>
                                 file.id !== undefined && file.originalName !== undefined && file.fileSize !== undefined
                             )
                             .map(file => ({
@@ -106,12 +106,12 @@ const UserProjectDetailPage = () => {
                                 uploadDate: file.uploadDate
                             }));
                     }
-                    
+
                     setProject({
                         ...data,
                         projectFiles: finalFiles
                     });
-                    
+
                     // 파일 상태도 함께 업데이트
                     setProjectFiles(finalFiles);
                     setError('');
@@ -201,8 +201,8 @@ const UserProjectDetailPage = () => {
     // 상태 변경 확인 메시지
     const getStatusChangeMessage = (newStatus: string) => {
         const statusMessages: Record<string, string> = {
-            'CONTRACTING': '계약 단계로 변경하시겠습니까?\n선택된 지원자와의 계약을 시작합니다.',
-            'IN_PROGRESS': '프로젝트를 시작하시겠습니까?\n프로젝트가 진행 중 상태로 변경됩니다.',
+            'CONTRACTING': '계약 단계로 변경하시겠습니까?\n선택된 지원자와의 계약을 시작합니다.\n\n⚠️ 계약 상태에서는 프로젝트 삭제가 불가능하며,\n필수 정보 수정이 제한됩니다.',
+            'IN_PROGRESS': '프로젝트를 시작하시겠습니까?\n프로젝트가 진행 중 상태로 변경됩니다.\n\n⚠️ 진행 중 상태에서는 상태 변경 외에 모든 수정이 제한됩니다.',
             'COMPLETED': '프로젝트를 완료 처리하시겠습니까?\n완료 후에는 상태 변경이 불가능합니다.',
             'SUSPENDED': '프로젝트를 일시 보류하시겠습니까?\n나중에 다시 재개할 수 있습니다.',
             'CANCELLED': '프로젝트를 취소하시겠습니까?\n취소 후에는 상태 변경이 불가능합니다.'
@@ -256,8 +256,8 @@ const UserProjectDetailPage = () => {
 
     if (error || !project) {
         return (
-            <ErrorDisplay 
-                error={error || '프로젝트를 찾을 수 없습니다.'} 
+            <ErrorDisplay
+                error={error || '프로젝트를 찾을 수 없습니다.'}
                 onRetry={() => router.back()}
                 retryButtonText="뒤로가기"
             />
@@ -273,7 +273,7 @@ const UserProjectDetailPage = () => {
             const offset = 120;
             const elementPosition = element.getBoundingClientRect().top;
             const offsetPosition = elementPosition + window.pageYOffset - offset;
-            
+
             window.scrollTo({
                 top: offsetPosition,
                 behavior: 'smooth'
@@ -636,27 +636,75 @@ const UserProjectDetailPage = () => {
 
                     {/* 기본 관리 버튼들 */}
                     <div className="flex flex-col sm:flex-row gap-4" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        <button
-                            onClick={() => router.push(`/user-projects/${params.managerId}/${params.projectId}/edit`)}
-                            className="flex-1 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors"
-                            style={{
-                                flex: 1,
-                                padding: '12px 0',
-                                backgroundColor: '#3b82f6',
-                                color: 'white',
-                                fontWeight: '600',
-                                borderRadius: '8px',
-                                border: 'none',
-                                cursor: 'pointer',
-                                transition: 'background-color 0.2s'
-                            }}
-                            onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#2563eb'}
-                            onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#3b82f6'}
-                        >
-                            프로젝트 수정
-                        </button>
+                        {(() => {
+                            const isEditRestricted = project.status === 'IN_PROGRESS' || project.status === 'COMPLETED';
+                            const isPartialEditRestricted = project.status === 'CONTRACTING';
+
+                            return (
+                                <>
+                                    <button
+                                        onClick={() => {
+                                            if (isEditRestricted) {
+                                                if (project.status === 'IN_PROGRESS') {
+                                                    alert('진행중인 프로젝트는 상태 변경 외에 수정할 수 없습니다.');
+                                                } else if (project.status === 'COMPLETED') {
+                                                    alert('완료된 프로젝트는 수정할 수 없습니다.');
+                                                }
+                                                return;
+                                            }
+                                            router.push(`/user-projects/${params.managerId}/${params.projectId}/edit`);
+                                        }}
+                                        disabled={isEditRestricted}
+                                        className={`flex-1 py-3 font-semibold rounded-lg transition-colors ${
+                                            isEditRestricted
+                                                ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                                : 'bg-blue-500 text-white hover:bg-blue-600'
+                                        }`}
+                                        style={{
+                                            flex: 1,
+                                            padding: '12px 0',
+                                            backgroundColor: isEditRestricted ? '#9ca3af' : '#3b82f6',
+                                            color: isEditRestricted ? '#e5e7eb' : 'white',
+                                            fontWeight: '600',
+                                            borderRadius: '8px',
+                                            border: 'none',
+                                            cursor: isEditRestricted ? 'not-allowed' : 'pointer',
+                                            transition: 'background-color 0.2s',
+                                            opacity: isEditRestricted ? 0.6 : 1
+                                        }}
+                                        onMouseOver={(e) => {
+                                            if (!isEditRestricted) {
+                                                (e.target as HTMLButtonElement).style.backgroundColor = '#2563eb';
+                                            }
+                                        }}
+                                        onMouseOut={(e) => {
+                                            if (!isEditRestricted) {
+                                                (e.target as HTMLButtonElement).style.backgroundColor = '#3b82f6';
+                                            }
+                                        }}
+                                        title={
+                                            project.status === 'IN_PROGRESS'
+                                                ? '진행중인 프로젝트는 수정할 수 없습니다'
+                                                : project.status === 'COMPLETED'
+                                                    ? '완료된 프로젝트는 수정할 수 없습니다'
+                                                    : isPartialEditRestricted
+                                                        ? '계약중인 프로젝트는 필수 정보 수정이 제한됩니다'
+                                                        : '프로젝트 수정'
+                                        }
+                                    >
+                                        프로젝트 수정
+                                    </button>
+                                </>
+                            );
+                        })()}
                         <button
                             onClick={async () => {
+                                // 계약중 또는 진행중 상태일 때 삭제 제한
+                                if (project.status === 'CONTRACTING' || project.status === 'IN_PROGRESS') {
+                                    alert('계약중 또는 진행중인 프로젝트는 삭제할 수 없습니다.');
+                                    return;
+                                }
+
                                 if (window.confirm(`"${project.title}" 프로젝트를 정말 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) {
                                     try {
                                         console.log('프로젝트 삭제 시작:', project.id);
@@ -689,13 +737,13 @@ const UserProjectDetailPage = () => {
                                             try {
                                                 const errorData = await deleteResponse.json();
                                                 console.error('삭제 API 오류 응답:', errorData);
-                                                errorMessage = errorData.msg || '';
+                                                errorMessage = errorData.message || errorData.msg || '';
                                             } catch {
                                                 const errorText = await deleteResponse.text();
                                                 console.error('삭제 API 오류 텍스트:', errorText);
                                                 errorMessage = errorText;
                                             }
-                                            
+
                                             console.error(`프로젝트 삭제 실패 - 상태: ${deleteResponse.status}, 메시지: ${errorMessage}`);
                                             alert(`프로젝트 삭제에 실패했습니다.\n오류: ${errorMessage || '서버 오류'} (상태: ${deleteResponse.status})`);
                                         }
