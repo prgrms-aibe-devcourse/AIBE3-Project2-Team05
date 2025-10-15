@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
 
 interface FreelancerInfo {
   freelancerTitle: string;
@@ -14,13 +14,21 @@ interface FreelancerInfo {
   freelancerProfileImageUrl?: string;
 }
 
-export default function FreelancerEditPage() {
+function getFullImageUrl(url?: string) {
+  if (!url) return "/placeholder.svg";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `${process.env.NEXT_PUBLIC_API_BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
+export default function FreelancerEditPage({ params }: { params: { id: string } }) {
+  const { id } = use(params);
   const [info, setInfo] = useState<FreelancerInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
+  const [deleteExistingImage, setDeleteExistingImage] = useState(false);
 
   // 기존 정보 불러오기
   useEffect(() => {
@@ -34,7 +42,9 @@ export default function FreelancerEditPage() {
         if (!res.ok) throw new Error("정보를 불러올 수 없습니다.");
         const data = await res.json();
         setInfo(data);
-        if (data.freelancerProfileImageUrl) setPreviewUrl(data.freelancerProfileImageUrl);
+        // 기존 이미지를 항상 잘 보이도록 조회
+        if (data.freelancerProfileImageUrl) setPreviewUrl(getFullImageUrl(data.freelancerProfileImageUrl));
+        else setPreviewUrl(null);
       } catch (e) {
         alert("정보를 불러올 수 없습니다.");
         setInfo(null);
@@ -68,15 +78,27 @@ export default function FreelancerEditPage() {
     });
   };
 
+  // 이미지 업로드
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+    // 새 파일 선택 시 미리보기, 기존 이미지는 복구
     if (previewUrl && previewUrl.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
     if (file) {
       setPreviewUrl(URL.createObjectURL(file));
+      setDeleteExistingImage(false);
     } else {
-      setPreviewUrl(info?.freelancerProfileImageUrl ?? null);
+      setPreviewUrl(info?.freelancerProfileImageUrl ? getFullImageUrl(info.freelancerProfileImageUrl) : null);
     }
     setImageFile(file);
+  };
+
+  // 대표 이미지 X 버튼 클릭 시 삭제
+  const handleDeleteImage = () => {
+    if (previewUrl && previewUrl.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setImageFile(null);
+    setDeleteExistingImage(true);
+    if (inputRef.current) inputRef.current.value = "";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -88,14 +110,13 @@ export default function FreelancerEditPage() {
       const formData = new FormData();
       formData.append(
         "dto",
-        new Blob([JSON.stringify(info)], { type: "application/json" })
+        new Blob([JSON.stringify({ ...info, deleteExistingImage })], { type: "application/json" })
       );
       if (imageFile) {
         formData.append("imageFile", imageFile);
       }
-      // PATCH or PUT 방식, 서버 요구에 맞게 변경 필요!
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/${id}`,
         { method: "PUT", credentials: "include", body: formData }
       );
       if (!res.ok) {
@@ -108,7 +129,7 @@ export default function FreelancerEditPage() {
         );
       }
       alert("프리랜서 정보가 성공적으로 수정되었습니다!");
-      router.push("/freelancers/me"); // 내정보 페이지로 이동
+      router.push("/freelancers/mypage");
     } catch (error: any) {
       alert(error.message || "오류가 발생했습니다.");
     } finally {
@@ -224,13 +245,7 @@ export default function FreelancerEditPage() {
                   />
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (previewUrl && previewUrl.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
-                      setPreviewUrl(info.freelancerProfileImageUrl ?? null);
-                      setImageFile(null);
-                      if (inputRef.current) inputRef.current.value = "";
-                    }}
+                    onClick={handleDeleteImage}
                     aria-label="이미지 제거"
                     style={{
                       position: "absolute",

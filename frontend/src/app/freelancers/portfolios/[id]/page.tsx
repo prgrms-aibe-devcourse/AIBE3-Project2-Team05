@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
 
 interface PortfolioDetail {
@@ -32,8 +33,32 @@ function formatDate(dateStr?: string) {
 }
 
 export default function PortfolioDetailPage({ params }: { params: { id: string } }) {
+  // @ts-ignore: keep legacy use(params) call as requested
   const { id } = use(params); // 수정 X
     const [portfolio, setPortfolio] = useState<PortfolioDetail | null>(null);
+  const router = useRouter();
+
+  const handleEdit = () => {
+    // navigate to write page with editId to indicate edit flow
+    router.push(`/freelancers/portfolios/write?editId=${id}`);
+  };
+
+  const handleDelete = async () => {
+    const ok = window.confirm("정말 이 포트폴리오를 삭제하시겠습니까? 삭제하면 복구할 수 없습니다.");
+    if (!ok) return;
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me/portfolios/${id}`, { method: "DELETE", credentials: "include" });
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(`삭제 실패: ${res.status} ${txt}`);
+      }
+      alert("포트폴리오가 삭제되었습니다.");
+      router.push("/freelancers/mypage");
+    } catch (err: any) {
+      console.error(err);
+      alert(err?.message || "삭제 중 오류가 발생했습니다.");
+    }
+  };
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -104,7 +129,8 @@ export default function PortfolioDetailPage({ params }: { params: { id: string }
         }}
       >
         {/* 제목 최상단 */}
-        <h2
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <h2
           style={{
             fontSize: "2.2rem",
             fontWeight: 900,
@@ -116,7 +142,12 @@ export default function PortfolioDetailPage({ params }: { params: { id: string }
           }}
         >
           {portfolio.title}
-        </h2>
+          </h2>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <button onClick={handleEdit} style={{ background: '#16a34a', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: 8, cursor: 'pointer', fontWeight: 700 }}>수정</button>
+            <button onClick={handleDelete} style={{ background: '#fff', color: '#e11d48', border: '1px solid #f3f4f6', padding: '8px 12px', borderRadius: 8, cursor: 'pointer', fontWeight: 700 }}>삭제</button>
+          </div>
+        </div>
         {/* 대표 이미지 - 더 크게, 꽉차게 */}
         <div style={{
           width: "100%",

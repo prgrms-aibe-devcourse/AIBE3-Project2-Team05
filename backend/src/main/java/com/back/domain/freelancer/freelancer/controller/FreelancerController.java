@@ -47,7 +47,7 @@ public class FreelancerController {
     }
 
     @PutMapping("/{id}")
-    public RsData<Void> update(@AuthenticationPrincipal SecurityUser securityUser, @PathVariable Long id, @RequestPart FreelancerUpdateRequestDto dto, @RequestPart MultipartFile imageFile) {
+    public RsData<Void> update(@AuthenticationPrincipal SecurityUser securityUser, @PathVariable Long id, @RequestPart FreelancerUpdateRequestDto dto, @Nullable @RequestPart MultipartFile imageFile) {
         freelancerService.update(securityUser.getId(), id, dto, imageFile);
         return new RsData<>("200-1", "%d번 프리랜서가 수정되었습니다.".formatted(id));
     }

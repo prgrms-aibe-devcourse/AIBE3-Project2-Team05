@@ -43,6 +43,7 @@ function fullImageUrl(url?: string) {
 }
 
 export default function FreelancerMyPage() {
+  const router = useRouter();
   const [freelancer, setFreelancer] = useState<any | null>(null);
   const [portfolios, setPortfolios] = useState<any[]>([]);
   const [completedProjects, setCompletedProjects] = useState<any[]>([]);
@@ -53,6 +54,9 @@ export default function FreelancerMyPage() {
   const [activePortfolioId, setActivePortfolioId] = useState<string | number | null>(null);
   const [modalPortfolio, setModalPortfolio] = useState<any | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
+  const [showActionMenu, setShowActionMenu] = useState(false);
+  const [careerEditModalOpen, setCareerEditModalOpen] = useState(false);
+  const [techEditModalOpen, setTechEditModalOpen] = useState(false);
 
 
   useEffect(() => {
@@ -83,19 +87,19 @@ export default function FreelancerMyPage() {
   function deleteMyFreelancer() {
     if (!freelancer) return;
     fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/${freelancer.id}`,
-        { method: "DELETE", credentials: "include" }
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/${freelancer.id}`,
+      { method: "DELETE", credentials: "include" }
     )
-        .then((res) => {
-            if (!res.ok) throw new Error("프리랜서를 삭제할 수 없습니다.");
-            alert("프리랜서가 성공적으로 삭제되었습니다.");
-            setFreelancer(null);
-        })
-        .catch((err) => {
-            console.error(err);
-            alert("오류가 발생했습니다."); 
-        });
-}
+      .then((res) => {
+        if (!res.ok) throw new Error("프리랜서를 삭제할 수 없습니다.");
+        alert("프리랜서가 성공적으로 삭제되었습니다.");
+        setFreelancer(null);
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("오류가 발생했습니다.");
+      });
+  }
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -144,6 +148,27 @@ export default function FreelancerMyPage() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [portfolioModalOpen]);
+
+  // 포트폴리오 삭제
+  async function handleDeletePortfolio(portfolioId: string | number) {
+    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+    setModalLoading(true);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me/portfolios/${portfolioId}`,
+        { method: "DELETE", credentials: "include" }
+      );
+      if (!res.ok) throw new Error("포트폴리오를 삭제할 수 없습니다.");
+      alert("포트폴리오가 성공적으로 삭제되었습니다.");
+      // 목록에서 제거
+      setPortfolios((prev) => prev.filter((p) => p.id !== portfolioId));
+      closePortfolioModal();
+    } catch (err) {
+      alert("삭제 실패: " + (err as Error).message);
+    } finally {
+      setModalLoading(false);
+    }
+  }
 
   return (
     <div
@@ -212,7 +237,11 @@ export default function FreelancerMyPage() {
                 boxShadow: "0 1px 10px #0001",
               }}>
                 <img
-                  src={fullImageUrl(freelancer?.freelancerProfileImageUrl)}
+                  src={
+                    freelancer?.freelancerProfileImageUrl
+                      ? fullImageUrl(freelancer.freelancerProfileImageUrl)
+                      : "/logo-full.png"
+                  }
                   alt={freelancer?.nickname || "프리랜서"}
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
@@ -367,16 +396,7 @@ export default function FreelancerMyPage() {
                       cursor: "pointer",
                     }}
                     onClick={() => {
-                      const router = (window as any).__next_router || null;
-                      // Prefer Next's router via import if available
-                      try {
-                        // useRouter is available at module top; use programmatic navigation via window.location as fallback
-                        const nav = require && typeof require === 'function' ? require('next/navigation') : null;
-                      } catch (e) {
-                        // ignore
-                      }
-                      // Simple client-side navigation fallback
-                      window.location.href = '/freelancers/update';
+                      router.push(`/freelancers/${freelancer?.id}/update`);
                     }}
                   >
                     수정하기
@@ -394,14 +414,10 @@ export default function FreelancerMyPage() {
                       cursor: "pointer",
                     }}
                     onClick={() => {
-                        alert("정말 삭제하시겠습니까?");
+                      if (window.confirm("정말 삭제하시겠습니까?")) {
                         deleteMyFreelancer();
-                        const router = (window as any).__next_router || null;
-                      try {
-                        const nav = require && typeof require === 'function' ? require('next/navigation') : null;
-                      } catch (e) {
+                        router.push("/freelancers");
                       }
-                      window.location.href = '/freelancers';
                     }}
                   >
                     삭제하기
@@ -721,6 +737,7 @@ export default function FreelancerMyPage() {
               )}
             </div>
           </div>
+          {/* 포트폴리오 상세 모달 */}
           {portfolioModalOpen && (
             <div
               role="dialog"
@@ -746,8 +763,57 @@ export default function FreelancerMyPage() {
                   overflow: "hidden",
                   background: "#fff",
                   boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
+                  position: "relative",
                 }}
               >
+                {/* 액션 버튼들 (우측 상단, 눈에 잘 띄지 않게) */}
+                {modalPortfolio && (
+                  <div style={{
+                    position: "absolute",
+                    top: 18,
+                    right: 24,
+                    display: "flex",
+                    gap: "8px"
+                  }}>
+                    <button
+                      title="수정"
+                      onClick={() => {
+                        router.push(`/freelancers/portfolios/${modalPortfolio.id}/update`);
+                        closePortfolioModal();
+                      }}
+                      style={{
+                        padding: "6px 13px",
+                        borderRadius: "7px",
+                        border: "1px solid #e0e0e0",
+                        background: "#f8faff",
+                        color: "#16a34a",
+                        fontWeight: 600,
+                        fontSize: "14px",
+                        opacity: 0.7,
+                        cursor: "pointer"
+                      }}
+                    >
+                      수정
+                    </button>
+                    <button
+                      title="삭제"
+                      onClick={() => handleDeletePortfolio(modalPortfolio.id)}
+                      style={{
+                        padding: "6px 13px",
+                        borderRadius: "7px",
+                        border: "1px solid #e0e0e0",
+                        background: "#f8faff",
+                        color: "#e11d48",
+                        fontWeight: 600,
+                        fontSize: "14px",
+                        opacity: 0.7,
+                        cursor: "pointer"
+                      }}
+                    >
+                      삭제
+                    </button>
+                  </div>
+                )}
                 {modalLoading ? (
                   <div style={{ padding: 40, textAlign: "center" }}>로딩 중...</div>
                 ) : !modalPortfolio ? (

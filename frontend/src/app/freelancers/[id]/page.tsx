@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
 
 function fullImageUrl(url?: string) {
@@ -22,6 +23,8 @@ export default function FreelancerDetailPage({
   const [activePortfolioId, setActivePortfolioId] = useState<string | number | null>(null);
   const [modalPortfolio, setModalPortfolio] = useState<any | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
+  const [showActionMenu, setShowActionMenu] = useState(false);
+  const router = useRouter();
   
   const [completedProjects, setCompletedProjects] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
@@ -292,6 +295,7 @@ export default function FreelancerDetailPage({
                         overflow: "hidden",
                         background: "#fff",
                         boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
+                        position: "relative",
                       }}
                     >
                       {modalLoading ? (
@@ -300,6 +304,66 @@ export default function FreelancerDetailPage({
                         <div style={{ padding: 40, textAlign: "center" }}>포트폴리오 정보를 불러올 수 없습니다.</div>
                       ) : (
                         <div style={{ padding: 28 }}>
+                          {/* action menu button (compact) */}
+                          <div style={{ position: "absolute", top: 10, right: 10 }}>
+                            <button
+                              aria-label="더보기"
+                              onClick={() => setShowActionMenu((s) => !s)}
+                              style={{
+                                width: 36,
+                                height: 36,
+                                borderRadius: 18,
+                                border: "1px solid #e6e6e6",
+                                background: "#fff",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontWeight: 700,
+                              }}
+                            >
+                              ⋯
+                            </button>
+                            {showActionMenu && (
+                              <div style={{ marginTop: 8, right: 0, position: "absolute", background: "#fff", border: "1px solid #e6e6e6", borderRadius: 8, boxShadow: "0 6px 16px rgba(0,0,0,0.12)", overflow: "hidden" }}>
+                                <button
+                                  onClick={() => {
+                                    // edit
+                                    setShowActionMenu(false);
+                                    router.push(`/freelancers/portfolios/write?editId=${activePortfolioId}`);
+                                  }}
+                                  style={{ display: "block", padding: "10px 14px", width: "100%", textAlign: "left", background: "transparent", border: "none", cursor: "pointer", fontWeight: 700 }}
+                                >
+                                  수정
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    setShowActionMenu(false);
+                                    const ok = window.confirm("정말 이 포트폴리오를 삭제하시겠습니까? 삭제하면 복구할 수 없습니다.");
+                                    if (!ok) return;
+                                    try {
+                                      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/portfolios/${activePortfolioId}`, { method: "DELETE", credentials: "include" });
+                                      if (!res.ok) {
+                                        const txt = await res.text();
+                                        throw new Error(`삭제 실패: ${res.status} ${txt}`);
+                                      }
+                                      // remove from list
+                                      setPortfolios((prev) => prev.filter((x) => String(x.id) !== String(activePortfolioId)));
+                                      alert("포트폴리오가 삭제되었습니다.");
+                                      closeModal();
+                                    } catch (err: any) {
+                                      console.error(err);
+                                      alert(err?.message || "삭제 중 오류가 발생했습니다.");
+                                    }
+                                  }}
+                                  style={{ display: "block", padding: "10px 14px", width: "100%", textAlign: "left", background: "transparent", border: "none", cursor: "pointer", color: "#e11d48", fontWeight: 700 }}
+                                >
+                                  삭제
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
                           <h2 style={{ fontSize: "1.8rem", fontWeight: 900, textAlign: "center", marginBottom: 18 }}>{modalPortfolio.title}</h2>
                           <div style={{ width: "100%", maxWidth: 700, height: 360, margin: "0 auto 20px", borderRadius: 12, overflow: "hidden", background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center" }}>
                             {modalPortfolio.imageUrl ? (
