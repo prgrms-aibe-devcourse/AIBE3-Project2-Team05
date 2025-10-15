@@ -43,6 +43,16 @@ public class PortfolioService {
     }
 
     @Transactional
+    public List<PortfolioResponseDto> getPortfoliosByMemberId(long id) {
+        Freelancer freelancer = freelancerFinder.findFreelancerByMemberId(id);
+
+        List<Portfolio> portfolios = portfolioRepository.findAllByFreelancerId(freelancer.getId());
+        return portfolios.stream()
+                .map(PortfolioResponseDto::new)
+                .toList();
+    }
+
+    @Transactional
     public Portfolio save(Long memberId, PortfolioSaveRequestDto dto, MultipartFile imageFile) {
         Freelancer freelancer = freelancerFinder.findFreelancerByMemberId(memberId);
 
