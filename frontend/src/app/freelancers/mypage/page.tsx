@@ -1,4 +1,5 @@
 "use client";
+import CareerAddModal from "@/components/CareerAddModal";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -54,9 +55,8 @@ export default function FreelancerMyPage() {
   const [activePortfolioId, setActivePortfolioId] = useState<string | number | null>(null);
   const [modalPortfolio, setModalPortfolio] = useState<any | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
-  const [showActionMenu, setShowActionMenu] = useState(false);
-  const [careerEditModalOpen, setCareerEditModalOpen] = useState(false);
-  const [techEditModalOpen, setTechEditModalOpen] = useState(false);
+  const [careerAddModalOpen, setCareerAddModalOpen] = useState(false);
+  const [techAddModalOpen, setTechAddModalOpen] = useState(false);
 
 
   useEffect(() => {
@@ -560,28 +560,49 @@ export default function FreelancerMyPage() {
                     fontWeight: 800,
                     fontSize: "1.12rem",
                     color: "#222",
-                    marginBottom: "15px"
+                    marginBottom: "10px"
                   }}>
                     소개
                   </h3>
                   <p style={{
                     color: "#555",
-                    marginBottom: "22px",
+                    marginBottom: "60px",
                     fontSize: "15.5px",
                     lineHeight: "1.75",
                   }}>
                     {freelancer?.content}
                   </p>
                   {/* 경력 */}
-                  <div style={{ marginBottom: "24px" }}>
+                  <div>
+                  <div style={{ display: "flex", alignItems: "center", marginBottom: "5px" }}>
                     <h3 style={{
                     fontWeight: 800,
                     fontSize: "1.12rem",
                     color: "#222",
-                    marginBottom: "15px"
+                    marginBottom: "10px",
+                    flex: 1
                   }}>
                     경력
                   </h3>
+                  <button
+                      type="button"
+                      style={{
+                        marginLeft: "10px",
+                        background: "#f8faff",
+                        border: "1px solid #e0e0e0",
+                        color: "#16a34a",
+                        fontWeight: 600,
+                        fontSize: "14px",
+                        borderRadius: "7px",
+                        padding: "3px 12px",
+                        cursor: "pointer",
+                        opacity: 0.6
+                      }}
+                      onClick={() => setCareerAddModalOpen(true)}
+                    >
+                      + 추가
+                    </button>
+                    </div>
                     {Array.isArray(freelancer?.careerList) && freelancer?.careerList.length > 0 ? (
                       <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
                         {freelancer.careerList.map((c: any) => (
@@ -608,17 +629,69 @@ export default function FreelancerMyPage() {
                     ) : (
                       <div style={{ color: "#888" }}>경력 정보가 없습니다.</div>
                     )}
+
+                  {careerAddModalOpen && (
+                    <CareerAddModal
+                        onClose={() => setCareerAddModalOpen(false)}
+                        onAdd={async (career) => {
+                        // 실제 등록 로직(API 호출 후 목록 갱신)
+                        const res = await fetch(
+                          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me/careers`,
+                          {
+                            method: "POST",
+                            credentials: "include",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(career),
+                          }
+                        );
+                        if (!res.ok) {
+                          alert("경력 등록 실패");
+                          return;
+                        }
+                        const data = await res.json();
+                        const newCareer = data.data;
+                        setCareerAddModalOpen(false);
+                        alert("경력이 성공적으로 등록되었습니다.");
+                        setFreelancer((prev: any) => ({
+                          ...prev,
+                          careerList: [...(prev.careerList || []), newCareer],
+                        }));
+                        }}
+                    />
+                    )}
                   </div>
                   {/* 스킬 */}
                   <div>
+                  <div style={{ marginBottom: "2px", marginTop: "28px", display: "flex", alignItems: "center" }}>
                     <h3 style={{
                     fontWeight: 800,
                     fontSize: "1.12rem",
                     color: "#222",
-                    marginBottom: "15px"
+                    marginTop: "40px",
+                    marginBottom: "15px",
+                    flex: 1
                   }}>
                     기술스택
                   </h3>
+                  <button
+                      type="button"
+                      style={{
+                        marginLeft: "10px",
+                        background: "#f8faff",
+                        border: "1px solid #e0e0e0",
+                        color: "#16a34a",
+                        fontWeight: 600,
+                        fontSize: "14px",
+                        borderRadius: "7px",
+                        padding: "3px 12px",
+                        cursor: "pointer",
+                        opacity: 0.6
+                      }}
+                      onClick={() => setTechAddModalOpen(true)}
+                    >
+                      + 추가
+                    </button>
+                    </div>
                     <div style={{ display: "flex", gap: "7px", flexWrap: "wrap" }}>
                       {(freelancer?.techList || []).length > 0 ? (
                         freelancer?.techList.map((tech: any) => (
@@ -640,6 +713,72 @@ export default function FreelancerMyPage() {
                         <div style={{ color: "#888" }}>등록된 스킬이 없습니다.</div>
                       )}
                     </div>
+                    {techAddModalOpen && (
+                    <div
+                      style={{
+                        position: "fixed",
+                        left: 0,
+                        top: 0,
+                        width: "100vw",
+                        height: "100vh",
+                        background: "rgba(40,40,40,0.18)",
+                        zIndex: 99,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center"
+                      }}
+                      onClick={() => setTechAddModalOpen(false)}
+                    >
+                      <div
+                        onClick={e => e.stopPropagation()}
+                        style={{
+                          background: "#fff",
+                          borderRadius: "13px",
+                          boxShadow: "0 2px 18px #16a34a33",
+                          minWidth: 380,
+                          maxWidth: 540,
+                          width: "100%",
+                          padding: "32px 28px",
+                          position: "relative"
+                        }}
+                      >
+                        <button
+                          style={{
+                            position: "absolute", right: 18, top: 16,
+                            background: "none", border: "none",
+                            fontSize: "22px", color: "#888", cursor: "pointer"
+                          }}
+                          onClick={() => setTechAddModalOpen(false)}
+                          aria-label="닫기"
+                        >
+                          ×
+                        </button>
+                        <h3 style={{
+                          fontWeight: 800, fontSize: "20px", marginBottom: "20px", color: "#16a34a", textAlign: "center"
+                        }}>기술스택 추가</h3>
+                        <div style={{ textAlign: "center", color: "#888", marginBottom: 10 }}>
+                          기술스택 추가 기능을 임시로 구현하세요.
+                        </div>
+                        <button
+                          style={{
+                            background: "#16a34a",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "8px",
+                            padding: "10px 0px",
+                            fontWeight: 700,
+                            fontSize: "16px",
+                            width: "100%",
+                            marginTop: "10px",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => setTechAddModalOpen(false)}
+                        >
+                          닫기
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   </div>
                 </div>
               )}

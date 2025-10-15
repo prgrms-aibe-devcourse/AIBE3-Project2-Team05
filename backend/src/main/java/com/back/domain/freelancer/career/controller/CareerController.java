@@ -23,10 +23,15 @@ public class CareerController {
         return careerService.getCareers(freelancerId);
     }
 
+    @GetMapping("/careers/{careerId}")
+    public CareerResponseDto getCareer(@PathVariable Long careerId) {
+        return careerService.getCareer(careerId);
+    }
+
     @PostMapping("/me/careers")
-    public RsData<Void> addCareer(@AuthenticationPrincipal SecurityUser securityUser, @RequestBody CareerRequestDto dto) {
+    public RsData<CareerResponseDto> addCareer(@AuthenticationPrincipal SecurityUser securityUser, @RequestBody CareerRequestDto dto) {
         Career career = careerService.create(securityUser.getId(), dto);
-        return new RsData<>("201-1", "%d번 경력이 생성되었습니다.".formatted(career.getId()));
+        return new RsData<>("201-1", "%d번 경력이 생성되었습니다.".formatted(career.getId()), new CareerResponseDto(career));
     }
 
     @PutMapping("/me/careers/{careerId}")
