@@ -1,5 +1,6 @@
 "use client";
 import CareerAddModal from "@/components/CareerAddModal";
+import CareerEditModal from "@/components/CareerEditModal";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -57,7 +58,8 @@ export default function FreelancerMyPage() {
   const [modalLoading, setModalLoading] = useState(false);
   const [careerAddModalOpen, setCareerAddModalOpen] = useState(false);
   const [techAddModalOpen, setTechAddModalOpen] = useState(false);
-
+  const [editCareerModalOpen, setEditCareerModalOpen] = useState(false);
+  const [selectedCareerId, setSelectedCareerId] = useState<string | number | null>(null);
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -604,31 +606,60 @@ export default function FreelancerMyPage() {
                     </button>
                     </div>
                     {Array.isArray(freelancer?.careerList) && freelancer?.careerList.length > 0 ? (
-                      <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
-                        {freelancer.careerList.map((c: any) => (
-                          <li key={c.id}
-                            style={{
-                              background: "#f8faff",
-                              borderRadius: 8,
-                              padding: "10px 15px",
-                              marginBottom: "10px",
-                              fontSize: "15px"
-                            }}>
-                            <div style={{ fontWeight: 700}}>
-                              {c.title} · {c.company}
-                            </div>
-                            <div style={{ color: "#888", fontSize: "14px", marginTop: "2px" }}>
-                              {c.startDate} - {c.endDate} {c.current ? "(재직중)" : ""}
-                            </div>
-                            {c.description && (
-                              <div style={{ marginTop: "5px", color: "#444" }}>{c.description}</div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <div style={{ color: "#888" }}>경력 정보가 없습니다.</div>
-                    )}
+                        <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
+                            {freelancer.careerList.map((c: any, idx: number) => (
+                            <li
+                                key={c.id ?? `${c.title}-${c.company}-${c.startDate}-${idx}`}
+                                style={{
+                                background: "#f8faff",
+                                borderRadius: 8,
+                                padding: "10px 15px",
+                                marginBottom: "10px",
+                                fontSize: "15px",
+                                position: "relative", // 버튼 위치를 위한 설정
+                                display: "flex",
+                                alignItems: "center"
+                                }}
+                            >
+                                <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: 700 }}>
+                                    {c.title} · {c.company}
+                                </div>
+                                <div style={{ color: "#888", fontSize: "14px", marginTop: "2px" }}>
+                                    {c.startDate} - {c.endDate} {c.current ? "(재직중)" : ""}
+                                </div>
+                                {c.description && (
+                                    <div style={{ marginTop: "5px", color: "#444" }}>{c.description}</div>
+                                )}
+                                </div>
+                                {/* 수정 버튼 */}
+                                <button
+                                type="button"
+                                style={{
+                                    marginLeft: "8px",
+                                    background: "#f8faff",
+                                    border: "1px solid #e0e0e0",
+                                    color: "#464847ff",
+                                    fontWeight: 600,
+                                    fontSize: "13px",
+                                    borderRadius: "7px",
+                                    padding: "2px 10px",
+                                    cursor: "pointer",
+                                    opacity: 0.5
+                                }}
+                                onClick={() => {
+                                    setEditCareerModalOpen(true);
+                                    setSelectedCareerId(c.id);
+                                }}
+                                >
+                                수정
+                                </button>
+                            </li>
+                            ))}
+                        </ul>
+                        ) : (
+                        <div style={{ color: "#888" }}>경력 정보가 없습니다.</div>
+                        )}
 
                   {careerAddModalOpen && (
                     <CareerAddModal
@@ -659,6 +690,33 @@ export default function FreelancerMyPage() {
                         }}
                     />
                     )}
+                    {editCareerModalOpen && (
+                    <CareerEditModal
+                        id={selectedCareerId}
+                        onClose={() => setEditCareerModalOpen(false)}
+                        onEdit={async (updatedCareer) => {
+                        setEditCareerModalOpen(false);
+                        // 서버에서 최신 freelancer 정보 fetch (수정 직후)
+                        try {
+                            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`, {
+                            method: "GET", credentials: "include"
+                            });
+                            if (res.ok) {
+                            const latest = await res.json();
+                            setFreelancer(latest);
+                            }
+                        } catch (err) {
+                            // fetch 실패시 기존 방식으로 로컬 업데이트
+                            setFreelancer((prev: any) => ({
+                            ...prev,
+                            careerList: prev.careerList.map((c: any) =>
+                                String(c.id) === String(updatedCareer.id) ? updatedCareer : c
+                            ),
+                            }));
+                        }
+                        }}
+                    />
+                    )}
                   </div>
                   {/* 스킬 */}
                   <div>
@@ -670,7 +728,8 @@ export default function FreelancerMyPage() {
                     marginTop: "40px",
                     marginBottom: "15px",
                     flex: 1
-                  }}>
+                  }}
+                  >
                     기술스택
                   </h3>
                   <button
