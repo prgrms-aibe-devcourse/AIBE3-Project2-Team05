@@ -135,7 +135,7 @@ export default function FreelancerDetailPage({
               letterSpacing: "-1px",
             }}
           >
-            내 프리랜서 정보
+            프리랜서 정보
           </h1>
         </div>
 

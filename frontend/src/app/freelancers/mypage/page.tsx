@@ -487,13 +487,13 @@ export default function FreelancerMyPage() {
                       cursor: "pointer",
                     }}
                     onClick={() => {
-                      if (window.confirm("정말 삭제하시겠습니까?")) {
+                      if (window.confirm("내 모든 프리랜서 정보가 삭제됩니다. 정말 탈퇴하시겠습니까?")) {
                         deleteMyFreelancer();
                         router.push("/freelancers");
                       }
                     }}
                   >
-                    삭제하기
+                    프리랜서 탈퇴하기
                   </button>
                 </div>
               </div>
