@@ -4,7 +4,7 @@ import { apiFetch } from "@/lib/backend/client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-// 이미지 처리 함수
+// 이미지 처리 함수 
 function fullImageUrl(url?: string) {
   if (!url) return "/placeholder.svg";
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
