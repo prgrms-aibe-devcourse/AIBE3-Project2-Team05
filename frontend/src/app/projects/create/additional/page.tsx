@@ -265,7 +265,7 @@ const ProjectCreateAdditionalPage = () => {
         router.push(`/user-projects/${memberId}/${projectId}`);
       } else {
         const errorData = await response.json().catch(() => ({}));
-        alert(errorData.message || '프로젝트 등록에 실패했습니다.');
+        alert(errorData.msg || '프로젝트 등록에 실패했습니다.');
       }
     } catch (error) {
       console.error('프로젝트 등록 실패:', error);

@@ -231,7 +231,7 @@ const UserProjectEditPage = () => {
         window.location.href = `/user-projects/${params.managerId}/${params.projectId}`;
       } else {
         const errorData = await response.json().catch(() => ({}));
-        showErrorMessage(errorData.message || '프로젝트 수정에 실패했습니다.');
+        showErrorMessage(errorData.msg || '프로젝트 수정에 실패했습니다.');
       }
     } catch (error) {
       console.error('프로젝트 수정 실패:', error);

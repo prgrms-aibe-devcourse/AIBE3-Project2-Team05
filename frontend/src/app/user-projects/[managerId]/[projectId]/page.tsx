@@ -689,7 +689,7 @@ const UserProjectDetailPage = () => {
                                             try {
                                                 const errorData = await deleteResponse.json();
                                                 console.error('삭제 API 오류 응답:', errorData);
-                                                errorMessage = errorData.message || errorData.msg || '';
+                                                errorMessage = errorData.msg || '';
                                             } catch {
                                                 const errorText = await deleteResponse.text();
                                                 console.error('삭제 API 오류 텍스트:', errorText);
