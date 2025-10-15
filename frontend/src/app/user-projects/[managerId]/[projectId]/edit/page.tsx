@@ -354,19 +354,34 @@ const UserProjectEditPage = () => {
           <div className="p-8 space-y-6" style={formStyles.formContent}>
             {/* 프로젝트 제목 */}
             <div>
-              <label className={formClasses.label} style={formStyles.label}>
-                프로젝트 제목 *
+              <label className="block text-sm font-bold text-gray-800 mb-2" style={{
+                display: 'block',
+                fontSize: '15px',
+                fontWeight: '700',
+                color: '#1f2937',
+                marginBottom: '8px',
+                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+              }}>
+                📝 프로젝트 제목 *
               </label>
               <input
                 type="text"
                 value={formData.title || ''}
                 onChange={(e) => handleInputChange('title', e.target.value)}
-                className={formClasses.input}
+                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-3 focus:ring-blue-300 focus:border-blue-500 transition-all duration-200 shadow-sm"
                 style={{
-                  ...formStyles.input,
-                  backgroundColor: isRestrictedField('title') ? '#f3f4f6' : 'white',
+                  width: '100%',
+                  padding: '16px',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '12px',
+                  fontSize: '16px',
+                  fontWeight: '500',
+                  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                  backgroundColor: isRestrictedField('title') ? '#f3f4f6' : '#fefefe',
                   color: isRestrictedField('title') ? '#6b7280' : '#111827',
-                  cursor: isRestrictedField('title') ? 'not-allowed' : 'text'
+                  cursor: isRestrictedField('title') ? 'not-allowed' : 'text',
+                  transition: 'all 0.2s ease-in-out',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.02)'
                 }}
                 placeholder="프로젝트 제목을 입력하세요"
                 required
@@ -377,25 +392,39 @@ const UserProjectEditPage = () => {
 
             {/* 프로젝트 설명 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2" style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                프로젝트 설명
+              <label className="block text-sm font-bold text-gray-800 mb-2" style={{
+                display: 'block',
+                fontSize: '15px',
+                fontWeight: '700',
+                color: '#1f2937',
+                marginBottom: '8px',
+                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+              }}>
+                📄 프로젝트 설명
               </label>
               <textarea
                 value={formData.description || ''}
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 rows={4}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-3 focus:ring-blue-300 focus:border-blue-500 transition-all duration-200 shadow-sm resize-none"
                 style={{
                   width: '100%',
-                  padding: '12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  minHeight: '100px',
-                  backgroundColor: isRestrictedField('description') ? '#f3f4f6' : 'white',
+                  padding: '16px',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '12px',
+                  minHeight: '120px',
+                  fontSize: '16px',
+                  fontWeight: '400',
+                  lineHeight: '1.6',
+                  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                  backgroundColor: isRestrictedField('description') ? '#f3f4f6' : '#fefefe',
                   color: isRestrictedField('description') ? '#6b7280' : '#111827',
-                  cursor: isRestrictedField('description') ? 'not-allowed' : 'text'
+                  cursor: isRestrictedField('description') ? 'not-allowed' : 'text',
+                  transition: 'all 0.2s ease-in-out',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.02)',
+                  resize: 'none'
                 }}
-                placeholder="프로젝트에 대한 설명을 입력하세요"
+                placeholder="프로젝트에 대한 상세한 설명을 입력해주세요..."
                 disabled={isRestrictedField('description')}
                 title={isRestrictedField('description') ? '이 필드는 현재 상태에서 수정할 수 없습니다' : undefined}
               />
@@ -403,28 +432,40 @@ const UserProjectEditPage = () => {
 
             {/* 예산 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2" style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                예산
+              <label className="block text-sm font-bold text-gray-800 mb-2" style={{
+                display: 'block',
+                fontSize: '15px',
+                fontWeight: '700',
+                color: '#1f2937',
+                marginBottom: '8px',
+                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+              }}>
+                💰 예산 범위
               </label>
               <select
                 value={formData.budgetType || ''}
                 onChange={(e) => handleInputChange('budgetType', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-3 focus:ring-blue-300 focus:border-blue-500 transition-all duration-200 shadow-sm bg-white"
                 style={{
                   width: '100%',
-                  padding: '12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  backgroundColor: isRestrictedField('budgetType') ? '#f3f4f6' : 'white',
+                  padding: '16px',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '12px',
+                  fontSize: '16px',
+                  fontWeight: '500',
+                  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                  backgroundColor: isRestrictedField('budgetType') ? '#f3f4f6' : '#ffffff',
                   color: isRestrictedField('budgetType') ? '#6b7280' : '#111827',
-                  cursor: isRestrictedField('budgetType') ? 'not-allowed' : 'pointer'
+                  cursor: isRestrictedField('budgetType') ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease-in-out',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.02)'
                 }}
                 disabled={isRestrictedField('budgetType')}
                 title={isRestrictedField('budgetType') ? '이 필드는 현재 상태에서 수정할 수 없습니다' : undefined}
               >
-                <option value="">예산을 선택하세요</option>
+                <option value="" style={{ color: '#9ca3af' }}>💼 예산 범위를 선택해주세요</option>
                 {budgetOptions.map(option => (
-                  <option key={option.value} value={option.value}>
+                  <option key={option.value} value={option.value} style={{ color: '#1f2937', fontWeight: '500' }}>
                     {option.label}
                   </option>
                 ))}
@@ -433,19 +474,39 @@ const UserProjectEditPage = () => {
 
             {/* 지역 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2" style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                지역
+              <label className="block text-sm font-bold text-gray-800 mb-2" style={{
+                display: 'block',
+                fontSize: '15px',
+                fontWeight: '700',
+                color: '#1f2937',
+                marginBottom: '8px',
+                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+              }}>
+                📍 프로젝트 지역
               </label>
               <select
                 value={formData.companyLocation || ''}
                 onChange={(e) => handleInputChange('companyLocation', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                style={{ width: '100%', padding: '12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
+                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-3 focus:ring-blue-300 focus:border-blue-500 transition-all duration-200 shadow-sm bg-white"
+                style={{
+                  width: '100%',
+                  padding: '16px',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '12px',
+                  fontSize: '16px',
+                  fontWeight: '500',
+                  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                  backgroundColor: isRestrictedField('companyLocation') ? '#f3f4f6' : '#ffffff',
+                  color: isRestrictedField('companyLocation') ? '#6b7280' : '#111827',
+                  cursor: isRestrictedField('companyLocation') ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease-in-out',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.02)'
+                }}
                 disabled={isRestrictedField('companyLocation')}
               >
-                <option value="">지역을 선택하세요</option>
+                <option value="" style={{ color: '#9ca3af' }}>🌍 진행 지역을 선택해주세요</option>
                 {regionOptions.map(option => (
-                  <option key={option.value} value={option.value}>
+                  <option key={option.value} value={option.value} style={{ color: '#1f2937', fontWeight: '500' }}>
                     {option.label}
                   </option>
                 ))}
@@ -454,68 +515,113 @@ const UserProjectEditPage = () => {
 
             {/* 기술 스택 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2" style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                기술 스택
+              <label className="block text-sm font-bold text-gray-800 mb-2" style={{
+                display: 'block',
+                fontSize: '15px',
+                fontWeight: '700',
+                color: '#1f2937',
+                marginBottom: '8px',
+                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+              }}>
+                ⚡ 기술 스택
               </label>
-              <div className="space-y-4" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {Object.entries(techStackCategories).map(([category, techs]) => (
-                  <div key={category}>
-                    <h4 className="text-sm font-semibold text-gray-600 mb-2" style={{ fontSize: '14px', fontWeight: '600', color: '#4b5563', marginBottom: '8px' }}>
-                      {category}
-                    </h4>
-                    <div className="grid grid-cols-4 gap-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
-                      {techs.map(tech => (
-                        <label key={tech.value} className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50" style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          padding: '12px',
-                          border: '1px solid #d1d5db',
-                          borderRadius: '8px',
-                          cursor: 'pointer',
-                          backgroundColor: formData.techNames?.includes(tech.value) ? '#eff6ff' : 'white',
-                          borderColor: formData.techNames?.includes(tech.value) ? '#3b82f6' : '#d1d5db'
-                        }}>
-                          <input
-                            type="checkbox"
-                            checked={formData.techNames?.includes(tech.value) || false}
-                            onChange={() => handleTechStackChange(tech.value)}
-                            className="sr-only"
-                          />
-                          <span className="text-sm font-medium" style={{ fontSize: '14px', fontWeight: '500', color: formData.techNames?.includes(tech.value) ? '#1d4ed8' : '#374151' }}>
-                            {tech.label}
-                          </span>
-                        </label>
-                      ))}
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200" style={{
+                backgroundColor: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)',
+                padding: '20px',
+                borderRadius: '12px',
+                border: '1px solid #e5e7eb'
+              }}>
+                <div className="space-y-5" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {Object.entries(techStackCategories).map(([category, techs]) => (
+                    <div key={category}>
+                      <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center" style={{
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: '#374151',
+                        marginBottom: '12px',
+                        fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}>
+                        <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                        {category}
+                      </h4>
+                      <div className="grid grid-cols-4 gap-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+                        {techs.map(tech => (
+                          <label key={tech.value} className="flex items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition-all duration-200 hover:scale-105 transform" style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '14px 8px',
+                            border: '2px solid',
+                            borderRadius: '12px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease-in-out',
+                            backgroundColor: formData.techNames?.includes(tech.value) ? '#dbeafe' : '#ffffff',
+                            borderColor: formData.techNames?.includes(tech.value) ? '#3b82f6' : '#e5e7eb',
+                            boxShadow: formData.techNames?.includes(tech.value) ? '0 4px 12px rgba(59, 130, 246, 0.15)' : '0 2px 4px rgba(0, 0, 0, 0.02)',
+                            transform: formData.techNames?.includes(tech.value) ? 'translateY(-1px)' : 'translateY(0)'
+                          }}>
+                            <input
+                              type="checkbox"
+                              checked={formData.techNames?.includes(tech.value) || false}
+                              onChange={() => handleTechStackChange(tech.value)}
+                              className="sr-only"
+                            />
+                            <span className="text-sm font-semibold text-center" style={{
+                              fontSize: '13px',
+                              fontWeight: '600',
+                              color: formData.techNames?.includes(tech.value) ? '#1e40af' : '#4b5563',
+                              fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                              textAlign: 'center'
+                            }}>
+                              {tech.label}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* 프로젝트 분야 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2" style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                프로젝트 분야
+              <label className="block text-sm font-bold text-gray-800 mb-2" style={{
+                display: 'block',
+                fontSize: '15px',
+                fontWeight: '700',
+                color: '#1f2937',
+                marginBottom: '8px',
+                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+              }}>
+                🎯 프로젝트 분야
               </label>
               <select
                 value={formData.projectField || ''}
                 onChange={(e) => handleInputChange('projectField', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-3 focus:ring-blue-300 focus:border-blue-500 transition-all duration-200 shadow-sm bg-white"
                 style={{
                   width: '100%',
-                  padding: '12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  backgroundColor: isRestrictedField('projectField') ? '#f3f4f6' : 'white',
+                  padding: '16px',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '12px',
+                  fontSize: '16px',
+                  fontWeight: '500',
+                  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                  backgroundColor: isRestrictedField('projectField') ? '#f3f4f6' : '#ffffff',
                   color: isRestrictedField('projectField') ? '#6b7280' : '#111827',
-                  cursor: isRestrictedField('projectField') ? 'not-allowed' : 'pointer'
+                  cursor: isRestrictedField('projectField') ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease-in-out',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.02)'
                 }}
                 disabled={isRestrictedField('projectField')}
                 title={isRestrictedField('projectField') ? '이 필드는 현재 상태에서 수정할 수 없습니다' : undefined}
               >
-                <option value="">프로젝트 분야를 선택하세요</option>
+                <option value="" style={{ color: '#9ca3af' }}>🚀 프로젝트 분야를 선택해주세요</option>
                 {projectFieldOptions.map(option => (
-                  <option key={option.value} value={option.value}>
+                  <option key={option.value} value={option.value} style={{ color: '#1f2937', fontWeight: '500' }}>
                     {option.label}
                   </option>
                 ))}
@@ -524,28 +630,40 @@ const UserProjectEditPage = () => {
 
             {/* 모집 유형 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2" style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                모집 유형
+              <label className="block text-sm font-bold text-gray-800 mb-2" style={{
+                display: 'block',
+                fontSize: '15px',
+                fontWeight: '700',
+                color: '#1f2937',
+                marginBottom: '8px',
+                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+              }}>
+                👥 모집 유형
               </label>
               <select
                 value={formData.recruitmentType || ''}
                 onChange={(e) => handleInputChange('recruitmentType', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-3 focus:ring-blue-300 focus:border-blue-500 transition-all duration-200 shadow-sm bg-white"
                 style={{
                   width: '100%',
-                  padding: '12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  backgroundColor: isRestrictedField('recruitmentType') ? '#f3f4f6' : 'white',
+                  padding: '16px',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '12px',
+                  fontSize: '16px',
+                  fontWeight: '500',
+                  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                  backgroundColor: isRestrictedField('recruitmentType') ? '#f3f4f6' : '#ffffff',
                   color: isRestrictedField('recruitmentType') ? '#6b7280' : '#111827',
-                  cursor: isRestrictedField('recruitmentType') ? 'not-allowed' : 'pointer'
+                  cursor: isRestrictedField('recruitmentType') ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease-in-out',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.02)'
                 }}
                 disabled={isRestrictedField('recruitmentType')}
                 title={isRestrictedField('recruitmentType') ? '이 필드는 현재 상태에서 수정할 수 없습니다' : undefined}
               >
-                <option value="">모집 유형을 선택하세요</option>
+                <option value="" style={{ color: '#9ca3af' }}>📋 모집 유형을 선택해주세요</option>
                 {recruitmentTypeOptions.map(option => (
-                  <option key={option.value} value={option.value}>
+                  <option key={option.value} value={option.value} style={{ color: '#1f2937', fontWeight: '500' }}>
                     {option.label}
                   </option>
                 ))}
@@ -554,19 +672,39 @@ const UserProjectEditPage = () => {
 
             {/* 파트너 유형 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2" style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                파트너 유형
+              <label className="block text-sm font-bold text-gray-800 mb-2" style={{
+                display: 'block',
+                fontSize: '15px',
+                fontWeight: '700',
+                color: '#1f2937',
+                marginBottom: '8px',
+                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+              }}>
+                🤝 파트너 유형
               </label>
               <select
                 value={formData.partnerType || ''}
                 onChange={(e) => handleInputChange('partnerType', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                style={{ width: '100%', padding: '12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
+                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-3 focus:ring-blue-300 focus:border-blue-500 transition-all duration-200 shadow-sm bg-white"
+                style={{
+                  width: '100%',
+                  padding: '16px',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '12px',
+                  fontSize: '16px',
+                  fontWeight: '500',
+                  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                  backgroundColor: isRestrictedField('partnerType') ? '#f3f4f6' : '#ffffff',
+                  color: isRestrictedField('partnerType') ? '#6b7280' : '#111827',
+                  cursor: isRestrictedField('partnerType') ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease-in-out',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.02)'
+                }}
                 disabled={isRestrictedField('partnerType')}
               >
-                <option value="">파트너 유형을 선택하세요</option>
+                <option value="" style={{ color: '#9ca3af' }}>🔍 파트너 유형을 선택해주세요</option>
                 {partnerTypeOptions.map(option => (
-                  <option key={option.value} value={option.value}>
+                  <option key={option.value} value={option.value} style={{ color: '#1f2937', fontWeight: '500' }}>
                     {option.label}
                   </option>
                 ))}
@@ -575,82 +713,149 @@ const UserProjectEditPage = () => {
 
             {/* 진행 상태 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2" style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                프로젝트 진행 상태
+              <label className="block text-sm font-bold text-gray-800 mb-2" style={{
+                display: 'block',
+                fontSize: '15px',
+                fontWeight: '700',
+                color: '#1f2937',
+                marginBottom: '8px',
+                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+              }}>
+                📊 프로젝트 진행 상태
               </label>
               <select
                 value={formData.progressStatus || ''}
                 onChange={(e) => handleInputChange('progressStatus', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                style={{ width: '100%', padding: '12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
+                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-3 focus:ring-blue-300 focus:border-blue-500 transition-all duration-200 shadow-sm bg-white"
+                style={{
+                  width: '100%',
+                  padding: '16px',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '12px',
+                  fontSize: '16px',
+                  fontWeight: '500',
+                  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                  backgroundColor: isRestrictedField('progressStatus') ? '#f3f4f6' : '#ffffff',
+                  color: isRestrictedField('progressStatus') ? '#6b7280' : '#111827',
+                  cursor: isRestrictedField('progressStatus') ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease-in-out',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.02)'
+                }}
                 disabled={isRestrictedField('progressStatus')}
               >
-                <option value="">진행 상태를 선택하세요</option>
+                <option value="" style={{ color: '#9ca3af' }}>⏳ 진행 상태를 선택해주세요</option>
                 {progressStatusOptions.map(option => (
-                  <option key={option.value} value={option.value}>
+                  <option key={option.value} value={option.value} style={{ color: '#1f2937', fontWeight: '500' }}>
                     {option.label}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* 프로젝트 시작일 */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2" style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                프로젝트 시작일
-              </label>
-              <input
-                type="date"
-                value={formData.startDate || ''}
-                onChange={(e) => handleInputChange('startDate', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  backgroundColor: isRestrictedField('startDate') ? '#f3f4f6' : 'white',
-                  color: isRestrictedField('startDate') ? '#6b7280' : '#111827',
-                  cursor: isRestrictedField('startDate') ? 'not-allowed' : 'text'
-                }}
-                disabled={isRestrictedField('startDate')}
-                title={isRestrictedField('startDate') ? '이 필드는 현재 상태에서 수정할 수 없습니다' : undefined}
-              />
-            </div>
+            {/* 프로젝트 기간 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* 프로젝트 시작일 */}
+              <div>
+                <label className="block text-sm font-bold text-gray-800 mb-2" style={{
+                  display: 'block',
+                  fontSize: '15px',
+                  fontWeight: '700',
+                  color: '#1f2937',
+                  marginBottom: '8px',
+                  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+                }}>
+                  🗓️ 프로젝트 시작일
+                </label>
+                <input
+                  type="date"
+                  value={formData.startDate || ''}
+                  onChange={(e) => handleInputChange('startDate', e.target.value)}
+                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-3 focus:ring-green-300 focus:border-green-500 transition-all duration-200 shadow-sm"
+                  style={{
+                    width: '100%',
+                    padding: '16px',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '12px',
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                    backgroundColor: isRestrictedField('startDate') ? '#f3f4f6' : '#fefefe',
+                    color: isRestrictedField('startDate') ? '#6b7280' : '#111827',
+                    cursor: isRestrictedField('startDate') ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s ease-in-out',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.02)'
+                  }}
+                  disabled={isRestrictedField('startDate')}
+                  title={isRestrictedField('startDate') ? '이 필드는 현재 상태에서 수정할 수 없습니다' : undefined}
+                />
+              </div>
 
-            {/* 프로젝트 종료일 */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2" style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                프로젝트 종료일
-              </label>
-              <input
-                type="date"
-                value={formData.endDate || ''}
-                onChange={(e) => handleInputChange('endDate', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  backgroundColor: isRestrictedField('endDate') ? '#f3f4f6' : 'white',
-                  color: isRestrictedField('endDate') ? '#6b7280' : '#111827',
-                  cursor: isRestrictedField('endDate') ? 'not-allowed' : 'text'
-                }}
-                disabled={isRestrictedField('endDate')}
-                title={isRestrictedField('endDate') ? '이 필드는 현재 상태에서 수정할 수 없습니다' : undefined}
-              />
+              {/* 프로젝트 종료일 */}
+              <div>
+                <label className="block text-sm font-bold text-gray-800 mb-2" style={{
+                  display: 'block',
+                  fontSize: '15px',
+                  fontWeight: '700',
+                  color: '#1f2937',
+                  marginBottom: '8px',
+                  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+                }}>
+                  🏁 프로젝트 종료일
+                </label>
+                <input
+                  type="date"
+                  value={formData.endDate || ''}
+                  onChange={(e) => handleInputChange('endDate', e.target.value)}
+                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-3 focus:ring-red-300 focus:border-red-500 transition-all duration-200 shadow-sm"
+                  style={{
+                    width: '100%',
+                    padding: '16px',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '12px',
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                    backgroundColor: isRestrictedField('endDate') ? '#f3f4f6' : '#fefefe',
+                    color: isRestrictedField('endDate') ? '#6b7280' : '#111827',
+                    cursor: isRestrictedField('endDate') ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s ease-in-out',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.02)'
+                  }}
+                  disabled={isRestrictedField('endDate')}
+                  title={isRestrictedField('endDate') ? '이 필드는 현재 상태에서 수정할 수 없습니다' : undefined}
+                />
+              </div>
             </div>
 
             {/* 첨부파일 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3" style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '12px' }}>
-                참고파일 관리
-                <span className="text-xs text-gray-500 font-normal ml-2" style={{ fontSize: '12px', color: '#6b7280', fontWeight: '400', marginLeft: '8px' }}>
-                  (드래그 앤 드롭 또는 클릭하여 파일을 추가/삭제할 수 있습니다)
+              <label className="block text-sm font-bold text-gray-800 mb-2" style={{
+                display: 'block',
+                fontSize: '15px',
+                fontWeight: '700',
+                color: '#1f2937',
+                marginBottom: '8px',
+                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+              }}>
+                📎 참고파일 관리
+                <span className="block text-xs text-gray-600 font-normal mt-1" style={{
+                  display: 'block',
+                  fontSize: '12px',
+                  color: '#6b7280',
+                  fontWeight: '400',
+                  marginTop: '4px',
+                  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+                }}>
+                  💡 드래그 앤 드롭 또는 클릭하여 파일을 자유롭게 추가/삭제할 수 있습니다
                 </span>
               </label>
-              <div className="bg-gray-50 p-4 rounded-lg" style={{ backgroundColor: '#f9fafb', padding: '16px', borderRadius: '8px' }}>
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-dashed border-blue-200" style={{
+                background: 'linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%)',
+                padding: '24px',
+                borderRadius: '12px',
+                border: '2px dashed #bfdbfe',
+                transition: 'all 0.2s ease-in-out'
+              }}>
                 <ProjectFileManager
                   projectId={params?.projectId as string}
                   projectFiles={projectFiles}
