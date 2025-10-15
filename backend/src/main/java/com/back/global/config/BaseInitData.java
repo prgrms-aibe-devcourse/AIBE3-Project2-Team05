@@ -9,10 +9,20 @@ import com.back.domain.project.repository.ProjectRepository;
 import com.back.domain.project.repository.ProjectTechRepository;
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.repository.MemberRepository;
+import com.back.domain.freelancer.freelancer.entity.Freelancer;
+import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
+import com.back.domain.freelancer.freelancerTech.entity.FreelancerTech;
+import com.back.domain.freelancer.freelancerTech.repository.FreelancerTechRepository;
+import com.back.domain.matching.projectSubmission.entity.ProjectSubmission;
+import com.back.domain.matching.projectSubmission.entity.SubmissionStatus;
+import com.back.domain.matching.projectSubmission.repository.ProjectSubmissionRepository;
+import com.back.domain.tech.entity.Tech;
+import com.back.domain.tech.repository.TechRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +42,11 @@ public class BaseInitData implements CommandLineRunner {
     private final ProjectRepository projectRepository;
     private final ProjectTechRepository projectTechRepository;
     private final ProjectFileRepository projectFileRepository;
+    private final FreelancerRepository freelancerRepository;
+    private final FreelancerTechRepository freelancerTechRepository;
+    private final ProjectSubmissionRepository projectSubmissionRepository;
+    private final TechRepository techRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // 지역 목록 - Region enum으로 변경
     private final List<Region> regions = Arrays.asList(
@@ -67,19 +82,33 @@ public class BaseInitData implements CommandLineRunner {
         // 프로젝트 파일 데이터 생성
         createProjectFiles();
 
+        // 프리랜서 데이터 생성
+        createFreelancers();
+
+        // 프리랜서 기술스택 데이터 생성
+        createFreelancerTechs();
+
+        // 프로젝트 지원 데이터 생성
+        createProjectSubmissions();
 
         log.info("초기 데이터 삽입이 완료되었습니다.");
     }
 
     private void createUsers() {
-        Member user1 = new Member("Park-seungg", "park", "password123", "park.seungg@example.com");
-        Member user2 = new Member("developer1", "dev1", "password123", "dev1@example.com");
-        Member user3 = new Member("designer1", "designer", "password123", "designer1@example.com");
-        Member user4 = new Member("iot_expert", "iot", "password123", "iot@example.com");
-        Member user5 = new Member("marketer1", "marketer", "password123", "marketing@example.com");
-        Member user6 = new Member("opensource_dev", "opensource", "password123", "opensource@example.com");
-        Member user7 = new Member("plugin_dev", "plugin", "password123", "plugin@example.com");
+        // PM 계정 2개 추가 (매칭 시스템 테스트용)
+        Member client1 = new Member("client1", "PM 홍길동", passwordEncoder.encode("12341234"), "client1@test.com");
+        Member client2 = new Member("client2", "PM 김철수", passwordEncoder.encode("12341234"), "client2@test.com");
 
+        Member user1 = new Member("Park-seungg", "park", passwordEncoder.encode("password123"), "park.seungg@example.com");
+        Member user2 = new Member("developer1", "dev1", passwordEncoder.encode("password123"), "dev1@example.com");
+        Member user3 = new Member("designer1", "designer", passwordEncoder.encode("password123"), "designer1@example.com");
+        Member user4 = new Member("iot_expert", "iot", passwordEncoder.encode("password123"), "iot@example.com");
+        Member user5 = new Member("marketer1", "marketer", passwordEncoder.encode("password123"), "marketing@example.com");
+        Member user6 = new Member("opensource_dev", "opensource", passwordEncoder.encode("password123"), "opensource@example.com");
+        Member user7 = new Member("plugin_dev", "plugin", passwordEncoder.encode("password123"), "plugin@example.com");
+
+        memberRepository.save(client1);
+        memberRepository.save(client2);
         memberRepository.save(user1);
         memberRepository.save(user2);
         memberRepository.save(user3);
@@ -88,11 +117,13 @@ public class BaseInitData implements CommandLineRunner {
         memberRepository.save(user6);
         memberRepository.save(user7);
 
-        log.info("사용자 데이터 {} 건이 생성되었습니다.", 7);
+        log.info("사용자 데이터 {} 건이 생성되었습니다 (PM 2명 포함).", 9);
     }
 
     private void createProjects() {
         // 사용자 조회 (ID는 Auto Increment로 자동 생성됨)
+        Member client1 = memberRepository.findByUsername("client1").orElseThrow();
+        Member client2 = memberRepository.findByUsername("client2").orElseThrow();
         Member parkSeungg = memberRepository.findByUsername("Park-seungg").orElseThrow();
         Member developer1 = memberRepository.findByUsername("developer1").orElseThrow();
         Member designer1 = memberRepository.findByUsername("designer1").orElseThrow();
@@ -101,7 +132,243 @@ public class BaseInitData implements CommandLineRunner {
         Member opensourceDev = memberRepository.findByUsername("opensource_dev").orElseThrow();
         Member pluginDev = memberRepository.findByUsername("plugin_dev").orElseThrow();
 
+        // ============================================
+        // client1 (PM 홍길동) 프로젝트 7개
+        // ============================================
+        Project pmProject1 = new Project(
+                "E커머스 플랫폼 개발",
+                "쇼핑몰 풀스택 개발 프로젝트입니다. React + Spring Boot 스택 사용. 3개월 예상.",
+                ProjectField.DEVELOPMENT,
+                RecruitmentType.PROJECT_CONTRACT,
+                BudgetRange.RANGE_1000_2000,
+                LocalDate.of(2025, 11, 1),
+                LocalDate.of(2026, 1, 31),
+                client1
+        );
+        pmProject1.setPartnerType(PartnerType.INDIVIDUAL_OR_TEAM_FREELANCER);
+        pmProject1.setBudgetAmount(15000000L);
+        pmProject1.setProgressStatus(ProgressStatus.DETAILED_PLAN);
+        pmProject1.setCompanyLocation(Region.SEOUL);
+        pmProject1.setViewCount(45);
+        pmProject1.setApplicantCount(3);
+        pmProject1.setCreateDate(LocalDateTime.now().minusDays(10));
+        pmProject1.setModifyDate(LocalDateTime.now().minusDays(2));
+
+        Project pmProject2 = new Project(
+                "사내 인사관리 시스템",
+                "Spring Boot 기반 사내 인사관리 시스템 개발. 직원 관리, 근태, 급여 등.",
+                ProjectField.DEVELOPMENT,
+                RecruitmentType.PROJECT_CONTRACT,
+                BudgetRange.RANGE_1000_2000,
+                LocalDate.of(2025, 10, 20),
+                LocalDate.of(2026, 3, 20),
+                client1
+        );
+        pmProject2.setPartnerType(PartnerType.BUSINESS_TEAM_OR_COMPANY);
+        pmProject2.setBudgetAmount(20000000L);
+        pmProject2.setProgressStatus(ProgressStatus.CONTENT_ORGANIZED);
+        pmProject2.setCompanyLocation(Region.GYEONGGI);
+        pmProject2.setViewCount(28);
+        pmProject2.setApplicantCount(2);
+        pmProject2.setCreateDate(LocalDateTime.now().minusDays(15));
+        pmProject2.setModifyDate(LocalDateTime.now().minusDays(5));
+
+        Project pmProject3 = new Project(
+                "실시간 채팅 앱",
+                "WebSocket 기반 실시간 채팅 애플리케이션. React Native + Node.js 스택.",
+                ProjectField.DEVELOPMENT,
+                RecruitmentType.PROJECT_CONTRACT,
+                BudgetRange.RANGE_500_1000,
+                LocalDate.of(2025, 11, 5),
+                LocalDate.of(2026, 1, 5),
+                client1
+        );
+        pmProject3.setPartnerType(PartnerType.INDIVIDUAL_OR_TEAM_FREELANCER);
+        pmProject3.setBudgetAmount(10000000L);
+        pmProject3.setProgressStatus(ProgressStatus.DETAILED_PLAN);
+        pmProject3.setCompanyLocation(Region.SEOUL);
+        pmProject3.setViewCount(52);
+        pmProject3.setApplicantCount(5);
+        pmProject3.setCreateDate(LocalDateTime.now().minusDays(20));
+        pmProject3.setModifyDate(LocalDateTime.now().minusDays(1));
+
+        Project pmProject4 = new Project(
+                "온라인 교육 플랫폼",
+                "Zoom/WebRTC 통합 온라인 강의 플랫폼. 결제 시스템 포함.",
+                ProjectField.DEVELOPMENT,
+                RecruitmentType.PROJECT_CONTRACT,
+                BudgetRange.RANGE_2000_3000,
+                LocalDate.of(2025, 10, 15),
+                LocalDate.of(2026, 4, 15),
+                client1
+        );
+        pmProject4.setPartnerType(PartnerType.BUSINESS_TEAM_OR_COMPANY);
+        pmProject4.setBudgetAmount(25000000L);
+        pmProject4.setProgressStatus(ProgressStatus.DETAILED_PLAN);
+        pmProject4.setCompanyLocation(Region.BUSAN);
+        pmProject4.setViewCount(67);
+        pmProject4.setApplicantCount(8);
+        pmProject4.setCreateDate(LocalDateTime.now().minusDays(25));
+        pmProject4.setModifyDate(LocalDateTime.now().minusDays(3));
+
+        Project pmProject5 = new Project(
+                "IoT 센서 데이터 수집 시스템",
+                "AWS IoT Core 활용 센서 데이터 수집 및 시각화. Spring Boot + React.",
+                ProjectField.DEVELOPMENT,
+                RecruitmentType.PROJECT_CONTRACT,
+                BudgetRange.RANGE_1000_2000,
+                LocalDate.of(2025, 12, 1),
+                LocalDate.of(2026, 5, 1),
+                client1
+        );
+        pmProject5.setPartnerType(PartnerType.INDIVIDUAL_OR_TEAM_FREELANCER);
+        pmProject5.setBudgetAmount(18000000L);
+        pmProject5.setProgressStatus(ProgressStatus.CONTENT_ORGANIZED);
+        pmProject5.setCompanyLocation(Region.DAEJEON);
+        pmProject5.setViewCount(15);
+        pmProject5.setApplicantCount(1);
+        pmProject5.setCreateDate(LocalDateTime.now().minusDays(5));
+        pmProject5.setModifyDate(LocalDateTime.now().minusDays(1));
+
+        Project pmProject6 = new Project(
+                "CRM 시스템 고도화",
+                "기존 CRM 시스템 기능 추가 및 UI/UX 개선. Vue.js 리팩토링.",
+                ProjectField.DESIGN,
+                RecruitmentType.PROJECT_CONTRACT,
+                BudgetRange.RANGE_500_1000,
+                LocalDate.of(2025, 9, 1),
+                LocalDate.of(2025, 12, 31),
+                client1
+        );
+        pmProject6.setPartnerType(PartnerType.INDIVIDUAL_FREELANCER);
+        pmProject6.setBudgetAmount(8000000L);
+        pmProject6.setProgressStatus(ProgressStatus.CONTENT_ORGANIZED);
+        pmProject6.setCompanyLocation(Region.SEOUL);
+        pmProject6.setViewCount(89);
+        pmProject6.setApplicantCount(12);
+        pmProject6.setCreateDate(LocalDateTime.now().minusDays(90));
+        pmProject6.setModifyDate(LocalDateTime.now().minusDays(30));
+
+        Project pmProject7 = new Project(
+                "블록체인 기반 NFT 마켓플레이스",
+                "Ethereum 기반 NFT 거래 플랫폼. Web3.js + React.",
+                ProjectField.DEVELOPMENT,
+                RecruitmentType.PROJECT_CONTRACT,
+                BudgetRange.RANGE_3000_5000,
+                LocalDate.of(2025, 11, 20),
+                LocalDate.of(2026, 6, 20),
+                client1
+        );
+        pmProject7.setPartnerType(PartnerType.BUSINESS_TEAM_OR_COMPANY);
+        pmProject7.setBudgetAmount(30000000L);
+        pmProject7.setProgressStatus(ProgressStatus.DETAILED_PLAN);
+        pmProject7.setCompanyLocation(Region.SEOUL);
+        pmProject7.setViewCount(102);
+        pmProject7.setApplicantCount(15);
+        pmProject7.setCreateDate(LocalDateTime.now().minusDays(12));
+        pmProject7.setModifyDate(LocalDateTime.now());
+
+        // ============================================
+        // client2 (PM 김철수) 프로젝트 5개
+        // ============================================
+        Project pmProject8 = new Project(
+                "모바일 앱 백엔드 API 구축",
+                "Node.js 또는 Spring Boot로 RESTful API 개발. AWS 인프라 구축 포함.",
+                ProjectField.DEVELOPMENT,
+                RecruitmentType.PROJECT_CONTRACT,
+                BudgetRange.RANGE_1000_2000,
+                LocalDate.of(2025, 11, 15),
+                LocalDate.of(2026, 2, 15),
+                client2
+        );
+        pmProject8.setPartnerType(PartnerType.INDIVIDUAL_OR_TEAM_FREELANCER);
+        pmProject8.setBudgetAmount(12000000L);
+        pmProject8.setProgressStatus(ProgressStatus.DETAILED_PLAN);
+        pmProject8.setCompanyLocation(Region.INCHEON);
+        pmProject8.setViewCount(32);
+        pmProject8.setApplicantCount(4);
+        pmProject8.setCreateDate(LocalDateTime.now().minusDays(18));
+        pmProject8.setModifyDate(LocalDateTime.now().minusDays(4));
+
+        Project pmProject9 = new Project(
+                "금융 데이터 분석 대시보드",
+                "Python + Django 기반 실시간 금융 데이터 시각화. Grafana 연동.",
+                ProjectField.DEVELOPMENT,
+                RecruitmentType.PROJECT_CONTRACT,
+                BudgetRange.RANGE_2000_3000,
+                LocalDate.of(2025, 10, 25),
+                LocalDate.of(2026, 3, 25),
+                client2
+        );
+        pmProject9.setPartnerType(PartnerType.BUSINESS_TEAM_OR_COMPANY);
+        pmProject9.setBudgetAmount(22000000L);
+        pmProject9.setProgressStatus(ProgressStatus.CONTENT_ORGANIZED);
+        pmProject9.setCompanyLocation(Region.SEOUL);
+        pmProject9.setViewCount(41);
+        pmProject9.setApplicantCount(6);
+        pmProject9.setCreateDate(LocalDateTime.now().minusDays(22));
+        pmProject9.setModifyDate(LocalDateTime.now().minusDays(6));
+
+        Project pmProject10 = new Project(
+                "AI 챗봇 서비스",
+                "OpenAI API 통합 고객 상담 챗봇. NLP 기반 자동 응답 시스템.",
+                ProjectField.PLANNING,
+                RecruitmentType.PROJECT_CONTRACT,
+                BudgetRange.RANGE_1000_2000,
+                LocalDate.of(2025, 11, 10),
+                LocalDate.of(2026, 2, 10),
+                client2
+        );
+        pmProject10.setPartnerType(PartnerType.INDIVIDUAL_OR_TEAM_FREELANCER);
+        pmProject10.setBudgetAmount(16000000L);
+        pmProject10.setProgressStatus(ProgressStatus.IDEA_STAGE);
+        pmProject10.setCompanyLocation(Region.GYEONGGI);
+        pmProject10.setViewCount(58);
+        pmProject10.setApplicantCount(7);
+        pmProject10.setCreateDate(LocalDateTime.now().minusDays(14));
+        pmProject10.setModifyDate(LocalDateTime.now().minusDays(2));
+
+        Project pmProject11 = new Project(
+                "소셜미디어 통합 관리 도구",
+                "Instagram, Facebook, Twitter API 통합. 예약 게시 기능.",
+                ProjectField.PLANNING,
+                RecruitmentType.PERSONAL_CONTRACT,
+                BudgetRange.RANGE_1000_2000,
+                LocalDate.of(2025, 8, 1),
+                LocalDate.of(2025, 11, 30),
+                client2
+        );
+        pmProject11.setPartnerType(PartnerType.INDIVIDUAL_FREELANCER);
+        pmProject11.setBudgetAmount(14000000L);
+        pmProject11.setProgressStatus(ProgressStatus.IDEA_STAGE);
+        pmProject11.setCompanyLocation(Region.BUSAN);
+        pmProject11.setViewCount(23);
+        pmProject11.setApplicantCount(3);
+        pmProject11.setCreateDate(LocalDateTime.now().minusDays(60));
+        pmProject11.setModifyDate(LocalDateTime.now().minusDays(20));
+
+        Project pmProject12 = new Project(
+                "헬스케어 모바일 앱",
+                "React Native 기반 건강 관리 앱. 웨어러블 기기 연동.",
+                ProjectField.DEVELOPMENT,
+                RecruitmentType.PROJECT_CONTRACT,
+                BudgetRange.RANGE_1000_2000,
+                LocalDate.of(2025, 12, 1),
+                LocalDate.of(2026, 5, 1),
+                client2
+        );
+        pmProject12.setPartnerType(PartnerType.INDIVIDUAL_OR_TEAM_FREELANCER);
+        pmProject12.setBudgetAmount(19000000L);
+        pmProject12.setProgressStatus(ProgressStatus.DETAILED_PLAN);
+        pmProject12.setCompanyLocation(Region.DAEGU);
+        pmProject12.setViewCount(38);
+        pmProject12.setApplicantCount(5);
+        pmProject12.setCreateDate(LocalDateTime.now().minusDays(8));
+        pmProject12.setModifyDate(LocalDateTime.now().minusDays(1));
+
+        // ============================================
         // Park-seungg의 프로젝트들
+        // ============================================
         Project project1 = new Project(
                 "React + Spring Boot 풀스택 웹사이트 개발",
                 "모던 웹 기술을 활용한 반응형 웹사이트를 개발합니다. 사용자 친화적인 UI/UX와 안정적인 백엔드 API를 구축하여 완성도 높은 서비스를 만들어보세요.",
@@ -293,6 +560,21 @@ public class BaseInitData implements CommandLineRunner {
         project10.setCreateDate(LocalDateTime.of(2025, 9, 30, 11, 30, 0));
         project10.setModifyDate(LocalDateTime.of(2025, 9, 30, 11, 30, 0));
 
+        // PM 프로젝트 저장
+        projectRepository.save(pmProject1);
+        projectRepository.save(pmProject2);
+        projectRepository.save(pmProject3);
+        projectRepository.save(pmProject4);
+        projectRepository.save(pmProject5);
+        projectRepository.save(pmProject6);
+        projectRepository.save(pmProject7);
+        projectRepository.save(pmProject8);
+        projectRepository.save(pmProject9);
+        projectRepository.save(pmProject10);
+        projectRepository.save(pmProject11);
+        projectRepository.save(pmProject12);
+
+        // 기타 사용자 프로젝트 저장
         projectRepository.save(project1);
         projectRepository.save(project2);
         projectRepository.save(project3);
@@ -607,7 +889,7 @@ public class BaseInitData implements CommandLineRunner {
         projectRepository.save(project24);
         projectRepository.save(project25);
 
-        log.info("프로젝트 데이터 {} 건이 생성되었습니다.", 25);
+        log.info("프로젝트 데이터 {} 건이 생성되었습니다. (PM 프로젝트 12건 포함)", 37);
     }
 
     // 랜덤 지역 선택 메서드 추가
@@ -890,5 +1172,252 @@ public class BaseInitData implements CommandLineRunner {
         ProjectFile projectFile = new ProjectFile(project, originalName, storedName, filePath, fileSize, fileType);
         projectFile.setUploadDate(uploadDate);
         projectFileRepository.save(projectFile);
+    }
+
+    private void createFreelancers() {
+        log.info("프리랜서 데이터를 생성합니다.");
+
+        // 기존 Member 조회
+        Member user1 = memberRepository.findByUsername("Park-seungg").orElseThrow();
+        Member user2 = memberRepository.findByUsername("developer1").orElseThrow();
+        Member user3 = memberRepository.findByUsername("designer1").orElseThrow();
+        Member user4 = memberRepository.findByUsername("iot_expert").orElseThrow();
+        Member user5 = memberRepository.findByUsername("marketer1").orElseThrow();
+
+        // 프리랜서 1: 풀스택 개발자 (React, Spring Boot, Java, MySQL - EXPERT)
+        Freelancer freelancer1 = new Freelancer(
+                user1,
+                "풀스택 시니어 개발자",
+                "개발",
+                "서울",
+                "10년 경력의 풀스택 개발자입니다. React, Spring Boot 전문입니다.",
+                true,
+                5000000,
+                7000000,
+                null
+        );
+        freelancer1.setRatingAvg(4.8);
+        freelancer1.setCompletedProjectsCount(15);
+        freelancer1.setReviewsCount(12);
+        freelancerRepository.save(freelancer1);
+
+        // 프리랜서 2: 프론트엔드 개발자 (React, TypeScript, Vue - ADVANCED)
+        Freelancer freelancer2 = new Freelancer(
+                user2,
+                "프론트엔드 전문가",
+                "개발",
+                "경기",
+                "5년 경력의 프론트엔드 개발자입니다. React, Vue 전문입니다.",
+                false,
+                3500000,
+                5000000,
+                null
+        );
+        freelancer2.setRatingAvg(4.5);
+        freelancer2.setCompletedProjectsCount(8);
+        freelancer2.setReviewsCount(7);
+        freelancerRepository.save(freelancer2);
+
+        // 프리랜서 3: 백엔드 개발자 (Spring Boot, Node.js, Python - EXPERT)
+        Freelancer freelancer3 = new Freelancer(
+                user3,
+                "백엔드 아키텍트",
+                "개발",
+                "서울",
+                "8년 경력의 백엔드 개발자입니다. Spring Boot, Node.js 전문입니다.",
+                true,
+                4500000,
+                6500000,
+                null
+        );
+        freelancer3.setRatingAvg(4.9);
+        freelancer3.setCompletedProjectsCount(12);
+        freelancer3.setReviewsCount(10);
+        freelancerRepository.save(freelancer3);
+
+        // 프리랜서 4: 웹 디자이너/개발자 (HTML, CSS, JavaScript - INTERMEDIATE)
+        Freelancer freelancer4 = new Freelancer(
+                user4,
+                "웹 디자이너 겸 개발자",
+                "디자인",
+                "부산",
+                "3년 경력의 웹 디자이너입니다. HTML, CSS, JavaScript를 다룹니다.",
+                false,
+                2500000,
+                3500000,
+                null
+        );
+        freelancer4.setRatingAvg(4.2);
+        freelancer4.setCompletedProjectsCount(5);
+        freelancer4.setReviewsCount(4);
+        freelancerRepository.save(freelancer4);
+
+        // 프리랜서 5: 데이터 엔지니어 (Python, Django, PostgreSQL - ADVANCED)
+        Freelancer freelancer5 = new Freelancer(
+                user5,
+                "데이터 엔지니어",
+                "개발",
+                "대전",
+                "6년 경력의 데이터 엔지니어입니다. Python, Django, PostgreSQL 전문입니다.",
+                true,
+                4000000,
+                6000000,
+                null
+        );
+        freelancer5.setRatingAvg(4.6);
+        freelancer5.setCompletedProjectsCount(10);
+        freelancer5.setReviewsCount(8);
+        freelancerRepository.save(freelancer5);
+
+        log.info("프리랜서 데이터 5건이 생성되었습니다.");
+    }
+
+    private void createFreelancerTechs() {
+        log.info("프리랜서 기술스택 데이터를 생성합니다.");
+
+        List<Freelancer> freelancers = freelancerRepository.findAll();
+        Freelancer freelancer1 = freelancers.get(0);
+        Freelancer freelancer2 = freelancers.get(1);
+        Freelancer freelancer3 = freelancers.get(2);
+        Freelancer freelancer4 = freelancers.get(3);
+        Freelancer freelancer5 = freelancers.get(4);
+
+        // 프리랜서 1: 풀스택 (React, Spring Boot, Java, MySQL)
+        createFreelancerTech(freelancer1, "FRONTEND", "REACT", "EXPERT");
+        createFreelancerTech(freelancer1, "FRONTEND", "TYPESCRIPT", "EXPERT");
+        createFreelancerTech(freelancer1, "BACKEND", "SPRING_BOOT", "EXPERT");
+        createFreelancerTech(freelancer1, "BACKEND", "JAVA", "EXPERT");
+        createFreelancerTech(freelancer1, "DATABASE", "MYSQL", "ADVANCED");
+
+        // 프리랜서 2: 프론트엔드 (React, TypeScript, Vue)
+        createFreelancerTech(freelancer2, "FRONTEND", "REACT", "ADVANCED");
+        createFreelancerTech(freelancer2, "FRONTEND", "TYPESCRIPT", "ADVANCED");
+        createFreelancerTech(freelancer2, "FRONTEND", "VUE", "EXPERT");
+        createFreelancerTech(freelancer2, "FRONTEND", "JAVASCRIPT", "ADVANCED");
+
+        // 프리랜서 3: 백엔드 (Spring Boot, Node.js, Python)
+        createFreelancerTech(freelancer3, "BACKEND", "SPRING_BOOT", "EXPERT");
+        createFreelancerTech(freelancer3, "BACKEND", "JAVA", "EXPERT");
+        createFreelancerTech(freelancer3, "BACKEND", "NODE_JS", "ADVANCED");
+        createFreelancerTech(freelancer3, "BACKEND", "PYTHON", "ADVANCED");
+        createFreelancerTech(freelancer3, "DATABASE", "MYSQL", "EXPERT");
+        createFreelancerTech(freelancer3, "DATABASE", "POSTGRESQL", "ADVANCED");
+
+        // 프리랜서 4: 웹 디자인 (HTML, CSS, JavaScript)
+        createFreelancerTech(freelancer4, "FRONTEND", "HTML", "INTERMEDIATE");
+        createFreelancerTech(freelancer4, "FRONTEND", "CSS", "INTERMEDIATE");
+        createFreelancerTech(freelancer4, "FRONTEND", "JAVASCRIPT", "INTERMEDIATE");
+
+        // 프리랜서 5: 데이터 엔지니어 (Python, Django, PostgreSQL)
+        createFreelancerTech(freelancer5, "BACKEND", "PYTHON", "EXPERT");
+        createFreelancerTech(freelancer5, "BACKEND", "DJANGO", "EXPERT");
+        createFreelancerTech(freelancer5, "DATABASE", "POSTGRESQL", "EXPERT");
+        createFreelancerTech(freelancer5, "BACKEND", "NODE_JS", "INTERMEDIATE");
+
+        log.info("프리랜서 기술스택 데이터 생성이 완료되었습니다.");
+    }
+
+    private void createFreelancerTech(Freelancer freelancer, String techCategory, String techName, String techLevel) {
+        // Tech 엔티티 조회 또는 생성
+        Tech tech = techRepository.findByTechCategoryAndTechName(techCategory, techName)
+                .orElseGet(() -> {
+                    Tech newTech = new Tech();
+                    newTech.setTechCategory(techCategory);
+                    newTech.setTechName(techName);
+                    return techRepository.save(newTech);
+                });
+
+        FreelancerTech freelancerTech = new FreelancerTech(freelancer, tech, techLevel);
+        freelancerTechRepository.save(freelancerTech);
+    }
+
+    private void createProjectSubmissions() {
+        log.info("프로젝트 지원 데이터를 생성합니다.");
+
+        // 프리랜서와 RECRUITING 프로젝트 조회
+        List<Freelancer> freelancers = freelancerRepository.findAll();
+        List<Project> recruitingProjects = projectRepository.findAll().stream()
+                .filter(p -> p.getStatus() == ProjectStatus.RECRUITING)
+                .toList();
+
+        if (freelancers.isEmpty() || recruitingProjects.isEmpty()) {
+            log.warn("프리랜서 또는 모집중인 프로젝트가 없어 지원 데이터를 생성하지 않습니다.");
+            return;
+        }
+
+        // 프리랜서 1 (Park-seungg): E커머스, 온라인 교육, IoT 프로젝트에 지원
+        if (recruitingProjects.size() >= 3 && freelancers.size() >= 1) {
+            createSubmission(recruitingProjects.get(0), freelancers.get(0),
+                "10년 경력의 풀스택 개발자로 React와 Spring Boot에 전문성이 있습니다. E커머스 플랫폼 구축 경험이 풍부하며, MSA 아키텍처 설계 능력을 보유하고 있습니다.",
+                5000000, 90, SubmissionStatus.ACCEPTED);
+
+            createSubmission(recruitingProjects.get(3), freelancers.get(0),
+                "온라인 교육 플랫폼 개발 경험이 있으며, WebRTC 통합 및 결제 시스템 구축에 능숙합니다.",
+                5500000, 120, SubmissionStatus.PENDING);
+
+            createSubmission(recruitingProjects.get(4), freelancers.get(0),
+                "AWS IoT Core 및 Spring Boot를 활용한 센서 데이터 수집 시스템 구축 경험이 있습니다.",
+                5200000, 150, SubmissionStatus.PENDING);
+        }
+
+        // 프리랜서 2 (developer1): 사내 인사관리, E커머스 프로젝트에 지원
+        if (recruitingProjects.size() >= 2 && freelancers.size() >= 2) {
+            createSubmission(recruitingProjects.get(1), freelancers.get(1),
+                "React 및 TypeScript를 활용한 프론트엔드 개발 전문가입니다. 사용자 친화적인 UI/UX 구현에 강점이 있습니다.",
+                4000000, 80, SubmissionStatus.PENDING);
+
+            createSubmission(recruitingProjects.get(0), freelancers.get(1),
+                "E커머스 플랫폼 프론트엔드 개발 경험이 풍부하며, React와 TypeScript를 능숙하게 다룹니다.",
+                4200000, 90, SubmissionStatus.PENDING);
+        }
+
+        // 프리랜서 3 (designer1): 온라인 교육, 블록체인 NFT 프로젝트에 지원
+        if (recruitingProjects.size() >= 5 && freelancers.size() >= 3) {
+            createSubmission(recruitingProjects.get(3), freelancers.get(2),
+                "Spring Boot와 Node.js를 활용한 백엔드 개발 전문가입니다. 대규모 트래픽 처리 경험이 있습니다.",
+                6000000, 110, SubmissionStatus.ACCEPTED);
+
+            createSubmission(recruitingProjects.get(6), freelancers.get(2),
+                "블록체인 및 Web3.js 기술에 대한 이해도가 높으며, NFT 마켓플레이스 구축 경험이 있습니다.",
+                6500000, 180, SubmissionStatus.PENDING);
+        }
+
+        // 프리랜서 4 (iot_expert): 모바일 앱 백엔드 API 구축 프로젝트에 지원
+        if (recruitingProjects.size() >= 8 && freelancers.size() >= 4) {
+            createSubmission(recruitingProjects.get(7), freelancers.get(3),
+                "Node.js와 AWS 인프라 구축에 전문성이 있으며, RESTful API 설계 경험이 풍부합니다.",
+                4500000, 90, SubmissionStatus.PENDING);
+        }
+
+        // 프리랜서 5 (marketer1): AI 챗봇 서비스, 헬스케어 모바일 앱 프로젝트에 지원
+        if (recruitingProjects.size() >= 10 && freelancers.size() >= 5) {
+            createSubmission(recruitingProjects.get(9), freelancers.get(4),
+                "Python과 Django를 활용한 AI 서비스 개발 경험이 있으며, OpenAI API 통합에 능숙합니다.",
+                5000000, 75, SubmissionStatus.PENDING);
+
+            createSubmission(recruitingProjects.get(11), freelancers.get(4),
+                "React Native 및 웨어러블 기기 연동 경험이 있으며, 헬스케어 도메인에 대한 이해도가 높습니다.",
+                5200000, 130, SubmissionStatus.REJECTED);
+        }
+
+        log.info("프로젝트 지원 데이터 생성이 완료되었습니다.");
+    }
+
+    private void createSubmission(Project project, Freelancer freelancer, String coverLetter,
+                                   Integer proposedRate, Integer estimatedDuration, SubmissionStatus status) {
+        ProjectSubmission submission = new ProjectSubmission(
+                project,
+                freelancer,
+                coverLetter,
+                proposedRate,
+                estimatedDuration,
+                null  // portfolioData는 null로 설정
+        );
+
+        if (status != SubmissionStatus.PENDING) {
+            submission.updateStatus(status);
+        }
+
+        projectSubmissionRepository.save(submission);
     }
 }

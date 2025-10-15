@@ -36,14 +36,13 @@ public class MemberService {
         return memberRepository.save(member);
 
     }
+
     @Transactional
     public MemberLoginRes login(MemberLoginReq req) {
-        Member member = memberRepository.findByUsername(req.getUsername())
-                .orElseThrow(() -> new ServiceException("400-3", "존재하지 않는 회원입니다."));
+        Member member = memberRepository.findByUsername(req.getUsername()).orElseThrow(() -> new ServiceException("400-3", "존재하지 않는 회원입니다."));
 
         checkPassword(member, req.getPassword());
 
-        // ✅ RefreshToken 없거나 만료됐을 때만 발급
         if (member.getRefreshToken() == null || member.getRefreshTokenExpiry().isBefore(LocalDateTime.now())) {
             member.issueRefreshToken();
         }

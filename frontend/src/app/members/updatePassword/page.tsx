@@ -106,13 +106,13 @@ export default function UpdatePassword() {
       <div className="relative z-10 w-[448px] flex flex-col items-center">
         <h1
           className="text-[24px] font-bold leading-[32px] mb-2"
-          style={{ color: "#0F0A03" }}
+          style={{ color: "#0F0A03",marginBottom: "12px" }}
         >
           비밀번호 재설정
         </h1>
         <p
           className="text-[14px] font-[300] leading-[20px] mb-[20px]"
-          style={{ color: "#5A5549" }}
+          style={{ color: "#5A5549", marginBottom: "20px" }}
         >
           등록된 이메일로 인증번호를 발송해드려요
         </p>

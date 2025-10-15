@@ -89,4 +89,9 @@ public class FreelancerService {
 
         freelancer.update(dto.freelancerTitle(), dto.type(), dto.location(), dto.content(), dto.isOnSite(), dto.minMonthlyRate(), dto.maxMonthlyRate(), updatedImageUrl);
     }
+
+    @Transactional(readOnly = true)
+    public Freelancer findByMemberId(Long memberId) {
+        return freelancerRepository.findByMemberId(memberId).orElse(null);
+    }
 }

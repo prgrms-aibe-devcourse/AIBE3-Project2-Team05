@@ -85,13 +85,13 @@ export default function FindId() {
         <div className="w-full flex flex-col items-center mb-6">
           <h1
             className="text-[24px] font-bold leading-[32px] mb-3"
-            style={{ color: "#0F0A03" }}
+            style={{ color: "#0F0A03",marginBottom: "12px" }}
           >
             아이디 찾기
           </h1>
           <p
             className="text-[14px] font-[300] leading-[20px]"
-            style={{ color: "#5A5549" }}
+            style={{ color: "#5A5549", marginBottom: "20px" }}
           >
             등록 된 이메일로 인증번호를 발송해드려요
           </p>
