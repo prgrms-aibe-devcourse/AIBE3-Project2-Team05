@@ -28,7 +28,7 @@ export default function MyPage() {
           return;
         }
 
-        const member = data.Data;
+        const member = data.data;
         if (member) {
           setUsername(member.username ?? "");
           setNickname(member.nickname ?? "");

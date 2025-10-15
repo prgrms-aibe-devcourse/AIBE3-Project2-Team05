@@ -6,7 +6,6 @@ import {
   useEffect,
   useState,
 } from "react";
-
 type UserContextType = {
   username: string | null;
   memberId: number | null;
@@ -16,7 +15,6 @@ type UserContextType = {
   setRoles: (roles: string[]) => void; // Role setter 추가
   isLoaded: boolean;
 };
-
 const UserContext = createContext<UserContextType>({
   username: null,
   memberId: null,
@@ -26,13 +24,11 @@ const UserContext = createContext<UserContextType>({
   setRoles: () => {},
   isLoaded: false,
 });
-
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [username, setUsernameState] = useState<string | null>(null);
   const [memberId, setMemberIdState] = useState<number | null>(null);
   const [roles, setRolesState] = useState<string[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
-
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -64,19 +60,15 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     };
     fetchUser();
   }, []);
-
   const setUsername = (name: string | null) => {
     setUsernameState(name);
   };
-
   const setMemberId = (id: number | null) => {
     setMemberIdState(id);
   };
-
   const setRoles = (roles: string[]) => {
     setRolesState(roles);
   };
-
   return (
     <UserContext.Provider
       value={{ username, memberId, roles, setUsername, setMemberId, setRoles, isLoaded }}
@@ -85,5 +77,4 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     </UserContext.Provider>
   );
 };
-
 export const useUser = () => useContext(UserContext);
