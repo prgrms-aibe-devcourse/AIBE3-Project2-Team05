@@ -162,7 +162,7 @@ export default function FreelancerSearchPage() {
                 onChange={() => setShowOnlyResident(s => !s)}
                 style={{ accentColor: "#ed6a23" }}
               />
-              상주 가능한 프리랜서만
+              상주 가능만 보기
             </label>
           </div>
         </aside>
@@ -284,7 +284,11 @@ export default function FreelancerSearchPage() {
                       flexShrink: 0,
                     }}>
                       <img
-                        src={fullImageUrl(f.freelancerProfileImageUrl)}
+                        src={
+                    f?.freelancerProfileImageUrl
+                            ? fullImageUrl(f.freelancerProfileImageUrl)
+                            : "/logo-full.png"
+                        }
                         alt={f.nickname || "프리랜서"}
                         style={{ width: "100%", height: "100%", objectFit: "cover" }}
                       />
@@ -357,8 +361,8 @@ export default function FreelancerSearchPage() {
                         color: "#ed6a23",
                         fontSize: "1.1rem",
                       }}>
-                        {Math.round((f.minMonthlyRate ?? f.minRate ?? 0) / 10000).toLocaleString()}만 ~{" "}
-                        {Math.round((f.maxMonthlyRate ?? f.maxRate ?? 0) / 10000).toLocaleString()}만
+                        {Math.round(f.minMonthlyRate ?? f.minRate ?? 0).toLocaleString()}만 ~{" "}
+                        {Math.round(f.maxMonthlyRate ?? f.maxRate ?? 0).toLocaleString()}만
                       </div>
                       <div style={{ fontSize: "13px", color: "#999" }}>월 단가</div>
                     </div>
