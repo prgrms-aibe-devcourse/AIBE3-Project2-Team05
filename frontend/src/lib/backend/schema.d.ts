@@ -1717,9 +1717,10 @@ export interface components {
             unpaged?: boolean;
             paged?: boolean;
             /** Format: int32 */
-            pageNumber?: number;
-            /** Format: int32 */
             pageSize?: number;
+            /** Format: int32 */
+            pageNumber?: number;
+            unpaged?: boolean;
         };
         SortObject: {
             empty?: boolean;
@@ -3167,7 +3168,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["FreelancerDetailResponseDto"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataFreelancerDto"];
                 };
             };
         };

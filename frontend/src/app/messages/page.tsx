@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { ChatModal } from '@/components/ChatModal'
 import { useAuth } from '@/global/auth/hooks/useAuth'
 import { useConversations } from '@/hooks/useConversations'
-import { ConversationCard } from './_components/ConversationCard'
-import { ChatModal } from '@/components/ChatModal'
+import '@/styles/applications-messages.css'
+import { Button } from '@/ui/button'
 import { Card } from '@/ui/card'
 import { Input } from '@/ui/input'
-import { Button } from '@/ui/button'
+import { useCallback, useEffect, useState } from 'react'
+import { ConversationCard } from './_components/ConversationCard'
 
 export default function MessagesPage() {
   const { user, isLoading: authLoading } = useAuth()
@@ -82,7 +83,7 @@ export default function MessagesPage() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-16 min-h-page">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">로딩 중...</p>
@@ -93,7 +94,7 @@ export default function MessagesPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-16 min-h-page">
         <Card className="p-8 text-center">
           <p className="text-destructive mb-4">{error}</p>
           <Button onClick={refetch}>다시 시도</Button>
@@ -103,7 +104,7 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 min-h-page">
       <h1 className="text-3xl font-bold mb-6">메시지</h1>
 
       {/* 검색 및 필터 */}
