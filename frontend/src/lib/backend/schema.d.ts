@@ -762,6 +762,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/freelancers/careers/{careerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getCareer"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/projects": {
         parameters: {
             query?: never;
@@ -1388,6 +1404,27 @@ export interface components {
             msg?: string;
             data?: components["schemas"]["PortfolioResponseDto"];
         };
+        CareerResponseDto: {
+            freelancerName?: string;
+            /** Format: int64 */
+            id?: number;
+            title?: string;
+            company?: string;
+            position?: string;
+            /** Format: date */
+            startDate?: string;
+            /** Format: date */
+            endDate?: string;
+            current?: boolean;
+            description?: string;
+        };
+        RsDataCareerResponseDto: {
+            resultCode?: string;
+            /** Format: int32 */
+            statusCode?: number;
+            msg?: string;
+            data?: components["schemas"]["CareerResponseDto"];
+        };
         ProjectFile: {
             /** Format: int64 */
             id?: number;
@@ -1649,20 +1686,6 @@ export interface components {
             techNameList?: string[];
             freelancerProfileImageUrl?: string;
         };
-        CareerResponseDto: {
-            freelancerName?: string;
-            /** Format: int64 */
-            id?: number;
-            title?: string;
-            company?: string;
-            position?: string;
-            /** Format: date */
-            startDate?: string;
-            /** Format: date */
-            endDate?: string;
-            current?: boolean;
-            description?: string;
-        };
         FreelancerDetailResponseDto: {
             /** Format: int64 */
             id?: number;
@@ -1693,10 +1716,10 @@ export interface components {
             freelancerProfileImageUrl?: string;
         };
         PageProjectResponse: {
-            /** Format: int32 */
-            totalPages?: number;
             /** Format: int64 */
             totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
             first?: boolean;
             last?: boolean;
             /** Format: int32 */
@@ -1705,26 +1728,26 @@ export interface components {
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         PageableObject: {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
-            unpaged?: boolean;
             paged?: boolean;
             /** Format: int32 */
             pageNumber?: number;
             /** Format: int32 */
             pageSize?: number;
+            unpaged?: boolean;
         };
         SortObject: {
             empty?: boolean;
-            unsorted?: boolean;
             sorted?: boolean;
+            unsorted?: boolean;
         };
         RsDataListLong: {
             resultCode?: string;
@@ -2640,7 +2663,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataCareerResponseDto"];
                 };
             };
         };
@@ -3168,6 +3191,28 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["FreelancerDetailResponseDto"];
+                };
+            };
+        };
+    };
+    getCareer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                careerId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["CareerResponseDto"];
                 };
             };
         };
