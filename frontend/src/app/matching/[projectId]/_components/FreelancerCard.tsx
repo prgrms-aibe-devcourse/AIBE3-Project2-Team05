@@ -1,7 +1,7 @@
 import { Badge } from '@/ui/badge'
 import { Button } from '@/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
-import type { FreelancerRecommendationDto } from '@/global/backend/apiV1/types'
+import type { FreelancerRecommendationDto } from '@/lib/backend/apiV1/types'
 
 interface FreelancerCardProps {
   freelancer: FreelancerRecommendationDto

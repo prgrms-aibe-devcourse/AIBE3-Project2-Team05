@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { apiClient } from '@/global/backend/client'
+import { apiClient } from '@/lib/backend/client'
 
 export interface Conversation {
   projectId: number

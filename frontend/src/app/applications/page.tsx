@@ -1,13 +1,14 @@
 'use client'
 
+import { ChatModal } from '@/components/ChatModal'
+import { useUser } from '@/app/context/UserContext'
 import { useState, useEffect } from 'react'
-import { useAuth } from '@/global/auth/hooks/useAuth'
-import { apiClient } from '@/global/backend/client'
+import { apiClient } from '@/lib/backend/client'
+import '@/styles/applications-messages.css'
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 import { Button } from '@/ui/button'
 import { Badge } from '@/ui/badge'
 import { useRouter } from 'next/navigation'
-import { ChatModal } from '@/components/ChatModal'
 
 interface ProjectListItem {
   id: number
@@ -31,7 +32,7 @@ interface Submission {
 }
 
 export default function ApplicationsPage() {
-  const { user, isLoading: authLoading } = useAuth()
+  const { user, isLoading: authLoading } = useUser()
   const router = useRouter()
   const [projects, setProjects] = useState<ProjectListItem[]>([])
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null)
@@ -203,7 +204,7 @@ export default function ApplicationsPage() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="container mx-auto py-8 px-4">
+      <div className="container mx-auto py-8 px-4 min-h-page">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
@@ -216,7 +217,7 @@ export default function ApplicationsPage() {
 
   if (projects.length === 0) {
     return (
-      <div className="container mx-auto py-8 px-4">
+      <div className="container mx-auto py-8 px-4 min-h-page">
         <h1 className="text-3xl font-bold mb-6">지원자 관리</h1>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
@@ -235,7 +236,7 @@ export default function ApplicationsPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-8 px-4 min-h-page">
       <h1 className="text-3xl font-bold mb-6">지원자 관리</h1>
 
       {/* 프로젝트 선택 */}

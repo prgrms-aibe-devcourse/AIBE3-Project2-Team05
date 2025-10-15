@@ -6,7 +6,7 @@ import { useState } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setUsername } = useUser();
+  const { login } = useUser();
 
   const [usernameInput, setUsernameInput] = useState("");
   const [password, setPassword] = useState("");
@@ -24,31 +24,12 @@ export default function LoginPage() {
     }
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/member/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ username: usernameInput, password }),
-        }
-      );
-      const data = await res.json();
-
-      if (!res.ok) {
-        setErrorMsg(data.msg || "로그인 실패");
-        return;
-      }
-
-      setSuccessMsg(data.msg || "로그인 성공");
-
-      // 새로고침 시 유지
-      const usernameFromDto = data.Data?.username ?? null;
-      setUsername(usernameFromDto);
+      const message = await login(usernameInput, password);
+      setSuccessMsg(message || "로그인 성공");
       window.location.href = "/";
     } catch (err) {
       console.error(err);
-      setErrorMsg("로그인 중 오류가 발생했습니다.");
+      setErrorMsg(err instanceof Error ? err.message : "로그인 중 오류가 발생했습니다.");
     }
   };
 

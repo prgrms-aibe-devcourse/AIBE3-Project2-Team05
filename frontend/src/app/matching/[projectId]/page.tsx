@@ -5,15 +5,15 @@ import { useParams, useRouter } from 'next/navigation'
 import { FreelancerCard } from './_components/FreelancerCard'
 import { FreelancerProfileModal } from './_components/FreelancerProfileModal'
 import { ProposalMessageModal } from './_components/ProposalMessageModal'
-import { apiClient } from '@/global/backend/client'
-import { useAuth } from '@/global/auth/hooks/useAuth'
-import type { RecommendationResponseDto, FreelancerRecommendationDto } from '@/global/backend/apiV1/types'
+import { apiClient } from '@/lib/backend/client'
+import { useUser } from '@/app/context/UserContext'
+import type { RecommendationResponseDto, FreelancerRecommendationDto } from '@/lib/backend/apiV1/types'
 
 export default function MatchingPage() {
   const params = useParams()
   const projectId = params.projectId as string
   const router = useRouter()
-  const { user, isLoading: authLoading } = useAuth()
+  const { user, isLoading: authLoading } = useUser()
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

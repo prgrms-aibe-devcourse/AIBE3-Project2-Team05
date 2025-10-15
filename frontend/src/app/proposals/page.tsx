@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAuth } from '@/global/auth/hooks/useAuth'
-import { apiClient } from '@/global/backend/client'
+import { useUser } from '@/app/context/UserContext'
+import { apiClient } from '@/lib/backend/client'
 import { useRouter } from 'next/navigation'
 import { ProposalCard } from './_components/ProposalCard'
 import { AcceptRejectModal } from './_components/AcceptRejectModal'
@@ -28,7 +28,7 @@ interface Proposal {
 }
 
 export default function ProposalsPage() {
-  const { user, isLoading: authLoading } = useAuth()
+  const { user, isLoading: authLoading } = useUser()
   const router = useRouter()
   const [proposals, setProposals] = useState<Proposal[]>([])
   const [isLoading, setIsLoading] = useState(true)
