@@ -1693,28 +1693,27 @@ export interface components {
             freelancerProfileImageUrl?: string;
         };
         PageProjectResponse: {
-            /** Format: int32 */
-            totalPages?: number;
             /** Format: int64 */
             totalElements?: number;
-            first?: boolean;
-            last?: boolean;
+            /** Format: int32 */
+            totalPages?: number;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["ProjectResponse"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            pageable?: components["schemas"]["PageableObject"];
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         PageableObject: {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
-            unpaged?: boolean;
             paged?: boolean;
             /** Format: int32 */
             pageSize?: number;
@@ -1724,8 +1723,8 @@ export interface components {
         };
         SortObject: {
             empty?: boolean;
-            unsorted?: boolean;
             sorted?: boolean;
+            unsorted?: boolean;
         };
         RsDataListLong: {
             resultCode?: string;
@@ -3168,7 +3167,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataFreelancerDto"];
+                    "application/json;charset=UTF-8": components["schemas"]["FreelancerDetailResponseDto"];
                 };
             };
         };
