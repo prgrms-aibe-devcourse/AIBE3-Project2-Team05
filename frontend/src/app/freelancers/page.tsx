@@ -38,16 +38,21 @@ export default function FreelancerSearchPage() {
     // 검색어
     if (query) {
       const q = query.toLowerCase();
-      const name = (f.nickname || "").toString();
-      const title = (f.freelancerTitle || "").toString();
-      const skills = (f.skills || []).join(" ");
-      if (
-        !(
-          name.toLowerCase().includes(q) ||
-          title.toLowerCase().includes(q) ||
-          skills.toLowerCase().includes(q)
-        )
-      ) return false;
+      const name = (f.nickname || "").toString().toLowerCase();
+      const title = (f.freelancerTitle || "").toString().toLowerCase();
+      const content = (f.content || f.description || "").toString().toLowerCase();
+      // techList 내부의 techName, techCategory 모두 검색에 포함
+      const teches = (f.techList || [])
+        .map((t: any) => `${(t.techName || "").toString()} ${(t.techCategory || t.category || "").toString()}`)
+        .join(" ")
+        .toLowerCase();
+
+      if (!(
+        name.includes(q) ||
+        title.includes(q) ||
+        content.includes(q) ||
+        teches.includes(q)
+      )) return false;
     }
     // 유형
     if (selectedType !== "전체" && f.type !== selectedType) return false;
@@ -261,11 +266,12 @@ export default function FreelancerSearchPage() {
                   background: "#fff",
                   borderRadius: "13px",
                   boxShadow: "0 2px 12px #0001",
-                  padding: "32px 26px",
+                  padding: "18px 23px",
                   display: "flex",
                   flexDirection: "column",
-                  minHeight: "290px",
+                  height: "320px", // 고정 높이
                   gap: "10px",
+                  overflow: "hidden",
                 }}>
                   {/* 이미지, 닉네임, 타이틀 가로배치 */}
                   <div style={{
@@ -276,8 +282,8 @@ export default function FreelancerSearchPage() {
                   }}>
                     {/* 프로필 이미지 */}
                     <div style={{
-                      width: "70px",
-                      height: "70px",
+                      width: "80px",
+                      height: "80px",
                       borderRadius: "14px",
                       overflow: "hidden",
                       background: "#f7f7f7",
@@ -305,48 +311,73 @@ export default function FreelancerSearchPage() {
                         color: "#ed6a23",
                         fontWeight: 700,
                         fontSize: "16px",
-                        marginTop: "3px"
+                        marginTop: "10px"
                       }}>{f.freelancerTitle}</div>
                     </div>
                   </div>
                   {/* 기타 정보 */}
                   <div style={{
                     display: "flex",
-                    gap: "12px",
+                    gap: "5px",
                     fontSize: "15px",
                     color: "#666",
                     marginBottom: "7px"
                   }}>
-                    <span>★ {f.ratingAvg ?? f.rating ?? "0.0"}</span>
-                    <span>📍 {f.location}</span>
+                    <span style={{ color: "#f59e0b" }}>★ {f.ratingAvg ?? f.rating ?? "0.0"}</span>
+                    <span>({f.reviewsCount ?? f.reviewsCount ?? 0})</span>
+                    <span style={{marginLeft: "40px"}}>🇰🇷 {f.location}</span>
+                    <span style={{marginLeft: "40px"}}>👨‍💻 {f.type}</span>
                   </div>
                   {/* 카드 본문 */}
                   <div style={{
                     color: "#555",
                     fontSize: "15px",
-                    marginBottom: "10px",
-                    minHeight: "38px"
+                    marginBottom: "1px",
+                    minHeight: "38px",
+                    display: '-webkit-box',
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    wordBreak: 'break-word'
                   }}>{f.content ?? f.description}</div>
-                  {/* 기술 태그 */}
-                  <div style={{
-                    display: "flex",
-                    gap: "7px",
-                    flexWrap: "wrap",
-                    marginBottom: "10px"
-                  }}>
-                    {(f.skills || []).map((s: string) => (
-                      <span
-                        key={s}
-                        style={{
-                          background: "#f7f7f7",
-                          color: "#ed6a23",
-                          fontWeight: 600,
-                          borderRadius: "8px",
-                          padding: "5px 13px",
-                          fontSize: "13px",
-                        }}
-                      >{s}</span>
-                    ))}
+                  {/* 기술 태그 (한 줄로 표시, 우선순위: ADVANCED > INTERMEDIATE > BEGINNER) */}
+                  <div style={{ flex: 1, overflow: 'hidden' }}>
+                    <div
+                      title={(f.techList || []).map((t: any) => t.techName).join(", ")}
+                      style={{
+                        display: "flex",
+                        gap: "7px",
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
+                        textOverflow: "ellipsis",
+                        marginBottom: "10px"
+                      }}
+                    >
+                      {(f.techList || []).slice().sort((a: any, b: any) => {
+                        const order = (lvl: string) => {
+                          const v = (lvl || "").toUpperCase();
+                          if (v === "ADVANCED") return 0;
+                          if (v === "INTERMEDIATE") return 1;
+                          if (v === "BEGINNER") return 2;
+                          return 3;
+                        };
+                        return order(a.techLevel || a.level) - order(b.techLevel || b.level);
+                      }).map((s: any, idx: number) => (
+                        <span
+                          key={s.id ?? idx}
+                          style={{
+                            display: "inline-block",
+                            background: "#f7f7f7",
+                            fontWeight: 600,
+                            borderRadius: "8px",
+                            padding: "5px 13px",
+                            fontSize: "13px",
+                            marginRight: "6px",
+                          }}
+                        >{s.techName}</span>
+                      ))}
+                    </div>
                   </div>
                   {/* 액션/단가 */}
                   <div style={{
@@ -358,7 +389,6 @@ export default function FreelancerSearchPage() {
                     <div>
                       <div style={{
                         fontWeight: 800,
-                        color: "#ed6a23",
                         fontSize: "1.1rem",
                       }}>
                         {Math.round((f.minMonthlyRate ?? f.minRate ?? 0) / 10000).toLocaleString()}만 ~{" "}
@@ -367,6 +397,24 @@ export default function FreelancerSearchPage() {
                       <div style={{ fontSize: "13px", color: "#999" }}>월 단가</div>
                     </div>
                     <div style={{ display: "flex", gap: "7px" }}>
+                      <div style={{ flex: 1, minWidth: 0, textAlign: "center", background: "#f8faff",
+                        borderRadius: "8px",
+                        padding: "7px 8px",
+                        fontSize: "22px",
+                        fontWeight: 800,
+                        marginRight: "10px",
+                        color: "#16a34a",
+                        letterSpacing: "-1px",
+                        position: "relative", }}>
+                          <span style={{
+                            display: "block",
+                            fontSize: "15px",
+                            fontWeight: 800,
+                            color: f?.isOnSite ? "#16a34a" : "#7b898dff",
+                          }}>
+                            {f?.isOnSite ? "상주" : "작업중"}
+                          </span>
+                        </div>
                       <Link href={`/freelancers/${f.id}`}>
                         <button
                           style={{
@@ -381,18 +429,6 @@ export default function FreelancerSearchPage() {
                           }}
                         >프로필</button>
                       </Link>
-                      <button
-                        style={{
-                          background: "#f7f7f7",
-                          color: "#ed6a23",
-                          border: "none",
-                          borderRadius: "8px",
-                          padding: "7px 18px",
-                          fontWeight: 700,
-                          fontSize: "15px",
-                          cursor: "pointer",
-                        }}
-                      >연락</button>
                     </div>
                   </div>
                 </div>
