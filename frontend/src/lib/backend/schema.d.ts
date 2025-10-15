@@ -1361,6 +1361,8 @@ export interface components {
         FreelancerTechDto: {
             /** Format: int64 */
             id?: number;
+            /** Format: int64 */
+            techId?: number;
             techCategory?: string;
             techName?: string;
             techLevel?: string;
@@ -1716,10 +1718,10 @@ export interface components {
             freelancerProfileImageUrl?: string;
         };
         PageProjectResponse: {
-            /** Format: int64 */
-            totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            /** Format: int64 */
+            totalElements?: number;
             first?: boolean;
             last?: boolean;
             /** Format: int32 */
@@ -1728,9 +1730,9 @@ export interface components {
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
+            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             numberOfElements?: number;
-            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         PageableObject: {
@@ -1746,8 +1748,8 @@ export interface components {
         };
         SortObject: {
             empty?: boolean;
-            unsorted?: boolean;
             sorted?: boolean;
+            unsorted?: boolean;
         };
         RsDataListLong: {
             resultCode?: string;

@@ -3,9 +3,7 @@ package com.back.domain.freelancer.freelancerTech.entity;
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.tech.entity.Tech;
 import com.back.global.jpa.entity.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,15 +18,16 @@ public class FreelancerTech extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Tech tech;
 
-    private String techLevel;
+    @Enumerated(EnumType.STRING)
+    private TechLevel techLevel;
 
     public FreelancerTech(Freelancer freelancer, Tech tech, String techLevel) {
         this.freelancer = freelancer;
         this.tech = tech;
-        this.techLevel = techLevel;
+        this.techLevel = TechLevel.valueOf(techLevel);
     }
 
     public void update(String techLevel) {
-        this.techLevel = techLevel;
+        this.techLevel = TechLevel.valueOf(techLevel);
     }
 }

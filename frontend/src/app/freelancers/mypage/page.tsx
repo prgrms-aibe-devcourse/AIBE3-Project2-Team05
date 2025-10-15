@@ -1,6 +1,7 @@
 "use client";
 import CareerAddModal from "@/components/CareerAddModal";
 import CareerEditModal from "@/components/CareerEditModal";
+import TechAddModal from "@/components/TechAddModal";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -773,71 +774,16 @@ export default function FreelancerMyPage() {
                       )}
                     </div>
                     {techAddModalOpen && (
-                    <div
-                      style={{
-                        position: "fixed",
-                        left: 0,
-                        top: 0,
-                        width: "100vw",
-                        height: "100vh",
-                        background: "rgba(40,40,40,0.18)",
-                        zIndex: 99,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center"
-                      }}
-                      onClick={() => setTechAddModalOpen(false)}
-                    >
-                      <div
-                        onClick={e => e.stopPropagation()}
-                        style={{
-                          background: "#fff",
-                          borderRadius: "13px",
-                          boxShadow: "0 2px 18px #16a34a33",
-                          minWidth: 380,
-                          maxWidth: 540,
-                          width: "100%",
-                          padding: "32px 28px",
-                          position: "relative"
+                    <TechAddModal
+                        onClose={() => setTechAddModalOpen(false)}
+                        onAdd={(tech) => {
+                        setFreelancer((prev: any) => ({
+                            ...prev,
+                            techList: [...(prev.techList || []), tech],
+                        }));
                         }}
-                      >
-                        <button
-                          style={{
-                            position: "absolute", right: 18, top: 16,
-                            background: "none", border: "none",
-                            fontSize: "22px", color: "#888", cursor: "pointer"
-                          }}
-                          onClick={() => setTechAddModalOpen(false)}
-                          aria-label="닫기"
-                        >
-                          ×
-                        </button>
-                        <h3 style={{
-                          fontWeight: 800, fontSize: "20px", marginBottom: "20px", color: "#16a34a", textAlign: "center"
-                        }}>기술스택 추가</h3>
-                        <div style={{ textAlign: "center", color: "#888", marginBottom: 10 }}>
-                          기술스택 추가 기능을 임시로 구현하세요.
-                        </div>
-                        <button
-                          style={{
-                            background: "#16a34a",
-                            color: "#fff",
-                            border: "none",
-                            borderRadius: "8px",
-                            padding: "10px 0px",
-                            fontWeight: 700,
-                            fontSize: "16px",
-                            width: "100%",
-                            marginTop: "10px",
-                            cursor: "pointer",
-                          }}
-                          onClick={() => setTechAddModalOpen(false)}
-                        >
-                          닫기
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                    />
+                    )}
                   </div>
                 </div>
               )}
