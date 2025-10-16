@@ -1,3 +1,4 @@
+import { getTodayString } from "@/utils/dateUtils";
 import React, { useState } from "react";
 
 export default function CareerAddModal({ onClose, onAdd }: { onClose: () => void, onAdd: (career: any) => void }) {
@@ -15,15 +16,24 @@ export default function CareerAddModal({ onClose, onAdd }: { onClose: () => void
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type, checked } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setForm((prev) => {
+      // When toggling the 'current' checkbox, do NOT overwrite endDate.
+      if (name === 'current') {
+        return { ...prev, current: checked };
+      }
+      return {
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    if(form.current) {
+          form.endDate = getTodayString();
+        }
     // 실제 API 등록 로직 onAdd(form)
     try {
       await onAdd(form);
@@ -122,6 +132,7 @@ export default function CareerAddModal({ onClose, onAdd }: { onClose: () => void
                 type="date"
                 name="startDate"
                 value={form.startDate}
+                max={getTodayString()}
                 onChange={handleChange}
                 required
                 style={{ width: "100%", padding: "10px", borderRadius: 7, border: "1px solid #dde1e7", fontSize: "1rem" }}
@@ -134,6 +145,8 @@ export default function CareerAddModal({ onClose, onAdd }: { onClose: () => void
                 name="endDate"
                 value={form.endDate}
                 onChange={handleChange}
+                min={form.startDate}
+                max={getTodayString()}
                 disabled={form.current}
                 required={!form.current}
                 style={{ width: "100%", padding: "10px", borderRadius: 7, border: "1px solid #dde1e7", fontSize: "1rem", background: form.current ? "#f3f4f6" : "#fff" }}

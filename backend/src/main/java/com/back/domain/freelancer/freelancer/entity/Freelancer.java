@@ -47,7 +47,7 @@ public class Freelancer extends BaseEntity {
     private Double averageRating = 0.0;
 
     // ✅ 리뷰 수 (평균 계산시 분모)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
     @Builder.Default
     private Integer reviewCount = 0;
 
