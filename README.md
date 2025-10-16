@@ -160,10 +160,6 @@ src
   - 프로젝트와 포트폴리오가 모두 있는 경우 자동 부여
 - **재부여 규칙**
   - 프로젝트와 포트폴리오가 모두 없는 경우 **GENERAL**로 자동 변경
-
-![회원가입 및 로그인](https://github.com/user-attachments/assets/30308847-a1e0-4c7e-bd60-43b465d42b39)
-![회원 등급 정책](https://github.com/user-attachments/assets/b4bc4543-7194-41bf-a928-45c3ba7f5331)
-
 ---
 
 ## 2. 아이디 찾기 / 비밀번호 재설정
@@ -184,14 +180,6 @@ src
 - 사용자가 인증 코드 입력 → 검증
 - 인증 성공 시 새로운 비밀번호 입력 → DB 업데이트
 - 인증/변경 완료 후 사용자에게 성공 메시지 반환
-
-![아이디 찾기](https://github.com/user-attachments/assets/81631928-a2ba-496d-bb0a-92b67d3bc93d)
-![비밀번호 재설정](https://github.com/user-attachments/assets/2408bf07-eb7f-4581-8ebd-ceaec029b0e5)
-
-
-![인증 코드 확인](https://github.com/user-attachments/assets/263cdb11-3e8d-49e4-9e80-6f8f8b0a1109)
-
-
 ---
 
 ## 3. 마이페이지
@@ -206,10 +194,6 @@ src
   - 포트폴리오 버튼 클릭 → 포트폴리오 관리 마이페이지로 이동
 - PM + FREELANCER 모두 보유 시:
   - 각각의 버튼 클릭 시 해당 권한에 맞는 페이지로 매핑
-
-![마이페이지](https://github.com/user-attachments/assets/a293e742-70fb-44e6-b548-059a141319bd)
-
-
 ---
 
 
