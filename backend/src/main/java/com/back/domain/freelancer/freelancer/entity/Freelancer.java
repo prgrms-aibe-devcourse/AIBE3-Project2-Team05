@@ -31,6 +31,7 @@ public class Freelancer extends BaseEntity {
     private String freelancerTitle;
     private String type;
     private String location;
+    @Column(columnDefinition = "TEXT")
     private String content;
     private Boolean isOnSite;
     private int minMonthlyRate;
