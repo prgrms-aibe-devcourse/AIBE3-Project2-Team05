@@ -794,8 +794,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/reviews/average": {
     "/api/v1/freelancers/careers/{careerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getCareer"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reviews/average": {
         parameters: {
             query?: never;
             header?: never;
@@ -819,7 +834,6 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getAllReviews"];
-        get: operations["getCareer"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1835,10 +1849,10 @@ export interface components {
             freelancerProfileImageUrl?: string;
         };
         PageProjectResponse: {
-            /** Format: int64 */
-            totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            /** Format: int64 */
+            totalElements?: number;
             first?: boolean;
             last?: boolean;
             /** Format: int32 */
@@ -1847,9 +1861,9 @@ export interface components {
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
+            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             numberOfElements?: number;
-            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         PageableObject: {
@@ -1865,8 +1879,8 @@ export interface components {
         };
         SortObject: {
             empty?: boolean;
-            sorted?: boolean;
             unsorted?: boolean;
+            sorted?: boolean;
         };
         RsDataListLong: {
             resultCode?: string;
@@ -3406,6 +3420,28 @@ export interface operations {
             };
         };
     };
+    getCareer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                careerId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["CareerResponseDto"];
+                };
+            };
+        };
+    };
     getAverageRating: {
         parameters: {
             query: {
@@ -3433,13 +3469,6 @@ export interface operations {
             query?: never;
             header?: never;
             path?: never;
-    getCareer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                careerId: number;
-            };
             cookie?: never;
         };
         requestBody?: never;
@@ -3451,7 +3480,6 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["ReviewResponseDto"][];
-                    "application/json;charset=UTF-8": components["schemas"]["CareerResponseDto"];
                 };
             };
         };

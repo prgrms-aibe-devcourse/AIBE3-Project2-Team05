@@ -68,7 +68,7 @@ const sampleProfiles = [
   },
   {
     id: 6,
-    imageUrl: "/profile6.jpg",
+    imageUrl: "/윤주찬.jpg",
     nickname: "윤주찬",
     title: "인증 전문가",
     location: "서울",
@@ -108,7 +108,7 @@ const sampleProfiles = [
   },
   {
     id: 2,
-    imageUrl: "/profile2.jpg",
+    imageUrl: "",
     nickname: "박지영",
     title: "UI/UX 디자이너",
     location: "부산",
@@ -116,7 +116,7 @@ const sampleProfiles = [
   },
   {
     id: 3,
-    imageUrl: "/profile3.jpg",
+    imageUrl: "",
     nickname: "이수진",
     title: "백엔드 개발자",
     location: "대전",
@@ -124,7 +124,7 @@ const sampleProfiles = [
   },
   {
     id: 4,
-    imageUrl: "/profile4.jpg",
+    imageUrl: "",
     nickname: "최지우",
     title: "프론트엔드 개발자",
     location: "인천",
