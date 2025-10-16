@@ -1,5 +1,6 @@
 package com.back.domain.review.controller;
 
+import com.back.domain.freelancer.freelancer.service.FreelancerFinder;
 import com.back.domain.review.dto.ReviewRequestDto;
 import com.back.domain.review.dto.ReviewResponseDto;
 import com.back.domain.review.service.ReviewService;
@@ -24,6 +25,7 @@ import java.util.List;
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final FreelancerFinder freelancerFinder;
 
     /** 리뷰 등록 (인증 필요) */
     @PostMapping
@@ -66,6 +68,12 @@ public class ReviewController {
     ) {
         List<ReviewResponseDto> reviews = reviewService.getReviewsByTarget(targetUserId);
         return ResponseEntity.ok(reviews); // 200
+    }
+
+    //freelancerId로 조회하는 메서드 추가
+    @GetMapping("/{freelancerId}")
+    public List<ReviewResponseDto> getReviewsByFreelancerId(@PathVariable Long freelancerId) {
+        return reviewService.getReviewsByFreelancerId(freelancerId);
     }
 
     /** 대상 사용자 평균 평점 조회 (공개) */
