@@ -28,7 +28,7 @@ interface Proposal {
 }
 
 export default function ProposalsPage() {
-  const { user, isLoading: authLoading } = useUser()
+  const { user, roles, isLoading: authLoading } = useUser()
   const router = useRouter()
   const [proposals, setProposals] = useState<Proposal[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -47,32 +47,14 @@ export default function ProposalsPage() {
 
   const isPm = isFreelancer === false
 
-  // Freelancer 여부 확인
+  // Freelancer 여부 확인 (roles 기반)
   useEffect(() => {
-    const checkRole = async () => {
-      if (!user || authLoading) return
+    if (authLoading || !user) return
 
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
-          { credentials: 'include' }
-        )
-
-        if (res.ok) {
-          const data = await res.json()
-          // RsData 응답: resultCode가 200으로 시작하면 프리랜서
-          const isSuccess = data.resultCode?.startsWith('200')
-          setIsFreelancer(isSuccess)
-        } else {
-          setIsFreelancer(false)
-        }
-      } catch {
-        setIsFreelancer(false)
-      }
-    }
-
-    checkRole()
-  }, [user, authLoading])
+    const hasFreelancerRole = roles.includes('FREELANCER')
+    setIsFreelancer(hasFreelancerRole)
+    console.log('[Proposals] Freelancer role check:', { roles, hasFreelancerRole })
+  }, [user, authLoading, roles])
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -183,7 +165,7 @@ export default function ProposalsPage() {
     }
   }
 
-  if (authLoading || isLoading || isFreelancer === null) {
+  if (authLoading || isLoading || isFreelancer === null || isFreelancer === undefined) {
     return (
       <div className="container mx-auto py-8 px-4">
         <LoadingSpinner />

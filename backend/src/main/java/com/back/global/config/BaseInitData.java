@@ -1184,7 +1184,7 @@ public class BaseInitData implements CommandLineRunner {
         Member user4 = memberRepository.findByUsername("iot_expert").orElseThrow();
         Member user5 = memberRepository.findByUsername("marketer1").orElseThrow();
 
-        // 프리랜서 1: 풀스택 개발자 (React, Spring Boot, Java, MySQL - EXPERT)
+        // 프리랜서 1: 풀스택 개발자 (React, Spring Boot, Java, MySQL - ADVANCED)
         Freelancer freelancer1 = new Freelancer(
                 user1,
                 "풀스택 시니어 개발자",
@@ -1218,7 +1218,7 @@ public class BaseInitData implements CommandLineRunner {
         freelancer2.setReviewsCount(7);
         freelancerRepository.save(freelancer2);
 
-        // 프리랜서 3: 백엔드 개발자 (Spring Boot, Node.js, Python - EXPERT)
+        // 프리랜서 3: 백엔드 개발자 (Spring Boot, Node.js, Python - ADVANCED)
         Freelancer freelancer3 = new Freelancer(
                 user3,
                 "백엔드 아키텍트",
@@ -1283,24 +1283,24 @@ public class BaseInitData implements CommandLineRunner {
         Freelancer freelancer5 = freelancers.get(4);
 
         // 프리랜서 1: 풀스택 (React, Spring Boot, Java, MySQL)
-        createFreelancerTech(freelancer1, "FRONTEND", "REACT", "EXPERT");
-        createFreelancerTech(freelancer1, "FRONTEND", "TYPESCRIPT", "EXPERT");
-        createFreelancerTech(freelancer1, "BACKEND", "SPRING_BOOT", "EXPERT");
-        createFreelancerTech(freelancer1, "BACKEND", "JAVA", "EXPERT");
+        createFreelancerTech(freelancer1, "FRONTEND", "REACT", "ADVANCED");
+        createFreelancerTech(freelancer1, "FRONTEND", "TYPESCRIPT", "ADVANCED");
+        createFreelancerTech(freelancer1, "BACKEND", "SPRING_BOOT", "ADVANCED");
+        createFreelancerTech(freelancer1, "BACKEND", "JAVA", "ADVANCED");
         createFreelancerTech(freelancer1, "DATABASE", "MYSQL", "ADVANCED");
 
         // 프리랜서 2: 프론트엔드 (React, TypeScript, Vue)
         createFreelancerTech(freelancer2, "FRONTEND", "REACT", "ADVANCED");
         createFreelancerTech(freelancer2, "FRONTEND", "TYPESCRIPT", "ADVANCED");
-        createFreelancerTech(freelancer2, "FRONTEND", "VUE", "EXPERT");
+        createFreelancerTech(freelancer2, "FRONTEND", "VUE", "ADVANCED");
         createFreelancerTech(freelancer2, "FRONTEND", "JAVASCRIPT", "ADVANCED");
 
         // 프리랜서 3: 백엔드 (Spring Boot, Node.js, Python)
-        createFreelancerTech(freelancer3, "BACKEND", "SPRING_BOOT", "EXPERT");
-        createFreelancerTech(freelancer3, "BACKEND", "JAVA", "EXPERT");
+        createFreelancerTech(freelancer3, "BACKEND", "SPRING_BOOT", "ADVANCED");
+        createFreelancerTech(freelancer3, "BACKEND", "JAVA", "ADVANCED");
         createFreelancerTech(freelancer3, "BACKEND", "NODE_JS", "ADVANCED");
         createFreelancerTech(freelancer3, "BACKEND", "PYTHON", "ADVANCED");
-        createFreelancerTech(freelancer3, "DATABASE", "MYSQL", "EXPERT");
+        createFreelancerTech(freelancer3, "DATABASE", "MYSQL", "ADVANCED");
         createFreelancerTech(freelancer3, "DATABASE", "POSTGRESQL", "ADVANCED");
 
         // 프리랜서 4: 웹 디자인 (HTML, CSS, JavaScript)
@@ -1309,9 +1309,9 @@ public class BaseInitData implements CommandLineRunner {
         createFreelancerTech(freelancer4, "FRONTEND", "JAVASCRIPT", "INTERMEDIATE");
 
         // 프리랜서 5: 데이터 엔지니어 (Python, Django, PostgreSQL)
-        createFreelancerTech(freelancer5, "BACKEND", "PYTHON", "EXPERT");
-        createFreelancerTech(freelancer5, "BACKEND", "DJANGO", "EXPERT");
-        createFreelancerTech(freelancer5, "DATABASE", "POSTGRESQL", "EXPERT");
+        createFreelancerTech(freelancer5, "BACKEND", "PYTHON", "ADVANCED");
+        createFreelancerTech(freelancer5, "BACKEND", "DJANGO", "ADVANCED");
+        createFreelancerTech(freelancer5, "DATABASE", "POSTGRESQL", "ADVANCED");
         createFreelancerTech(freelancer5, "BACKEND", "NODE_JS", "INTERMEDIATE");
 
         log.info("프리랜서 기술스택 데이터 생성이 완료되었습니다.");
