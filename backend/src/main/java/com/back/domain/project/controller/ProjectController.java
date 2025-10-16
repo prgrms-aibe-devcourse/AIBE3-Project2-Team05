@@ -6,9 +6,11 @@ import com.back.domain.project.dto.ProjectResponse;
 import com.back.domain.project.dto.ProjectStatusChangeRequest;
 import com.back.domain.project.entity.Project;
 import com.back.domain.project.entity.enums.*;
+import com.back.domain.project.repository.ProjectRepository;
 import com.back.domain.project.service.ProjectManagementService;
 import com.back.domain.project.service.ProjectQueryService;
 import com.back.global.rsData.RsData;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +27,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class ProjectController {
-
+    private final ProjectRepository  projectRepository;
     private final ProjectManagementService projectManagementService;
     private final ProjectQueryService projectQueryService;
     private final MemberRoleService memberRoleService;
@@ -221,5 +223,12 @@ public class ProjectController {
             return ResponseEntity.status(500)
                     .body(new RsData<>("500-1", "서버 내부 오류가 발생했습니다."));
         }
+    }
+
+    @GetMapping("/{projectId}/status")
+    public ResponseEntity<String> getProjectStatus(@PathVariable Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("프로젝트를 찾을 수 없습니다."));
+        return ResponseEntity.ok(project.getStatus().name());
     }
 }

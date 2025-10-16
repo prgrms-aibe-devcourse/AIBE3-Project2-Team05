@@ -49,7 +49,7 @@ export const Header = () => {
     { text: "프로젝트", path: "/projects" },
     { text: "프리랜서", path: "/freelancers" },
     { text: "매칭 서비스", path: "/matching" },
-    { text: "이용후기", path: "/reviews" },
+    { text: "이용후기", path: "/reviewlist" },
   ];
 
   return (

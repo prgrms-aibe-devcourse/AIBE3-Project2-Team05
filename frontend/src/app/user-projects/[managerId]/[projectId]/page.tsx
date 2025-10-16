@@ -1,5 +1,6 @@
 "use client";
 
+import ReviewConfirmModal from "@/components/ReviewConfirmModal";
 import ErrorDisplay from '@/components/ErrorDisplay';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { ProjectFileApiService } from '@/lib/backend/projectFileApi';
@@ -41,6 +42,45 @@ const UserProjectDetailPage = () => {
     const [statusChangeLoading, setStatusChangeLoading] = useState(false);
     // 파일 상태를 별도로 관리 (ProjectResponse의 projectFiles는 ProjectFileInfo[] 타입)
     const [projectFiles, setProjectFiles] = useState<FileItem[]>([]);
+
+    const [showReviewModal, setShowReviewModal] = useState(false);
+    const [loggedUserId, setLoggedUserId] = useState<number | null>(null);
+
+    useEffect(() => {
+        // JWT에서 id 추출 (accessToken이 있을 경우)
+        const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split(".")[1]));
+                setLoggedUserId(payload.id || payload.userId || payload.sub || null);
+            } catch {
+                setLoggedUserId(null);
+            }
+        }
+    }, []);
+
+    // ✅ 프로젝트 상세 페이지
+    const handleGoToReview = () => {
+        if (!project) {
+            alert("프로젝트 정보를 불러오지 못했습니다.");
+        return;
+        }
+        
+        // project.id: 리뷰 대상이 되는 프로젝트의 id
+        // targetUserId: 내가 리뷰할 "상대방"의 사용자 id (예: 파트너/클라이언트/프리랜서)
+
+        const managerId = project.manager?.id;
+  const targetUserId = managerId || loggedUserId; // fallback
+
+  if (!targetUserId) {
+    alert("리뷰 대상 정보가 없습니다.");
+    return;
+  }
+
+  setShowReviewModal(false);
+  console.log("✅ 이동 시작:", project.id, targetUserId);
+  router.push(`/review?projectId=${project.id}&targetUserId=${targetUserId}`);
+};
 
     useEffect(() => {
         const fetchProject = async (forceRefresh = false) => {
@@ -178,25 +218,54 @@ const UserProjectDetailPage = () => {
                 }),
             });
 
-            if (response.ok) {
-                const updatedProject: ProjectResponse = await response.json();
-                setProject(updatedProject);
-                alert(`프로젝트 상태가 "${getStatusText(newStatus)}"로 변경되었습니다.`);
+            if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      alert('상태 변경에 실패했습니다. 다시 시도해주세요.');
+      return;
+    }
 
-                // 상태 변경 성공 후 내 프로젝트 관리 페이지로 이동
-                router.push(`/user-projects/${params?.managerId}`);
-            } else {
-                const errorData = await response.json().catch(() => ({}));
-                console.error('상태 변경 실패:', response.status, errorData);
-                alert('상태 변경에 실패했습니다. 다시 시도해주세요.');
-            }
-        } catch (error) {
-            console.error('상태 변경 실패:', error);
-            alert('상태 변경에 실패했습니다. 네트워크 연결을 확인해주세요.');
-        } finally {
-            setStatusChangeLoading(false);
-        }
-    };
+    const updated: ProjectResponse = await response.json();
+    setProject(updated);
+    alert(`프로젝트 상태가 "${getStatusText(newStatus)}"로 변경되었습니다.`);
+
+    if (String(newStatus).toUpperCase() === 'COMPLETED') {
+      console.log('✅ COMPLETED → 모달 열기');
+      setShowReviewModal(true);        // 🔥 여기서 끝! (이동 금지)
+      return;
+    }
+
+    // 완료가 아닌 경우에만 이동
+    router.push(`/user-projects/${params?.managerId}`);
+  } catch (e) {
+    alert('상태 변경에 실패했습니다. 네트워크 연결을 확인해주세요.');
+  } finally {
+    setStatusChangeLoading(false);
+  }
+
+        //     if (response.ok) {
+        //         const updatedProject: ProjectResponse = await response.json();
+        //         setProject(updatedProject);
+        //         alert(`프로젝트 상태가 "${getStatusText(newStatus)}"로 변경되었습니다.`);
+
+        //         // ✅ 상태가 완료인 경우엔 이동하지 않고 모달 표시
+        //         if (newStatus === 'COMPLETED') {
+        //             console.log("✅ setShowReviewModal 실행됨");
+        //             setShowReviewModal(true);
+        //         } else {
+        //             router.push(`/user-projects/${params?.managerId}`);
+        //         }
+        //         } else {
+        //         const errorData = await response.json().catch(() => ({}));
+        //         console.error('상태 변경 실패:', response.status, errorData);
+        //         alert('상태 변경에 실패했습니다. 다시 시도해주세요.');
+        //         }
+        //     } catch (error) {
+        //     console.error('상태 변경 실패:', error);
+        //     alert('상태 변경에 실패했습니다. 네트워크 연결을 확인해주세요.');
+        // } finally {
+        //     setStatusChangeLoading(false);
+        // }
+        }; 
 
     // 상태 변경 확인 메시지
     const getStatusChangeMessage = (newStatus: string) => {
@@ -281,6 +350,7 @@ const UserProjectDetailPage = () => {
         }
     };
 
+    console.log("모달 상태:", showReviewModal);
     return (
         <div className="min-h-screen bg-gray-50" style={{ backgroundColor: "var(--background)" }}>
             <div className="max-w-3xl mx-auto p-6" style={{ maxWidth: '48rem', margin: '0 auto', padding: '24px' }}>
@@ -779,8 +849,14 @@ const UserProjectDetailPage = () => {
                             프로젝트 삭제
                         </button>
                     </div>
+                    
                 </div>
             </div>
+            <ReviewConfirmModal
+                show={showReviewModal}
+                onClose={() => setShowReviewModal(false)}
+                onConfirm={handleGoToReview}
+            />
         </div>
     );
 };
