@@ -2,6 +2,7 @@
 
 import { useUser } from '@/app/context/UserContext';
 import { useEffect, useState } from "react";
+import { getAllReviews } from "@/lib/reviewApi";
 
 export default function HomePage() {
   const { username, isLoaded } = useUser();

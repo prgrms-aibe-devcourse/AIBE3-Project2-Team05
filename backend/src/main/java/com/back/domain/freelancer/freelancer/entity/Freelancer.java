@@ -46,9 +46,9 @@ public class Freelancer extends BaseEntity {
     private Double averageRating = 0.0;
 
     // ✅ 리뷰 수 (평균 계산시 분모)
-    @Column(nullable = true)
+    @Column(nullable = false)
     @Builder.Default
-    private int reviewCount = 0;
+    private Integer reviewCount = 0;
 
     @OneToMany(mappedBy = "freelancer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Portfolio> portfolioList = new ArrayList<>();

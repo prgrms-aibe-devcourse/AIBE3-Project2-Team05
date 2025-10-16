@@ -811,7 +811,6 @@ export interface paths {
         trace?: never;
     };
     "/api/reviews/average": {
-    "/api/v1/freelancers/careers/{careerId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -835,7 +834,6 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getAllReviews"];
-        get: operations["getCareer"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1852,14 +1850,14 @@ export interface components {
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
-            first?: boolean;
-            last?: boolean;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["ProjectResponse"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
             pageable?: components["schemas"]["PageableObject"];
@@ -1869,12 +1867,12 @@ export interface components {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
-            unpaged?: boolean;
             paged?: boolean;
             /** Format: int32 */
-            pageNumber?: number;
-            /** Format: int32 */
             pageSize?: number;
+            /** Format: int32 */
+            pageNumber?: number;
+            unpaged?: boolean;
         };
         SortObject: {
             empty?: boolean;
@@ -3468,13 +3466,6 @@ export interface operations {
             query?: never;
             header?: never;
             path?: never;
-    getCareer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                careerId: number;
-            };
             cookie?: never;
         };
         requestBody?: never;
@@ -3486,7 +3477,6 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["ReviewResponseDto"][];
-                    "application/json;charset=UTF-8": components["schemas"]["CareerResponseDto"];
                 };
             };
         };
