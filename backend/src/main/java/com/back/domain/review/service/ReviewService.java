@@ -1,5 +1,7 @@
 package com.back.domain.review.service;
 
+import com.back.domain.freelancer.freelancer.entity.Freelancer;
+import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.repository.MemberRepository;
 import com.back.domain.review.dto.ReviewRequestDto;
@@ -7,139 +9,108 @@ import com.back.domain.review.dto.ReviewResponseDto;
 import com.back.domain.review.entity.Review;
 import com.back.domain.review.repository.ReviewRepository;
 import com.back.global.exception.ServiceException;
-import jakarta.persistence.EntityNotFoundException;
+import com.back.global.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
-    private final MemberRepository userRepository;
+    private final MemberRepository memberRepository;
+    private final FreelancerRepository freelancerRepository;
 
-    /**
-     * 리뷰 등록
-     */
-    @Transactional
-    public ReviewResponseDto createReview(Long authorId, ReviewRequestDto request) {
+    /** 리뷰 생성 */
+    public ReviewResponseDto createReview(Long authorId, ReviewRequestDto dto) {
+        Member author = memberRepository.findById(authorId)
+                .orElseThrow(() -> new IllegalArgumentException("작성자 회원을 찾을 수 없습니다."));
+        Freelancer freelancer = freelancerRepository.findById(dto.getTargetFreelancerId())
+                .orElseThrow(() -> new IllegalArgumentException("리뷰 대상 프리랜서를 찾을 수 없습니다."));
+
+        Member target = freelancer.getMember(); // ✅ 프리랜서가 속한 Member를 가져옴
+
         Review review = Review.builder()
-                .projectId(request.getProjectId())
-                .authorId(authorId)
-                .targetUserId(request.getTargetUserId())
-                .rating(request.getRating())
-                .title(request.getTitle())
-                .content(request.getContent())
+                .projectId(dto.getProjectId())
+                .author(author)
+                .targetUser(target)
+                .rating(dto.getRating())
+                .title(dto.getTitle())
+                .content(dto.getContent())
                 .build();
 
-        reviewRepository.save(review);
-
-        // ✅ 평균 평점 업데이트
-        updateUserAverageRating(request.getTargetUserId());
-
-        return ReviewResponseDto.fromEntity(review);
+        Review saved = reviewRepository.save(review); // ✅ 실제 insert 발생
+        return ReviewResponseDto.fromEntity(saved);
     }
 
-    /**
-     * 리뷰 수정
-     */
-    @Transactional
-    public ReviewResponseDto updateReview(Long reviewId, Long authorId, ReviewRequestDto request) {
+    /** 리뷰 수정 */
+    public ReviewResponseDto updateReview(Long reviewId, Long authorId, ReviewRequestDto dto) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new EntityNotFoundException("리뷰를 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("리뷰를 찾을 수 없습니다."));
 
-        if (!review.getAuthorId().equals(authorId)) {
-            throw new IllegalArgumentException("본인이 작성한 리뷰만 수정할 수 있습니다.");
+        if (!review.getAuthor().getId().equals(authorId)) {
+            throw new SecurityException("본인만 리뷰를 수정할 수 있습니다.");
         }
 
-        review.setRating(request.getRating());
-        review.setTitle(request.getTitle());
-        review.setContent(request.getContent());
-        reviewRepository.save(review);
+        review.setTitle(dto.getTitle());
+        review.setContent(dto.getContent());
+        review.setRating(dto.getRating());
 
-        // ✅ 평균 평점 업데이트
-        updateUserAverageRating(review.getTargetUserId());
-
-        return ReviewResponseDto.fromEntity(review);
+        Review updated = reviewRepository.save(review);
+        return ReviewResponseDto.fromEntity(updated);
     }
 
-    /**
-     * 리뷰 삭제 (Soft Delete)
-     * // ✅ 평균 평점 업데이트
-     *         updateUserAverageRating(review.getTargetUserId());
-     */
+    /** 리뷰 삭제 */
     @Transactional
-    public void deleteReview(Long reviewId, Long requesterId) {
-        System.out.println("🧩 [deleteReview 시작] reviewId=" + reviewId + ", requesterId=" + requesterId);
+    public void deleteReview(Long reviewId, Long memberId) {
+        System.out.println("🧩 삭제 요청 들어옴: reviewId=" + reviewId + ", memberId=" + memberId);
 
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ServiceException("404-1", "리뷰가 존재하지 않습니다."));
+                .orElseThrow(() -> new ServiceException("404", "리뷰를 찾을 수 없습니다."));
 
-        System.out.println("🧩 [리뷰 정보] authorId=" + review.getAuthorId() + ", targetUserId=" + review.getTargetUserId());
+        System.out.println("✅ 삭제 대상 리뷰 존재: " + review.getId() + " / deleted=" + review.isDeleted());
 
-        if (!review.getAuthorId().equals(requesterId)) {
-            System.out.println("🚨 [삭제 실패] 작성자 불일치! authorId=" + review.getAuthorId() + ", 요청자=" + requesterId);
-            throw new ServiceException("403-1", "본인이 작성한 리뷰만 삭제할 수 있습니다.");
+        if (!review.getAuthor().getId().equals(memberId)) {
+            throw new UnauthorizedException("401-2", "본인만 리뷰를 삭제할 수 있습니다.");
         }
 
-        reviewRepository.delete(review);
-        System.out.println("✅ [삭제 성공] reviewId=" + reviewId + " 삭제 완료");
+        review.softDelete();
+        reviewRepository.saveAndFlush(review);
 
-        updateUserAverageRating(review.getTargetUserId());
+        System.out.println("🔥 리뷰 삭제 완료: " + review.getId());
     }
 
-
-
-    /**
-     * 대상 사용자 리뷰 조회
-     */
+    /** 특정 대상자의 리뷰 목록 조회 */
     @Transactional(readOnly = true)
     public List<ReviewResponseDto> getReviewsByTarget(Long targetUserId) {
-        return reviewRepository.findByTargetUserIdAndDeletedFalseOrderByCreatedAtDesc(targetUserId)
+        return reviewRepository
+                .findByTargetUser_IdAndDeletedFalseOrderByCreatedAtDesc(targetUserId)
                 .stream()
                 .map(ReviewResponseDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * ✅ 평균 평점 계산 및 반영
-     */
-    @Transactional
-    public void updateUserAverageRating(Long targetUserId) {
-        List<Review> reviews = reviewRepository.findByTargetUserIdAndDeletedFalse(targetUserId);
-        double avg = reviews.stream()
-                .mapToInt(Review::getRating)
-                .average()
-                .orElse(0.0);
-
-        Member member = userRepository.findById(targetUserId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-        member.setAverageRating(avg);
-    }
-
-    /**
-     * ✅ 대상 사용자의 평균 평점을 조회
-     * DB에 저장된 캐시 필드(averageRating)를 읽어오거나, 필요 시 실시간 계산
-     */
-    @Transactional(readOnly = true)
-    public double getAverageRating(Long targetUserId) {
-        Member member = userRepository.findById(targetUserId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-        return member.getAverageRating() != null ? member.getAverageRating() : 0.0;
-    }
-
+    /** 전체 리뷰 조회 */
     @Transactional(readOnly = true)
     public List<ReviewResponseDto> getAllReviews() {
-        return reviewRepository.findByDeletedFalseOrderByCreatedAtDesc()
+        return reviewRepository
+                .findByDeletedFalseOrderByCreatedAtDesc()
                 .stream()
                 .map(ReviewResponseDto::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    /** 평균 평점 */
+    @Transactional(readOnly = true)
+    public double getAverageRating(Long targetUserId) {
+        List<Review> reviews = reviewRepository.findByTargetUser_Id(targetUserId);
+        return reviews.isEmpty()
+                ? 0.0
+                : reviews.stream().mapToInt(Review::getRating).average().orElse(0.0);
     }
 }

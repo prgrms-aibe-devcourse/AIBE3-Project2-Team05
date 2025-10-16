@@ -6,15 +6,17 @@ import com.back.domain.freelancer.portfolio.entity.Portfolio;
 import com.back.domain.member.member.entity.Member;
 import com.back.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@AllArgsConstructor
+@DynamicUpdate
+@Builder
 @NoArgsConstructor
 @Entity
 @Getter
@@ -38,6 +40,15 @@ public class Freelancer extends BaseEntity {
     private int reviewsCount;  //비정규화
     private int favoritesCount;  //비정규화
     private int completedProjectsCount; //비정규화
+
+    // ✅ 프리랜서 평균 평점 캐싱용 필드
+    @Builder.Default
+    private Double averageRating = 0.0;
+
+    // ✅ 리뷰 수 (평균 계산시 분모)
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer reviewCount = 0;
 
     @OneToMany(mappedBy = "freelancer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Portfolio> portfolioList = new ArrayList<>();

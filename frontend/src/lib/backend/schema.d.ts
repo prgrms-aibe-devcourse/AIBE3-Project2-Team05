@@ -1127,10 +1127,10 @@ export interface components {
         ReviewRequestDto: {
             /**
              * Format: int64
-             * @description 리뷰 대상 사용자 ID (프리랜서 or 프로젝트 매니저)
+             * @description 리뷰 대상 사용자 ID (프리랜서)
              * @example 5
              */
-            targetUserId?: number;
+            targetFreelancerId?: number;
             /**
              * Format: int64
              * @description 리뷰가 연결된 프로젝트 ID
@@ -1161,6 +1161,7 @@ export interface components {
             projectId?: number;
             /** Format: int64 */
             authorId?: number;
+            authorNickname?: string;
             /** Format: int64 */
             targetUserId?: number;
             /** Format: int32 */
@@ -1617,10 +1618,6 @@ export interface components {
             refreshToken?: string;
             /** Format: date-time */
             refreshTokenExpiry?: string;
-            /** Format: double */
-            averageRating?: number;
-            /** Format: int32 */
-            reviewCount?: number;
         };
         Project: {
             /** Format: int64 */
@@ -1849,10 +1846,10 @@ export interface components {
             freelancerProfileImageUrl?: string;
         };
         PageProjectResponse: {
-            /** Format: int32 */
-            totalPages?: number;
             /** Format: int64 */
             totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
             first?: boolean;
             last?: boolean;
             /** Format: int32 */
@@ -1861,26 +1858,26 @@ export interface components {
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         PageableObject: {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
-            unpaged?: boolean;
-            paged?: boolean;
-            /** Format: int32 */
-            pageNumber?: number;
             /** Format: int32 */
             pageSize?: number;
+            /** Format: int32 */
+            pageNumber?: number;
+            paged?: boolean;
+            unpaged?: boolean;
         };
         SortObject: {
             empty?: boolean;
-            unsorted?: boolean;
             sorted?: boolean;
+            unsorted?: boolean;
         };
         RsDataListLong: {
             resultCode?: string;

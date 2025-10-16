@@ -1047,17 +1047,115 @@ export default function FreelancerMyPage() {
                 </div>
               )}
               {activeTab === "review" && (
-                <div style={{
-                  minHeight: 220,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#888",
-                  fontSize: "17px"
-                }}>
-                  후기 기능을 구현하세요.
-                </div>
-              )}
+  <div
+    style={{
+      minHeight: 220,
+      padding: "20px 10px",
+      display: "flex",
+      flexDirection: "column",
+      gap: "16px",
+    }}
+  >
+    {reviews.length === 0 ? (
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#888",
+          fontSize: "16px",
+        }}
+      >
+        아직 등록된 후기가 없습니다.
+      </div>
+    ) : (
+      reviews.map((review: any) => (
+        <div
+          key={review.id}
+          style={{
+            background: "#f8faff",
+            borderRadius: "12px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+            padding: "20px 22px",
+            border: "1px solid #eee",
+          }}
+        >
+          {/* 상단: 평점 + 제목 */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "6px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                color: "#f59e0b",
+                fontWeight: 700,
+                fontSize: "16px",
+              }}
+            >
+              {"★".repeat(review.rating)}{" "}
+              <span style={{ color: "#555", marginLeft: "8px" }}>
+                ({review.rating}점)
+              </span>
+            </div>
+            <div
+              style={{
+                color: "#666",
+                fontWeight: 500,
+                fontSize: "14px",
+              }}
+            >
+              {new Date(review.createdAt).toLocaleDateString("ko-KR")}
+            </div>
+          </div>
+
+          {/* 제목 */}
+          <div
+            style={{
+              fontWeight: 800,
+              fontSize: "17px",
+              color: "#222",
+              marginBottom: "10px",
+            }}
+          >
+            {review.title}
+          </div>
+
+          {/* 내용 */}
+          <div
+            style={{
+              color: "#444",
+              lineHeight: 1.6,
+              whiteSpace: "pre-wrap",
+              marginBottom: "14px",
+            }}
+          >
+            {review.content}
+          </div>
+
+          {/* 작성자 정보 */}
+          <div
+            style={{
+              textAlign: "right",
+              fontSize: "14px",
+              color: "#777",
+              fontWeight: 600,
+            }}
+          >
+            작성자: {review.authorNickname || `ID ${review.authorId}`}
+          </div>
+        </div>
+      ))
+    )}
+  </div>
+)}
             </div>
           </div>
           {/* 포트폴리오 상세 모달 */}

@@ -15,6 +15,7 @@ public class ReviewResponseDto {
     private Long id;
     private Long projectId;
     private Long authorId;
+    private String authorNickname; // ✅ 작성자 닉네임
     private Long targetUserId;
     private int rating;
     private String title;
@@ -25,8 +26,9 @@ public class ReviewResponseDto {
         return ReviewResponseDto.builder()
                 .id(review.getId())
                 .projectId(review.getProjectId())
-                .authorId(review.getAuthorId())
-                .targetUserId(review.getTargetUserId())
+                .authorId(review.getAuthor().getId()) // ✅ Member의 ID
+                .authorNickname(review.getAuthor().getNickname()) // ✅ Member의 닉네임
+                .targetUserId(review.getTargetUser().getId())
                 .rating(review.getRating())
                 .title(review.getTitle())
                 .content(review.getContent())

@@ -45,15 +45,8 @@ export default function EditReviewPage() {
   };
 
   useEffect(() => {
-    const cookieHasToken = document.cookie.includes("accessToken=");
-  if (!cookieHasToken && !isRedirecting.current) {
-    isRedirecting.current = true; // ✅ 한 번만 실행되도록
-    alert("로그인 후 이용해주세요.");
-    router.push("/members/login"); 
-    return;
-  }
   fetchReviewDetail();
-}, [numericReviewId, targetUserId]);
+  }, [numericReviewId, targetUserId]);
 
   // ✅ 수정 버튼 클릭 시 호출 (form submit 제거)
   const handleUpdateClick = async () => {

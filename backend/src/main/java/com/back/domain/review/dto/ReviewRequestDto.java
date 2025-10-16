@@ -11,8 +11,8 @@ import lombok.*;
 @Schema(description = "리뷰 작성/수정 요청 DTO")
 public class ReviewRequestDto {
 
-    @Schema(description = "리뷰 대상 사용자 ID (프리랜서 or 프로젝트 매니저)", example = "5")
-    private Long targetUserId;
+    @Schema(description = "리뷰 대상 사용자 ID (프리랜서)", example = "5")
+    private Long targetFreelancerId;
 
     @Schema(description = "리뷰가 연결된 프로젝트 ID", example = "10")
     private Long projectId;

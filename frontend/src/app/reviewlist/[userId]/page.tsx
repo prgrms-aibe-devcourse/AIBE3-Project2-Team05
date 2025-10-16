@@ -13,50 +13,49 @@ export default function UserReviewListPage() {
   const [loggedUserId, setLoggedUserId] = useState<number | null>(null);
 
   const fetchLoggedUser = async () => {
-  try {
-    const res = await fetch("http://localhost:8080/member/me", {
-      credentials: "include", // ✅ 쿠키를 함께 보냄
-    });
-
-    if (!res.ok) {
-      console.error("❌ 로그인 사용자 정보를 가져오지 못했습니다:", res.status);
+    try {
+      const res = await fetch("http://localhost:8080/member/me", {
+        credentials: "include",
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.data.id;
+    } catch {
       return null;
     }
-
-    const data = await res.json();
-    console.log("✅ 로그인 사용자 정보:", data);
-    return data.data.id; // RsData<MemberDto> 구조니까 data.id로 접근
-  } catch (err) {
-    console.error("❌ /member/me 호출 실패:", err);
-    return null;
-  }
-};
+  };
 
   const fetchUserReviews = async () => {
     try {
       if (!userId) return;
       const data = await getReviews(Number(userId));
       setReviews(data);
-    } catch (err: any) {
+    } catch (err) {
       console.error("리뷰 불러오기 실패:", err);
-      alert("리뷰를 불러오는 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (reviewId: number) => {
-  if (!confirm("이 리뷰를 삭제하시겠습니까?")) return;
+    if (!confirm("이 리뷰를 삭제하시겠습니까?")) return;
+    try {
+      await deleteReview(reviewId);
+      alert("리뷰가 삭제되었습니다.");
+      fetchUserReviews();
+    } catch (err: any) {
+      alert(`삭제 실패: ${err.message}`);
+    }
+  };
 
-  try {
-    await deleteReview(reviewId); // ✅ 여기서 reviewId가 제대로 전달되어야 함
-    alert("리뷰가 삭제되었습니다.");
-    fetchUserReviews();
-  } catch (err: any) {
-    console.error("삭제 실패:", err);
-    alert(`삭제 실패: ${err.message}`);
-  }
-};
+ 
+  const handleEdit = (reviewId: number) => {
+    if (!loggedUserId) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+    router.push(`/review/edit/${reviewId}?targetUserId=${userId}`);
+  };
 
   useEffect(() => {
     const init = async () => {
@@ -67,27 +66,18 @@ export default function UserReviewListPage() {
     init();
   }, [userId]);
 
-  if (loading) {
-    return (
-      <div className="review-loading">
-        로딩 중...
-      </div>
-    );
-  }
+  if (loading) return <div className="review-loading">로딩 중...</div>;
 
   return (
     <div className="review-container">
       <div className="review-list-container">
         <div className="review-header">
-          <h1 className="review-title">
-            {userId}번 사용자의 리뷰 ✨
-          </h1>
+          <h1 className="review-title">{userId}번 사용자의 리뷰</h1>
           <p className="review-subtitle">
             이 사용자가 작성한 모든 리뷰를 확인할 수 있습니다.
           </p>
-          <div className="review-divider"></div>
         </div>
-    
+
         {reviews.length === 0 ? (
           <div className="review-empty">
             <div className="review-empty-icon">📭</div>
@@ -107,20 +97,17 @@ export default function UserReviewListPage() {
                 <p className="review-content">{r.content}</p>
                 <div className="review-meta">
                   <div className="review-date">
-                    <span className="review-date-icon">📅</span>
-                    <span>작성일: {new Date(r.createdAt).toLocaleDateString()}</span>
+                    📅 작성일: {new Date(r.createdAt).toLocaleDateString()}
                   </div>
-                  <div className="review-author">
-                    <span className="review-author-icon">👤</span>
-                    <span>작성자 ID: {r.authorId}</span>
-                  </div>
+                  <div className="review-author">👤 작성자 : {r.authorNickname}</div>
                 </div>
 
-                {loggedUserId && loggedUserId === r.authorId && (
+                {/* 수정 버튼 클릭 시 로그인 확인 */}
+                {loggedUserId === r.authorId && (
                   <div className="review-actions">
                     <button
                       type="button"
-                      onClick={() => router.push(`/review/edit/${r.id}?targetUserId=${userId}`)}
+                      onClick={() => handleEdit(r.id)}
                       className="review-btn review-btn-secondary"
                     >
                       수정

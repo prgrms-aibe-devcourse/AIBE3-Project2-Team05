@@ -4,7 +4,7 @@ spring:
       on-profile: dev
 
   datasource:
-    url: jdbc:mysql://localhost:3306/fit?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul
+    url: jdbc:mysql://localhost:3306/fit_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -29,6 +29,8 @@ logging:
   level:
     com.back: DEBUG
     org.hibernate.orm.jdbc.bind: DEBUG
+    org.hibernate.type.descriptor.sql: trace
+    org.hibernate.SQL: debug
 
 # ===== OpenAPI 스키마 생성 설정 (개발환경) =====
 openapi:

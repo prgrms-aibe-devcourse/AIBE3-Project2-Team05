@@ -1,9 +1,8 @@
 package com.back.domain.review.entity;
 
+import com.back.domain.member.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -20,29 +19,37 @@ public class Review {
     private Long id;
 
     private Long projectId;
-    private Long authorId;
-    private Long targetUserId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    private Member author; // ✅ 작성자 (Member와 연관관계)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "target_user_id")
+    private Member targetUser; // ✅ 리뷰 대상자 (Member와 연관관계)
 
     private int rating;
     private String title;
     private String content;
 
-    private boolean deleted = false;
-
-    @CreationTimestamp // ✅ 생성 시 자동으로 현재 시간 저장
     private LocalDateTime createdAt;
-
-    @UpdateTimestamp // ✅ 수정 시 자동 갱신
     private LocalDateTime updatedAt;
 
-    private LocalDateTime deletedAt;
+    @Column(nullable = false)
+    private boolean deleted = false;
 
-    public void setDeletedAt(LocalDateTime deletedAt) {   // ✅ 수정된 부분
-        this.deletedAt = deletedAt;
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
-    public void preUpdate() {
+    protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void softDelete() {
+        this.deleted = true;
     }
 }
