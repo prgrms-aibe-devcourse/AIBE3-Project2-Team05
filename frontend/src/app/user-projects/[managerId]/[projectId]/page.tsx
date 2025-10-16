@@ -241,30 +241,6 @@ const UserProjectDetailPage = () => {
   } finally {
     setStatusChangeLoading(false);
   }
-
-        //     if (response.ok) {
-        //         const updatedProject: ProjectResponse = await response.json();
-        //         setProject(updatedProject);
-        //         alert(`프로젝트 상태가 "${getStatusText(newStatus)}"로 변경되었습니다.`);
-
-        //         // ✅ 상태가 완료인 경우엔 이동하지 않고 모달 표시
-        //         if (newStatus === 'COMPLETED') {
-        //             console.log("✅ setShowReviewModal 실행됨");
-        //             setShowReviewModal(true);
-        //         } else {
-        //             router.push(`/user-projects/${params?.managerId}`);
-        //         }
-        //         } else {
-        //         const errorData = await response.json().catch(() => ({}));
-        //         console.error('상태 변경 실패:', response.status, errorData);
-        //         alert('상태 변경에 실패했습니다. 다시 시도해주세요.');
-        //         }
-        //     } catch (error) {
-        //     console.error('상태 변경 실패:', error);
-        //     alert('상태 변경에 실패했습니다. 네트워크 연결을 확인해주세요.');
-        // } finally {
-        //     setStatusChangeLoading(false);
-        // }
         }; 
 
     // 상태 변경 확인 메시지

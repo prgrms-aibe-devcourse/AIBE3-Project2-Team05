@@ -1,7 +1,7 @@
 package com.back.domain.review.service;
 
-import com.back.domain.member.member.entity.Member;
-import com.back.domain.member.member.repository.MemberRepository;
+import com.back.domain.freelancer.freelancer.entity.Freelancer;
+import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
 import com.back.domain.review.dto.ReviewRequestDto;
 import com.back.domain.review.dto.ReviewResponseDto;
 import com.back.domain.review.entity.Review;
@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,8 +19,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ReviewService {
 
+    private final FreelancerRepository freelancerRepository;
     private final ReviewRepository reviewRepository;
-    private final MemberRepository userRepository;
 
     /**
      * 리뷰 등록
@@ -39,8 +38,8 @@ public class ReviewService {
 
         reviewRepository.save(review);
 
-        // ✅ 평균 평점 업데이트
-        updateUserAverageRating(request.getTargetUserId());
+        // ✅ 평균 평점 업데이트 (Freelancer 기준)
+        updateFreelancerAverageRating(request.getTargetUserId());
 
         return ReviewResponseDto.fromEntity(review);
     }
@@ -63,15 +62,13 @@ public class ReviewService {
         reviewRepository.save(review);
 
         // ✅ 평균 평점 업데이트
-        updateUserAverageRating(review.getTargetUserId());
+        updateFreelancerAverageRating(review.getTargetUserId());
 
         return ReviewResponseDto.fromEntity(review);
     }
 
     /**
-     * 리뷰 삭제 (Soft Delete)
-     * // ✅ 평균 평점 업데이트
-     *         updateUserAverageRating(review.getTargetUserId());
+     * 리뷰 삭제 (Soft Delete 또는 실제 삭제)
      */
     @Transactional
     public void deleteReview(Long reviewId, Long requesterId) {
@@ -90,10 +87,9 @@ public class ReviewService {
         reviewRepository.delete(review);
         System.out.println("✅ [삭제 성공] reviewId=" + reviewId + " 삭제 완료");
 
-        updateUserAverageRating(review.getTargetUserId());
+        // ✅ 프리랜서 평균 평점 갱신
+        updateFreelancerAverageRating(review.getTargetUserId());
     }
-
-
 
     /**
      * 대상 사용자 리뷰 조회
@@ -107,34 +103,43 @@ public class ReviewService {
     }
 
     /**
-     * ✅ 평균 평점 계산 및 반영
+     * ✅ 프리랜서 평균 평점 계산 및 반영
      */
     @Transactional
-    public void updateUserAverageRating(Long targetUserId) {
-        List<Review> reviews = reviewRepository.findByTargetUserIdAndDeletedFalse(targetUserId);
+    public double updateFreelancerAverageRating(Long freelancerId) {
+        List<Review> reviews = reviewRepository.findByTargetUserIdAndDeletedFalse(freelancerId);
+
         double avg = reviews.stream()
                 .mapToInt(Review::getRating)
                 .average()
                 .orElse(0.0);
 
-        Member member = userRepository.findById(targetUserId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        int count = (int) reviews.size();
 
-        member.setAverageRating(avg);
+        Freelancer freelancer = freelancerRepository.findById(freelancerId)
+                .orElseThrow(() -> new EntityNotFoundException("프리랜서를 찾을 수 없습니다."));
+
+        freelancer.setAverageRating(avg);
+        freelancer.setReviewCount(count);
+        freelancerRepository.save(freelancer);
+
+        return avg;
     }
 
     /**
-     * ✅ 대상 사용자의 평균 평점을 조회
-     * DB에 저장된 캐시 필드(averageRating)를 읽어오거나, 필요 시 실시간 계산
+     * ✅ 프리랜서 평균 평점 조회
      */
     @Transactional(readOnly = true)
-    public double getAverageRating(Long targetUserId) {
-        Member member = userRepository.findById(targetUserId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    public double getAverageRating(Long freelancerId) {
+        Freelancer freelancer = freelancerRepository.findById(freelancerId)
+                .orElseThrow(() -> new EntityNotFoundException("프리랜서를 찾을 수 없습니다."));
 
-        return member.getAverageRating() != null ? member.getAverageRating() : 0.0;
+        return freelancer.getAverageRating() != null ? freelancer.getAverageRating() : 0.0;
     }
 
+    /**
+     * ✅ 전체 리뷰 조회
+     */
     @Transactional(readOnly = true)
     public List<ReviewResponseDto> getAllReviews() {
         return reviewRepository.findByDeletedFalseOrderByCreatedAtDesc()
