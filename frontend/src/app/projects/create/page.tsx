@@ -3,6 +3,7 @@
 import { useUser } from '@/app/context/UserContext';
 import { budgetOptions } from '@/constants/projectOptions';
 import { components } from '@/lib/backend/schema';
+import { getTodayString, validateFutureDate } from '@/utils/dateUtils';
 import { showErrorMessage, showSuccessMessage, showValidationError } from '@/utils/formValidation';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -42,6 +43,15 @@ const ProjectCreatePage = () => {
   }, [isLoaded, username, router]);
 
   const handleInputChange = (field: keyof FormData, value: string) => {
+    // 날짜 필드인 경우 미래 날짜 검증
+    if (field === 'startDate' || field === 'endDate') {
+      const validation = validateFutureDate(value);
+      if (!validation.isValid && value) {
+        showValidationError(validation.error || '올바른 날짜를 선택해주세요.');
+        return;
+      }
+    }
+    
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -304,6 +314,7 @@ const ProjectCreatePage = () => {
                     <input
                       type="date"
                       value={formData.startDate}
+                      min={getTodayString()}
                       onChange={(e) => handleInputChange('startDate', e.target.value)}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       style={{ width: '100%', padding: '12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
@@ -316,6 +327,7 @@ const ProjectCreatePage = () => {
                     <input
                       type="date"
                       value={formData.endDate}
+                      min={formData.startDate || getTodayString()}
                       onChange={(e) => handleInputChange('endDate', e.target.value)}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       style={{ width: '100%', padding: '12px', border: '1px solid #d1d5db', borderRadius: '8px' }}

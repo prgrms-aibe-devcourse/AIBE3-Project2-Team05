@@ -1,5 +1,6 @@
 "use client";
 
+import { getTodayString, validateFutureDate } from '@/utils/dateUtils';
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
@@ -33,6 +34,16 @@ export default function PortfolioWritePage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value, type } = e.target;
+    
+    // 날짜 필드인 경우 미래 날짜 검증
+    if ((name === 'startDate' || name === 'endDate') && value) {
+      const validation = validateFutureDate(value);
+      if (!validation.isValid) {
+        alert(validation.error || '올바른 날짜를 선택해주세요.');
+        return;
+      }
+    }
+    
     setInfo((prev) => ({
       ...prev,
       [name]:
@@ -254,6 +265,7 @@ export default function PortfolioWritePage() {
                 type="date"
                 name="startDate"
                 value={info.startDate}
+                min={getTodayString()}
                 onChange={handleChange}
                 required
                 style={{
@@ -273,6 +285,7 @@ export default function PortfolioWritePage() {
                 type="date"
                 name="endDate"
                 value={info.endDate}
+                min={info.startDate || getTodayString()}
                 onChange={handleChange}
                 required
                 style={{
