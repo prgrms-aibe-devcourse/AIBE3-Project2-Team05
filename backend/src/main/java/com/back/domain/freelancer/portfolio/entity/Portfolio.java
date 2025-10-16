@@ -3,6 +3,7 @@ package com.back.domain.freelancer.portfolio.entity;
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.portfolio.dto.PortfolioUpdateRequestDto;
 import com.back.global.jpa.entity.BaseEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
@@ -20,6 +21,7 @@ public class Portfolio extends BaseEntity {
     private Freelancer freelancer;
 
     private String title;
+    @Column(columnDefinition = "TEXT")
     private String description;
     private LocalDate startDate;
     private LocalDate endDate;

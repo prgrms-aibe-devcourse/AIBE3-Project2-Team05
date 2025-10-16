@@ -339,9 +339,9 @@ export default function FreelancerEditPage({ params }: { params: { id: string } 
               }}
             >
               <option value="">선택하세요</option>
-              <option value="개인">개인</option>
-              <option value="기업">기업</option>
-              <option value="팀">팀</option>
+              <option value="기획">기획</option>
+              <option value="디자인">디자인</option>
+              <option value="개발">개발</option>
             </select>
           </div>
           {/* 소개 */}

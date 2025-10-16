@@ -1249,7 +1249,7 @@ export default function FreelancerMyPage() {
                         <div style={{ color: "#94a3b8", fontWeight: 600 }}>이미지 없음</div>
                       )}
                     </div>
-                    <div style={{ color: "#444", fontSize: 15, lineHeight: 1.7, marginBottom: 14 }}>{modalPortfolio.description}</div>
+                    <div style={{ color: "#444", fontSize: 15, lineHeight: 1.7, marginBottom: 14, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{modalPortfolio.description}</div>
                     <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 12 }}>
                       <div style={{ color: "#555", fontWeight: 700 }}>기간: {formatDate(modalPortfolio.startDate)} ~ {formatDate(modalPortfolio.endDate)}</div>
                       <div style={{ background: "#e7e7e7", color: "#16a34a", fontWeight: 700, borderRadius: 8, padding: "6px 10px" }}>{modalPortfolio.contribution}% 기여</div>

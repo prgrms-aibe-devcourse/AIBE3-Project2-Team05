@@ -1,3 +1,4 @@
+import { getTodayString } from "@/utils/dateUtils";
 import React, { useEffect, useState } from "react";
 
 interface CareerEditModalProps {
@@ -50,15 +51,23 @@ export default function CareerEditModal({ id, onClose, onEdit }: CareerEditModal
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type, checked } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setForm((prev) => {
+      if (name === 'current') {
+        return { ...prev, current: checked };
+      }
+      return {
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    if(form.current) {
+      form.endDate = getTodayString();
+    }
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me/careers/${id}`,
@@ -203,6 +212,7 @@ export default function CareerEditModal({ id, onClose, onEdit }: CareerEditModal
                 type="date"
                 name="startDate"
                 value={form.startDate}
+                max={getTodayString()}
                 onChange={handleChange}
                 required
                 style={{ width: "100%", padding: "10px", borderRadius: 7, border: "1px solid #dde1e7", fontSize: "1rem" }}
@@ -215,6 +225,8 @@ export default function CareerEditModal({ id, onClose, onEdit }: CareerEditModal
                 name="endDate"
                 value={form.endDate}
                 onChange={handleChange}
+                min={form.startDate}
+                max={getTodayString()}
                 disabled={form.current}
                 required={!form.current}
                 style={{ width: "100%", padding: "10px", borderRadius: 7, border: "1px solid #dde1e7", fontSize: "1rem", background: form.current ? "#f3f4f6" : "#fff" }}

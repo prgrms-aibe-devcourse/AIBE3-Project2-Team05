@@ -11,7 +11,7 @@ function fullImageUrl(url?: string) {
   return `http://localhost:8080${url.startsWith("/") ? "" : "/"}${url}`;
 }
 
-const TYPE_OPTIONS = ["전체", "개인", "기업", "팀"];
+const TYPE_OPTIONS = ["전체", "기획", "디자인", "개발"];
 const LOCATION_OPTIONS = [
   "전체", "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"
 ];

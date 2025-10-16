@@ -1,5 +1,6 @@
 "use client";
 
+import { getTodayString } from "@/utils/dateUtils";
 import { useRouter } from "next/navigation";
 import React, { use, useEffect, useRef, useState } from "react";
 
@@ -328,6 +329,7 @@ export default function PortfolioEditPage({ params }: { params: { id: string } }
                 name="startDate"
                 value={info.startDate}
                 onChange={handleChange}
+                max={getTodayString()}
                 required
                 style={{
                   width: "100%",
@@ -347,6 +349,8 @@ export default function PortfolioEditPage({ params }: { params: { id: string } }
                 name="endDate"
                 value={info.endDate}
                 onChange={handleChange}
+                min={info.startDate}
+                max={getTodayString()}
                 required
                 style={{
                   width: "100%",
