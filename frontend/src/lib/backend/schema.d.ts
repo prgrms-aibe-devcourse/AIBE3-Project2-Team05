@@ -795,6 +795,7 @@ export interface paths {
         trace?: never;
     };
     "/api/reviews/average": {
+    "/api/v1/freelancers/careers/{careerId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -818,6 +819,7 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getAllReviews"];
+        get: operations["getCareer"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1472,6 +1474,8 @@ export interface components {
         FreelancerTechDto: {
             /** Format: int64 */
             id?: number;
+            /** Format: int64 */
+            techId?: number;
             techCategory?: string;
             techName?: string;
             techLevel?: string;
@@ -1514,6 +1518,27 @@ export interface components {
             statusCode?: number;
             msg?: string;
             data?: components["schemas"]["PortfolioResponseDto"];
+        };
+        CareerResponseDto: {
+            freelancerName?: string;
+            /** Format: int64 */
+            id?: number;
+            title?: string;
+            company?: string;
+            position?: string;
+            /** Format: date */
+            startDate?: string;
+            /** Format: date */
+            endDate?: string;
+            current?: boolean;
+            description?: string;
+        };
+        RsDataCareerResponseDto: {
+            resultCode?: string;
+            /** Format: int32 */
+            statusCode?: number;
+            msg?: string;
+            data?: components["schemas"]["CareerResponseDto"];
         };
         ProjectFile: {
             /** Format: int64 */
@@ -1777,22 +1802,8 @@ export interface components {
             favoritesCount?: number;
             /** Format: int32 */
             completedProjectsCount?: number;
-            techNameList?: string[];
+            techList?: components["schemas"]["FreelancerTechDto"][];
             freelancerProfileImageUrl?: string;
-        };
-        CareerResponseDto: {
-            freelancerName?: string;
-            /** Format: int64 */
-            id?: number;
-            title?: string;
-            company?: string;
-            position?: string;
-            /** Format: date */
-            startDate?: string;
-            /** Format: date */
-            endDate?: string;
-            current?: boolean;
-            description?: string;
         };
         FreelancerDetailResponseDto: {
             /** Format: int64 */
@@ -1845,12 +1856,12 @@ export interface components {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
+            unpaged?: boolean;
+            paged?: boolean;
             /** Format: int32 */
             pageNumber?: number;
             /** Format: int32 */
             pageSize?: number;
-            paged?: boolean;
-            unpaged?: boolean;
         };
         SortObject: {
             empty?: boolean;
@@ -2817,7 +2828,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataCareerResponseDto"];
                 };
             };
         };
@@ -3422,6 +3433,13 @@ export interface operations {
             query?: never;
             header?: never;
             path?: never;
+    getCareer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                careerId: number;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -3433,6 +3451,7 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["ReviewResponseDto"][];
+                    "application/json;charset=UTF-8": components["schemas"]["CareerResponseDto"];
                 };
             };
         };

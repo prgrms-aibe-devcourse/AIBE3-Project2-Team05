@@ -26,6 +26,11 @@ public class FreelancerTechController {
     @PostMapping("/me/techs")
     public RsData<FreelancerTechDto> addMyTech(@AuthenticationPrincipal SecurityUser securityUser, @RequestBody FreelancerTechAddDto dto) {
         FreelancerTech freelancerTech = freelancerTechService.addMyTech(securityUser.getId(), dto);
+
+        if(freelancerTech == null) {
+            return new RsData<>("400-1", "이미 추가된 기술 스택입니다.");
+        }
+
         return new RsData<>("201-1", "기술 스택이 추가되었습니다.", new FreelancerTechDto(freelancerTech));
     }
 

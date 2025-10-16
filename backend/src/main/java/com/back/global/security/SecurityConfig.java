@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/techs").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/freelancers/*/techs").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/freelancers/*/careers").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/freelancers/careers/*").permitAll()
                         .requestMatchers("/images/**").permitAll()
                         .anyRequest().authenticated()
                 )

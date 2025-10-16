@@ -11,5 +11,7 @@ import java.util.List;
 @Repository
 public interface FreelancerTechRepository extends JpaRepository<FreelancerTech, Long> {
     boolean existsByFreelancerAndTech(Freelancer freelancer, Tech tech);
+    boolean existsAllByFreelancerAndTech(Freelancer freelancer, Tech tech);
+    boolean existsAnyByFreelancerAndTech(Freelancer freelancer, Tech tech);
     List<FreelancerTech> findByFreelancerId(Long freelancerId);
 }
