@@ -7,6 +7,8 @@ import com.back.domain.matching.matchScore.dto.RecommendationResponseDto;
 import com.back.domain.matching.matchScore.entity.MatchScore;
 import com.back.domain.matching.matchScore.repository.MatchScoreRepository;
 import com.back.domain.matching.matchScore.service.MatchScoreService;
+import com.back.domain.matching.proposal.entity.ProposalStatus;
+import com.back.domain.matching.proposal.repository.ProposalRepository;
 import com.back.domain.project.entity.Project;
 import com.back.domain.project.repository.ProjectRepository;
 import com.back.global.exception.ServiceException;
@@ -32,6 +34,7 @@ public class MatchingController {
     private final ProjectRepository projectRepository;
     private final FreelancerRepository freelancerRepository;
     private final FreelancerTechRepository freelancerTechRepository;
+    private final ProposalRepository proposalRepository;
 
     /**
      * 프리랜서 추천 조회
@@ -122,7 +125,14 @@ public class MatchingController {
 
                     long completedProjects = matchScore.getFreelancer().getCompletedProjectsCount();
 
-                    return new FreelancerRecommendationDto(matchScore, freelancerTechs, completedProjects);
+                    // 활성 제안 여부 확인 (PENDING 상태만)
+                    boolean alreadyProposed = proposalRepository.existsByProjectAndFreelancerAndStatus(
+                            project,
+                            matchScore.getFreelancer(),
+                            ProposalStatus.PENDING
+                    );
+
+                    return new FreelancerRecommendationDto(matchScore, freelancerTechs, completedProjects, alreadyProposed);
                 })
                 .collect(Collectors.toList());
 

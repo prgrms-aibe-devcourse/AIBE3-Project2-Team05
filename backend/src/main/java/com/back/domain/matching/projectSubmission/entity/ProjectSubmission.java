@@ -16,16 +16,11 @@ import java.time.LocalDateTime;
 @Entity
 @Table(
     name = "project_submissions",
-    uniqueConstraints = {
-        @UniqueConstraint(
-            name = "uk_project_freelancer",
-            columnNames = {"project_id", "freelancer_id"}
-        )
-    },
     indexes = {
         @Index(name = "idx_project_status", columnList = "project_id, status"),
         @Index(name = "idx_freelancer_status", columnList = "freelancer_id, status"),
-        @Index(name = "idx_created_at", columnList = "createDate")
+        @Index(name = "idx_created_at", columnList = "createDate"),
+        @Index(name = "idx_project_freelancer", columnList = "project_id, freelancer_id")
     }
 )
 @Getter

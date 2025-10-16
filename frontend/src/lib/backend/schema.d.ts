@@ -1772,6 +1772,7 @@ export interface components {
             skills?: components["schemas"]["FreelancerTechDto"][];
             /** Format: int64 */
             completedProjects?: number;
+            alreadyProposed?: boolean;
         };
         RecommendationResponseDto: {
             /** Format: int64 */

@@ -9,6 +9,36 @@ import { apiClient } from '@/lib/backend/client'
 import { useUser } from '@/app/context/UserContext'
 import type { RecommendationResponseDto, FreelancerRecommendationDto } from '@/lib/backend/apiV1/types'
 
+// 인라인 LoadingSpinner 컴포넌트
+function InlineLoadingSpinner() {
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '400px'
+    }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{
+          width: '64px',
+          height: '64px',
+          border: '4px solid #16a34a',
+          borderTopColor: 'transparent',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite',
+          margin: '0 auto 16px'
+        }} />
+        <p style={{ color: '#666', fontSize: '16px' }}>로딩 중...</p>
+      </div>
+      <style jsx>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  )
+}
+
 export default function MatchingPage() {
   const params = useParams()
   const projectId = params.projectId as string
@@ -44,12 +74,9 @@ export default function MatchingPage() {
   }, [authLoading, user, router])
 
   useEffect(() => {
-    // isFreelancer가 결정된 후에만 실행
     if (user && isFreelancer !== null) {
-      // PM일 때는 자동 재계산, 프리랜서일 때는 GET만 수행
       fetchRecommendations(isPm)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId, user, isFreelancer])
 
   const fetchRecommendations = async (autoRecalculate = false) => {
@@ -57,7 +84,6 @@ export default function MatchingPage() {
       setLoading(true)
       setError(null)
 
-      // PM이고 자동 재계산이 활성화된 경우 먼저 재계산 수행
       if (autoRecalculate) {
         await apiClient.post(`/api/v1/matching/recommend/${projectId}/recalculate`)
       }
@@ -80,7 +106,6 @@ export default function MatchingPage() {
       const response = await apiClient.post(`/api/v1/matching/recommend/${projectId}/recalculate`)
       await fetchRecommendations()
 
-      // 성공 메시지 표시
       alert(response.msg || (isFreelancer ? '내 매칭 점수가 업데이트되었습니다!' : '매칭 점수가 재계산되었습니다.'))
     } catch (err) {
       setError(err instanceof Error ? err.message : '재계산에 실패했습니다.')
@@ -106,6 +131,9 @@ export default function MatchingPage() {
 
       alert(response.msg || '제안이 전송되었습니다.')
       setProposalTargetFreelancer(null)
+
+      // 제안 후 목록 새로고침하여 alreadyProposed 상태 업데이트
+      await fetchRecommendations()
     } catch (err) {
       alert(err instanceof Error ? err.message : '제안 전송에 실패했습니다.')
     }
@@ -122,36 +150,76 @@ export default function MatchingPage() {
 
   if (authLoading || loading || isFreelancer === null) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-muted-foreground">
-              {authLoading ? '로그인 확인 중...' : isFreelancer === null ? '역할 확인 중...' : '추천 프리랜서를 찾고 있습니다...'}
-            </p>
-          </div>
+      <div style={{
+        minHeight: '100vh',
+        background: '#f7f5ec',
+        fontFamily: "'Pretendard', 'Inter', Arial, sans-serif"
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '40px 16px'
+        }}>
+          <InlineLoadingSpinner />
         </div>
       </div>
     )
   }
 
-  // 로그인되지 않은 경우 (리디렉션 전 화면)
   if (!user) {
     return null
   }
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="text-5xl mb-4">⚠️</div>
-            <div>
-              <h2 className="text-xl font-semibold text-foreground mb-2">오류가 발생했습니다</h2>
-              <p className="text-muted-foreground mb-4">{error}</p>
+      <div style={{
+        minHeight: '100vh',
+        background: '#f7f5ec',
+        fontFamily: "'Pretendard', 'Inter', Arial, sans-serif"
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '40px 16px'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '400px'
+          }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '64px', marginBottom: '16px' }}>⚠️</div>
+              <h2 style={{
+                fontSize: '20px',
+                fontWeight: 600,
+                color: '#222',
+                marginBottom: '8px'
+              }}>
+                오류가 발생했습니다
+              </h2>
+              <p style={{
+                color: '#666',
+                marginBottom: '16px',
+                fontSize: '15px'
+              }}>
+                {error}
+              </p>
               <button
-                onClick={fetchRecommendations}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+                onClick={() => fetchRecommendations()}
+                style={{
+                  background: '#16a34a',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '10px 24px',
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'background 0.2s'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.background = '#15803d'}
+                onMouseOut={(e) => e.currentTarget.style.background = '#16a34a'}
               >
                 다시 시도
               </button>
@@ -164,18 +232,54 @@ export default function MatchingPage() {
 
   if (!data || data.recommendations.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="text-5xl mb-4">🔍</div>
-            <div>
-              <h2 className="text-xl font-semibold text-foreground mb-2">추천할 프리랜서가 없습니다</h2>
-              <p className="text-muted-foreground mb-4">
+      <div style={{
+        minHeight: '100vh',
+        background: '#f7f5ec',
+        fontFamily: "'Pretendard', 'Inter', Arial, sans-serif"
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '40px 16px'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '400px'
+          }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '64px', marginBottom: '16px' }}>🔍</div>
+              <h2 style={{
+                fontSize: '20px',
+                fontWeight: 600,
+                color: '#222',
+                marginBottom: '8px'
+              }}>
+                추천할 프리랜서가 없습니다
+              </h2>
+              <p style={{
+                color: '#666',
+                marginBottom: '16px',
+                fontSize: '15px'
+              }}>
                 프로젝트 요구 기술을 확인하고 다시 시도해주세요.
               </p>
               <button
                 onClick={handleRecalculate}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+                style={{
+                  background: '#16a34a',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '10px 24px',
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'background 0.2s'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.background = '#15803d'}
+                onMouseOut={(e) => e.currentTarget.style.background = '#16a34a'}
               >
                 다시 계산하기
               </button>
@@ -187,91 +291,210 @@ export default function MatchingPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">{data.projectTitle}</h1>
-            <p className="text-muted-foreground">
-              {isFreelancer
-                ? '이 프로젝트와의 매칭 점수입니다'
-                : `총 ${data.recommendations.length}명의 프리랜서를 추천합니다 (TOP 10)`}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            {isPm && (
+    <div style={{
+      minHeight: '100vh',
+      background: '#f7f5ec',
+      fontFamily: "'Pretendard', 'Inter', Arial, sans-serif"
+    }}>
+      <div style={{
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: '40px 16px'
+      }}>
+        {/* Header */}
+        <div style={{ marginBottom: '32px' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '16px',
+            gap: '16px',
+            flexWrap: 'wrap'
+          }}>
+            <div style={{ flex: 1, minWidth: '300px' }}>
+              <h1 style={{
+                fontSize: '28px',
+                fontWeight: 800,
+                color: '#333',
+                letterSpacing: '-1px',
+                marginBottom: '8px'
+              }}>
+                {data.projectTitle}
+              </h1>
+              <p style={{ color: '#666', fontSize: '15px' }}>
+                {isFreelancer
+                  ? '이 프로젝트와의 매칭 점수입니다'
+                  : `총 ${data.recommendations.length}명의 프리랜서를 추천합니다 (TOP 10)`}
+              </p>
+            </div>
+            <div style={{
+              display: 'flex',
+              gap: '8px',
+              flexWrap: 'wrap'
+            }}>
+              {isPm && (
+                <button
+                  onClick={handleViewAllFreelancers}
+                  style={{
+                    background: '#fff',
+                    border: '1px solid #d1d5db',
+                    color: '#374151',
+                    padding: '10px 20px',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    whiteSpace: 'nowrap'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = '#f9fafb'
+                    e.currentTarget.style.borderColor = '#16a34a'
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.background = '#fff'
+                    e.currentTarget.style.borderColor = '#d1d5db'
+                  }}
+                >
+                  전체 프리랜서 목록
+                </button>
+              )}
               <button
-                onClick={handleViewAllFreelancers}
-                className="px-4 py-2 bg-card text-card-foreground border border-border rounded-md text-sm font-medium hover:bg-accent hover:border-primary transition-colors"
+                onClick={handleRecalculate}
+                style={{
+                  background: '#fff',
+                  border: '1px solid #d1d5db',
+                  color: '#374151',
+                  padding: '10px 20px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  whiteSpace: 'nowrap'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = '#f9fafb'
+                  e.currentTarget.style.borderColor = '#16a34a'
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = '#fff'
+                  e.currentTarget.style.borderColor = '#d1d5db'
+                }}
               >
-                전체 프리랜서 목록
+                {isFreelancer ? '내 점수 업데이트' : '전체 재계산'}
               </button>
-            )}
-            <button
-              onClick={handleRecalculate}
-              className="px-4 py-2 bg-card text-card-foreground border border-border rounded-md text-sm font-medium hover:bg-accent hover:border-primary transition-colors"
-            >
-              {isFreelancer ? '내 점수 업데이트' : '전체 재계산'}
-            </button>
+            </div>
+          </div>
+
+          {/* Info Card */}
+          <div style={{
+            background: '#fff',
+            borderRadius: '13px',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+            padding: '20px 24px',
+            border: '1px solid #e5e7eb'
+          }}>
+            <h3 style={{
+              fontWeight: 600,
+              marginBottom: '16px',
+              color: '#222',
+              fontSize: '16px'
+            }}>
+              📊 매칭 점수 산정 기준
+            </h3>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: '16px',
+              fontSize: '14px'
+            }}>
+              <div>
+                <span style={{
+                  fontWeight: 600,
+                  color: '#16a34a',
+                  display: 'block',
+                  marginBottom: '4px'
+                }}>
+                  스킬 매칭 (50점)
+                </span>
+                <p style={{
+                  color: '#666',
+                  lineHeight: '1.5'
+                }}>
+                  요구 기술 보유 여부 및 숙련도
+                </p>
+              </div>
+              <div>
+                <span style={{
+                  fontWeight: 600,
+                  color: '#16a34a',
+                  display: 'block',
+                  marginBottom: '4px'
+                }}>
+                  경력 (30점)
+                </span>
+                <p style={{
+                  color: '#666',
+                  lineHeight: '1.5'
+                }}>
+                  총 경력 연수, 완료 프로젝트 수, 평균 평점
+                </p>
+              </div>
+              <div>
+                <span style={{
+                  fontWeight: 600,
+                  color: '#16a34a',
+                  display: 'block',
+                  marginBottom: '4px'
+                }}>
+                  단가 (20점)
+                </span>
+                <p style={{
+                  color: '#666',
+                  lineHeight: '1.5'
+                }}>
+                  프로젝트 예산과 희망 단가 일치도
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Info Card */}
-        <div className="bg-muted/50 rounded-lg p-4 border border-border">
-          <h3 className="font-semibold mb-2 text-foreground">📊 매칭 점수 산정 기준</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div>
-              <span className="font-medium text-primary">스킬 매칭 (50점)</span>
-              <p className="text-muted-foreground mt-1">
-                요구 기술 보유 여부 및 숙련도
-              </p>
-            </div>
-            <div>
-              <span className="font-medium text-primary">경력 (30점)</span>
-              <p className="text-muted-foreground mt-1">
-                총 경력 연수, 완료 프로젝트 수, 평균 평점
-              </p>
-            </div>
-            <div>
-              <span className="font-medium text-primary">단가 (20점)</span>
-              <p className="text-muted-foreground mt-1">
-                프로젝트 예산과 희망 단가 일치도
-              </p>
-            </div>
-          </div>
+        {/* Freelancer Cards */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(500px, 1fr))',
+          gap: '24px'
+        }}>
+          {data.recommendations.map((freelancer) => (
+            <FreelancerCard
+              key={freelancer.freelancerId}
+              freelancer={freelancer}
+              onPropose={() => handlePropose(freelancer.freelancerId, freelancer.freelancerName)}
+              onViewProfile={() => handleViewProfile(freelancer)}
+              isPm={isPm}
+            />
+          ))}
         </div>
-      </div>
 
-      {/* Freelancer Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {data.recommendations.map((freelancer) => (
-          <FreelancerCard
-            key={freelancer.freelancerId}
-            freelancer={freelancer}
-            onPropose={() => handlePropose(freelancer.freelancerId, freelancer.freelancerName)}
-            onViewProfile={() => handleViewProfile(freelancer)}
-            isPm={isPm}
-          />
-        ))}
-      </div>
-
-      {/* Freelancer Profile Modal */}
-      <FreelancerProfileModal
-        freelancer={selectedFreelancer}
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-      />
-
-      {/* Proposal Message Modal */}
-      {proposalTargetFreelancer && (
-        <ProposalMessageModal
-          freelancerName={proposalTargetFreelancer.name}
-          open={isProposalModalOpen}
-          onOpenChange={setIsProposalModalOpen}
-          onSubmit={handleProposalSubmit}
+        {/* Freelancer Profile Modal */}
+        <FreelancerProfileModal
+          freelancer={selectedFreelancer}
+          open={isModalOpen}
+          onOpenChange={setIsModalOpen}
         />
-      )}
+
+        {/* Proposal Message Modal */}
+        {proposalTargetFreelancer && (
+          <ProposalMessageModal
+            freelancerName={proposalTargetFreelancer.name}
+            open={isProposalModalOpen}
+            onOpenChange={setIsProposalModalOpen}
+            onSubmit={handleProposalSubmit}
+          />
+        )}
+      </div>
     </div>
   )
 }

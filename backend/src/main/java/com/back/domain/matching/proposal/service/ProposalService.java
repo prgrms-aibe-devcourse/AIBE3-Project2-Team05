@@ -2,6 +2,8 @@ package com.back.domain.matching.proposal.service;
 
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
+import com.back.domain.matching.message.entity.RelatedType;
+import com.back.domain.matching.message.service.MessageService;
 import com.back.domain.matching.proposal.entity.Proposal;
 import com.back.domain.matching.proposal.entity.ProposalStatus;
 import com.back.domain.matching.proposal.repository.ProposalRepository;
@@ -29,6 +31,7 @@ public class ProposalService {
     private final ProjectRepository projectRepository;
     private final FreelancerRepository freelancerRepository;
     private final NotificationService notificationService;
+    private final MessageService messageService;
 
     /**
      * 프로젝트 제안 생성 (PM 전용)
@@ -60,9 +63,9 @@ public class ProposalService {
         Freelancer freelancer = freelancerRepository.findById(freelancerId)
                 .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프리랜서입니다."));
 
-        // 중복 제안 확인
-        if (proposalRepository.existsByProjectAndFreelancer(project, freelancer)) {
-            throw new ServiceException("409-1", "이미 제안한 프리랜서입니다.");
+        // 활성 제안 확인 (PENDING 상태만)
+        if (proposalRepository.existsByProjectAndFreelancerAndStatus(project, freelancer, ProposalStatus.PENDING)) {
+            throw new ServiceException("409-1", "이미 활성 제안이 있는 프리랜서입니다.");
         }
 
         // 제안 생성
@@ -74,6 +77,15 @@ public class ProposalService {
         );
 
         Proposal savedProposal = proposalRepository.save(proposal);
+
+        // 프리랜서에게 메시지 전송 (Message 테이블에 INSERT)
+        messageService.send(
+                pm,
+                freelancer.getMember().getId(),
+                RelatedType.PROPOSAL,
+                savedProposal.getId(),
+                message
+        );
 
         // 프리랜서에게 알림 전송
         notificationService.create(

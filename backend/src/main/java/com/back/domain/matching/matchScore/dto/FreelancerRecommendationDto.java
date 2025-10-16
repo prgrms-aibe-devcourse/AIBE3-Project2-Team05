@@ -31,7 +31,8 @@ public record FreelancerRecommendationDto(
         Integer rank,
         Map<String, Object> matchingReasons,
         List<FreelancerTechDto> skills,
-        Long completedProjects
+        Long completedProjects,
+        Boolean alreadyProposed
 ) {
     /**
      * MatchScore를 FreelancerRecommendationDto로 변환
@@ -39,10 +40,12 @@ public record FreelancerRecommendationDto(
      * @param matchScore      매칭 점수 엔티티
      * @param freelancerTechs 프리랜서 기술 목록
      * @param completedProjects 완료 프로젝트 수
+     * @param alreadyProposed 이미 제안한 프리랜서 여부
      */
     public FreelancerRecommendationDto(MatchScore matchScore,
                                       List<FreelancerTech> freelancerTechs,
-                                      Long completedProjects) {
+                                      Long completedProjects,
+                                      Boolean alreadyProposed) {
         this(
                 matchScore.getFreelancer().getId(),
                 matchScore.getFreelancer().getMemberNickname(),
@@ -58,7 +61,8 @@ public record FreelancerRecommendationDto(
                 matchScore.getRank(),
                 extractMatchingReasonsMap(matchScore),
                 extractSkillDtos(freelancerTechs),
-                completedProjects
+                completedProjects,
+                alreadyProposed
         );
     }
 

@@ -26,6 +26,21 @@ public interface ProposalRepository extends JpaRepository<Proposal, Long> {
     boolean existsByProjectAndFreelancer(Project project, Freelancer freelancer);
 
     /**
+     * PM이 특정 프리랜서에게 특정 프로젝트로 활성 제안이 있는지 확인
+     * PENDING 상태 제안만 확인하여 취소/거절 후 재제안 가능
+     *
+     * @param project    프로젝트
+     * @param freelancer 프리랜서
+     * @param status     제안 상태
+     * @return 제안 여부
+     */
+    boolean existsByProjectAndFreelancerAndStatus(
+            Project project,
+            Freelancer freelancer,
+            ProposalStatus status
+    );
+
+    /**
      * PM이 보낸 제안 목록 조회 (최신순)
      *
      * @param pm PM

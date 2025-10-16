@@ -56,8 +56,8 @@ public class ProjectSubmissionService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 프로젝트입니다."));
 
-        // 중복 지원 확인
-        if (projectSubmissionRepository.existsByFreelancerAndProject(freelancer, project)) {
+        // 중복 지원 확인 (취소된 지원은 제외)
+        if (projectSubmissionRepository.existsActiveSubmissionByFreelancerAndProject(freelancer, project)) {
             throw new ServiceException("409-1", "이미 지원한 프로젝트입니다.");
         }
 
