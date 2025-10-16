@@ -8,8 +8,9 @@ import java.util.List;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
+    List<Review> findByTargetUser_Id(Long targetUserId);
 
-    // ✅ targetUserId 기준으로 삭제되지 않은 리뷰들을 최신순으로 조회
+    // ✅ targetUser.id 기준으로 삭제되지 않은 리뷰 최신순 조회
     List<Review> findByTargetUserIdAndDeletedFalseOrderByCreatedAtDesc(Long targetUserId);
 
     // ✅ 특정 프리랜서의 모든 리뷰 (평균 계산용)
