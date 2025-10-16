@@ -1,16 +1,33 @@
 "use client";
 
 import { useUser } from '@/app/context/UserContext';
-import { useEffect, useState } from "react";
-import { getAllReviews } from "@/lib/reviewApi";
+import { apiFetch } from '@/lib/backend/client';
+import { useEffect, useMemo, useState } from "react";
+
+// 이미지 처리 함수 (API에서 오는 상대 경로 또는 public 폴더 경로를 안전하게 처리)
+function fullImageUrl(url?: string) {
+  if (!url) return '/logo-full.png';
+  // 이미 절대 URL인 경우 그대로 반환
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  // public 폴더에 있는 파일 경로는 /filename.jpg 형태이므로 바로 사용
+  if (url.startsWith('/')) return url;
+  // 서버에서 반환하는 상대 경로(예: /uploads/xxx) 처리
+  return `http://localhost:8080${url.startsWith('/') ? '' : '/'}${url}`;
+}
 
 export default function HomePage() {
   const { username, isLoaded } = useUser();
+  const [freelancers, setFreelancers] = useState<any[]>([]);
   
-  // 회전하는 텍스트를 위한 상태
+  // 회전하는 텍스트를 위한 상태 (부드러운 슬라이드로 변경)
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
   const rotatingTexts = ["프리랜서", "프로젝트", "전문 매칭"];
+
+  useEffect(() => {
+      apiFetch("/api/v1/freelancers")
+        .then(setFreelancers)
+        .catch(e => setError("데이터를 불러오지 못했습니다."))
+    }, []);
 
   // 프로젝트 카드 클릭 핸들러
   const handleProjectClick = (projectId: number) => {
@@ -25,18 +42,206 @@ export default function HomePage() {
     window.location.href = `/projects/${projectId}`;
   };
 
-  // 텍스트 자동 회전 효과
+  const marqueeProfiles = useMemo(() => {
+  // 데이터가 바뀔 때만 새로 만듦 (메인 타이틀 바뀔 때 영향 없음)
+  return [...freelancers, ...freelancers];
+}, [freelancers]);
+
+
+  // 텍스트 자동 회전 효과: 인덱스만 주기적으로 바꾸고 CSS transform으로 부드럽게 이동시킵니다.
   useEffect(() => {
     const interval = setInterval(() => {
-      setIsAnimating(true);
-      setTimeout(() => {
-        setCurrentTextIndex((prev) => (prev + 1) % rotatingTexts.length);
-        setIsAnimating(false);
-      }, 300);
+      setCurrentTextIndex((prev) => (prev + 1) % rotatingTexts.length);
     }, 3000);
-
     return () => clearInterval(interval);
   }, [rotatingTexts.length]);
+
+  // 예시 프로필 데이터
+const sampleProfiles = [
+  {
+    id: 5,
+    imageUrl: "/노현정.jpg",
+    nickname: "노현정",
+    title: "댓글 전문가",
+    location: "서울",
+    techs: ["Python", "Pandas"],
+  },
+  {
+    id: 6,
+    imageUrl: "/윤주찬.jpg",
+    nickname: "윤주찬",
+    title: "인증 전문가",
+    location: "서울",
+    techs: ["TensorFlow", "PyTorch"],
+  },
+  {
+    id: 7,
+    imageUrl: "/박세웅.jpg",
+    nickname: "박세웅",
+    title: "프로젝트 전문가",
+    location: "서울",
+    techs: ["React", "Node.js"],
+  },
+  {
+    id: 8,
+    imageUrl: "/임창기.jpg",
+    nickname: "임창기",
+    title: "매칭 전문가",
+    location: "서울",
+    techs: ["React", "Node.js"],
+  },
+  {
+    id: 9,
+    imageUrl: "/주권영.jpg",
+    nickname: "주권영",
+    title: "프리랜서 전문가",
+    location: "경기",
+    techs: ["React", "Node.js"],
+  },
+  {
+    id: 1,
+    imageUrl: "",
+    nickname: "김민수",
+    title: "풀스택 개발자",
+    location: "서울",
+    techs: ["React", "Node.js"],
+  },
+  {
+    id: 2,
+    imageUrl: "",
+    nickname: "박지영",
+    title: "UI/UX 디자이너",
+    location: "부산",
+    techs: ["Figma", "Adobe XD"],
+  },
+  {
+    id: 3,
+    imageUrl: "",
+    nickname: "이수진",
+    title: "백엔드 개발자",
+    location: "대전",
+    techs: ["Node.js", "Express"],
+  },
+  {
+    id: 4,
+    imageUrl: "",
+    nickname: "최지우",
+    title: "프론트엔드 개발자",
+    location: "인천",
+    techs: ["React", "TypeScript"],
+  },
+];
+
+type Profile = {
+  id: number | string;
+  freelancerProfileImageUrl?: string;
+  nickname?: string;
+  title?: string;
+  location?: string;
+  techs?: string[];
+};
+
+function FreelancerMarquee({ profiles }: { profiles: Profile[] }) {
+  return (
+    <div style={{
+      width: "100%",
+      overflow: "hidden",
+      background: "linear-gradient(90deg,#f7f5ec 0%, #fafaf7 100%)",
+      padding: "22px 0",
+      borderTop: "1px solid #f3f4f6",
+      position: "relative",
+    }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "24px",
+          alignItems: "center",
+          animation: "marquee 24s linear infinite",
+          whiteSpace: 'nowrap',
+          flexWrap: 'nowrap'
+        }}
+        onMouseEnter={e => e.currentTarget.style.animationPlayState = 'paused'}
+        onMouseLeave={e => e.currentTarget.style.animationPlayState = 'running'}
+      >
+        {profiles.map((f: Profile, idx: number) => (
+          <div key={String(f.id) + "-" + idx}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              background: "#fff",
+              borderRadius: "999px",
+              padding: "8px 20px 8px 10px",
+              boxShadow: "0 2px 12px #0001",
+              gap: "14px",
+              minWidth: "0",
+              border: "1px solid #f3f4f6",
+              flex: '0 0 auto' // grow horizontally instead of wrapping
+            }}>
+            <img
+              src={fullImageUrl((f as any).imageUrl || (f as any).freelancerProfileImageUrl)}
+              alt={f.nickname}
+              style={{
+                width: "58px",
+                height: "58px",
+                borderRadius: "50%",
+                objectFit: "cover",
+                background: "#eee",
+                boxShadow: "0 1px 8px #0001",
+                flexShrink: 0
+              }}
+            />
+            <div style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              minWidth: 0
+            }}>
+              <div style={{
+                fontWeight: 800,
+                fontSize: "18px",
+                color: "#222",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}>{f.nickname}
+              <span style={{ display: 'inline-block', color: "#888", fontSize: "13px", marginLeft: '8px' }}>📍 {f.location}</span></div>
+              <div style={{
+                color: "#222",
+                fontWeight: 500,
+                fontSize: "15px",
+                marginTop: "3px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}>{f.title}</div>
+              {/* tech chips (up to 2) */}
+              <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
+                {(f.techs || []).slice(0,2).map((t, i) => (
+                  <span key={i} style={{
+                    fontSize: '12px',
+                    padding: '4px 8px',
+                    background: '#f1f5f9',
+                    color: '#0f172a',
+                    borderRadius: '6px',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}>{t}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-52%); }
+        }
+      `}</style>
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--background)" }}>
@@ -62,25 +267,31 @@ export default function HomePage() {
               lineHeight: '1.2'
             }}>
               당신이 찾는{' '}
-              <span
-                className={`inline-block transition-all duration-700 ease-out ${
-                  isAnimating ? 'transform scale-110 opacity-0' : 'transform scale-100 opacity-100'                }`}
-                style={{
-                  color: '#16a34a',
-                  display: 'inline-block',
-                  minWidth: '200px',
-                  textAlign: 'center',
-                  fontWeight: '800',
-                  textShadow: '0 2px 4px rgba(22, 163, 74, 0.2)',
-                  background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  transform: isAnimating ? 'translateY(-10px) scale(1.1)' : 'translateY(0) scale(1)',
-                  transition: 'all 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
-                }}
-              >
-                {rotatingTexts[currentTextIndex]}
+              {/* 부드러운 슬라이드로 텍스트 전환 */}
+              <span style={{
+                color: '#16a34a',
+                display: 'inline-block',
+                minWidth: '200px',
+                textAlign: 'center',
+                fontWeight: '800',
+                textShadow: '0 2px 4px rgba(22, 163, 74, 0.2)',
+                verticalAlign: 'middle',
+                overflow: 'hidden'
+              }}>
+                  <div style={{ display: 'inline-block', overflow: 'hidden', height: '1.2em' }}>
+                    <div style={{ transform: `translateY(-${(currentTextIndex * 100) / (rotatingTexts.length || 1)}%)`, transition: 'transform 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55)' }}>
+                      {rotatingTexts.map((t, i) => (
+                        <div key={i} style={{
+                          height: '1.2em',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 800,
+                          color: '#16a34a'
+                        }}>{t}</div>
+                      ))}
+                    </div>
+                  </div>
               </span>
               <br />
               <span style={{
@@ -100,71 +311,29 @@ export default function HomePage() {
               전문성과 신뢰성을 인정받은 우수한 프리랜서들을 만나보세요.
             </p>
           </div>
-        </section>
-        {/* 통계 섹션 */}
-        <section className="px-4 md:px-8 lg:px-12" style={{
-          backgroundColor: "var(--background)",
-          paddingTop: '80px',
-          paddingBottom: '80px'
-        }}>
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-center">
-              <div className="p-8 hover:transform hover:scale-105 transition-all duration-300 ease-out" style={{
-                padding: '32px',
-                borderRadius: '16px',
-                background: 'linear-gradient(135deg, rgba(22, 163, 74, 0.05) 0%, rgba(34, 197, 94, 0.05) 100%)',
-                border: '1px solid rgba(22, 163, 74, 0.1)'
-              }}>
-                <div className="text-3xl font-bold text-green-600 mb-3 animate-pulse" style={{
-                  fontSize: 'clamp(2rem, 3.5vw, 2.5rem)',
-                  fontWeight: '800',
-                  background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  marginBottom: '12px',
-                  textShadow: '0 4px 8px rgba(22, 163, 74, 0.1)'
-                }}>
-                  12,847
-                </div>
-                <div className="text-lg font-semibold text-gray-700" style={{
-                  fontSize: 'clamp(1rem, 2vw, 1.25rem)',
-                  color: '#374151',
-                  fontWeight: '600'
-                }}>
-                  누적 프로젝트 수
-                </div>
-              </div>
-
-              <div className="p-8 hover:transform hover:scale-105 transition-all duration-300 ease-out" style={{
-                padding: '32px',
-                borderRadius: '16px',
-                background: 'linear-gradient(135deg, rgba(22, 163, 74, 0.05) 0%, rgba(34, 197, 94, 0.05) 100%)',
-                border: '1px solid rgba(22, 163, 74, 0.1)'
-              }}>
-                <div className="text-3xl font-bold text-green-600 mb-3 animate-pulse" style={{
-                  fontSize: 'clamp(2rem, 3.5vw, 2.5rem)',
-                  fontWeight: '800',
-                  background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  marginBottom: '12px',
-                  textShadow: '0 4px 8px rgba(22, 163, 74, 0.1)'
-                }}>
-                  8,432
-                </div>
-                <div className="text-lg font-semibold text-gray-700" style={{
-                  fontSize: 'clamp(1rem, 2vw, 1.25rem)',
-                  color: '#374151',
-                  fontWeight: '600'
-                }}>
-                  누적 포트폴리오 수
-                </div>
-              </div>
+          <FreelancerMarquee profiles={sampleProfiles} />
+          <div className="text-center mt-16" style={{ marginTop: '64px' }}>
+              <button 
+                className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 hover:transform hover:scale-105 transition-all duration-300 ease-out shadow-lg hover:shadow-xl font-semibold text-base" 
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: '#16a34a',
+                  color: 'white',
+                  borderRadius: '12px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+                }}
+                onClick={() => window.location.href = '/freelancers'}
+              >
+                더 많은 프리랜서 보기
+              </button>
             </div>
-          </div>
         </section>
+        
         {/* 최신 프로젝트 섹션 */}
         <section className="px-4 md:px-8 lg:px-12" style={{
           backgroundColor: "var(--background)",
@@ -451,385 +620,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 검증된 프리랜서 섹션 */}
-        <section className="px-4 md:px-8 lg:px-12" style={{
-          backgroundColor: "var(--background)",
-          paddingTop: '80px',
-          paddingBottom: '80px'
-        }}>
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16" style={{ marginBottom: '64px' }}>
-              <h2 className="text-4xl font-bold text-gray-900 mb-6" style={{
-                fontSize: 'clamp(2.25rem, 4vw, 2.75rem)',
-                fontWeight: '800',
-                color: '#111827',
-                marginBottom: '24px'
-              }}>
-                검증된 <span style={{
-                  color: '#16a34a',
-                  background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}>프리랜서</span>
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto" style={{
-                color: '#6b7280',
-                fontSize: 'clamp(1.25rem, 2.5vw, 1.5rem)',
-                maxWidth: '56rem',
-                margin: '0 auto',
-                lineHeight: '1.7'
-              }}>
-                전문성과 신뢰성을 인정받은 우수한 프리랜서를 만나보세요.
-              </p>
-            </div>            <div className="grid grid-cols-1 md:grid-cols-3 gap-10" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '40px' }}>
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-500 ease-out cursor-pointer" style={{
-                backgroundColor: 'white',
-                borderRadius: '20px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                border: '1px solid #e5e7eb',
-                overflow: 'hidden',
-                transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
-              }}>
-                <div className="p-8" style={{ padding: '32px' }}>
-                  <div className="flex items-center gap-4 mb-4" style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
-                    <div className="w-16 h-16 bg-gray-300 rounded-full" style={{ width: '64px', height: '64px', backgroundColor: '#d1d5db', borderRadius: '50%' }}></div>
-                    <div>
-                      <h3 className="font-bold text-lg text-gray-900" style={{ fontWeight: '700', fontSize: '18px', color: '#111827' }}>김민수</h3>
-                      <p className="text-gray-600 text-sm" style={{ color: '#6b7280', fontSize: '14px' }}>시니어 풀스택 개발자</p>
-                      <div className="flex items-center gap-2 mt-1" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                        <span className="text-yellow-500" style={{ color: '#eab308' }}>⭐ 4.9</span>
-                        <span className="text-gray-500 text-sm" style={{ color: '#6b7280', fontSize: '14px' }}>(47개 리뷰)</span>
-                        <span className="text-gray-500 text-sm" style={{ color: '#6b7280', fontSize: '14px' }}>📍 서울</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right mb-4" style={{ textAlign: 'right', marginBottom: '16px' }}>
-                    <div className="text-2xl font-bold text-gray-900" style={{ fontSize: '24px', fontWeight: '700', color: '#111827' }}>₩80,000</div>
-                    <div className="text-sm text-gray-600" style={{ fontSize: '14px', color: '#6b7280' }}>시간당</div>
-                  </div>
-                  <p className="text-gray-700 text-sm mb-4" style={{ color: '#374151', fontSize: '14px', marginBottom: '16px', lineHeight: '1.6' }}>
-                    7년차 풀스택 개발자로 스타트업부터 대기업까지 다양한 프로젝트 경험을 보유하고 있습니다. 특히 React와 Node.js를 활용한 웹 개발에 전문성을 가지고 있습니다.
-                  </p>
-                  <div className="flex flex-wrap gap-2 mb-4" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs" style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#dbeafe',
-                      color: '#1e40af',
-                      borderRadius: '4px',
-                      fontSize: '12px'
-                    }}>React</span>
-                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs" style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#dbeafe',
-                      color: '#1e40af',
-                      borderRadius: '4px',
-                      fontSize: '12px'
-                    }}>Node.js</span>
-                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs" style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#dbeafe',
-                      color: '#1e40af',
-                      borderRadius: '4px',
-                      fontSize: '12px'
-                    }}>TypeScript</span>
-                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs" style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#dbeafe',
-                      color: '#1e40af',
-                      borderRadius: '4px',
-                      fontSize: '12px'
-                    }}>AWS</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4 mb-4 text-center text-sm" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '16px', textAlign: 'center', fontSize: '14px' }}>
-                    <div>
-                      <div className="font-bold text-gray-900" style={{ fontWeight: '700', color: '#111827' }}>156</div>
-                      <div className="text-gray-500" style={{ color: '#6b7280' }}>완료 프로젝트</div>
-                    </div>
-                    <div>
-                      <div className="font-bold text-gray-900" style={{ fontWeight: '700', color: '#111827' }}>1시간 이내</div>
-                      <div className="text-gray-500" style={{ color: '#6b7280' }}>응답 시간</div>
-                    </div>
-                    <div>
-                      <div className="font-bold text-gray-900" style={{ fontWeight: '700', color: '#111827' }}>98%</div>
-                      <div className="text-gray-500" style={{ color: '#6b7280' }}>성공률</div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2" style={{ display: 'flex', gap: '8px' }}>
-                    <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm" style={{
-                      padding: '4px 12px',
-                      backgroundColor: '#dcfce7',
-                      color: '#166534',
-                      borderRadius: '9999px',
-                      fontSize: '14px'
-                    }}>Top Rated</span>
-                    <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm" style={{
-                      padding: '4px 12px',
-                      backgroundColor: '#dbeafe',
-                      color: '#1e40af',
-                      borderRadius: '9999px',
-                      fontSize: '14px'
-                    }}>Expert Verified</span>
-                  </div>
-                  <div className="flex gap-2 mt-4" style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
-                    <button className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors" style={{
-                      flex: '1',
-                      padding: '8px 16px',
-                      border: '1px solid #d1d5db',
-                      color: '#374151',
-                      borderRadius: '8px',
-                      backgroundColor: 'white',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}>
-                      프로필 보기
-                    </button>
-                    <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors" style={{
-                      padding: '8px 16px',
-                      backgroundColor: '#16a34a',
-                      color: 'white',
-                      borderRadius: '8px',
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}>
-                      💬 메시지
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-500 ease-out cursor-pointer" style={{
-                backgroundColor: 'white',
-                borderRadius: '20px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                border: '1px solid #e5e7eb',
-                overflow: 'hidden',
-                transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
-              }}>
-                <div className="p-8" style={{ padding: '32px' }}>
-                  <div className="flex items-center gap-4 mb-4" style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
-                    <div className="w-16 h-16 bg-gray-300 rounded-full" style={{ width: '64px', height: '64px', backgroundColor: '#d1d5db', borderRadius: '50%' }}></div>
-                    <div>
-                      <h3 className="font-bold text-lg text-gray-900" style={{ fontWeight: '700', fontSize: '18px', color: '#111827' }}>박지영</h3>
-                      <p className="text-gray-600 text-sm" style={{ color: '#6b7280', fontSize: '14px' }}>UI/UX 디자이너</p>
-                      <div className="flex items-center gap-2 mt-1" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                        <span className="text-yellow-500" style={{ color: '#eab308' }}>⭐ 4.8</span>
-                        <span className="text-gray-500 text-sm" style={{ color: '#6b7280', fontSize: '14px' }}>(32개 리뷰)</span>
-                        <span className="text-gray-500 text-sm" style={{ color: '#6b7280', fontSize: '14px' }}>📍 부산</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right mb-4" style={{ textAlign: 'right', marginBottom: '16px' }}>
-                    <div className="text-2xl font-bold text-gray-900" style={{ fontSize: '24px', fontWeight: '700', color: '#111827' }}>₩60,000</div>
-                    <div className="text-sm text-gray-600" style={{ fontSize: '14px', color: '#6b7280' }}>시간당</div>
-                  </div>
-                  <p className="text-gray-700 text-sm mb-4" style={{ color: '#374151', fontSize: '14px', marginBottom: '16px', lineHeight: '1.6' }}>
-                    사용자 중심의 디자인을 추구하는 UI/UX 디자이너입니다. 모바일 앱과 웹 서비스의 전체 디자인 프로세스를 담당하며, 사용자 경험을 최우선으로 생각합니다.
-                  </p>
-                  <div className="flex flex-wrap gap-2 mb-4" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-                    <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs" style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#fecaca',
-                      color: '#991b1b',
-                      borderRadius: '4px',
-                      fontSize: '12px'
-                    }}>Figma</span>
-                    <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs" style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#fecaca',
-                      color: '#991b1b',
-                      borderRadius: '4px',
-                      fontSize: '12px'
-                    }}>Adobe XD</span>
-                    <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs" style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#fecaca',
-                      color: '#991b1b',
-                      borderRadius: '4px',
-                      fontSize: '12px'
-                    }}>프로토타이핑</span>
-                    <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs" style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#fecaca',
-                      color: '#991b1b',
-                      borderRadius: '4px',
-                      fontSize: '12px'
-                    }}>사용자 리서치</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4 mb-4 text-center text-sm" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '16px', textAlign: 'center', fontSize: '14px' }}>
-                    <div>
-                      <div className="font-bold text-gray-900" style={{ fontWeight: '700', color: '#111827' }}>89</div>
-                      <div className="text-gray-500" style={{ color: '#6b7280' }}>완료 프로젝트</div>
-                    </div>
-                    <div>
-                      <div className="font-bold text-gray-900" style={{ fontWeight: '700', color: '#111827' }}>3시간 이내</div>
-                      <div className="text-gray-500" style={{ color: '#6b7280' }}>응답 시간</div>
-                    </div>
-                    <div>
-                      <div className="font-bold text-gray-900" style={{ fontWeight: '700', color: '#111827' }}>96%</div>
-                      <div className="text-gray-500" style={{ color: '#6b7280' }}>성공률</div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2" style={{ display: 'flex', gap: '8px' }}>
-                    <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm" style={{
-                      padding: '4px 12px',
-                      backgroundColor: '#dcfce7',
-                      color: '#166534',
-                      borderRadius: '9999px',
-                      fontSize: '14px'
-                    }}>Design Expert</span>
-                  </div>
-                  <div className="flex gap-2 mt-4" style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
-                    <button className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors" style={{
-                      flex: '1',
-                      padding: '8px 16px',
-                      border: '1px solid #d1d5db',
-                      color: '#374151',
-                      borderRadius: '8px',
-                      backgroundColor: 'white',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}>
-                      프로필 보기
-                    </button>
-                    <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors" style={{
-                      padding: '8px 16px',
-                      backgroundColor: '#16a34a',
-                      color: 'white',
-                      borderRadius: '8px',
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}>
-                      💬 메시지
-                    </button>
-                  </div>
-                </div>              </div>
-
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-500 ease-out cursor-pointer" style={{
-                backgroundColor: 'white',
-                borderRadius: '20px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                border: '1px solid #e5e7eb',
-                overflow: 'hidden',
-                transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
-              }}>
-                <div className="p-8" style={{ padding: '32px' }}>
-                  <div className="flex items-center gap-4 mb-4" style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
-                    <div className="w-16 h-16 bg-gray-300 rounded-full" style={{ width: '64px', height: '64px', backgroundColor: '#d1d5db', borderRadius: '50%' }}></div>                    <div>
-                      <h3 className="font-bold text-lg text-gray-900" style={{ fontWeight: '700', fontSize: '18px', color: '#111827' }}>이준호</h3>
-                      <p className="text-gray-600 text-sm" style={{ color: '#6b7280', fontSize: '14px' }}>브랜드 디자이너</p>
-                      <div className="flex items-center gap-2 mt-1" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                        <span className="text-yellow-500" style={{ color: '#eab308' }}>⭐ 4.7</span>
-                        <span className="text-gray-500 text-sm" style={{ color: '#6b7280', fontSize: '14px' }}>(28개 리뷰)</span>
-                        <span className="text-gray-500 text-sm" style={{ color: '#6b7280', fontSize: '14px' }}>📍 대구</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right mb-4" style={{ textAlign: 'right', marginBottom: '16px' }}>
-                    <div className="text-2xl font-bold text-gray-900" style={{ fontSize: '24px', fontWeight: '700', color: '#111827' }}>₩50,000</div>
-                    <div className="text-sm text-gray-600" style={{ fontSize: '14px', color: '#6b7280' }}>시간당</div>
-                  </div>
-                  <p className="text-gray-700 text-sm mb-4" style={{ color: '#374151', fontSize: '14px', marginBottom: '16px', lineHeight: '1.6' }}>
-                    10년 이상의 브랜드 디자인 경험을 바탕으로 기업의 아이덴티티를 구축하는 전문가입니다. 로고부터 전체 브랜드 가이드라인까지 종합적인 브랜드 솔루션을 제공합니다.
-                  </p>                  <div className="flex flex-wrap gap-2 mb-4" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-                    <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs" style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#e9d5ff',
-                      color: '#6b21a8',
-                      borderRadius: '4px',
-                      fontSize: '12px'
-                    }}>브랜딩</span>
-                    <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs" style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#e9d5ff',
-                      color: '#6b21a8',
-                      borderRadius: '4px',
-                      fontSize: '12px'
-                    }}>로고 디자인</span>
-                    <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs" style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#e9d5ff',
-                      color: '#6b21a8',
-                      borderRadius: '4px',
-                      fontSize: '12px'
-                    }}>인쇄물</span>
-                    <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs" style={{
-                      padding: '4px 8px',                      backgroundColor: '#e9d5ff',
-                      color: '#6b21a8',
-                      borderRadius: '4px',
-                      fontSize: '12px'
-                    }}>Adobe Creative</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4 mb-4 text-center text-sm" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '16px', textAlign: 'center', fontSize: '14px' }}>
-                    <div>
-                      <div className="font-bold text-gray-900" style={{ fontWeight: '700', color: '#111827' }}>73</div>
-                      <div className="text-gray-500" style={{ color: '#6b7280' }}>완료 프로젝트</div>
-                    </div>
-                    <div>
-                      <div className="font-bold text-gray-900" style={{ fontWeight: '700', color: '#111827' }}>2시간 이내</div>
-                      <div className="text-gray-500" style={{ color: '#6b7280' }}>응답 시간</div>
-                    </div>
-                    <div>
-                      <div className="font-bold text-gray-900" style={{ fontWeight: '700', color: '#111827' }}>94%</div>
-                      <div className="text-gray-500" style={{ color: '#6b7280' }}>성공률</div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2" style={{ display: 'flex', gap: '8px' }}>                    <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm" style={{
-                      padding: '4px 12px',
-                      backgroundColor: '#dcfce7',
-                      color: '#166534',
-                      borderRadius: '9999px',
-                      fontSize: '14px'
-                    }}>Brand Specialist</span>
-                  </div>
-                  <div className="flex gap-2 mt-4" style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
-                    <button className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors" style={{
-                      flex: '1',
-                      padding: '8px 16px',
-                      border: '1px solid #d1d5db',
-                      color: '#374151',
-                      borderRadius: '8px',
-                      backgroundColor: 'white',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}>
-                      프로필 보기
-                    </button>                    <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors" style={{
-                      padding: '8px 16px',
-                      backgroundColor: '#16a34a',
-                      color: 'white',
-                      borderRadius: '8px',
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}>
-                      💬 메시지
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="text-center mt-16" style={{ marginTop: '64px' }}>
-              <button className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 hover:transform hover:scale-105 transition-all duration-300 ease-out shadow-lg hover:shadow-xl font-semibold text-base" style={{
-                padding: '12px 24px',
-                backgroundColor: '#16a34a',
-                color: 'white',
-                borderRadius: '12px',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                fontSize: '16px',
-                fontWeight: '600',
-                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
-              }}>
-                모든 프리랜서 보기 →
-              </button>
-            </div>
-          </div>
-        </section>
-
         {/* 고객 이용후기 섹션 */}
         <section className="px-4 md:px-8 lg:px-12" style={{
           backgroundColor: "var(--background)",
@@ -973,7 +763,79 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+        {/* 통계 섹션 */}
+        <section className="px-4 md:px-8 lg:px-12" style={{
+          backgroundColor: "var(--background)",
+          paddingTop: '80px',
+          paddingBottom: '80px'
+        }}>
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-center">
+              <div className="p-8 hover:transform hover:scale-105 transition-all duration-300 ease-out" style={{
+                padding: '32px',
+                borderRadius: '16px',
+                background: 'linear-gradient(135deg, rgba(22, 163, 74, 0.05) 0%, rgba(34, 197, 94, 0.05) 100%)',
+                border: '1px solid rgba(22, 163, 74, 0.1)'
+              }}>
+                <div className="text-3xl font-bold text-green-600 mb-3 animate-pulse" style={{
+                  fontSize: 'clamp(2rem, 3.5vw, 2.5rem)',
+                  fontWeight: '800',
+                  background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  marginBottom: '12px',
+                  textShadow: '0 4px 8px rgba(22, 163, 74, 0.1)'
+                }}>
+                  12,847
+                </div>
+                <div className="text-lg font-semibold text-gray-700" style={{
+                  fontSize: 'clamp(1rem, 2vw, 1.25rem)',
+                  color: '#374151',
+                  fontWeight: '600'
+                }}>
+                  누적 프로젝트 수
+                </div>
+              </div>
+
+              <div className="p-8 hover:transform hover:scale-105 transition-all duration-300 ease-out" style={{
+                padding: '32px',
+                borderRadius: '16px',
+                background: 'linear-gradient(135deg, rgba(22, 163, 74, 0.05) 0%, rgba(34, 197, 94, 0.05) 100%)',
+                border: '1px solid rgba(22, 163, 74, 0.1)'
+              }}>
+                <div className="text-3xl font-bold text-green-600 mb-3 animate-pulse" style={{
+                  fontSize: 'clamp(2rem, 3.5vw, 2.5rem)',
+                  fontWeight: '800',
+                  background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  marginBottom: '12px',
+                  textShadow: '0 4px 8px rgba(22, 163, 74, 0.1)'
+                }}>
+                  8,432
+                </div>
+                <div className="text-lg font-semibold text-gray-700" style={{
+                  fontSize: 'clamp(1rem, 2vw, 1.25rem)',
+                  color: '#374151',
+                  fontWeight: '600'
+                }}>
+                  누적 포트폴리오 수
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
 }
+
+function setLoading(arg0: boolean): void {
+  throw new Error('Function not implemented.');
+}
+function setError(arg0: string): any {
+  throw new Error('Function not implemented.');
+}
+
