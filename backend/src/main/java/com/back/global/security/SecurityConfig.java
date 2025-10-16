@@ -30,6 +30,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/member/logout").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/auth/updatePassword/verify").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/projects").permitAll()
+
+                        // ✅ 리뷰: 조회는 공개
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+
                         .requestMatchers(HttpMethod.GET, "/api/v1/freelancers").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/freelancers/*").permitAll().requestMatchers(HttpMethod.GET, "/api/v1/freelancers/me").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/freelancers/*/portfolios").permitAll().requestMatchers(HttpMethod.GET, "/api/v1/freelancers/me/portfolios").authenticated()
@@ -60,6 +64,7 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
         configuration.setExposedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("Authorization", "Set-Cookie"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
