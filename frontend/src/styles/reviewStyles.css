@@ -1,0 +1,461 @@
+/* Review Pages Common Styles */
+
+/* 컨테이너 기본 스타일 */
+.review-container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #ffffff, #f0fdf4);
+  padding: 1rem;
+}
+
+.review-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.review-card:hover {
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+/* 헤더 스타일 */
+.review-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.review-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.review-subtitle {
+  color: #6b7280;
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+}
+
+.review-divider {
+  height: 4px;
+  width: 6rem;
+  margin: 0 auto;
+  background: linear-gradient(to right, #10b981, #059669);
+  border-radius: 9999px;
+}
+
+/* 폼 스타일 */
+.review-form {
+  max-width: 42rem;
+  margin: 0 auto;
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.review-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.review-label {
+  display: block;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.review-input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  outline: none;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.review-input:focus {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+  border-color: transparent;
+}
+
+.review-textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  outline: none;
+  transition: all 0.2s ease;
+  resize: none;
+  min-height: 120px;
+  font-size: 0.875rem;
+  font-family: inherit;
+}
+
+.review-textarea:focus {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+  border-color: transparent;
+}
+
+/* 버튼 스타일 */
+.review-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.review-btn-primary {
+  background: linear-gradient(to right, #10b981, #059669);
+  color: white;
+}
+
+.review-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(to right, #059669, #047857);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.review-btn-secondary {
+  background: linear-gradient(to right, #3b82f6, #2563eb);
+  color: white;
+}
+
+.review-btn-secondary:hover:not(:disabled) {
+  background: linear-gradient(to right, #2563eb, #1d4ed8);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.review-btn-danger {
+  background: linear-gradient(to right, #ef4444, #dc2626);
+  color: white;
+}
+
+.review-btn-danger:hover:not(:disabled) {
+  background: linear-gradient(to right, #dc2626, #b91c1c);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.review-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* 리뷰 목록 스타일 */
+.review-list-container {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.review-item {
+  background: white;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  margin-bottom: 1rem;
+}
+
+.review-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.review-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.review-item-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.review-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f59e0b;
+}
+
+.review-content {
+  color: #374151;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.review-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.review-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+/* 로딩 및 빈 상태 */
+.review-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  color: #6b7280;
+  font-size: 1.125rem;
+}
+
+.review-empty {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: #6b7280;
+}
+
+.review-empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+/* 정렬 버튼 */
+.review-sort-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.review-sort-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.review-sort-btn.active {
+  background: linear-gradient(to right, #f59e0b, #d97706);
+  color: white;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+  transform: scale(1.05);
+}
+
+.review-sort-btn.inactive {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.review-sort-btn.inactive:hover {
+  background: #e5e7eb;
+}
+
+/* 통계 정보 */
+.review-stats {
+  background: linear-gradient(to right, #f0fdf4, #eff6ff);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.review-stats-grid {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+}
+
+.review-stats-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.review-stats-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.review-stats-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.review-stats-divider {
+  width: 1px;
+  background: #d1d5db;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .review-form {
+    padding: 1.5rem;
+    margin: 0 1rem;
+  }
+
+  .review-title {
+    font-size: 2rem;
+  }
+
+  .review-item-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .review-actions {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .review-sort-buttons {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .review-stats-grid {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .review-stats-divider {
+    display: none;
+  }
+
+  .review-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+}
+
+/* 알림 스타일 */
+.review-notification {
+  display: inline-block;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  color: #92400e;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+}
+
+/* 별점 표시 개선 */
+.review-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.review-star {
+  color: #fbbf24;
+  font-size: 1.25rem;
+}
+
+/* 프로젝트 태그 */
+.review-project-tag {
+  background: #dcfce7;
+  color: #166534;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* 작성자 정보 */
+.review-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.review-author-icon {
+  font-size: 1rem;
+}
+
+/* 날짜 정보 */
+.review-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.review-date-icon {
+  font-size: 1rem;
+}
+
+/* 애니메이션 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.review-item {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* 포커스 스타일 개선 */
+.review-input:focus,
+.review-textarea:focus,
+.review-btn:focus {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+/* 스크롤바 스타일링 (웹킷 기반 브라우저) */
+.review-textarea::-webkit-scrollbar {
+  width: 8px;
+}
+
+.review-textarea::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.review-textarea::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.review-textarea::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
