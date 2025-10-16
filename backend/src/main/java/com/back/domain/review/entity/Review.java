@@ -35,7 +35,7 @@ public class Review {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    @Builder.Default
+    @Column(nullable = false)
     private boolean deleted = false;
 
     @PrePersist

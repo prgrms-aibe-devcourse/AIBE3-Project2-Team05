@@ -100,7 +100,7 @@ export default function FreelancerMyPage() {
   fetchAllData();
 }, []);
 
-// ✅ 여기 아래에 리뷰용 useEffect 추가
+// ✅ 여기 아래에 리뷰용 useEffect 추가  
 useEffect(() => {
   const fetchReviews = async () => {
     try {
@@ -111,7 +111,7 @@ useEffect(() => {
       );
       if (!res.ok) throw new Error("리뷰 데이터를 불러올 수 없습니다.");
       const data = await res.json();
-      setReviews(data);
+      setReviews(data.data || data);
     } catch (err) {
       console.error("리뷰 불러오기 실패:", err);
     }

@@ -12,8 +12,8 @@ export default function UserReviewCreatePage() {
   const searchParams = useSearchParams();
 
   // ✅ targetFreelancerId 로 변경 (member → freelancer 반영)
-  const targetFreelancerId = searchParams.get("targetFreelancerId");
-  const projectId = searchParams.get("projectId");
+  const targetFreelancerId = searchParams.get("targetUserId");
+const projectId = searchParams.get("projectId");
 
   console.log("✅ 받은 값:", projectId, targetFreelancerId);
 
@@ -31,6 +31,10 @@ export default function UserReviewCreatePage() {
     }
 
     if (!targetFreelancerId || !projectId) {
+      const payload = { title, content, rating, projectId, targetFreelancerId };
+      console.log("리뷰 payload", payload);
+      console.log("targetFreelancerId:", targetFreelancerId);
+      console.log("projectId:", projectId);
       alert("리뷰 대상 또는 프로젝트 정보가 없습니다.");
       return;
     }
@@ -57,7 +61,7 @@ export default function UserReviewCreatePage() {
       setShowConfirmModal(false);
       alert("리뷰가 성공적으로 등록되었습니다!");
       await new Promise((r) => setTimeout(r, 100));
-      router.push(`/reviews/${targetFreelancerId}`, { scroll: true });
+      router.push(`/reviewlist/${targetFreelancerId}`, { scroll: true });
     } catch (err: any) {
       console.error("리뷰 등록 실패:", err);
       alert(`리뷰 등록 실패: ${err.message}`);

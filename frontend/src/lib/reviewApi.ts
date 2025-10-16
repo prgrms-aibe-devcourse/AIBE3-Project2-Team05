@@ -29,24 +29,28 @@ function getAuthToken(): string | null {
 
 // ✅ 공통 fetch 함수 (Authorization 헤더 자동 추가)
 export async function fetchBase<T>(url: string, options: RequestInit = {}): Promise<T> {
+  // ✅ 클라이언트 환경에서만 실행되도록
+  if (typeof window === "undefined") {
+    throw new Error("fetchBase must be called from the client side only.");
+  }
+
   const token =
-    (typeof window !== "undefined" &&
-      (localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken"))) ||
-    null;
+    localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
 
   const res = await fetch(`http://localhost:8080${url}`, {
-    credentials: "include", // ✅ 쿠키 + CORS
+    method: options.method || "GET",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}), // ✅ 토큰 자동 추가
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers || {}),
     },
-    ...options,
+    body: options.body,
   });
 
   if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`요청 실패 (${res.status}): ${errorText}`);
+    const text = await res.text();
+    throw new Error(`요청 실패 (${res.status}): ${text}`);
   }
 
   return res.json();
@@ -74,25 +78,33 @@ export async function createReview(payload: ReviewRequest) {
 export async function updateReview(
   reviewId: number,
   payload: Partial<Pick<ReviewRequest, "rating" | "title" | "content">>
-) { 
+) {
   const token =
     localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
 
   return fetchBase<ReviewResponse>(`/api/reviews/${reviewId}`, {
     method: "PUT",
     body: JSON.stringify(payload),
-    credentials: "include", 
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}), // ✅ 반드시 필요
     },
   });
 }
 
 // ✅ 리뷰 삭제
 export async function deleteReview(reviewId: number) {
+  const token =
+    localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+
   const res = await fetch(`http://localhost:8080/api/reviews/${reviewId}`, {
     method: "DELETE",
     credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
   });
 
   if (!res.ok) {
@@ -104,8 +116,8 @@ export async function deleteReview(reviewId: number) {
 }
 
 // ✅ 특정 사용자의 리뷰 목록 조회
-export async function getReviews(targetFreelancerId: number) {
-  return fetchBase<ReviewResponse[]>(`/api/reviews?targetFreelancerId=${targetFreelancerId}`);
+export async function getReviews(targetUserId: number) {
+  return fetchBase<ReviewResponse[]>(`/api/reviews?targetUserId=${targetUserId}`);
 }
 
 // ✅ 평균 평점 조회
