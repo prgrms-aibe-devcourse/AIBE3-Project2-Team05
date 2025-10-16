@@ -1,4 +1,7 @@
 "use client";
+import CareerAddModal from "@/components/CareerAddModal";
+import CareerEditModal from "@/components/CareerEditModal";
+import TechAddModal from "@/components/TechAddModal";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -36,6 +39,16 @@ function formatDate(dateStr?: string) {
   return `${year}년 ${month}월`;
 }
 
+// full-year format: "2025년 02월"
+function formatFullDate(dateStr?: string) {
+  if (!dateStr) return "-";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "-";
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  return `${year}년 ${month}월`;
+}
+
 function fullImageUrl(url?: string) {
   if (!url) return "/placeholder.svg";
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
@@ -54,10 +67,10 @@ export default function FreelancerMyPage() {
   const [activePortfolioId, setActivePortfolioId] = useState<string | number | null>(null);
   const [modalPortfolio, setModalPortfolio] = useState<any | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
-  const [showActionMenu, setShowActionMenu] = useState(false);
-  const [careerEditModalOpen, setCareerEditModalOpen] = useState(false);
-  const [techEditModalOpen, setTechEditModalOpen] = useState(false);
-
+  const [careerAddModalOpen, setCareerAddModalOpen] = useState(false);
+  const [techAddModalOpen, setTechAddModalOpen] = useState(false);
+  const [editCareerModalOpen, setEditCareerModalOpen] = useState(false);
+  const [selectedCareerId, setSelectedCareerId] = useState<string | number | null>(null);
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -560,86 +573,319 @@ export default function FreelancerMyPage() {
                     fontWeight: 800,
                     fontSize: "1.12rem",
                     color: "#222",
-                    marginBottom: "15px"
+                    marginBottom: "10px"
                   }}>
                     소개
                   </h3>
                   <p style={{
+                    background: "#f8faff",
                     color: "#555",
-                    marginBottom: "22px",
-                    fontSize: "15.5px",
+                    borderRadius: 8,
+                    padding: "10px 15px",
+                    marginBottom: "40px",
+                    fontSize: "16px",
                     lineHeight: "1.75",
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
                   }}>
                     {freelancer?.content}
                   </p>
                   {/* 경력 */}
-                  <div style={{ marginBottom: "24px" }}>
+                  <div>
+                  <div style={{ display: "flex", alignItems: "center", marginBottom: "5px" }}>
                     <h3 style={{
                     fontWeight: 800,
                     fontSize: "1.12rem",
                     color: "#222",
-                    marginBottom: "15px"
+                    marginBottom: "10px",
+                    flex: 1
                   }}>
                     경력
                   </h3>
+                  <button
+                      type="button"
+                      style={{
+                        marginLeft: "10px",
+                        background: "#f8faff",
+                        border: "1px solid #e0e0e0",
+                        color: "#16a34a",
+                        fontWeight: 600,
+                        fontSize: "14px",
+                        borderRadius: "7px",
+                        padding: "3px 12px",
+                        cursor: "pointer",
+                        opacity: 0.6
+                      }}
+                      onClick={() => setCareerAddModalOpen(true)}
+                    >
+                      + 추가
+                    </button>
+                    </div>
                     {Array.isArray(freelancer?.careerList) && freelancer?.careerList.length > 0 ? (
-                      <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
-                        {freelancer.careerList.map((c: any) => (
-                          <li key={c.id}
-                            style={{
-                              background: "#f8faff",
-                              borderRadius: 8,
-                              padding: "10px 15px",
-                              marginBottom: "10px",
-                              fontSize: "15px"
-                            }}>
-                            <div style={{ fontWeight: 700}}>
-                              {c.title} · {c.company}
-                            </div>
-                            <div style={{ color: "#888", fontSize: "14px", marginTop: "2px" }}>
-                              {c.startDate} - {c.endDate} {c.current ? "(재직중)" : ""}
-                            </div>
-                            {c.description && (
-                              <div style={{ marginTop: "5px", color: "#444" }}>{c.description}</div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <div style={{ color: "#888" }}>경력 정보가 없습니다.</div>
+                        <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
+                            {freelancer.careerList
+                              .slice()
+                              .sort((a: any, b: any) => {
+                                const da = new Date(a?.startDate);
+                                const db = new Date(b?.startDate);
+                                const ta = isNaN(da.getTime()) ? Infinity : da.getTime();
+                                const tb = isNaN(db.getTime()) ? Infinity : db.getTime();
+                                return ta - tb; // earlier start first
+                              })
+                              .map((c: any, idx: number) => (
+              <li
+                key={c.id ?? `${c.title}-${c.company}-${c.startDate}-${idx}`}
+                style={{
+                borderRadius: 8,
+                padding: "12px 14px",
+                marginBottom: "10px",
+                fontSize: "15px",
+                position: "relative",
+                display: "flex",
+                gap: "12px",
+                alignItems: "flex-start",
+                }}
+              >
+                {/* Left: stacked dates (start on top, end below) */}
+                <div style={{ width: 120, minWidth: 100, textAlign: "left", color: "#666" }}>
+                  <div style={{ fontSize: "16px", color: "#888", textAlign: "center" }}>{formatFullDate(c.startDate)}</div>
+                  <div style={{ fontSize: "12px", color: "#ccc", margin: "4px 0", textAlign: "center" }}>|</div>
+                  <div style={{ marginTop: "1px", fontSize: "16px", color: "#888", textAlign: "center" }}>
+                    {c.endDate ? formatFullDate(c.endDate) : (c.current ? "재직중" : "-")}
+                  </div>
+                </div>
+
+                {/* Right: company/title on top, description below */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, color: "#222", display: "flex", gap: "8px", alignItems: "center" }}>
+                    <span style={{ fontSize: "18px", marginRight: "12px" }}>{c.company}</span>
+                    <span style={{ fontSize: "16px", color: "#555", fontWeight: 600 }}>{c.title}</span>
+                  </div>
+                  {c.description && (
+                    <div style={{ marginTop: "8px", color: "#444", lineHeight: 1.5 }}>{c.description}</div>
+                  )}
+                </div>
+
+                {/* Edit button aligned to the right */}
+                <div style={{ marginLeft: "8px", display: "flex", alignItems: "start" }}>
+                  <button
+                    type="button"
+                    style={{
+                      background: "#f8faff",
+                      border: "1px solid #e0e0e0",
+                      color: "#464847ff",
+                      fontWeight: 600,
+                      fontSize: "13px",
+                      borderRadius: "3px",
+                      padding: "2px 5px",
+                      cursor: "pointer",
+                      opacity: 0.85
+                    }}
+                    onClick={() => {
+                      setEditCareerModalOpen(true);
+                      setSelectedCareerId(c.id);
+                    }}
+                  >
+                    수정
+                  </button>
+                </div>
+              </li>
+                            ))}
+                        </ul>
+                        ) : (
+                        <div style={{ color: "#888" }}>경력 정보가 없습니다.</div>
+                        )}
+
+                  {careerAddModalOpen && (
+                    <CareerAddModal
+                        onClose={() => setCareerAddModalOpen(false)}
+                        onAdd={async (career) => {
+                        // 실제 등록 로직(API 호출 후 목록 갱신)
+                        const res = await fetch(
+                          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me/careers`,
+                          {
+                            method: "POST",
+                            credentials: "include",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(career),
+                          }
+                        );
+                        if (!res.ok) {
+                          alert("경력 등록 실패");
+                          return;
+                        }
+                        const data = await res.json();
+                        const newCareer = data.data;
+                        setCareerAddModalOpen(false);
+                        alert("경력이 성공적으로 등록되었습니다.");
+                        setFreelancer((prev: any) => ({
+                          ...prev,
+                          careerList: [...(prev.careerList || []), newCareer],
+                        }));
+                        }}
+                    />
                     )}
+          {editCareerModalOpen && selectedCareerId != null && (
+          <CareerEditModal
+            id={selectedCareerId}
+            onClose={() => setEditCareerModalOpen(false)}
+            onEdit={async (updatedCareer) => {
+            setEditCareerModalOpen(false);
+            // 서버에서 최신 freelancer 정보 fetch (수정 직후)
+            try {
+              const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`, {
+              method: "GET", credentials: "include"
+              });
+              if (res.ok) {
+              const latest = await res.json();
+              setFreelancer(latest);
+              }
+            } catch (err) {
+              // fetch 실패시 기존 방식으로 로컬 업데이트
+              setFreelancer((prev: any) => ({
+              ...prev,
+              careerList: prev.careerList.map((c: any) =>
+                String(c.id) === String(updatedCareer.id) ? updatedCareer : c
+              ),
+              }));
+            }
+            }}
+          />
+          )}
                   </div>
                   {/* 스킬 */}
                   <div>
+                  <div style={{ marginBottom: "2px", marginTop: "28px", display: "flex", alignItems: "center" }}>
                     <h3 style={{
                     fontWeight: 800,
                     fontSize: "1.12rem",
                     color: "#222",
-                    marginBottom: "15px"
-                  }}>
+                    marginTop: "20px",
+                    marginBottom: "15px",
+                    flex: 1
+                  }}
+                  >
                     기술스택
                   </h3>
-                    <div style={{ display: "flex", gap: "7px", flexWrap: "wrap" }}>
-                      {(freelancer?.techList || []).length > 0 ? (
-                        freelancer?.techList.map((tech: any) => (
-                          <span
-                            key={tech.id ?? tech.techName}
-                            style={{
-                              background: "#f7f7f7",
-                              color: "#72a685ff",
-                              fontWeight: 600,
-                              borderRadius: "8px",
-                              padding: "5px 13px",
-                              fontSize: "13px",
-                            }}
-                          >
-                            {tech.techName ?? tech}
-                          </span>
-                        ))
+                  <button
+                      type="button"
+                      style={{
+                        marginLeft: "10px",
+                        background: "#f8faff",
+                        border: "1px solid #e0e0e0",
+                        color: "#16a34a",
+                        fontWeight: 600,
+                        fontSize: "14px",
+                        borderRadius: "7px",
+                        padding: "3px 12px",
+                        cursor: "pointer",
+                        opacity: 0.6
+                      }}
+                      onClick={() => setTechAddModalOpen(true)}
+                    >
+                      + 추가
+                    </button>
+                    </div>
+                    <div style={{ display: "flex", gap: "18px", flexWrap: "wrap" }}>
+                      {((freelancer?.techList || []) as any[]).length > 0 ? (
+                        (() => {
+                          // group by techLevel -> display order: HIGH, MID, LOW, 기타
+                          const groups: Record<string, any[]> = { HIGH: [], MID: [], LOW: [], OTHER: [] };
+                          // Expect backend to use: BEGINNER, INTERMEDIATE, ADVANCED
+                          (freelancer!.techList || []).forEach((t: any) => {
+                            const lvl = (t.techLevel || t.level || "").toString().toUpperCase();
+                            if (lvl === "ADVANCED" || lvl === "ADV") groups.HIGH.push(t);
+                            else if (lvl === "INTERMEDIATE" || lvl === "MID") groups.MID.push(t);
+                            else if (lvl === "BEGINNER" || lvl === "LOW") groups.LOW.push(t);
+                            else groups.OTHER.push(t);
+                          });
+
+                          const renderGroup = (label: string, items: any[]) => {
+                            if (!items || items.length === 0) return null;
+                            return (
+                              <div style={{ display: "flex", flexDirection: "column", gap: 8 }} key={label}>
+                                <div style={{ fontSize: 12, color: "#666", fontWeight: 700 }}>{label}</div>
+                                <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
+                                  {items.map((tech: any) => (
+                                    <span
+                                      key={tech.id ?? tech.techName}
+                                      style={{
+                                        background: "#f7f7f7",
+                                        color: "#72a685ff",
+                                        fontWeight: 600,
+                                        borderRadius: "8px",
+                                        padding: "5px 13px",
+                                        fontSize: "13px",
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        gap: 8,
+                                      }}
+                                    >
+                                      <span>{tech.techName ?? tech}</span>
+                                      <button
+                                        type="button"
+                                        style={{
+                                          background: "none",
+                                          border: "none",
+                                          color: "#e11d48",
+                                          fontWeight: 700,
+                                          fontSize: "15px",
+                                          cursor: "pointer",
+                                          padding: "0 2px",
+                                          lineHeight: 1,
+                                          opacity: 0.65,
+                                        }}
+                                        title="삭제"
+                                        onClick={async () => {
+                                          if (!window.confirm(`${tech.techName ?? tech} 기술스택을 삭제할까요?`)) return;
+                                          try {
+                                            const res = await fetch(
+                                              `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me/techs/${tech.id}`,
+                                              { method: "DELETE", credentials: "include" }
+                                            );
+                                            if (!res.ok) throw new Error("삭제 실패");
+                                            setFreelancer((prev: any) => ({
+                                              ...prev,
+                                              techList: prev.techList.filter((t: any) => t.id !== tech.id),
+                                            }));
+                                          } catch (err) {
+                                            alert("삭제에 실패했습니다.");
+                                          }
+                                        }}
+                                      >
+                                        ×
+                                      </button>
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          };
+
+                          return (
+                            <>
+                              {renderGroup("고급", groups.HIGH)}
+                              {renderGroup("중급", groups.MID)}
+                              {renderGroup("초급", groups.LOW)}
+                              {renderGroup("기타", groups.OTHER)}
+                            </>
+                          );
+                        })()
                       ) : (
                         <div style={{ color: "#888" }}>등록된 스킬이 없습니다.</div>
                       )}
                     </div>
+                    {techAddModalOpen && (
+                    <TechAddModal
+                        onClose={() => setTechAddModalOpen(false)}
+                        onAdd={(tech) => {
+                        setFreelancer((prev: any) => ({
+                            ...prev,
+                            techList: [...(prev.techList || []), tech],
+                        }));
+                        }}
+                    />
+                    )}
                   </div>
                 </div>
               )}
