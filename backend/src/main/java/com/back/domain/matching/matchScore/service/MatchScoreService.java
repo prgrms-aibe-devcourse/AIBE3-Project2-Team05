@@ -170,7 +170,7 @@ public class MatchScoreService {
 
             if (matchedTech.isPresent()) {
                 // 숙련도에 따른 가중치
-                double proficiencyWeight = getProficiencyWeight(matchedTech.get().getTechLevel());
+                double proficiencyWeight = getProficiencyWeight(matchedTech.get().getTechLevel().name());
                 matchedSkillScore += proficiencyWeight;
             }
         }

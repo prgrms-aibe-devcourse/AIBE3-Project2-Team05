@@ -36,8 +36,8 @@ public class FreelancerTechService {
         Freelancer freelancer = freelancerFinder.findFreelancerByMemberId(memberId);
         Tech tech = techRepository.findById(dto.techId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 기술입니다"));
 
-        if(freelancerTechRepository.existsByFreelancerAndTech(freelancer, tech)) {
-            throw new IllegalArgumentException("이미 추가된 기술입니다");
+        if(freelancerTechRepository.existsAnyByFreelancerAndTech(freelancer, tech)) {
+            return null;
         }
 
         FreelancerTech freelancerTech = new FreelancerTech(freelancer, tech, dto.techLevel());

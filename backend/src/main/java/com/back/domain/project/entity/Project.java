@@ -97,6 +97,10 @@ public class Project {
     @JsonIgnore
     private List<ProjectFavorite> projectFavorites;
 
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<com.back.domain.matching.matchScore.entity.MatchScore> matchScores;
+
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
