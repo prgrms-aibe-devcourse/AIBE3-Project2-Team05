@@ -73,11 +73,11 @@ const UserProjectDetailPage = () => {
                 });
                 if (response.ok) {
                     const data: ProjectResponse = await response.json();
-                    
+
                     // 파일 로딩 로직 - projects/[id]/page.tsx와 동일하게 처리
                     let finalFiles: FileItem[] = [];
                     const hasProjectFiles = data.projectFiles && Array.isArray(data.projectFiles) && data.projectFiles.length > 0;
-                    
+
                     if (!hasProjectFiles) {
                         // API 응답에 파일이 없으면 별도 파일 API 호출
                         try {
@@ -96,7 +96,7 @@ const UserProjectDetailPage = () => {
                     } else {
                         // API 응답의 파일 데이터를 사용
                         finalFiles = (data.projectFiles || [])
-                            .filter((file): file is Required<typeof file> => 
+                            .filter((file): file is Required<typeof file> =>
                                 file.id !== undefined && file.originalName !== undefined && file.fileSize !== undefined
                             )
                             .map(file => ({
@@ -106,12 +106,12 @@ const UserProjectDetailPage = () => {
                                 uploadDate: file.uploadDate
                             }));
                     }
-                    
+
                     setProject({
                         ...data,
                         projectFiles: finalFiles
                     });
-                    
+
                     // 파일 상태도 함께 업데이트
                     setProjectFiles(finalFiles);
                     setError('');
@@ -201,8 +201,8 @@ const UserProjectDetailPage = () => {
     // 상태 변경 확인 메시지
     const getStatusChangeMessage = (newStatus: string) => {
         const statusMessages: Record<string, string> = {
-            'CONTRACTING': '계약 단계로 변경하시겠습니까?\n선택된 지원자와의 계약을 시작합니다.',
-            'IN_PROGRESS': '프로젝트를 시작하시겠습니까?\n프로젝트가 진행 중 상태로 변경됩니다.',
+            'CONTRACTING': '계약 단계로 변경하시겠습니까?\n선택된 지원자와의 계약을 시작합니다.\n\n⚠️ 계약 상태에서는 프로젝트 삭제가 불가능하며,\n필수 정보 수정이 제한됩니다.',
+            'IN_PROGRESS': '프로젝트를 시작하시겠습니까?\n프로젝트가 진행 중 상태로 변경됩니다.\n\n⚠️ 진행 중 상태에서는 상태 변경 외에 모든 수정이 제한됩니다.',
             'COMPLETED': '프로젝트를 완료 처리하시겠습니까?\n완료 후에는 상태 변경이 불가능합니다.',
             'SUSPENDED': '프로젝트를 일시 보류하시겠습니까?\n나중에 다시 재개할 수 있습니다.',
             'CANCELLED': '프로젝트를 취소하시겠습니까?\n취소 후에는 상태 변경이 불가능합니다.'
@@ -256,8 +256,8 @@ const UserProjectDetailPage = () => {
 
     if (error || !project) {
         return (
-            <ErrorDisplay 
-                error={error || '프로젝트를 찾을 수 없습니다.'} 
+            <ErrorDisplay
+                error={error || '프로젝트를 찾을 수 없습니다.'}
                 onRetry={() => router.back()}
                 retryButtonText="뒤로가기"
             />
@@ -273,7 +273,7 @@ const UserProjectDetailPage = () => {
             const offset = 120;
             const elementPosition = element.getBoundingClientRect().top;
             const offsetPosition = elementPosition + window.pageYOffset - offset;
-            
+
             window.scrollTo({
                 top: offsetPosition,
                 behavior: 'smooth'
@@ -436,27 +436,27 @@ const UserProjectDetailPage = () => {
 
                 {/* 요약 섹션 */}
                 <div id="summary" className="bg-white rounded-xl shadow-sm mb-8 p-8" style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', marginBottom: '32px', padding: '32px' }}>
-                    <h2 className="text-xl font-bold mb-6 text-gray-900" style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '24px', color: '#111827' }}>프로젝트 요약</h2>
+                    <h2 className="text-xl font-bold mb-6 text-gray-900" style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '24px', color: '#111827' }}>📋 프로젝트 요약</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', marginBottom: '32px' }}>
                         <div className="bg-gray-50 p-4 rounded-lg" style={{ backgroundColor: '#f9fafb', padding: '16px', borderRadius: '8px' }}>
-                            <span className="text-gray-600 text-sm block mb-1" style={{ color: '#4b5563', fontSize: '14px', display: 'block', marginBottom: '4px' }}>예산</span>
+                            <span className="text-gray-600 text-sm block mb-1" style={{ color: '#4b5563', fontSize: '14px', display: 'block', marginBottom: '4px' }}>💰 예산</span>
                             <span className="font-semibold text-gray-900 text-lg" style={{ fontWeight: '600', color: '#111827', fontSize: '18px' }}>{getBudgetTypeText(project.budgetType)}</span>
                         </div>
                         {project.partnerType && (
                             <div className="bg-gray-50 p-4 rounded-lg" style={{ backgroundColor: '#f9fafb', padding: '16px', borderRadius: '8px' }}>
-                                <span className="text-gray-600 text-sm block mb-1" style={{ color: '#4b5563', fontSize: '14px', display: 'block', marginBottom: '4px' }}>선호파트너</span>
+                                <span className="text-gray-600 text-sm block mb-1" style={{ color: '#4b5563', fontSize: '14px', display: 'block', marginBottom: '4px' }}>🤝 선호파트너</span>
                                 <span className="font-semibold text-gray-900 text-lg" style={{ fontWeight: '600', color: '#111827', fontSize: '18px' }}>{getPartnerTypeText(project.partnerType)}</span>
                             </div>
                         )}
                         {project.companyLocation && (
                             <div className="bg-gray-50 p-4 rounded-lg" style={{ backgroundColor: '#f9fafb', padding: '16px', borderRadius: '8px' }}>
-                                <span className="text-gray-600 text-sm block mb-1" style={{ color: '#4b5563', fontSize: '14px', display: 'block', marginBottom: '4px' }}>지역</span>
+                                <span className="text-gray-600 text-sm block mb-1" style={{ color: '#4b5563', fontSize: '14px', display: 'block', marginBottom: '4px' }}>📍 지역</span>
                                 <span className="font-semibold text-gray-900 text-lg" style={{ fontWeight: '600', color: '#111827', fontSize: '18px' }}>{getLocationText(project.companyLocation)}</span>
                             </div>
                         )}
                         {project.startDate && project.endDate && (
                             <div className="bg-gray-50 p-4 rounded-lg" style={{ backgroundColor: '#f9fafb', padding: '16px', borderRadius: '8px' }}>
-                                <span className="text-gray-600 text-sm block mb-1" style={{ color: '#4b5563', fontSize: '14px', display: 'block', marginBottom: '4px' }}>기간</span>
+                                <span className="text-gray-600 text-sm block mb-1" style={{ color: '#4b5563', fontSize: '14px', display: 'block', marginBottom: '4px' }}>🗓️ 기간</span>
                                 <span className="font-semibold text-gray-900 text-lg" style={{ fontWeight: '600', color: '#111827', fontSize: '18px' }}>
                   {new Date(project.startDate).toLocaleDateString()} ~ {new Date(project.endDate).toLocaleDateString()}
                 </span>
@@ -467,7 +467,7 @@ const UserProjectDetailPage = () => {
                     {/* 기술 스택 */}
                     {project.techStacks && project.techStacks.length > 0 && (
                         <div>
-                            <h3 className="font-semibold mb-4 text-gray-900" style={{ fontWeight: '600', marginBottom: '16px', color: '#111827' }}>기술 스택</h3>
+                            <h3 className="font-semibold mb-4 text-gray-900" style={{ fontWeight: '600', marginBottom: '16px', color: '#111827' }}>⚡ 기술 스택</h3>
                             <div className="flex flex-wrap gap-3" style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
                                 {(() => {
                                     // 카테고리별로 기술들을 그룹화
@@ -508,7 +508,7 @@ const UserProjectDetailPage = () => {
 
                 {/* 업무내용 섹션 */}
                 <div id="details" className="bg-white rounded-xl shadow-sm mb-8 p-8" style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', marginBottom: '32px', padding: '32px' }}>
-                    <h2 className="text-xl font-bold mb-6 text-gray-900" style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '24px', color: '#111827' }}>업무내용</h2>
+                    <h2 className="text-xl font-bold mb-6 text-gray-900" style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '24px', color: '#111827' }}>📄 업무내용</h2>
                     <div className="prose max-w-none" style={{ maxWidth: 'none' }}>
                         <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-base" style={{ whiteSpace: 'pre-wrap', color: '#374151', lineHeight: '1.7', fontSize: '16px' }}>
                             {project.description || '업무 내용이 등록되지 않았습니다.'}
@@ -518,9 +518,16 @@ const UserProjectDetailPage = () => {
 
                 {/* 첨부파일 */}
                 <div id="files" className="bg-white rounded-xl shadow-sm mb-8 p-8" style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', marginBottom: '32px', padding: '32px' }}>
-                    <h2 className="text-xl font-bold mb-6 text-gray-900" style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '24px', color: '#111827' }}>참고파일</h2>
+                    <h2 className="text-xl font-bold mb-6 text-gray-900" style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '24px', color: '#111827' }}>📎 참고파일</h2>
                     {projectFiles && projectFiles.length > 0 ? (
-                        <div className="space-y-4" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-dashed border-blue-200" style={{
+                            background: 'linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%)',
+                            padding: '24px',
+                            borderRadius: '12px',
+                            border: '2px dashed #bfdbfe',
+                            transition: 'all 0.2s ease-in-out'
+                        }}>
+                            <div className="space-y-4" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             {projectFiles.map((file) => (
                                 <div key={file.id} className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors" style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', border: '1px solid #e5e7eb', borderRadius: '12px', transition: 'background-color 0.2s' }}>
                                     <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl" style={{ width: '48px', height: '48px', backgroundColor: '#dbeafe', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
@@ -567,6 +574,7 @@ const UserProjectDetailPage = () => {
                                     </div>
                                 </div>
                             ))}
+                            </div>
                         </div>
                     ) : (
                         <div className="text-gray-500 text-center py-12" style={{ color: '#6b7280', textAlign: 'center', padding: '48px 0' }}>
@@ -636,27 +644,75 @@ const UserProjectDetailPage = () => {
 
                     {/* 기본 관리 버튼들 */}
                     <div className="flex flex-col sm:flex-row gap-4" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        <button
-                            onClick={() => router.push(`/user-projects/${params.managerId}/${params.projectId}/edit`)}
-                            className="flex-1 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors"
-                            style={{
-                                flex: 1,
-                                padding: '12px 0',
-                                backgroundColor: '#3b82f6',
-                                color: 'white',
-                                fontWeight: '600',
-                                borderRadius: '8px',
-                                border: 'none',
-                                cursor: 'pointer',
-                                transition: 'background-color 0.2s'
-                            }}
-                            onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#2563eb'}
-                            onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#3b82f6'}
-                        >
-                            프로젝트 수정
-                        </button>
+                        {(() => {
+                            const isEditRestricted = project.status === 'IN_PROGRESS' || project.status === 'COMPLETED';
+                            const isPartialEditRestricted = project.status === 'CONTRACTING';
+
+                            return (
+                                <>
+                                    <button
+                                        onClick={() => {
+                                            if (isEditRestricted) {
+                                                if (project.status === 'IN_PROGRESS') {
+                                                    alert('진행중인 프로젝트는 상태 변경 외에 수정할 수 없습니다.');
+                                                } else if (project.status === 'COMPLETED') {
+                                                    alert('완료된 프로젝트는 수정할 수 없습니다.');
+                                                }
+                                                return;
+                                            }
+                                            router.push(`/user-projects/${params.managerId}/${params.projectId}/edit`);
+                                        }}
+                                        disabled={isEditRestricted}
+                                        className={`flex-1 py-3 font-semibold rounded-lg transition-colors ${
+                                            isEditRestricted
+                                                ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                                : 'bg-blue-500 text-white hover:bg-blue-600'
+                                        }`}
+                                        style={{
+                                            flex: 1,
+                                            padding: '12px 0',
+                                            backgroundColor: isEditRestricted ? '#9ca3af' : '#3b82f6',
+                                            color: isEditRestricted ? '#e5e7eb' : 'white',
+                                            fontWeight: '600',
+                                            borderRadius: '8px',
+                                            border: 'none',
+                                            cursor: isEditRestricted ? 'not-allowed' : 'pointer',
+                                            transition: 'background-color 0.2s',
+                                            opacity: isEditRestricted ? 0.6 : 1
+                                        }}
+                                        onMouseOver={(e) => {
+                                            if (!isEditRestricted) {
+                                                (e.target as HTMLButtonElement).style.backgroundColor = '#2563eb';
+                                            }
+                                        }}
+                                        onMouseOut={(e) => {
+                                            if (!isEditRestricted) {
+                                                (e.target as HTMLButtonElement).style.backgroundColor = '#3b82f6';
+                                            }
+                                        }}
+                                        title={
+                                            project.status === 'IN_PROGRESS'
+                                                ? '진행중인 프로젝트는 수정할 수 없습니다'
+                                                : project.status === 'COMPLETED'
+                                                    ? '완료된 프로젝트는 수정할 수 없습니다'
+                                                    : isPartialEditRestricted
+                                                        ? '계약중인 프로젝트는 필수 정보 수정이 제한됩니다'
+                                                        : '프로젝트 수정'
+                                        }
+                                    >
+                                        프로젝트 수정
+                                    </button>
+                                </>
+                            );
+                        })()}
                         <button
                             onClick={async () => {
+                                // 계약중 또는 진행중 상태일 때 삭제 제한
+                                if (project.status === 'CONTRACTING' || project.status === 'IN_PROGRESS') {
+                                    alert('계약중 또는 진행중인 프로젝트는 삭제할 수 없습니다.');
+                                    return;
+                                }
+
                                 if (window.confirm(`"${project.title}" 프로젝트를 정말 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) {
                                     try {
                                         console.log('프로젝트 삭제 시작:', project.id);
@@ -695,7 +751,7 @@ const UserProjectDetailPage = () => {
                                                 console.error('삭제 API 오류 텍스트:', errorText);
                                                 errorMessage = errorText;
                                             }
-                                            
+
                                             console.error(`프로젝트 삭제 실패 - 상태: ${deleteResponse.status}, 메시지: ${errorMessage}`);
                                             alert(`프로젝트 삭제에 실패했습니다.\n오류: ${errorMessage || '서버 오류'} (상태: ${deleteResponse.status})`);
                                         }
