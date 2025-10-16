@@ -11,7 +11,7 @@ import { Input } from '@/ui/input'
 import { Button } from '@/ui/button'
 
 export default function MessagesPage() {
-  const { user, isLoading: authLoading } = useUser()
+  const { user, roles, isLoading: authLoading } = useUser()
   const { conversations, isLoading, error, refetch } = useConversations()
   const [searchQuery, setSearchQuery] = useState('')
   const [showUnreadOnly, setShowUnreadOnly] = useState(false)
@@ -25,30 +25,14 @@ export default function MessagesPage() {
   } | null>(null)
   const [isFreelancer, setIsFreelancer] = useState<boolean | null>(null)
 
-  // PM 여부 확인
+  // Freelancer 여부 확인 (roles 기반)
   useEffect(() => {
-    const checkRole = async () => {
-      if (!user || authLoading) return
+    if (authLoading || !user) return
 
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
-          { credentials: 'include' }
-        )
-
-        if (res.ok) {
-          const data = await res.json()
-          setIsFreelancer(data.resultCode?.startsWith('200'))
-        } else {
-          setIsFreelancer(false)
-        }
-      } catch {
-        setIsFreelancer(false)
-      }
-    }
-
-    checkRole()
-  }, [user, authLoading])
+    const hasFreelancerRole = roles.includes('FREELANCER')
+    setIsFreelancer(hasFreelancerRole)
+    console.log('[Messages] Freelancer role check:', { roles, hasFreelancerRole })
+  }, [user, authLoading, roles])
 
   // 검색 필터링
   const filteredConversations = conversations.filter((conv) => {
@@ -81,7 +65,7 @@ export default function MessagesPage() {
     }, 500)
   }, [refetch])
 
-  if (authLoading || isLoading) {
+  if (authLoading || isLoading || isFreelancer === null || isFreelancer === undefined) {
     return (
       <div className="container mx-auto px-4 py-16 min-h-page">
         <div className="text-center">

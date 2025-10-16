@@ -183,14 +183,13 @@ public class MatchScoreService {
     }
 
     /**
-     * 숙련도 가중치 반환
+     * 숙련도 가중치 반환 (3단계: ADVANCED, INTERMEDIATE, BEGINNER)
      */
     private double getProficiencyWeight(String proficiency) {
         return switch (proficiency) {
-            case "EXPERT" -> 1.0;
-            case "ADVANCED" -> 0.8;
-            case "INTERMEDIATE" -> 0.6;
-            case "BEGINNER" -> 0.4;
+            case "ADVANCED" -> 1.0;      // 고급 (최고 숙련도)
+            case "INTERMEDIATE" -> 0.7;  // 중급
+            case "BEGINNER" -> 0.4;      // 초급
             default -> 0.0;
         };
     }

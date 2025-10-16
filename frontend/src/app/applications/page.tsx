@@ -32,7 +32,7 @@ interface Submission {
 }
 
 export default function ApplicationsPage() {
-  const { user, isLoading: authLoading } = useUser()
+  const { user, roles, isLoading: authLoading } = useUser()
   const router = useRouter()
   const [projects, setProjects] = useState<ProjectListItem[]>([])
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null)
@@ -48,36 +48,20 @@ export default function ApplicationsPage() {
     projectTitle: string
   } | null>(null)
 
-  // PM 여부 확인
+  // PM 여부 확인 (roles 기반)
   useEffect(() => {
-    const checkRole = async () => {
-      if (!user || authLoading) return
+    if (authLoading || !user) return
 
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
-          { credentials: 'include' }
-        )
+    const hasPMRole = roles.includes('PM')
+    setIsFreelancer(!hasPMRole)
 
-        if (res.ok) {
-          const data = await res.json()
-          const isFreelancerUser = data.resultCode?.startsWith('200')
-          setIsFreelancer(isFreelancerUser)
+    console.log('[Applications] PM role check:', { roles, hasPMRole })
 
-          if (isFreelancerUser) {
-            alert('PM만 접근 가능한 페이지입니다.')
-            router.push('/')
-          }
-        } else {
-          setIsFreelancer(false)
-        }
-      } catch {
-        setIsFreelancer(false)
-      }
+    if (!hasPMRole) {
+      alert('PM만 접근 가능한 페이지입니다.')
+      router.push('/')
     }
-
-    checkRole()
-  }, [user, authLoading, router])
+  }, [user, authLoading, roles, router])
 
   // 프로젝트 로드
   useEffect(() => {
@@ -202,7 +186,7 @@ export default function ApplicationsPage() {
     )
   }
 
-  if (authLoading || isLoading) {
+  if (authLoading || isLoading || isFreelancer === null || isFreelancer === undefined) {
     return (
       <div className="container mx-auto py-8 px-4 min-h-page">
         <div className="flex items-center justify-center min-h-[400px]">

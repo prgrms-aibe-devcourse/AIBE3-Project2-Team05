@@ -61,7 +61,7 @@ interface MatchedProject {
 
 export default function MatchingDashboardPage() {
   const router = useRouter()
-  const { user, isLoading: authLoading } = useUser()
+  const { user, roles, isLoading: authLoading } = useUser()
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'applicants' | 'messages'>('overview')
   const [stats, setStats] = useState<DashboardStats>({
@@ -73,12 +73,55 @@ export default function MatchingDashboardPage() {
   })
   const [projects, setProjects] = useState<ProjectSummary[]>([])
   const [applicants, setApplicants] = useState<ApplicantSummary[]>([])
-  const [isFreelancer, setIsFreelancer] = useState<boolean | null>(null)
 
-  // Freelancer 여부 확인
+  // 역할 상태 관리
+  const [userRole, setUserRole] = useState<'freelancer' | 'pm' | 'both' | 'none' | null>(null)
+  const [selectedRole, setSelectedRole] = useState<'freelancer' | 'pm' | null>(null)
+  const [showRoleSelectModal, setShowRoleSelectModal] = useState(false)
+  const [hasFreelancerProfile, setHasFreelancerProfile] = useState(false)
+
+  // 역할 체크 (roles 배열 기반)
   useEffect(() => {
-    const checkFreelancer = async () => {
+    if (authLoading || !user) return
+
+    const hasFreelancerRole = roles.includes('FREELANCER')
+    const hasPMRole = roles.includes('PM')
+
+    console.log('[Matching] User roles:', { roles, hasFreelancerRole, hasPMRole })
+
+    if (hasFreelancerRole && hasPMRole) {
+      // 둘 다 있으면 세션 스토리지에서 마지막 선택 확인
+      const savedRole = sessionStorage.getItem('selectedDashboardRole') as 'freelancer' | 'pm' | null
+      if (savedRole === 'freelancer' || savedRole === 'pm') {
+        setUserRole('both')
+        setSelectedRole(savedRole)
+        console.log('[Matching] Both roles, loaded saved selection:', savedRole)
+      } else {
+        // 저장된 선택이 없으면 모달 표시
+        setUserRole('both')
+        setShowRoleSelectModal(true)
+        console.log('[Matching] Both roles, showing modal')
+      }
+    } else if (hasFreelancerRole) {
+      setUserRole('freelancer')
+      setSelectedRole('freelancer')
+      console.log('[Matching] Freelancer role only')
+    } else if (hasPMRole) {
+      setUserRole('pm')
+      setSelectedRole('pm')
+      console.log('[Matching] PM role only')
+    } else {
+      // 둘 다 없음
+      setUserRole('none')
+      console.log('[Matching] No PM or Freelancer role')
+    }
+  }, [user, authLoading, roles])
+
+  // 프리랜서 프로필 확인
+  useEffect(() => {
+    const checkFreelancerProfile = async () => {
       if (!user || authLoading) return
+      if (userRole !== 'freelancer' && selectedRole !== 'freelancer') return
 
       try {
         const res = await fetch(
@@ -88,25 +131,24 @@ export default function MatchingDashboardPage() {
 
         if (res.ok) {
           const data = await res.json()
-          // RsData 응답: resultCode가 200으로 시작하면 프리랜서
-          const isSuccess = data.resultCode?.startsWith('200')
-          console.log('[Matching] Freelancer check:', { resultCode: data.resultCode, isSuccess })
-          setIsFreelancer(isSuccess)
+          // id 필드가 있고 freelancerTitle 등 프리랜서 관련 필드가 있으면 프리랜서 프로필 존재
+          const hasProfile = data && typeof data === 'object' && data.id && 'freelancerTitle' in data
+          setHasFreelancerProfile(hasProfile)
+          console.log('[Matching] Freelancer profile check:', { hasProfile, data })
         } else {
-          // HTTP 에러 (인증 실패 등)
-          console.log('[Matching] Freelancer check failed:', res.status)
-          setIsFreelancer(false)
+          setHasFreelancerProfile(false)
+          console.log('[Matching] Freelancer profile not found:', res.status)
         }
       } catch (error) {
-        console.error('[Matching] Freelancer check error:', error)
-        setIsFreelancer(false) // 에러 시 PM으로 간주
+        console.error('[Matching] Freelancer profile check error:', error)
+        setHasFreelancerProfile(false)
       }
     }
 
-    checkFreelancer()
-  }, [user, authLoading])
+    checkFreelancerProfile()
+  }, [user, authLoading, userRole, selectedRole])
 
-  // PM 대시보드 데이터 로드
+  // 대시보드 데이터 로드
   useEffect(() => {
     if (!authLoading && !user) {
       alert('로그인이 필요한 서비스입니다.')
@@ -114,17 +156,20 @@ export default function MatchingDashboardPage() {
       return
     }
 
-    // isFreelancer가 null이면 아직 역할 확인 중
-    if (isFreelancer === null) {
+    // userRole이 null이면 아직 역할 확인 중
+    if (userRole === null) {
       return
     }
 
-    if (user && isFreelancer === false) {
+    // PM 대시보드 로드
+    if (user && (selectedRole === 'pm' || userRole === 'pm')) {
       void loadDashboardData()
-    } else if (user && isFreelancer === true) {
+    } else if (user && (selectedRole === 'freelancer' || userRole === 'freelancer')) {
+      setLoading(false)
+    } else if (userRole === 'none') {
       setLoading(false)
     }
-  }, [authLoading, user, isFreelancer, router])
+  }, [authLoading, user, userRole, selectedRole, router])
 
   const loadDashboardData = async () => {
     try {
@@ -228,7 +273,16 @@ export default function MatchingDashboardPage() {
     }
   }
 
-  if (authLoading || isFreelancer === null || loading) {
+  // 역할 선택 모달 핸들러
+  const handleRoleSelect = (role: 'freelancer' | 'pm') => {
+    setSelectedRole(role)
+    sessionStorage.setItem('selectedDashboardRole', role)
+    setShowRoleSelectModal(false)
+    console.log('[Matching] Role selected:', role)
+  }
+
+  // 로딩 중
+  if (authLoading || userRole === null || loading) {
     return (
       <div className="bg-gray-100 min-h-screen" style={{ backgroundColor: 'var(--background)' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '80px 16px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -241,12 +295,169 @@ export default function MatchingDashboardPage() {
     )
   }
 
-  // 프리랜서용 대시보드로 분기
-  if (isFreelancer === true) {
+  // 권한 없음 (PM도 프리랜서도 아님)
+  if (userRole === 'none') {
+    return (
+      <div className="bg-gray-100 min-h-screen" style={{ backgroundColor: 'var(--background)' }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 16px' }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '48px', textAlign: 'center', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
+            <img
+              src="/logo-full.png"
+              alt="접근 권한 없음"
+              style={{ width: '200px', height: 'auto', margin: '0 auto 24px', display: 'block' }}
+            />
+            <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', marginBottom: '16px' }}>
+              접근 권한이 없습니다
+            </h2>
+            <p style={{ color: '#6b7280', marginBottom: '32px', lineHeight: '1.6' }}>
+              매칭 대시보드는 PM 또는 프리랜서 역할이 있는 사용자만 이용할 수 있습니다.<br />
+              관리자에게 문의하거나 프로필을 등록해 주세요.
+            </p>
+            <button
+              onClick={() => router.push('/')}
+              style={{
+                padding: '12px 24px',
+                backgroundColor: '#16a34a',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '16px',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              메인으로 돌아가기
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // 역할 선택 모달 (둘 다 있을 때)
+  if (userRole === 'both' && showRoleSelectModal) {
+    return (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 50
+      }}>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          padding: '32px',
+          maxWidth: '500px',
+          width: '90%'
+        }}>
+          <h3 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '16px', textAlign: 'center' }}>
+            대시보드 선택
+          </h3>
+          <p style={{ color: '#6b7280', marginBottom: '32px', textAlign: 'center' }}>
+            PM과 프리랜서 역할을 모두 가지고 계십니다.<br />
+            어떤 대시보드를 보시겠습니까?
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <button
+              onClick={() => handleRoleSelect('freelancer')}
+              style={{
+                padding: '16px',
+                backgroundColor: '#eff6ff',
+                border: '2px solid #3b82f6',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: 600,
+                color: '#1e40af'
+              }}
+            >
+              프리랜서 대시보드
+            </button>
+            <button
+              onClick={() => handleRoleSelect('pm')}
+              style={{
+                padding: '16px',
+                backgroundColor: '#f0fdf4',
+                border: '2px solid #16a34a',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: 600,
+                color: '#166534'
+              }}
+            >
+              PM 대시보드
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // 프리랜서 역할인데 프로필이 없는 경우
+  if ((selectedRole === 'freelancer' || userRole === 'freelancer') && !hasFreelancerProfile) {
+    return (
+      <div className="bg-gray-100 min-h-screen" style={{ backgroundColor: 'var(--background)' }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 16px' }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '48px', textAlign: 'center', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
+            <div style={{ fontSize: '64px', marginBottom: '24px' }}>📝</div>
+            <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', marginBottom: '16px' }}>
+              프리랜서 프로필 등록 필요
+            </h2>
+            <p style={{ color: '#6b7280', marginBottom: '32px', lineHeight: '1.6' }}>
+              프리랜서 매칭 대시보드를 이용하려면<br />
+              먼저 프리랜서 프로필을 등록해야 합니다.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button
+                onClick={() => router.push('/')}
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: 'white',
+                  color: '#6b7280',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                나중에
+              </button>
+              <button
+                onClick={() => router.push('/freelancers/create')}
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: '#16a34a',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                프로필 등록하기
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // 프리랜서용 대시보드
+  if (selectedRole === 'freelancer' || userRole === 'freelancer') {
     return <FreelancerMatchingDashboard user={user} router={router} />
   }
 
-  // PM 대시보드 (isFreelancer === false)
+  // PM 대시보드
 
   return (
     <div className="bg-gray-100 min-h-screen" style={{ backgroundColor: 'var(--background)' }}>

@@ -13,7 +13,7 @@ export default function MatchingPage() {
   const params = useParams()
   const projectId = params.projectId as string
   const router = useRouter()
-  const { user, isLoading: authLoading } = useUser()
+  const { user, roles, isLoading: authLoading } = useUser()
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -26,30 +26,14 @@ export default function MatchingPage() {
 
   const isPm = isFreelancer === false
 
-  // 역할 확인
+  // 역할 확인 (roles 기반)
   useEffect(() => {
-    const checkRole = async () => {
-      if (!user || authLoading) return
+    if (authLoading || !user) return
 
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
-          { credentials: 'include' }
-        )
-
-        if (res.ok) {
-          const data = await res.json()
-          setIsFreelancer(data.resultCode?.startsWith('200'))
-        } else {
-          setIsFreelancer(false)
-        }
-      } catch {
-        setIsFreelancer(false)
-      }
-    }
-
-    checkRole()
-  }, [user, authLoading])
+    const hasFreelancerRole = roles.includes('FREELANCER')
+    setIsFreelancer(hasFreelancerRole)
+    console.log('[MatchingDetail] Freelancer role check:', { roles, hasFreelancerRole })
+  }, [user, authLoading, roles])
 
   // 로그인 체크
   useEffect(() => {
