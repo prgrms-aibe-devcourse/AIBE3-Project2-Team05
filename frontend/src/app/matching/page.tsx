@@ -1,6 +1,5 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { useUser } from '@/app/context/UserContext'
 import {
   AlertCircle,
@@ -13,6 +12,8 @@ import {
   Star,
   Users
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 interface ProjectSummary {
   id: number
