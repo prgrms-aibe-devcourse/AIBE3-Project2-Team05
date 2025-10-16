@@ -1,8 +1,8 @@
 "use client";
 
-import ReviewConfirmModal from "@/components/ReviewConfirmModal";
 import ErrorDisplay from '@/components/ErrorDisplay';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import ReviewConfirmModal from "@/components/ReviewConfirmModal";
 import { ProjectFileApiService } from '@/lib/backend/projectFileApi';
 import { components } from '@/lib/backend/schema';
 import {
@@ -190,20 +190,32 @@ const UserProjectDetailPage = () => {
         };
     }, [params?.projectId]);
 
-
-
-
-
-
-
     // 프로젝트 상태 변경 함수
     const handleStatusChange = async (newStatus: 'RECRUITING' | 'CONTRACTING' | 'IN_PROGRESS' | 'COMPLETED' | 'SUSPENDED' | 'CANCELLED') => {
         if (!project) return;
+
+        // 변경자 ID 검증
+        const changerId = loggedUserId || Number(params?.managerId);
+        if (!changerId) {
+            alert('사용자 인증 정보가 없습니다. 다시 로그인해주세요.');
+            return;
+        }
 
         const confirmMessage = getStatusChangeMessage(newStatus);
         if (!window.confirm(confirmMessage)) return;
 
         setStatusChangeLoading(true);
+        
+        const requestData = {
+            status: newStatus,
+            changedById: changerId
+        };
+        
+        console.log('프로젝트 상태 변경 요청:', {
+            projectId: project.id,
+            ...requestData
+        });
+
         try {
             // 실제 API 호출로 상태 변경
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${project.id}/status`, {
@@ -212,17 +224,16 @@ const UserProjectDetailPage = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    status: newStatus,
-                    changedById: Number(params?.managerId) // 현재 사용자(매니저)의 ID 추가
-                }),
+                body: JSON.stringify(requestData),
             });
 
             if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      alert('상태 변경에 실패했습니다. 다시 시도해주세요.');
-      return;
-    }
+                const errorData = await response.json().catch(() => ({}));
+                const errorMessage = (errorData as { message?: string }).message || '상태 변경에 실패했습니다. 다시 시도해주세요.';
+                console.error('상태 변경 실패:', response.status, errorData);
+                alert(errorMessage);
+                return;
+            }
 
     const updated: ProjectResponse = await response.json();
     setProject(updated);
@@ -236,11 +247,12 @@ const UserProjectDetailPage = () => {
 
     // 완료가 아닌 경우에만 이동
     router.push(`/user-projects/${params?.managerId}`);
-  } catch (e) {
-    alert('상태 변경에 실패했습니다. 네트워크 연결을 확인해주세요.');
-  } finally {
-    setStatusChangeLoading(false);
-  }
+        } catch (error) {
+            console.error('상태 변경 실패:', error);
+            alert('상태 변경에 실패했습니다. 네트워크 연결을 확인해주세요.');
+        } finally {
+            setStatusChangeLoading(false);
+        }
 
         //     if (response.ok) {
         //         const updatedProject: ProjectResponse = await response.json();
