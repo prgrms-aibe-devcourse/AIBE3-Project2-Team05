@@ -71,31 +71,55 @@ export default function FreelancerMyPage() {
   const [techAddModalOpen, setTechAddModalOpen] = useState(false);
   const [editCareerModalOpen, setEditCareerModalOpen] = useState(false);
   const [selectedCareerId, setSelectedCareerId] = useState<string | number | null>(null);
+  
 
   useEffect(() => {
-    const fetchAllData = async () => {
-      try {
-        const freelancerPromise = fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
-          { method: "GET", credentials: "include" }
-        ).then((res) => res.json());
-        const portfolioPromise = fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me/portfolios`,
-          { method: "GET", credentials: "include" }
-        ).then((res) => res.json());
-        // 리뷰, 완료프로젝트 API가 있다면 여기에 추가
-        const [freelancerData, portfolioData] = await Promise.all([
-          freelancerPromise,
-          portfolioPromise,
-        ]);
-        setFreelancer(freelancerData);
-        setPortfolios(portfolioData || []);
-      } catch (err) {
-        console.error("API 호출 중 오류 발생:", err);
-      }
-    };
-    fetchAllData();
-  }, []);
+  const fetchAllData = async () => {
+    try {
+      const freelancerPromise = fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
+        { method: "GET", credentials: "include" }
+      ).then((res) => res.json());
+
+      const portfolioPromise = fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me/portfolios`,
+        { method: "GET", credentials: "include" }
+      ).then((res) => res.json());
+
+      const [freelancerData, portfolioData] = await Promise.all([
+        freelancerPromise,
+        portfolioPromise,
+      ]);
+
+      setFreelancer(freelancerData);
+      setPortfolios(portfolioData || []);
+    } catch (err) {
+      console.error("API 호출 중 오류 발생:", err);
+    }
+  };
+  fetchAllData();
+}, []);
+
+// ✅ 여기 아래에 리뷰용 useEffect 추가
+useEffect(() => {
+  const fetchReviews = async () => {
+    try {
+      if (!freelancer?.id) return; // 프리랜서 데이터가 없으면 중단
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/reviews?targetFreelancerId=${freelancer.id}`,
+        { method: "GET", credentials: "include" }
+      );
+      if (!res.ok) throw new Error("리뷰 데이터를 불러올 수 없습니다.");
+      const data = await res.json();
+      setReviews(data);
+    } catch (err) {
+      console.error("리뷰 불러오기 실패:", err);
+    }
+  };
+
+  fetchReviews();
+}, [freelancer]); // ✅ freelancer 정보가 갱신될 때마다 리뷰 재조회
+
 
   function deleteMyFreelancer() {
     if (!freelancer) return;
@@ -1047,17 +1071,115 @@ export default function FreelancerMyPage() {
                 </div>
               )}
               {activeTab === "review" && (
-                <div style={{
-                  minHeight: 220,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#888",
-                  fontSize: "17px"
-                }}>
-                  후기 기능을 구현하세요.
-                </div>
-              )}
+  <div
+    style={{
+      minHeight: 220,
+      padding: "20px 10px",
+      display: "flex",
+      flexDirection: "column",
+      gap: "16px",
+    }}
+  >
+    {reviews.length === 0 ? (
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#888",
+          fontSize: "16px",
+        }}
+      >
+        아직 등록된 후기가 없습니다.
+      </div>
+    ) : (
+      reviews.map((review: any) => (
+        <div
+          key={review.id}
+          style={{
+            background: "#f8faff",
+            borderRadius: "12px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+            padding: "20px 22px",
+            border: "1px solid #eee",
+          }}
+        >
+          {/* 상단: 평점 + 제목 */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "6px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                color: "#f59e0b",
+                fontWeight: 700,
+                fontSize: "16px",
+              }}
+            >
+              {"★".repeat(review.rating)}{" "}
+              <span style={{ color: "#555", marginLeft: "8px" }}>
+                ({review.rating}점)
+              </span>
+            </div>
+            <div
+              style={{
+                color: "#666",
+                fontWeight: 500,
+                fontSize: "14px",
+              }}
+            >
+              {new Date(review.createdAt).toLocaleDateString("ko-KR")}
+            </div>
+          </div>
+
+          {/* 제목 */}
+          <div
+            style={{
+              fontWeight: 800,
+              fontSize: "17px",
+              color: "#222",
+              marginBottom: "10px",
+            }}
+          >
+            {review.title}
+          </div>
+
+          {/* 내용 */}
+          <div
+            style={{
+              color: "#444",
+              lineHeight: 1.6,
+              whiteSpace: "pre-wrap",
+              marginBottom: "14px",
+            }}
+          >
+            {review.content}
+          </div>
+
+          {/* 작성자 정보 */}
+          <div
+            style={{
+              textAlign: "right",
+              fontSize: "14px",
+              color: "#777",
+              fontWeight: 600,
+            }}
+          >
+            작성자: {review.authorNickname || `ID ${review.authorId}`}
+          </div>
+        </div>
+      ))
+    )}
+  </div>
+)}
             </div>
           </div>
           {/* 포트폴리오 상세 모달 */}

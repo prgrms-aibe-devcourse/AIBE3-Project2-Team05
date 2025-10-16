@@ -6,21 +6,21 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import { ProjectFileApiService } from '@/lib/backend/projectFileApi';
 import { components } from '@/lib/backend/schema';
 import {
-    canPreviewFile,
-    getFileIcon
+  canPreviewFile,
+  getFileIcon
 } from '@/utils/filePreviewUtils';
 import {
-    calculateDday,
-    formatFileSize,
-    getBudgetTypeText,
-    getLocationText,
-    getPartnerTypeText,
-    getProgressStatusText,
-    getProjectFieldText,
-    getRecruitmentTypeText,
-    getStatusText,
-    getTechCategoryFromName,
-    getTechStackText
+  calculateDday,
+  formatFileSize,
+  getBudgetTypeText,
+  getLocationText,
+  getPartnerTypeText,
+  getProgressStatusText,
+  getProjectFieldText,
+  getRecruitmentTypeText,
+  getStatusText,
+  getTechCategoryFromName,
+  getTechStackText
 } from '@/utils/projectUtils';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -52,7 +52,7 @@ const UserProjectDetailPage = () => {
         if (token) {
             try {
                 const payload = JSON.parse(atob(token.split(".")[1]));
-                setLoggedUserId(payload.id || payload.userId || payload.sub || null);
+                setLoggedUserId(payload.id || payload.freelancerId || payload.userId || payload.sub || null);
             } catch {
                 setLoggedUserId(null);
             }
@@ -61,26 +61,32 @@ const UserProjectDetailPage = () => {
 
     // ✅ 프로젝트 상세 페이지
     const handleGoToReview = () => {
-        if (!project) {
-            alert("프로젝트 정보를 불러오지 못했습니다.");
-        return;
-        }
-        
-        // project.id: 리뷰 대상이 되는 프로젝트의 id
-        // targetUserId: 내가 리뷰할 "상대방"의 사용자 id (예: 파트너/클라이언트/프리랜서)
+    if (!project) {
+      alert("프로젝트 정보를 불러오지 못했습니다.");
+      return;
+    }
 
-        const managerId = project.manager?.id;
-  const targetUserId = managerId || loggedUserId; // fallback
+    // 🔥 변경: 프리랜서(또는 계약자)의 ID 추출
+    const freelancerId = (project as any).freelancer?.id;
 
-  if (!targetUserId) {
-    alert("리뷰 대상 정보가 없습니다.");
-    return;
-  }
+    // 🔥 매니저 ID
+    const managerId = project.manager?.id;
 
-  setShowReviewModal(false);
-  console.log("✅ 이동 시작:", project.id, targetUserId);
-  router.push(`/review?projectId=${project.id}&targetUserId=${targetUserId}`);
-};
+    if (!freelancerId) {
+      alert("리뷰 대상 프리랜서 정보를 찾을 수 없습니다.");
+      return;
+    }
+
+    // 🔥 매니저만 리뷰 가능하도록 제한
+    if (!loggedUserId || loggedUserId !== managerId) {
+  alert("리뷰는 프로젝트 매니저만 작성할 수 있습니다.");
+  return;
+}
+
+    setShowReviewModal(false);
+    console.log("✅ 리뷰 페이지 이동:", project.id, freelancerId);
+    router.push(`/review?projectId=${project.id}&targetFreelancerId=${freelancerId}`);
+  };
 
     useEffect(() => {
         const fetchProject = async (forceRefresh = false) => {
@@ -191,11 +197,6 @@ const UserProjectDetailPage = () => {
     }, [params?.projectId]);
 
 
-
-
-
-
-
     // 프로젝트 상태 변경 함수
     const handleStatusChange = async (newStatus: 'RECRUITING' | 'CONTRACTING' | 'IN_PROGRESS' | 'COMPLETED' | 'SUSPENDED' | 'CANCELLED') => {
         if (!project) return;
@@ -214,7 +215,7 @@ const UserProjectDetailPage = () => {
                 },
                 body: JSON.stringify({
                     status: newStatus,
-                    changedById: Number(params?.managerId) // 현재 사용자(매니저)의 ID 추가
+                    changedById: loggedUserId, // 현재 사용자(매니저)의 ID 추가
                 }),
             });
 
@@ -228,11 +229,11 @@ const UserProjectDetailPage = () => {
     setProject(updated);
     alert(`프로젝트 상태가 "${getStatusText(newStatus)}"로 변경되었습니다.`);
 
-    if (String(newStatus).toUpperCase() === 'COMPLETED') {
-      console.log('✅ COMPLETED → 모달 열기');
-      setShowReviewModal(true);        // 🔥 여기서 끝! (이동 금지)
-      return;
-    }
+    if (String(newStatus).toUpperCase() === 'COMPLETED' && loggedUserId === updated.manager?.id) {
+        console.log('✅ COMPLETED → 리뷰 모달 표시 (매니저 전용)');
+        setShowReviewModal(true);
+        return;
+      }
 
     // 완료가 아닌 경우에만 이동
     router.push(`/user-projects/${params?.managerId}`);
@@ -828,11 +829,12 @@ const UserProjectDetailPage = () => {
                     
                 </div>
             </div>
-            <ReviewConfirmModal
-                show={showReviewModal}
-                onClose={() => setShowReviewModal(false)}
-                onConfirm={handleGoToReview}
-            />
+            {/* 리뷰 모달 (매니저 → 프리랜서만) */}
+      <ReviewConfirmModal
+        show={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        onConfirm={handleGoToReview}
+      />
         </div>
     );
 };

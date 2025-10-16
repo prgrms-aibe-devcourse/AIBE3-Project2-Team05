@@ -1,5 +1,5 @@
 export interface ReviewRequest {
-  targetUserId: number;
+  targetFreelancerId: number; // ✅ 이름 변경
   projectId: number;
   rating: number;
   title: string;
@@ -10,7 +10,8 @@ export interface ReviewResponse {
   id: number;
   projectId: number;
   authorId: number;
-  targetUserId: number;
+  authorNickname: string; // ✅ 닉네임 표시용 추가
+  targetFreelancerId: number; // ✅ 이름 변경
   rating: number;
   title: string;
   content: string;
@@ -103,13 +104,13 @@ export async function deleteReview(reviewId: number) {
 }
 
 // ✅ 특정 사용자의 리뷰 목록 조회
-export async function getReviews(targetUserId: number) {
-  return fetchBase<ReviewResponse[]>(`/api/reviews?targetUserId=${targetUserId}`);
+export async function getReviews(targetFreelancerId: number) {
+  return fetchBase<ReviewResponse[]>(`/api/reviews?targetFreelancerId=${targetFreelancerId}`);
 }
 
 // ✅ 평균 평점 조회
-export async function getAverageRating(targetUserId: number) {
-  return fetchBase<number>(`/api/reviews/average?targetUserId=${targetUserId}`);
+export async function getAverageRating(targetFreelancerId: number) {
+  return fetchBase<number>(`/api/reviews/average?targetFreelancerId=${targetFreelancerId}`);
 }
 
 // ✅ 모든 리뷰 조회

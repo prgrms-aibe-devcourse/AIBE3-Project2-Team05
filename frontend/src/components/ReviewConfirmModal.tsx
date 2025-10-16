@@ -49,7 +49,7 @@ export default function ReviewConfirmModal({
             marginBottom: "20px",
           }}
         >
-          리뷰를 쓰시겠습니까?
+          이 프로젝트에 참여한 프리랜서에게 리뷰를 작성하시겠습니까?
         </p>
 
         <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>

@@ -794,8 +794,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/reviews/average": {
     "/api/v1/freelancers/careers/{careerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getCareer"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reviews/average": {
         parameters: {
             query?: never;
             header?: never;
@@ -819,7 +834,6 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getAllReviews"];
-        get: operations["getCareer"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1113,10 +1127,10 @@ export interface components {
         ReviewRequestDto: {
             /**
              * Format: int64
-             * @description 리뷰 대상 사용자 ID (프리랜서 or 프로젝트 매니저)
+             * @description 리뷰 대상 사용자 ID (프리랜서)
              * @example 5
              */
-            targetUserId?: number;
+            targetFreelancerId?: number;
             /**
              * Format: int64
              * @description 리뷰가 연결된 프로젝트 ID
@@ -1147,6 +1161,7 @@ export interface components {
             projectId?: number;
             /** Format: int64 */
             authorId?: number;
+            authorNickname?: string;
             /** Format: int64 */
             targetUserId?: number;
             /** Format: int32 */
@@ -1603,10 +1618,6 @@ export interface components {
             refreshToken?: string;
             /** Format: date-time */
             refreshTokenExpiry?: string;
-            /** Format: double */
-            averageRating?: number;
-            /** Format: int32 */
-            reviewCount?: number;
         };
         Project: {
             /** Format: int64 */
@@ -1835,18 +1846,18 @@ export interface components {
             freelancerProfileImageUrl?: string;
         };
         PageProjectResponse: {
-            /** Format: int32 */
-            totalPages?: number;
             /** Format: int64 */
             totalElements?: number;
-            first?: boolean;
-            last?: boolean;
+            /** Format: int32 */
+            totalPages?: number;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["ProjectResponse"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
             pageable?: components["schemas"]["PageableObject"];
@@ -1856,12 +1867,12 @@ export interface components {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
-            unpaged?: boolean;
-            paged?: boolean;
             /** Format: int32 */
             pageNumber?: number;
             /** Format: int32 */
             pageSize?: number;
+            paged?: boolean;
+            unpaged?: boolean;
         };
         SortObject: {
             empty?: boolean;
@@ -3406,6 +3417,28 @@ export interface operations {
             };
         };
     };
+    getCareer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                careerId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["CareerResponseDto"];
+                };
+            };
+        };
+    };
     getAverageRating: {
         parameters: {
             query: {
@@ -3433,13 +3466,6 @@ export interface operations {
             query?: never;
             header?: never;
             path?: never;
-    getCareer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                careerId: number;
-            };
             cookie?: never;
         };
         requestBody?: never;
@@ -3451,7 +3477,6 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["ReviewResponseDto"][];
-                    "application/json;charset=UTF-8": components["schemas"]["CareerResponseDto"];
                 };
             };
         };

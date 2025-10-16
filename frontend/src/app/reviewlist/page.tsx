@@ -255,7 +255,7 @@ export default function AllReviewsPage() {
                       <span className="flex items-center gap-1">
                         <span>👤</span>
                         <span className="font-semibold" style={{ color: '#374151' }}>
-                          {r.authorNickname || `User #${r.authorId}`}
+                          {r.authorNickname || `User #${r.authorNickname}`}
                         </span>
                       </span>
                     </div>
