@@ -30,10 +30,10 @@ public class ReviewService {
     public ReviewResponseDto createReview(Long authorId, ReviewRequestDto dto) {
         Member author = memberRepository.findById(authorId)
                 .orElseThrow(() -> new IllegalArgumentException("작성자 회원을 찾을 수 없습니다."));
-        Freelancer freelancer = freelancerRepository.findByMemberId(dto.getTargetFreelancerId())
+        Freelancer freelancer = freelancerRepository.findById(dto.getTargetFreelancerId())
                 .orElseThrow(() -> new IllegalArgumentException("리뷰 대상 프리랜서를 찾을 수 없습니다."));
 
-        Member target = freelancer.getMember();
+        Member target = freelancer.getMember(); // ✅ 프리랜서가 속한 Member를 가져옴
 
         Review review = Review.builder()
                 .projectId(dto.getProjectId())
@@ -44,7 +44,7 @@ public class ReviewService {
                 .content(dto.getContent())
                 .build();
 
-        Review saved = reviewRepository.save(review);
+        Review saved = reviewRepository.save(review); // ✅ 실제 insert 발생
         return ReviewResponseDto.fromEntity(saved);
     }
 

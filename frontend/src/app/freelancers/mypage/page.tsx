@@ -71,55 +71,31 @@ export default function FreelancerMyPage() {
   const [techAddModalOpen, setTechAddModalOpen] = useState(false);
   const [editCareerModalOpen, setEditCareerModalOpen] = useState(false);
   const [selectedCareerId, setSelectedCareerId] = useState<string | number | null>(null);
-  
 
   useEffect(() => {
-  const fetchAllData = async () => {
-    try {
-      const freelancerPromise = fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
-        { method: "GET", credentials: "include" }
-      ).then((res) => res.json());
-
-      const portfolioPromise = fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me/portfolios`,
-        { method: "GET", credentials: "include" }
-      ).then((res) => res.json());
-
-      const [freelancerData, portfolioData] = await Promise.all([
-        freelancerPromise,
-        portfolioPromise,
-      ]);
-
-      setFreelancer(freelancerData);
-      setPortfolios(portfolioData || []);
-    } catch (err) {
-      console.error("API 호출 중 오류 발생:", err);
-    }
-  };
-  fetchAllData();
-}, []);
-
-// ✅ 여기 아래에 리뷰용 useEffect 추가  
-useEffect(() => {
-  const fetchReviews = async () => {
-    try {
-      if (!freelancer?.id) return; // 프리랜서 데이터가 없으면 중단
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/reviews?targetFreelancerId=${freelancer.id}`,
-        { method: "GET", credentials: "include" }
-      );
-      if (!res.ok) throw new Error("리뷰 데이터를 불러올 수 없습니다.");
-      const data = await res.json();
-      setReviews(data.data || data);
-    } catch (err) {
-      console.error("리뷰 불러오기 실패:", err);
-    }
-  };
-
-  fetchReviews();
-}, [freelancer]); // ✅ freelancer 정보가 갱신될 때마다 리뷰 재조회
-
+    const fetchAllData = async () => {
+      try {
+        const freelancerPromise = fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
+          { method: "GET", credentials: "include" }
+        ).then((res) => res.json());
+        const portfolioPromise = fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me/portfolios`,
+          { method: "GET", credentials: "include" }
+        ).then((res) => res.json());
+        // 리뷰, 완료프로젝트 API가 있다면 여기에 추가
+        const [freelancerData, portfolioData] = await Promise.all([
+          freelancerPromise,
+          portfolioPromise,
+        ]);
+        setFreelancer(freelancerData);
+        setPortfolios(portfolioData || []);
+      } catch (err) {
+        console.error("API 호출 중 오류 발생:", err);
+      }
+    };
+    fetchAllData();
+  }, []);
 
   function deleteMyFreelancer() {
     if (!freelancer) return;

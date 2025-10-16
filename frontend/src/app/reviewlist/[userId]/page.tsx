@@ -99,7 +99,7 @@ export default function UserReviewListPage() {
                   <div className="review-date">
                     📅 작성일: {new Date(r.createdAt).toLocaleDateString()}
                   </div>
-                  <div className="review-author">👤 작성자 ID: {r.authorId}</div>
+                  <div className="review-author">👤 작성자 : {r.authorNickname}</div>
                 </div>
 
                 {/* 수정 버튼 클릭 시 로그인 확인 */}
