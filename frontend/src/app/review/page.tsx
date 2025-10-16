@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { createReview } from "@/lib/reviewApi";
 import ReviewConfirmModal from "@/components/ReviewConfirmModal";
+import { createReview } from "@/lib/reviewApi";
+import "@/styles/reviewStyles.css";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 export default function UserReviewCreatePage() {
   const router = useRouter();
@@ -54,7 +55,7 @@ export default function UserReviewCreatePage() {
     setShowConfirmModal(false); // ✅ 모달 닫기
     alert("리뷰가 성공적으로 등록되었습니다!");
     await new Promise((r) => setTimeout(r, 50));
-    router.push(`/reviewlist/${targetUserId}`, { scroll: true });
+    router.push(`/reviews/${targetUserId}`, { scroll: true });
   } catch (err: any) {
     console.error("리뷰 등록 실패:", err);
     alert(`리뷰 등록 실패: ${err.message}`);
@@ -64,73 +65,73 @@ export default function UserReviewCreatePage() {
 };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-6">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-        ✍ 리뷰 작성하기
-      </h1>
-
-      <div className="bg-white p-6 rounded-xl shadow-md space-y-4">
-        <div>
-          <label className="block text-sm font-semibold mb-2 text-gray-700">
-            제목
-          </label>
-          <input
-            type="text"
-            className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="리뷰 제목을 입력하세요"
-          />
+    <div className="review-container">
+      <div className="review-list-container">
+        <div className="review-header">
+          <h1 className="review-title">
+            ✍ 리뷰 작성하기
+          </h1>
         </div>
 
-        <div>
-          <label className="block text-sm font-semibold mb-2 text-gray-700">
-            내용
-          </label>
-          <textarea
-            className="w-full border rounded-lg p-3 h-40 focus:ring-2 focus:ring-blue-400 outline-none resize-none"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="리뷰 내용을 입력하세요"
-          />
-        </div>
+        <div className="review-form">
+          <div className="review-form-group">
+            <label className="review-label">
+              제목
+            </label>
+            <input
+              type="text"
+              className="review-input"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="리뷰 제목을 입력하세요"
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-semibold mb-2 text-gray-700">
-            평점 ⭐
-          </label>
-          <select
-            className="border rounded-lg p-2"
-            value={rating}
-            onChange={(e) => setRating(Number(e.target.value))}
+          <div className="review-form-group">
+            <label className="review-label">
+              내용
+            </label>
+            <textarea
+              className="review-textarea"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="리뷰 내용을 입력하세요"
+            />
+          </div>
+
+          <div className="review-form-group">
+            <label className="review-label">
+              평점 ⭐
+            </label>
+            <select
+              className="review-input"
+              value={rating}
+              onChange={(e) => setRating(Number(e.target.value))}
+            >
+              {[5, 4, 3, 2, 1].map((r) => (
+                <option key={r} value={r}>
+                  {r}점
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button
+            onClick={() => setShowConfirmModal(true)}
+            disabled={loading}
+            className={`review-btn ${loading ? 'review-btn:disabled' : 'review-btn-secondary'} w-full`}
           >
-            {[5, 4, 3, 2, 1].map((r) => (
-              <option key={r} value={r}>
-                {r}점
-              </option>
-            ))}
-          </select>
+            {loading ? "등록 중..." : "리뷰 등록하기"}
+          </button>
         </div>
 
-        <button
-          onClick={() => setShowConfirmModal(true)}
-          disabled={loading}
-          className={`w-full py-3 font-semibold rounded-lg transition-colors ${
-            loading
-              ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-              : "bg-blue-500 text-white hover:bg-blue-600"
-          }`}
-        >
-          {loading ? "등록 중..." : "리뷰 등록하기"}
-        </button>
+        {/* ✅ 확인 모달 */}
+        <ReviewConfirmModal
+          show={showConfirmModal}
+          onClose={() => setShowConfirmModal(false)}
+          onConfirm={handleSubmit}
+        />
       </div>
-
-      {/* ✅ 확인 모달 */}
-      <ReviewConfirmModal
-        show={showConfirmModal}
-        onClose={() => setShowConfirmModal(false)}
-        onConfirm={handleSubmit}
-      />
     </div>
   );
 }

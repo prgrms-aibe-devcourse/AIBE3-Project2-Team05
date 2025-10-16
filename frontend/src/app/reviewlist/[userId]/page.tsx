@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { deleteReview, getReviews } from "@/lib/reviewApi";
+import "@/styles/reviewStyles.css";
 import { useParams, useRouter } from "next/navigation";
-import { getReviews, deleteReview} from "@/lib/reviewApi";
+import { useEffect, useState } from "react";
 
 export default function UserReviewListPage() {
   const { userId } = useParams();
@@ -68,66 +69,75 @@ export default function UserReviewListPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen text-gray-500">
+      <div className="review-loading">
         로딩 중...
       </div>
     );
   }
 
   return (
-    console.log("✅ 리뷰 목록 데이터:", reviews),
-    console.log("✅ 로그인 사용자 ID:", loggedUserId),
-    <div className="max-w-3xl mx-auto p-6 space-y-8">
-      <div className="text-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">
-          {userId}번 사용자의 리뷰 ✨
-        </h1>
-        <p className="text-gray-500">
-          이 사용자가 작성한 모든 리뷰를 확인할 수 있습니다. 
-        </p>
-      </div>
-  
-      {reviews.length === 0 ? (
-        <p className="text-center text-gray-500">등록된 리뷰가 없습니다.</p>
-      ) : (console.log("✅ 리뷰 목록 데이터:", reviews),
-    console.log("✅ 로그인 사용자 ID:", loggedUserId),
-        <div className="space-y-5">
-          {reviews.map((r) => (
-            <div
-              key={r.id}
-              className="p-5 border rounded-xl shadow-sm bg-white hover:shadow-md transition"
-            >
-              <div className="flex justify-between mb-2">
-                <h2 className="text-lg font-semibold">{r.title}</h2>
-                <span className="text-yellow-500 font-bold">⭐ {r.rating}</span>
-              </div>
-              <p className="text-gray-700 mb-3">{r.content}</p>
-              <div className="text-sm text-gray-400 flex justify-between">
-                <span>작성일: {new Date(r.createdAt).toLocaleDateString()}</span>
-                <span>작성자 ID: {r.authorId}</span>
-              </div>
-
-              {loggedUserId && loggedUserId === r.authorId && (
-                <div className="flex gap-3 mt-4">
-                  <button
-  type="button"
-  onClick={() => router.push(`/review/edit/${r.id}?targetUserId=${userId}`)}
-  className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition"
->
-  수정
-</button>
-                  <button
-                    onClick={() => handleDelete(r.id)}
-                    className="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition"
-                  >
-                    삭제
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
+    <div className="review-container">
+      <div className="review-list-container">
+        <div className="review-header">
+          <h1 className="review-title">
+            {userId}번 사용자의 리뷰 ✨
+          </h1>
+          <p className="review-subtitle">
+            이 사용자가 작성한 모든 리뷰를 확인할 수 있습니다.
+          </p>
+          <div className="review-divider"></div>
         </div>
-      )}
+    
+        {reviews.length === 0 ? (
+          <div className="review-empty">
+            <div className="review-empty-icon">📭</div>
+            <p>등록된 리뷰가 없습니다.</p>
+          </div>
+        ) : (
+          <div className="space-y-5">
+            {reviews.map((r) => (
+              <div key={r.id} className="review-item">
+                <div className="review-item-header">
+                  <h2 className="review-item-title">{r.title}</h2>
+                  <div className="review-rating">
+                    <span className="review-star">⭐</span>
+                    <span>{r.rating}</span>
+                  </div>
+                </div>
+                <p className="review-content">{r.content}</p>
+                <div className="review-meta">
+                  <div className="review-date">
+                    <span className="review-date-icon">📅</span>
+                    <span>작성일: {new Date(r.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <div className="review-author">
+                    <span className="review-author-icon">👤</span>
+                    <span>작성자 ID: {r.authorId}</span>
+                  </div>
+                </div>
+
+                {loggedUserId && loggedUserId === r.authorId && (
+                  <div className="review-actions">
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/review/edit/${r.id}?targetUserId=${userId}`)}
+                      className="review-btn review-btn-secondary"
+                    >
+                      수정
+                    </button>
+                    <button
+                      onClick={() => handleDelete(r.id)}
+                      className="review-btn review-btn-danger"
+                    >
+                      삭제
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,17 +1,18 @@
-// ✅ 수정 완료 버전
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useParams, useSearchParams } from "next/navigation";
 import StarRating from "@/components/StarRating";
-import { updateReview, getReviews } from "@/lib/reviewApi";
-import { useRef } from "react";
+import { getReviews, updateReview } from "@/lib/reviewApi";
+import "@/styles/reviewStyles.css";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 export default function EditReviewPage() {
   const router = useRouter();
   const { reviewId } = useParams<{ reviewId: string }>();
-  const targetUserId = Number(useSearchParams().get("targetUserId"));
-  const numericReviewId = Number(reviewId);
+  const numericReviewId = parseInt(reviewId, 10);
+  const params = useSearchParams();
+  const targetUserId = Number(params.get("targetUserId"));
+  const isRedirecting = useRef(false);
 
   const [form, setForm] = useState({
     rating: 5,
@@ -21,41 +22,40 @@ export default function EditReviewPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  // ✅ 리뷰 데이터 불러오기
   const fetchReviewDetail = async () => {
     try {
       const reviews = await getReviews(targetUserId);
       const review = reviews.find((r: any) => r.id === numericReviewId);
+
       if (!review) throw new Error("해당 리뷰를 찾을 수 없습니다.");
+
       setForm({
         rating: review.rating,
         title: review.title,
         content: review.content,
       });
     } catch (err: any) {
-      alert("리뷰를 불러오는 중 오류가 발생했습니다.");
+      console.error("리뷰 조회 실패:", err);
+      alert(err.message);
       router.push(`/reviewlist/${targetUserId}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const hasFetched = useRef(false);
-
   useEffect(() => {
-    if (hasFetched.current) return;
-    hasFetched.current = true;
-
     const cookieHasToken = document.cookie.includes("accessToken=");
-  if (!cookieHasToken) {
+  if (!cookieHasToken && !isRedirecting.current) {
+    isRedirecting.current = true; // ✅ 한 번만 실행되도록
     alert("로그인 후 이용해주세요.");
-    router.replace("/members/login");
+    router.push("/members/login"); 
     return;
   }
   fetchReviewDetail();
-}, []);
+}, [numericReviewId, targetUserId]);
 
-
-  // ✅ 버튼 클릭 시 직접 실행 (form 제거)
+  // ✅ 수정 버튼 클릭 시 호출 (form submit 제거)
   const handleUpdateClick = async () => {
     setSaving(true);
     try {
@@ -64,62 +64,100 @@ export default function EditReviewPage() {
         title: form.title,
         content: form.content,
       });
+
       alert("리뷰가 수정되었습니다!");
       router.push(`/reviewlist/${targetUserId}`);
     } catch (err: any) {
       console.error("수정 실패:", err);
-      alert("로그인 후 이용해주세요.");
+      alert(`수정 실패: ${err.message}`);
     } finally {
       setSaving(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  if (loading) return <div>로딩 중...</div>;
+  if (loading) {
+    return (
+      <div className="review-loading">
+        로딩 중...
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 max-w-2xl mx-auto bg-white shadow-lg rounded-xl">
-      <h1 className="text-2xl font-bold mb-4">리뷰 수정하기 ✏️</h1>
-      <div className="mb-4">
-        <label className="block mb-2">평점</label>
-        <StarRating
-          rating={form.rating}
-          onChange={(newRating) =>
-            setForm((prev) => ({ ...prev, rating: newRating }))
-          }
-        />
+    <div className="review-container">
+      <div className="review-form">
+        <div className="review-header">
+          <h1 className="review-title">
+            리뷰 수정하기 ✏️
+          </h1>
+          <p className="review-subtitle">
+            이전에 작성한 리뷰 내용을 수정하세요.
+          </p>
+          <div className="review-divider"></div>
+        </div>
+
+        <div className="space-y-6">
+          <div className="review-form-group">
+            <label className="review-label">
+              평점
+            </label>
+            <StarRating
+              rating={form.rating}
+              onChange={(newRating) =>
+                setForm((prev) => ({ ...prev, rating: newRating }))
+              }
+            />
+          </div>
+
+          <div className="review-form-group">
+            <label className="review-label">
+              제목
+            </label>
+            <input
+              type="text"
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              placeholder="리뷰 제목을 수정하세요"
+              className="review-input"
+              required
+            />
+          </div>
+
+          <div className="review-form-group">
+            <label className="review-label">
+              내용
+            </label>
+            <textarea
+              name="content"
+              value={form.content}
+              onChange={handleChange}
+              placeholder="리뷰 내용을 수정하세요."
+              rows={6}
+              className="review-textarea"
+              required
+            />
+          </div>
+
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={handleUpdateClick}
+              disabled={saving}
+              className={`review-btn ${saving ? '' : 'review-btn-primary'}`}
+            >
+              {saving ? "수정 중..." : "수정 완료"}
+            </button>
+          </div>
+        </div>
       </div>
-      <div className="mb-4">
-        <label className="block mb-2">제목</label>
-        <input
-          name="title"
-          value={form.title}
-          onChange={handleChange}
-          className="border p-2 rounded w-full"
-        />
-      </div>
-      <div className="mb-4">
-        <label className="block mb-2">내용</label>
-        <textarea
-          name="content"
-          value={form.content}
-          onChange={handleChange}
-          className="border p-2 rounded w-full"
-          rows={5}
-        />
-      </div>
-      <button
-        type="button" // ✅ form 기본 submit 막기
-        disabled={saving}
-        onClick={handleUpdateClick}
-        className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-      >
-        {saving ? "수정 중..." : "수정 완료"}
-      </button>
     </div>
   );
 }
