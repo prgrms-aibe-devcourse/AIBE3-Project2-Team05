@@ -31,6 +31,12 @@ public class CareerService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public CareerResponseDto getCareer(Long careerId) {
+        Career career = careerRepository.findById(careerId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 경력 id 입니다."));
+        return new CareerResponseDto(career);
+    }
+
     @Transactional
     public Career create(Long memberId, CareerRequestDto dto) {
         Freelancer freelancer = freelancerFinder.findFreelancerByMemberId(memberId);
