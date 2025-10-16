@@ -197,6 +197,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/reviews/{reviewId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateReview"];
+        post?: never;
+        delete: operations["deleteReview"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/projects/{id}/complete": {
         parameters: {
             query?: never;
@@ -435,6 +451,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["addCareer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getReviewsByTarget"];
+        put?: never;
+        post: operations["createReview"];
         delete?: never;
         options?: never;
         head?: never;
@@ -762,6 +794,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/reviews/average": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getAverageRating"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reviews/all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getAllReviews"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/projects": {
         parameters: {
             query?: never;
@@ -770,6 +834,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getAllProjects"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/{projectId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getProjectStatus"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1026,6 +1106,53 @@ export interface components {
             endDate?: string;
             current?: boolean;
             description?: string;
+        };
+        /** @description 리뷰 작성/수정 요청 DTO */
+        ReviewRequestDto: {
+            /**
+             * Format: int64
+             * @description 리뷰 대상 사용자 ID (프리랜서 or 프로젝트 매니저)
+             * @example 5
+             */
+            targetUserId?: number;
+            /**
+             * Format: int64
+             * @description 리뷰가 연결된 프로젝트 ID
+             * @example 10
+             */
+            projectId?: number;
+            /**
+             * Format: int32
+             * @description 평점 (1~5)
+             * @example 5
+             */
+            rating?: number;
+            /**
+             * @description 리뷰 제목
+             * @example 훌륭한 협업이었습니다!
+             */
+            title?: string;
+            /**
+             * @description 리뷰 내용
+             * @example 소통이 빠르고 결과물의 완성도가 높았습니다.
+             */
+            content?: string;
+        };
+        ReviewResponseDto: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: int64 */
+            projectId?: number;
+            /** Format: int64 */
+            authorId?: number;
+            /** Format: int64 */
+            targetUserId?: number;
+            /** Format: int32 */
+            rating?: number;
+            title?: string;
+            content?: string;
+            /** Format: date-time */
+            createdAt?: string;
         };
         ProjectRequest: {
             title?: string;
@@ -1451,6 +1578,10 @@ export interface components {
             refreshToken?: string;
             /** Format: date-time */
             refreshTokenExpiry?: string;
+            /** Format: double */
+            averageRating?: number;
+            /** Format: int32 */
+            reviewCount?: number;
         };
         Project: {
             /** Format: int64 */
@@ -1711,19 +1842,19 @@ export interface components {
             empty?: boolean;
         };
         PageableObject: {
-            paged?: boolean;
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
-            /** Format: int32 */
-            pageSize?: number;
+            paged?: boolean;
             /** Format: int32 */
             pageNumber?: number;
+            /** Format: int32 */
+            pageSize?: number;
             unpaged?: boolean;
         };
         SortObject: {
-            sorted?: boolean;
             empty?: boolean;
+            sorted?: boolean;
             unsorted?: boolean;
         };
         RsDataListLong: {
@@ -2172,6 +2303,52 @@ export interface operations {
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
                 };
+            };
+        };
+    };
+    updateReview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reviewId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewRequestDto"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["ReviewResponseDto"];
+                };
+            };
+        };
+    };
+    deleteReview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reviewId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2641,6 +2818,52 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    getReviewsByTarget: {
+        parameters: {
+            query: {
+                targetUserId: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["ReviewResponseDto"][];
+                };
+            };
+        };
+    };
+    createReview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewRequestDto"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["ReviewResponseDto"];
                 };
             };
         };
@@ -3172,6 +3395,48 @@ export interface operations {
             };
         };
     };
+    getAverageRating: {
+        parameters: {
+            query: {
+                targetUserId: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": number;
+                };
+            };
+        };
+    };
+    getAllReviews: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["ReviewResponseDto"][];
+                };
+            };
+        };
+    };
     getAllProjects: {
         parameters: {
             query?: {
@@ -3202,6 +3467,28 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["PageProjectResponse"];
+                };
+            };
+        };
+    };
+    getProjectStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": string;
                 };
             };
         };
