@@ -33,10 +33,6 @@ public class SecurityConfig {
 
                         // ✅ 리뷰: 조회는 공개
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
-                        // ✅ 리뷰: 등록/수정/삭제는 인증 필요
-                        .requestMatchers(HttpMethod.POST, "/api/reviews/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT,  "/api/reviews/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE,"/api/reviews/**").authenticated()
 
                         .requestMatchers(HttpMethod.GET, "/api/v1/freelancers").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/freelancers/*").permitAll().requestMatchers(HttpMethod.GET, "/api/v1/freelancers/me").authenticated()

@@ -54,7 +54,7 @@ export default function UserReviewCreatePage() {
     setShowConfirmModal(false); // ✅ 모달 닫기
     alert("리뷰가 성공적으로 등록되었습니다!");
     await new Promise((r) => setTimeout(r, 50));
-    router.push(`/reviews/${targetUserId}`, { scroll: true });
+    router.push(`/reviewlist/${targetUserId}`, { scroll: true });
   } catch (err: any) {
     console.error("리뷰 등록 실패:", err);
     alert(`리뷰 등록 실패: ${err.message}`);

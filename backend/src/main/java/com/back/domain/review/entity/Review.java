@@ -2,6 +2,8 @@ package com.back.domain.review.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -27,8 +29,12 @@ public class Review {
 
     private boolean deleted = false;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @CreationTimestamp // ✅ 생성 시 자동으로 현재 시간 저장
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp // ✅ 수정 시 자동 갱신
     private LocalDateTime updatedAt;
+
     private LocalDateTime deletedAt;
 
     public void setDeletedAt(LocalDateTime deletedAt) {   // ✅ 수정된 부분

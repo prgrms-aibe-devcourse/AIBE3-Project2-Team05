@@ -28,10 +28,16 @@ function getAuthToken(): string | null {
 
 // ✅ 공통 fetch 함수 (Authorization 헤더 자동 추가)
 export async function fetchBase<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const token =
+    (typeof window !== "undefined" &&
+      (localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken"))) ||
+    null;
+
   const res = await fetch(`http://localhost:8080${url}`, {
-    credentials: "include", // ✅ 쿠키 반드시 함께 전송
+    credentials: "include", // ✅ 쿠키 + CORS
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}), // ✅ 토큰 자동 추가
       ...(options.headers || {}),
     },
     ...options,
@@ -67,7 +73,10 @@ export async function createReview(payload: ReviewRequest) {
 export async function updateReview(
   reviewId: number,
   payload: Partial<Pick<ReviewRequest, "rating" | "title" | "content">>
-) {
+) { 
+  const token =
+    localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+
   return fetchBase<ReviewResponse>(`/api/reviews/${reviewId}`, {
     method: "PUT",
     body: JSON.stringify(payload),
