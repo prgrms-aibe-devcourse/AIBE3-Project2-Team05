@@ -29,22 +29,43 @@ export default function UserReviewListPage() {
     }
   };
 
+  // ✅ UserContext에서 사용자 정보 가져오기 (임시 방법)
+  const fetchUserInfoFromContext = async () => {
+    try {
+      // 로그인한 사용자 정보 가져오기
+      const res = await fetch("http://localhost:8080/member/me", {
+        credentials: "include",
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        const currentUserId = data.data.id;
+        
+        // 현재 페이지의 userId와 로그인한 사용자 ID가 같으면
+        if (currentUserId === Number(userId)) {
+          setUserNickname(data.data.nickname || data.data.username);
+          return;
+        }
+      }
+      
+
+      setUserNickname(`${userId}번 프리랜서`);
+      
+    } 
+    catch (err) {
+      console.error("사용자 정보 조회 실패:", err);
+      setUserNickname(`${userId}번 프리랜서`);
+    }
+  };
+
   const fetchUserReviews = async () => {
     try {
       if (!userId) return;
       const data = await getReviews(Number(userId));
       setAllReviews(data);
       setReviews(data);
-      
-      // ✅ 리뷰가 있으면 첫 번째 리뷰의 작성자 닉네임 사용
-      if (data && data.length > 0 && data[0].authorNickname) {
-        setUserNickname(data[0].authorNickname);
-      } else {
-        setUserNickname(`${userId}번 사용자`);
-      }
     } catch (err) {
       console.error("리뷰 불러오기 실패:", err);
-      setUserNickname(`${userId}번 사용자`);
     } finally {
       setLoading(false);
     }
@@ -74,6 +95,7 @@ export default function UserReviewListPage() {
     const init = async () => {
       const uid = await fetchLoggedUser();
       setLoggedUserId(uid);
+      await fetchUserInfoFromContext();
       await fetchUserReviews();
     };
     init();
@@ -107,7 +129,7 @@ export default function UserReviewListPage() {
 
           {reviews.length === 0 ? (
             <div className="review-empty">
-              <div className="review-empty-icon">📭</div>
+              <div className="review-empty-icon">🔭</div>
               <p>등록된 리뷰가 없습니다.</p>
             </div>
           ) : (
