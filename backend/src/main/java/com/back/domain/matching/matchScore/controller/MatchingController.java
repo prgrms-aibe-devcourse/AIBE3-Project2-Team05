@@ -64,27 +64,11 @@ public class MatchingController {
 
         List<MatchScore> matchScores;
 
-        // 프리랜서인 경우: 본인의 매칭 점수만 조회 (minScore 무시)
+        // 역할 우선순위: 1) 프로젝트 매니저 2) 프리랜서 3) 일반 사용자
         if (user != null) {
-            var freelancerOpt = freelancerRepository.findByMemberId(user.getId());
-
-            if (freelancerOpt.isPresent()) {
-                // 프리랜서로 로그인한 경우, 본인의 매칭 점수만 조회
-                var myScoreOpt = matchScoreRepository.findByProjectAndFreelancer(project, freelancerOpt.get());
-
-                // 매칭 점수가 없으면 계산해서 생성
-                if (myScoreOpt.isEmpty()) {
-                    matchScoreService.calculateAndSaveForFreelancer(projectId, freelancerOpt.get().getId());
-                    myScoreOpt = matchScoreRepository.findByProjectAndFreelancer(project, freelancerOpt.get());
-
-                    if (myScoreOpt.isEmpty()) {
-                        throw new ServiceException("500-1", "매칭 점수 계산에 실패했습니다.");
-                    }
-                }
-
-                matchScores = List.of(myScoreOpt.get());
-            } else {
-                // PM 또는 일반 사용자: 전체 추천 목록 조회 (minScore 무시, TOP 10만)
+            // 1순위: 프로젝트 매니저 확인 (PM+FREELANCER 이중 역할 대응)
+            if (project.getManager().getId().equals(user.getId())) {
+                // PM 모드: TOP 10 반환
                 matchScores = matchScoreService.getRecommendations(projectId, limit, null);
 
                 // 매칭 점수가 없으면 계산 후 다시 조회
@@ -99,8 +83,44 @@ public class MatchingController {
                     }
                 }
             }
+            // 2순위: 프리랜서 확인
+            else {
+                var freelancerOpt = freelancerRepository.findByMemberId(user.getId());
+
+                if (freelancerOpt.isPresent()) {
+                    // 프리랜서 모드: 본인의 매칭 점수만 조회
+                    var myScoreOpt = matchScoreRepository.findByProjectAndFreelancer(project, freelancerOpt.get());
+
+                    // 매칭 점수가 없으면 계산해서 생성
+                    if (myScoreOpt.isEmpty()) {
+                        matchScoreService.calculateAndSaveForFreelancer(projectId, freelancerOpt.get().getId());
+                        myScoreOpt = matchScoreRepository.findByProjectAndFreelancer(project, freelancerOpt.get());
+
+                        if (myScoreOpt.isEmpty()) {
+                            throw new ServiceException("500-1", "매칭 점수 계산에 실패했습니다.");
+                        }
+                    }
+
+                    matchScores = List.of(myScoreOpt.get());
+                } else {
+                    // 일반 사용자: TOP 10 반환
+                    matchScores = matchScoreService.getRecommendations(projectId, limit, null);
+
+                    // 매칭 점수가 없으면 계산 후 다시 조회
+                    if (matchScores.isEmpty()) {
+                        int calculatedCount = matchScoreService.calculateAndSaveRecommendations(projectId);
+
+                        if (calculatedCount == 0) {
+                            // 프리랜서가 없는 경우 빈 리스트 반환 (정상 처리)
+                            matchScores = List.of();
+                        } else {
+                            matchScores = matchScoreService.getRecommendations(projectId, limit, null);
+                        }
+                    }
+                }
+            }
         } else {
-            // 비로그인 사용자: 전체 추천 목록 조회
+            // 비로그인 사용자: TOP 10 반환
             matchScores = matchScoreService.getRecommendations(projectId, limit, null);
 
             // 매칭 점수가 없으면 계산 후 다시 조회

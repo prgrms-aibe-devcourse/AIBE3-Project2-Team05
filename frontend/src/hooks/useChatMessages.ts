@@ -18,6 +18,8 @@ interface UseChatMessagesProps {
   receiverId: number  // 실제 수신자 회원 ID
   currentUserId: number
   isOpen: boolean
+  initialRelatedType?: string  // 초기 relatedType (예: 'PROPOSAL', 'PROJECT')
+  initialRelatedId?: number    // 초기 relatedId (예: proposalId, projectId)
 }
 
 export function useChatMessages({
@@ -25,7 +27,9 @@ export function useChatMessages({
   freelancerId,
   receiverId,
   currentUserId,
-  isOpen
+  isOpen,
+  initialRelatedType,
+  initialRelatedId
 }: UseChatMessagesProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -77,14 +81,20 @@ export function useChatMessages({
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim()) return
 
-    // relatedType/Id 결정: 저장된 값 우선, 없으면 PROJECT/projectId 사용
-    const relatedType = savedRelatedInfo?.relatedType || 'PROJECT'
-    const relatedId = savedRelatedInfo?.relatedId || projectId
+    // relatedType/Id 결정 (3단계 우선순위)
+    // 1순위: initialRelatedType/initialRelatedId (props로 받은 초기값 - 명시적으로 지정된 문맥)
+    // 2순위: savedRelatedInfo (fetch한 메시지에서 가져온 값 - 기존 대화 이어가기)
+    // 3순위: PROJECT/projectId (fallback)
+    const relatedType = initialRelatedType || savedRelatedInfo?.relatedType || 'PROJECT'
+    const relatedId = initialRelatedId || savedRelatedInfo?.relatedId || projectId
 
     console.log('[ChatDebug] Sending message:', {
       receiverId,
       relatedType,
       relatedId,
+      savedRelatedInfo,
+      initialRelatedType,
+      initialRelatedId,
       projectId,
       freelancerId,
       contentLength: content.trim().length
@@ -127,7 +137,7 @@ export function useChatMessages({
       setMessages(prev => prev.filter(msg => msg.id !== Date.now()))
       throw err
     }
-  }, [projectId, freelancerId, receiverId, currentUserId, savedRelatedInfo])
+  }, [projectId, freelancerId, receiverId, currentUserId, savedRelatedInfo, initialRelatedType, initialRelatedId])
 
   // Fetch messages when modal opens
   useEffect(() => {

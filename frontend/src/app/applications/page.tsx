@@ -23,6 +23,7 @@ interface Submission {
   projectId: number
   projectTitle: string
   freelancerId: number
+  freelancerMemberId?: number  // 프리랜서의 회원 ID (백엔드 추가 대기)
   freelancerName: string
   coverLetter: string
   proposedRate: number
@@ -41,6 +42,7 @@ export default function ApplicationsPage() {
   const [isFreelancer, setIsFreelancer] = useState<boolean | null>(null)
   const [chatModalOpen, setChatModalOpen] = useState(false)
   const [chatTarget, setChatTarget] = useState<{
+    submissionId: number
     freelancerId: number
     receiverId: number
     receiverName: string
@@ -164,9 +166,20 @@ export default function ApplicationsPage() {
     const project = projects.find(p => p.id === selectedProjectId)
     if (!project) return
 
-    setChatTarget({
+    // receiverId: 회원 ID를 사용 (freelancerMemberId가 없으면 fallback으로 freelancerId)
+    const receiverId = submission.freelancerMemberId ?? submission.freelancerId
+
+    console.log('[Applications Debug] Opening chat:', {
+      submissionId: submission.id,
       freelancerId: submission.freelancerId,
-      receiverId: submission.freelancerId,  // PM이 프리랜서에게 메시지 보냄
+      freelancerMemberId: submission.freelancerMemberId,
+      receiverId
+    })
+
+    setChatTarget({
+      submissionId: submission.id,
+      freelancerId: submission.freelancerId,
+      receiverId: receiverId,
       receiverName: submission.freelancerName,
       projectId: submission.projectId,
       projectTitle: submission.projectTitle
@@ -336,6 +349,8 @@ export default function ApplicationsPage() {
           receiverId={chatTarget.receiverId}
           receiverName={chatTarget.receiverName}
           projectTitle={chatTarget.projectTitle}
+          relatedType="SUBMISSION"
+          relatedId={chatTarget.submissionId}
         />
       )}
     </div>

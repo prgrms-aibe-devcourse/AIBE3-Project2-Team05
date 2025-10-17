@@ -13,6 +13,8 @@ interface ChatModalProps {
   receiverId: number  // 실제 수신자 회원 ID
   receiverName: string
   projectTitle: string
+  relatedType?: string  // 메시지 연관 타입 (예: 'PROPOSAL', 'PROJECT')
+  relatedId?: number    // 메시지 연관 ID (예: proposalId, projectId)
 }
 
 export function ChatModal({
@@ -22,7 +24,9 @@ export function ChatModal({
   freelancerId,
   receiverId,
   receiverName,
-  projectTitle
+  projectTitle,
+  relatedType,
+  relatedId
 }: ChatModalProps) {
   const { user } = useUser()
   const [inputMessage, setInputMessage] = useState('')
@@ -33,9 +37,11 @@ export function ChatModal({
   const { messages, isLoading, error, sendMessage, refetch } = useChatMessages({
     projectId,
     freelancerId,
-    receiverId,  // receiverId 추가
+    receiverId,
     currentUserId: user?.id || 0,
-    isOpen
+    isOpen,
+    initialRelatedType: relatedType,
+    initialRelatedId: relatedId
   })
 
   // Auto scroll to bottom when new messages arrive

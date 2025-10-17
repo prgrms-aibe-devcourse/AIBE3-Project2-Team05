@@ -12,6 +12,7 @@ interface Submission {
   projectId: number
   projectTitle: string
   freelancerName: string
+  freelancerMemberId?: number  // 프리랜서의 회원 ID (백엔드 추가 대기)
   coverLetter: string
   proposedRate: number
   estimatedDuration: number
@@ -67,6 +68,7 @@ export default function SubmissionsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [chatModalOpen, setChatModalOpen] = useState(false)
   const [chatTarget, setChatTarget] = useState<{
+    submissionId: number
     freelancerId: number
     receiverId: number
     receiverName: string
@@ -134,7 +136,15 @@ export default function SubmissionsPage() {
       return
     }
 
+    console.log('[Submissions Debug] Opening chat:', {
+      submissionId: submission.id,
+      freelancerId: freelancerId,
+      receiverId: project.pmId,
+      pmName: project.pmName
+    })
+
     setChatTarget({
+      submissionId: submission.id,
       freelancerId: freelancerId,
       receiverId: project.pmId,
       receiverName: project.pmName,
@@ -470,6 +480,8 @@ export default function SubmissionsPage() {
             receiverId={chatTarget.receiverId}
             receiverName={chatTarget.receiverName}
             projectTitle={chatTarget.projectTitle}
+            relatedType="SUBMISSION"
+            relatedId={chatTarget.submissionId}
           />
         )}
       </div>

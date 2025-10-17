@@ -1344,6 +1344,8 @@ export interface components {
             projectTitle?: string;
             /** Format: int64 */
             freelancerId?: number;
+            /** Format: int64 */
+            freelancerMemberId?: number;
             freelancerName?: string;
             coverLetter?: string;
             /** Format: int32 */
@@ -1383,6 +1385,8 @@ export interface components {
             pmName?: string;
             /** Format: int64 */
             freelancerId?: number;
+            /** Format: int64 */
+            freelancerMemberId?: number;
             freelancerName?: string;
             message?: string;
             /** @enum {string} */
@@ -1423,6 +1427,8 @@ export interface components {
             pmName?: string;
             /** Format: int64 */
             freelancerId?: number;
+            /** Format: int64 */
+            freelancerMemberId?: number;
             freelancerName?: string;
             /** Format: int64 */
             senderId?: number;
@@ -1725,6 +1731,8 @@ export interface components {
             projectTitle?: string;
             /** Format: int64 */
             freelancerId?: number;
+            /** Format: int64 */
+            freelancerMemberId?: number;
             freelancerName?: string;
             /** Format: int64 */
             pmId?: number;
@@ -1734,6 +1742,9 @@ export interface components {
             lastMessageAt?: string;
             /** Format: int32 */
             unreadCount?: number;
+            relatedType?: string;
+            /** Format: int64 */
+            relatedId?: number;
             lastMessagePreview?: string;
         };
         RsDataListConversationDto: {
@@ -1847,10 +1858,10 @@ export interface components {
             freelancerProfileImageUrl?: string;
         };
         PageProjectResponse: {
-            /** Format: int32 */
-            totalPages?: number;
             /** Format: int64 */
             totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
             first?: boolean;
             last?: boolean;
             /** Format: int32 */
@@ -1859,26 +1870,26 @@ export interface components {
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         PageableObject: {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
+            unpaged?: boolean;
             paged?: boolean;
             /** Format: int32 */
             pageNumber?: number;
             /** Format: int32 */
             pageSize?: number;
-            unpaged?: boolean;
         };
         SortObject: {
             empty?: boolean;
-            unsorted?: boolean;
             sorted?: boolean;
+            unsorted?: boolean;
         };
         RsDataListLong: {
             resultCode?: string;

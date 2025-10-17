@@ -51,6 +51,8 @@ export default function MessagesPage() {
     receiverId: number
     receiverName: string
     projectTitle: string
+    relatedType?: string
+    relatedId?: number
   } | null>(null)
 
   const isFreelancer = selectedRole === 'FREELANCER'
@@ -96,7 +98,9 @@ export default function MessagesPage() {
       pmId: conversation.pmId,
       freelancerId: conversation.freelancerId,
       freelancerMemberId: conversation.freelancerMemberId,
-      receiverId
+      receiverId,
+      relatedType: conversation.relatedType,
+      relatedId: conversation.relatedId
     })
 
     setSelectedConversation({
@@ -104,7 +108,9 @@ export default function MessagesPage() {
       freelancerId: conversation.freelancerId,
       receiverId: receiverId,
       receiverName: isFreelancer ? conversation.pmName : conversation.freelancerName,
-      projectTitle: conversation.projectTitle
+      projectTitle: conversation.projectTitle,
+      relatedType: conversation.relatedType,
+      relatedId: conversation.relatedId
     })
     setChatModalOpen(true)
   }, [isFreelancer])
@@ -305,6 +311,8 @@ export default function MessagesPage() {
           receiverId={selectedConversation.receiverId}
           receiverName={selectedConversation.receiverName}
           projectTitle={selectedConversation.projectTitle}
+          relatedType={selectedConversation.relatedType}
+          relatedId={selectedConversation.relatedId}
         />
       )}
 

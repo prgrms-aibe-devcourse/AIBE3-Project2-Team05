@@ -12,6 +12,8 @@ export interface Conversation {
   lastMessage: string
   lastMessageAt: string
   unreadCount: number
+  relatedType?: string  // 메시지 연관 타입 (예: 'PROPOSAL', 'SUBMISSION', 'PROJECT')
+  relatedId?: number    // 메시지 연관 ID (백엔드 추가 대기)
 }
 
 export function useConversations() {

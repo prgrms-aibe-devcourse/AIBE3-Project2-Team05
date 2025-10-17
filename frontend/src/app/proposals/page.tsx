@@ -117,6 +117,7 @@ export default function ProposalsPage() {
   const [chatModalOpen, setChatModalOpen] = useState(false)
   const [showRoleModal, setShowRoleModal] = useState(false)
   const [chatTarget, setChatTarget] = useState<{
+    proposalId: number
     freelancerId: number
     receiverId: number
     receiverName: string
@@ -234,8 +235,8 @@ export default function ProposalsPage() {
     }
   }
 
-  const handleSendMessage = (freelancerId: number, receiverId: number, receiverName: string, projectId: number, projectTitle: string) => {
-    setChatTarget({ freelancerId, receiverId, receiverName, projectId, projectTitle })
+  const handleSendMessage = (proposalId: number, freelancerId: number, receiverId: number, receiverName: string, projectId: number, projectTitle: string) => {
+    setChatTarget({ proposalId, freelancerId, receiverId, receiverName, projectId, projectTitle })
     setChatModalOpen(true)
   }
 
@@ -331,6 +332,7 @@ export default function ProposalsPage() {
                     })
 
                     handleSendMessage(
+                      proposal.id,
                       proposal.freelancerId,
                       receiverId,
                       isPm ? proposal.freelancerName : proposal.pmName,
@@ -368,6 +370,8 @@ export default function ProposalsPage() {
             receiverId={chatTarget.receiverId}
             receiverName={chatTarget.receiverName}
             projectTitle={chatTarget.projectTitle}
+            relatedType="PROPOSAL"
+            relatedId={chatTarget.proposalId}
           />
         )}
 
