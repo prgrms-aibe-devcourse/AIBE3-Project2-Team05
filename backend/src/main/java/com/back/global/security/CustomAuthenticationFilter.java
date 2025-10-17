@@ -48,7 +48,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
                 (uri.equals("/auth/updatePassword/verify") && method.equals("PUT")) ||
                 (uri.equals("/api/projects") && method.equals("GET")) ||
                 (uri.equals("/api/v1/techs") && method.equals("GET")) ||
-                (uri.equals("/api/reviews") && method.equals("GET")) ||
+                (uri.startsWith("/api/reviews") && method.equals("GET")) ||
                 uri.startsWith("/api/v1/freelancers") && !uri.equals("/api/v1/freelancers/me") && !uri.equals("/api/v1/freelancers/me/portfolios") && method.equals("GET") ||
                 uri.startsWith("/images") ||
                 (uri.equals("/auth/refresh") && method.equals("POST"))) {

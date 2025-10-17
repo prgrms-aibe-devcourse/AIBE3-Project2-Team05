@@ -13,7 +13,7 @@ export default function UserReviewCreatePage() {
 
   // ✅ targetFreelancerId 로 변경 (member → freelancer 반영)
   const targetFreelancerId = searchParams.get("targetUserId");
-const projectId = searchParams.get("projectId");
+  const projectId = searchParams.get("projectId");
 
   console.log("✅ 받은 값:", projectId, targetFreelancerId);
 
@@ -22,6 +22,7 @@ const projectId = searchParams.get("projectId");
   const [rating, setRating] = useState(5);
   const [loading, setLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  console.log(projectId, targetFreelancerId, rating)
 
   // ✅ 리뷰 등록 실행
   const handleSubmit = async () => {

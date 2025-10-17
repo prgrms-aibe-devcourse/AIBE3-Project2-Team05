@@ -28,23 +28,39 @@ public class ReviewService {
 
     /** 리뷰 생성 */
     public ReviewResponseDto createReview(Long authorId, ReviewRequestDto dto) {
+        // ✅ 작성자 = 항상 PM
         Member author = memberRepository.findById(authorId)
                 .orElseThrow(() -> new IllegalArgumentException("작성자 회원을 찾을 수 없습니다."));
-        Freelancer freelancer = freelancerRepository.findById(dto.getTargetFreelancerId())
-                .orElseThrow(() -> new IllegalArgumentException("리뷰 대상 프리랜서를 찾을 수 없습니다."));
 
-        Member target = freelancer.getMember(); // ✅ 프리랜서가 속한 Member를 가져옴
+        Member target; // 리뷰 대상
+
+        // ✅ 프리랜서가 존재하면 → 프리랜서에게 리뷰
+        if (dto.getTargetFreelancerId() != null) {
+            Freelancer freelancer = freelancerRepository.findById(dto.getTargetFreelancerId())
+                    .orElse(null);
+
+            if (freelancer != null && freelancer.getMember() != null) {
+                target = freelancer.getMember(); // 프리랜서 소속 Member
+            } else {
+                // ❗ 프리랜서가 없으면 → PM 자신에게 리뷰
+                target = author;
+            }
+
+        } else {
+            // ✅ 프리랜서 ID 자체가 없으면 → PM 자신에게 리뷰
+            target = author;
+        }
 
         Review review = Review.builder()
                 .projectId(dto.getProjectId())
-                .author(author)
-                .targetUser(target)
+                .author(author)       // 리뷰 작성자 (PM)
+                .targetUser(target)   // 프리랜서 or 자기 자신
                 .rating(dto.getRating())
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .build();
 
-        Review saved = reviewRepository.save(review); // ✅ 실제 insert 발생
+        Review saved = reviewRepository.save(review);
         return ReviewResponseDto.fromEntity(saved);
     }
 

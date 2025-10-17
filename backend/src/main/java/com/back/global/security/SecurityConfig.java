@@ -33,6 +33,7 @@ public class SecurityConfig {
 
                         // ✅ 리뷰: 조회는 공개
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/all").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/v1/freelancers").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/freelancers/*").permitAll().requestMatchers(HttpMethod.GET, "/api/v1/freelancers/me").authenticated()
