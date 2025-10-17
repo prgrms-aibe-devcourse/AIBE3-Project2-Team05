@@ -29,32 +29,19 @@ export default function UserReviewListPage() {
     }
   };
 
-  // ✅ UserContext에서 사용자 정보 가져오기 (임시 방법)
+  // ✅ 로그인한 사용자 정보 가져오기
   const fetchUserInfoFromContext = async () => {
     try {
-      // 로그인한 사용자 정보 가져오기
       const res = await fetch("http://localhost:8080/member/me", {
         credentials: "include",
       });
       
       if (res.ok) {
         const data = await res.json();
-        const currentUserId = data.data.id;
-        
-        // 현재 페이지의 userId와 로그인한 사용자 ID가 같으면
-        if (currentUserId === Number(userId)) {
-          setUserNickname(data.data.nickname || data.data.username);
-          return;
-        }
+        setUserNickname(data.data.nickname || data.data.username);
       }
-      
-
-      setUserNickname(`${userId}번 프리랜서`);
-      
-    } 
-    catch (err) {
+    } catch (err) {
       console.error("사용자 정보 조회 실패:", err);
-      setUserNickname(`${userId}번 프리랜서`);
     }
   };
 
@@ -123,7 +110,7 @@ export default function UserReviewListPage() {
               {userNickname ? `${userNickname}님의 리뷰` : "리뷰 목록"}
             </h1>
             <p className="review-subtitle">
-              이 사용자가 작성한 모든 리뷰를 확인할 수 있습니다.
+              이 프리랜서가 받은 모든 리뷰를 확인할 수 있습니다.
             </p>
           </div>
 
