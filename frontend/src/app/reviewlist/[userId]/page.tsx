@@ -29,22 +29,30 @@ export default function UserReviewListPage() {
     }
   };
 
+  // ✅ 로그인한 사용자 정보 가져오기
+  const fetchUserInfoFromContext = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/member/me", {
+        credentials: "include",
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setUserNickname(data.data.nickname || data.data.username);
+      }
+    } catch (err) {
+      console.error("사용자 정보 조회 실패:", err);
+    }
+  };
+
   const fetchUserReviews = async () => {
     try {
       if (!userId) return;
       const data = await getReviews(Number(userId));
       setAllReviews(data);
       setReviews(data);
-      
-      // ✅ 리뷰가 있으면 첫 번째 리뷰의 작성자 닉네임 사용
-      if (data && data.length > 0 && data[0].authorNickname) {
-        setUserNickname(data[0].authorNickname);
-      } else {
-        setUserNickname(`${userId}번 사용자`);
-      }
     } catch (err) {
       console.error("리뷰 불러오기 실패:", err);
-      setUserNickname(`${userId}번 사용자`);
     } finally {
       setLoading(false);
     }
@@ -74,6 +82,7 @@ export default function UserReviewListPage() {
     const init = async () => {
       const uid = await fetchLoggedUser();
       setLoggedUserId(uid);
+      await fetchUserInfoFromContext();
       await fetchUserReviews();
     };
     init();
@@ -101,13 +110,13 @@ export default function UserReviewListPage() {
               {userNickname ? `${userNickname}님의 리뷰` : "리뷰 목록"}
             </h1>
             <p className="review-subtitle">
-              이 사용자가 작성한 모든 리뷰를 확인할 수 있습니다.
+              이 프리랜서가 받은 모든 리뷰를 확인할 수 있습니다.
             </p>
           </div>
 
           {reviews.length === 0 ? (
             <div className="review-empty">
-              <div className="review-empty-icon">📭</div>
+              <div className="review-empty-icon">🔭</div>
               <p>등록된 리뷰가 없습니다.</p>
             </div>
           ) : (
