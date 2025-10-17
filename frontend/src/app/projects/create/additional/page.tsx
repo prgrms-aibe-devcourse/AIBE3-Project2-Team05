@@ -5,6 +5,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import { budgetOptions, partnerTypeOptions, progressStatusOptions, regionOptions, techStackCategories } from '@/constants/projectOptions';
 import { ProjectFileApiService } from '@/lib/backend/projectFileApi';
 import { components } from '@/lib/backend/schema';
+import { getBudgetAmountFromType } from '@/utils/projectUtils';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -141,6 +142,8 @@ const ProjectCreateAdditionalPage = () => {
         startDate: basicData.startDate,
         endDate: basicData.endDate,
         managerId: memberId,
+        // budgetType으로부터 자동 생성된 budgetAmount 추가
+        budgetAmount: getBudgetAmountFromType(basicData.budgetType),
         
         // 추가 정보 (빈 문자열을 undefined로 처리)
         partnerType: additionalData.partnerType && additionalData.partnerType.trim() 

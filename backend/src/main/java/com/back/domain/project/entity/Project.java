@@ -146,8 +146,8 @@ public class Project {
     }
 
     public void validateBudget() {
-        if (budgetAmount != null && budgetAmount <= 0) {
-            throw new IllegalArgumentException("예산은 양수여야 합니다.");
+        if (budgetAmount != null && budgetAmount < 0) {
+            throw new IllegalArgumentException("예산은 0 이상이어야 합니다.");
         }
     }
 }

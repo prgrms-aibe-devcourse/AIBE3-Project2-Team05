@@ -22,6 +22,29 @@ export const getBudgetTypeText = (budgetType?: string): string => {
   return budgetMap[budgetType] || '미정';
 };
 
+// 예산 타입을 예산 금액(중간값)으로 변환
+export const getBudgetAmountFromType = (budgetType?: string): number => {
+  if (!budgetType || budgetType.trim() === '' || budgetType === '0') {
+    return 0;
+  }
+  
+  const budgetAmountMap: Record<string, number> = {
+    'RANGE_1_100': 500000,        // 50만원
+    'RANGE_100_200': 1500000,     // 150만원
+    'RANGE_200_300': 2500000,     // 250만원
+    'RANGE_300_500': 4000000,     // 400만원
+    'RANGE_500_1000': 7500000,    // 750만원
+    'RANGE_1000_2000': 15000000,  // 1,500만원
+    'RANGE_2000_3000': 25000000,  // 2,500만원
+    'RANGE_3000_5000': 40000000,  // 4,000만원
+    'RANGE_5000_OVER': 75000000,  // 7,500만원
+    'OVER_1_EUK': 500000000,      // 5억원
+    'NEGOTIABLE': 0               // 협의 (0원)
+  };
+  
+  return budgetAmountMap[budgetType] || 0;
+};
+
 // 프로젝트 필드를 한국어로 변환
 export const getProjectFieldText = (field?: string): string => {
   if (!field || field.trim() === '' || field === '0') {

@@ -5,6 +5,7 @@ import { budgetOptions } from '@/constants/projectOptions';
 import { components } from '@/lib/backend/schema';
 import { getTodayString, validateFutureDate } from '@/utils/dateUtils';
 import { showErrorMessage, showSuccessMessage, showValidationError } from '@/utils/formValidation';
+import { getBudgetAmountFromType } from '@/utils/projectUtils';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -18,6 +19,7 @@ interface FormData {
   budgetType: string;
   startDate: string;
   endDate: string;
+  budgetAmount?: number;
 }
 
 const ProjectCreatePage = () => {
@@ -30,7 +32,8 @@ const ProjectCreatePage = () => {
     recruitmentType: '',
     budgetType: '',
     startDate: '',
-    endDate: ''
+    endDate: '',
+    budgetAmount: undefined
   });
   const [creating, setCreating] = useState(false);
 
@@ -52,7 +55,16 @@ const ProjectCreatePage = () => {
       }
     }
     
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const newFormData = { ...prev, [field]: value };
+      
+      // budgetType이 변경되면 자동으로 budgetAmount 설정
+      if (field === 'budgetType') {
+        newFormData.budgetAmount = getBudgetAmountFromType(value);
+      }
+      
+      return newFormData;
+    });
   };
 
   // 필수 항목 검증
@@ -90,7 +102,8 @@ const ProjectCreatePage = () => {
         budgetType: formData.budgetType as ProjectRequest['budgetType'],
         startDate: formData.startDate,
         endDate: formData.endDate,
-        managerId: memberId
+        managerId: memberId,
+        budgetAmount: formData.budgetAmount
       };
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/complete`, {

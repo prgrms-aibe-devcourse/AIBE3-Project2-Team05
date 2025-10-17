@@ -15,7 +15,7 @@ import {
 import { components } from '@/lib/backend/schema';
 import { formClasses, formStyles } from '@/styles/formStyles';
 import { showErrorMessage, showSuccessMessage, showValidationError, validateProjectForm } from '@/utils/formValidation';
-import { formatDateForInput } from '@/utils/projectUtils';
+import { formatDateForInput, getBudgetAmountFromType } from '@/utils/projectUtils';
 import { sessionStorageUtils } from '@/utils/sessionStorageUtils';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -116,7 +116,8 @@ const UserProjectEditPage = () => {
             recruitmentType: data.recruitmentType || '',
             partnerType: data.partnerType || '',
             progressStatus: data.progressStatus || '',
-            budgetAmount: data.budgetAmount,
+            // budgetAmount가 없으면 budgetType으로부터 자동 생성
+            budgetAmount: data.budgetAmount ?? getBudgetAmountFromType(data.budgetType),
             partnerEtcDescription: data.partnerEtcDescription || ''
           });
 
@@ -138,7 +139,16 @@ const UserProjectEditPage = () => {
   }, [params?.projectId]);
 
   const handleInputChange = (field: keyof FormData, value: string | string[] | number | undefined) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const newFormData = { ...prev, [field]: value };
+      
+      // budgetType이 변경되면 자동으로 budgetAmount 설정
+      if (field === 'budgetType' && typeof value === 'string') {
+        newFormData.budgetAmount = getBudgetAmountFromType(value);
+      }
+      
+      return newFormData;
+    });
   };
 
   const handleTechStackChange = (techStack: string) => {
@@ -187,7 +197,7 @@ const UserProjectEditPage = () => {
         progressStatus: formData.progressStatus && formData.progressStatus.trim()
           ? formData.progressStatus as ProjectRequest['progressStatus']
           : undefined,
-        budgetAmount: formData.budgetAmount || undefined,
+        budgetAmount: formData.budgetAmount !== undefined ? formData.budgetAmount : undefined,
         partnerEtcDescription: formData.partnerEtcDescription && formData.partnerEtcDescription.trim()
           ? formData.partnerEtcDescription
           : undefined
