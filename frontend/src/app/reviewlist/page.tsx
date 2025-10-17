@@ -40,6 +40,30 @@ const SAMPLE_REVIEWS = [
       "요구사항을 정확히 이해하고 기대 이상의 결과를 만들어주셨습니다. 프로페셔널한 태도가 인상적이었어요!",
     createdAt: "2024-03-13T09:15:00",
   },
+  {
+    id: 4,
+    projectId: 104,
+    authorId: 4,
+    authorNickname: "최마케터",
+    targetUserId: 8,
+    rating: 5,
+    title: "훌륭한 협업 경험",
+    content:
+      "프로젝트 전반에 걸쳐 체계적이고 전문적인 모습을 보여주셨습니다. 적극 추천합니다!",
+    createdAt: "2024-03-12T15:20:00",
+  },
+  {
+    id: 5,
+    projectId: 105,
+    authorId: 5,
+    authorNickname: "정개발자",
+    targetUserId: 9,
+    rating: 4,
+    title: "믿을 수 있는 파트너",
+    content:
+      "기술적으로 뛰어나고 커뮤니케이션도 원활했습니다. 다음에도 함께 일하고 싶네요.",
+    createdAt: "2024-03-11T09:45:00",
+  },
 ];
 
 export default function AllReviewsPage() {
@@ -53,22 +77,37 @@ export default function AllReviewsPage() {
   const ITEMS_PER_PAGE = 6;
 
   const fetchAllReviews = async () => {
+    console.log('=== 리뷰 데이터 로딩 시작 ===');
     try {
+      console.log('getAllReviews() 호출 중...');
       const data = await getAllReviews();
+      console.log('API 응답 데이터:', data);
+      console.log('데이터 타입:', typeof data);
+      console.log('데이터 길이:', data?.length);
+      
       if (!data || data.length === 0) {
+        console.log('❌ 데이터가 비어있음 → 샘플 데이터 사용');
         setAllReviews(SAMPLE_REVIEWS);
         setReviews(SAMPLE_REVIEWS);
         setUseHardcoded(true);
       } else {
+        console.log('✅ 실제 데이터 사용, 리뷰 개수:', data.length);
         setAllReviews(data);
         setReviews(data);
         setUseHardcoded(false);
       }
-    } catch {
+    } catch (error) {
+      console.error('❌ 리뷰 로딩 실패!');
+      console.error('에러 타입:', error.constructor.name);
+      console.error('에러 메시지:', error.message);
+      console.error('전체 에러:', error);
+      
+      // 백엔드 연결 실패 시 샘플 데이터 표시
       setAllReviews(SAMPLE_REVIEWS);
       setReviews(SAMPLE_REVIEWS);
       setUseHardcoded(true);
     } finally {
+      console.log('=== 리뷰 데이터 로딩 완료 ===');
       setLoading(false);
     }
   };
@@ -211,12 +250,12 @@ export default function AllReviewsPage() {
                   display: 'inline-block',
                   padding: '8px 16px',
                   borderRadius: '9999px',
-                  backgroundColor: '#dcfce7',
-                  color: '#166534',
+                  backgroundColor: '#dbeafe',
+                  color: '#1e40af',
                   fontSize: '14px',
                   fontWeight: '600'
                 }}>
-                  💡 샘플 데이터를 표시하고 있습니다
+                  💡 실제 리뷰 데이터를 불러올 수 없어 샘플 데이터를 표시합니다
                 </div>
               )}
 

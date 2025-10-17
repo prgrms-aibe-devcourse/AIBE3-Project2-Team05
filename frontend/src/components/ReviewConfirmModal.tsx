@@ -49,7 +49,7 @@ export default function ReviewConfirmModal({
             marginBottom: "20px",
           }}
         >
-          이 프로젝트에 참여한 프리랜서에게 리뷰를 작성하시겠습니까?
+          FIT을 사용한 후기를 남기시겠습니까?
         </p>
 
         <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
@@ -98,6 +98,5 @@ export default function ReviewConfirmModal({
     </div>
   );
 
-  // 🔥 body 바로 밑으로 이동 (헤더/레이아웃 영향 완전 제거)
   return typeof window !== "undefined" ? createPortal(modal, document.body) : null;
 }

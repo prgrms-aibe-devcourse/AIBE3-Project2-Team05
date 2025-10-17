@@ -126,6 +126,28 @@ export async function getAverageRating(targetFreelancerId: number) {
 }
 
 // ✅ 모든 리뷰 조회
-export async function getAllReviews() {
-  return fetchBase<ReviewResponse[]>("/api/reviews/all");
+export async function getAllReviews(): Promise<ReviewResponse[]> {
+  if (typeof window === "undefined") {
+    throw new Error("getAllReviews must be called from the client side only.");
+  }
+
+  // 토큰이 있으면 포함, 없으면 제외 (로그인/로그아웃 모두 지원)
+  const token =
+    localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+
+  const res = await fetch(`http://localhost:8080/api/reviews/all`, {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}), // 토큰이 있으면 포함
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`요청 실패 (${res.status}): ${text}`);
+  }
+
+  return res.json();
 }
