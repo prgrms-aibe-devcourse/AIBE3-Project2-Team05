@@ -15,12 +15,15 @@ public class ConversationDto {
     private final Long projectId;
     private final String projectTitle;
     private final Long freelancerId;
+    private final Long freelancerMemberId;
     private final String freelancerName;
     private final Long pmId;
     private final String pmName;
     private final String lastMessage;
     private final LocalDateTime lastMessageAt;
     private final int unreadCount;
+    private final String relatedType;
+    private final Long relatedId;
 
     /**
      * 메시지 리스트로부터 대화방 정보 생성
@@ -38,11 +41,14 @@ public class ConversationDto {
         this.projectId = latestMessage.getProject().getId();
         this.projectTitle = latestMessage.getProject().getTitle();
         this.freelancerId = latestMessage.getFreelancer().getId();
+        this.freelancerMemberId = latestMessage.getFreelancer().getMember().getId();
         this.freelancerName = latestMessage.getFreelancer().getMember().getNickname();
         this.pmId = latestMessage.getPm().getId();
         this.pmName = latestMessage.getPm().getNickname();
         this.lastMessage = latestMessage.getContent();
         this.lastMessageAt = latestMessage.getCreateDate();
+        this.relatedType = latestMessage.getRelatedType() != null ? latestMessage.getRelatedType().name() : null;
+        this.relatedId = latestMessage.getRelatedId();
 
         // 현재 사용자가 수신자인 읽지 않은 메시지 개수 계산
         this.unreadCount = (int) messages.stream()

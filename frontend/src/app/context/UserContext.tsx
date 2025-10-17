@@ -25,9 +25,11 @@ interface UserContextValue {
   username: string | null;
   memberId: number | null;
   roles: string[];
+  selectedRole: 'PM' | 'FREELANCER' | null;
   isLoading: boolean;
   isLoaded: boolean;
   setUsername: (name: string | null) => void;
+  setSelectedRole: (role: 'PM' | 'FREELANCER' | null) => void;
   login: (username: string, password: string) => Promise<string | undefined>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -106,6 +108,7 @@ const extractPayload = (raw: unknown): Record<string, unknown> | null => {
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<MemberDto | null>(null);
   const [roles, setRoles] = useState<string[]>([]);
+  const [selectedRole, setSelectedRoleState] = useState<'PM' | 'FREELANCER' | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
@@ -148,6 +151,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       if (!res.ok) {
         setUser(null);
         setRoles([]);
+        setSelectedRoleState(null);
         return;
       }
 
@@ -161,15 +165,27 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setUser(null);
         setRoles([]);
+        setSelectedRoleState(null);
       }
     } catch (error) {
       console.error("Failed to refresh user:", error);
       setUser(null);
       setRoles([]);
+      setSelectedRoleState(null);
     } finally {
       setIsLoading(false);
       setHasLoadedOnce(true);
     }
+  }, []);
+
+  const setSelectedRole = useCallback((role: 'PM' | 'FREELANCER' | null) => {
+    console.log('[UserContext] setSelectedRole called:', role);
+    if (role) {
+      localStorage.setItem('selectedRole', role);
+    } else {
+      localStorage.removeItem('selectedRole');
+    }
+    setSelectedRoleState(role);
   }, []);
 
   const login = useCallback(async (username: string, password: string) => {
@@ -211,8 +227,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error("Failed to logout:", error);
     } finally {
+      localStorage.removeItem('selectedRole');
       setUser(null);
       setRoles([]);
+      setSelectedRoleState(null);
       setIsLoading(false);
       setHasLoadedOnce(true);
     }
@@ -222,23 +240,72 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     void refreshUser();
   }, [refreshUser]);
 
+  // roles 변경 시 selectedRole 자동 설정
+  useEffect(() => {
+    console.log('[UserContext] useEffect triggered:', { user: !!user, roles, selectedRole });
+
+    if (!user || roles.length === 0) {
+      console.log('[UserContext] No user or roles, setting selectedRole to null');
+      setSelectedRoleState(null);
+      return;
+    }
+
+    const hasPm = roles.includes('PM');
+    const hasFreelancer = roles.includes('FREELANCER');
+
+    // 2개 역할 모두 보유
+    if (hasPm && hasFreelancer) {
+      const saved = localStorage.getItem('selectedRole');
+      console.log('[UserContext] Both roles, localStorage:', saved);
+      if (saved === 'PM' || saved === 'FREELANCER') {
+        console.log('[UserContext] Setting selectedRole from localStorage:', saved);
+        setSelectedRoleState(saved);
+      } else {
+        // localStorage에 저장된 값이 없으면 null로 유지 (페이지에서 모달 표시)
+        console.log('[UserContext] No saved role, keeping null for modal');
+        setSelectedRoleState(null);
+      }
+    } else if (hasPm) {
+      // PM만 보유
+      console.log('[UserContext] PM only, setting to PM');
+      setSelectedRoleState('PM');
+      localStorage.setItem('selectedRole', 'PM');
+    } else if (hasFreelancer) {
+      // FREELANCER만 보유
+      console.log('[UserContext] FREELANCER only, setting to FREELANCER');
+      setSelectedRoleState('FREELANCER');
+      localStorage.setItem('selectedRole', 'FREELANCER');
+    } else {
+      // 역할 없음
+      console.log('[UserContext] No valid roles, setting to null');
+      setSelectedRoleState(null);
+      localStorage.removeItem('selectedRole');
+    }
+  }, [user, roles]);
+
   const contextValue = useMemo<UserContextValue>(
     () => ({
       user,
       username: user?.username ?? null,
       memberId: user?.id ?? null,
       roles,
+      selectedRole,
       isLoading,
       isLoaded: hasLoadedOnce && !isLoading,
       setUsername,
+      setSelectedRole,
       login,
       logout,
       refreshUser,
     }),
-    [user, roles, isLoading, hasLoadedOnce, setUsername, login, logout, refreshUser]
+    [user, roles, selectedRole, isLoading, hasLoadedOnce, setUsername, setSelectedRole, login, logout, refreshUser]
   );
 
-  return <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>;
+  return (
+    <UserContext.Provider value={contextValue}>
+      {children}
+    </UserContext.Provider>
+  );
 };
 
 export const useUser = () => {

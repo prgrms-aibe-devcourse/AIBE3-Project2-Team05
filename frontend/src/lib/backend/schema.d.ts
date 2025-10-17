@@ -1360,6 +1360,8 @@ export interface components {
             projectTitle?: string;
             /** Format: int64 */
             freelancerId?: number;
+            /** Format: int64 */
+            freelancerMemberId?: number;
             freelancerName?: string;
             coverLetter?: string;
             /** Format: int32 */
@@ -1399,6 +1401,8 @@ export interface components {
             pmName?: string;
             /** Format: int64 */
             freelancerId?: number;
+            /** Format: int64 */
+            freelancerMemberId?: number;
             freelancerName?: string;
             message?: string;
             /** @enum {string} */
@@ -1439,6 +1443,8 @@ export interface components {
             pmName?: string;
             /** Format: int64 */
             freelancerId?: number;
+            /** Format: int64 */
+            freelancerMemberId?: number;
             freelancerName?: string;
             /** Format: int64 */
             senderId?: number;
@@ -1741,6 +1747,8 @@ export interface components {
             projectTitle?: string;
             /** Format: int64 */
             freelancerId?: number;
+            /** Format: int64 */
+            freelancerMemberId?: number;
             freelancerName?: string;
             /** Format: int64 */
             pmId?: number;
@@ -1750,6 +1758,9 @@ export interface components {
             lastMessageAt?: string;
             /** Format: int32 */
             unreadCount?: number;
+            relatedType?: string;
+            /** Format: int64 */
+            relatedId?: number;
             lastMessagePreview?: string;
         };
         RsDataListConversationDto: {
@@ -1788,6 +1799,7 @@ export interface components {
             skills?: components["schemas"]["FreelancerTechDto"][];
             /** Format: int64 */
             completedProjects?: number;
+            alreadyProposed?: boolean;
         };
         RecommendationResponseDto: {
             /** Format: int64 */
@@ -1866,14 +1878,14 @@ export interface components {
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["ProjectResponse"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            first?: boolean;
-            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
             pageable?: components["schemas"]["PageableObject"];
@@ -1883,17 +1895,17 @@ export interface components {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
+            unpaged?: boolean;
             paged?: boolean;
             /** Format: int32 */
-            pageSize?: number;
-            /** Format: int32 */
             pageNumber?: number;
-            unpaged?: boolean;
+            /** Format: int32 */
+            pageSize?: number;
         };
         SortObject: {
             empty?: boolean;
-            sorted?: boolean;
             unsorted?: boolean;
+            sorted?: boolean;
         };
         RsDataListLong: {
             resultCode?: string;

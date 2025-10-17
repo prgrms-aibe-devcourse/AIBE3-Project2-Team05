@@ -27,6 +27,24 @@ public interface ProjectSubmissionRepository extends JpaRepository<ProjectSubmis
     boolean existsByFreelancerAndProject(Freelancer freelancer, Project project);
 
     /**
+     * 프리랜서가 특정 프로젝트에 활성 지원(취소되지 않은)이 있는지 확인
+     * 취소된 지원은 제외하고 중복 체크
+     *
+     * @param freelancer 프리랜서
+     * @param project    프로젝트
+     * @return 활성 지원 여부
+     */
+    @Query("SELECT CASE WHEN COUNT(ps) > 0 THEN true ELSE false END " +
+           "FROM ProjectSubmission ps " +
+           "WHERE ps.freelancer = :freelancer " +
+           "AND ps.project = :project " +
+           "AND ps.cancelledAt IS NULL")
+    boolean existsActiveSubmissionByFreelancerAndProject(
+            @Param("freelancer") Freelancer freelancer,
+            @Param("project") Project project
+    );
+
+    /**
      * 프리랜서의 모든 지원 목록 조회 (최신순)
      *
      * @param freelancer 프리랜서

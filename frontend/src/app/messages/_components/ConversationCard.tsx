@@ -1,8 +1,6 @@
 'use client'
 
-import { memo } from 'react'
-import { Card } from '@/ui/card'
-import { Badge } from '@/ui/badge'
+import { memo, useState } from 'react'
 import type { Conversation } from '@/hooks/useConversations'
 
 interface ConversationCardProps {
@@ -16,6 +14,8 @@ export const ConversationCard = memo(function ConversationCard({
   currentUserRole,
   onClick
 }: ConversationCardProps) {
+  const [isHovered, setIsHovered] = useState(false)
+
   // 상대방 이름 (PM은 프리랜서를, 프리랜서는 PM을 봄)
   const otherPartyName = currentUserRole === 'PM'
     ? conversation.freelancerName
@@ -48,45 +48,126 @@ export const ConversationCard = memo(function ConversationCard({
   }
 
   return (
-    <Card
-      className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+    <div
       onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        background: isHovered ? '#f9fafb' : '#fff',
+        borderRadius: '12px',
+        border: '1px solid #e5e7eb',
+        padding: '16px',
+        cursor: 'pointer',
+        transition: 'background 0.2s, box-shadow 0.2s',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+      }}
     >
-      <div className="flex items-center gap-4">
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px'
+      }}>
         {/* 프로필 이미지 (원형) */}
-        <div className="flex-shrink-0">
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-lg font-semibold text-primary">
+        <div style={{ flexShrink: 0 }}>
+          <div style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            background: 'rgba(22, 163, 74, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <span style={{
+              fontSize: '18px',
+              fontWeight: 600,
+              color: '#16a34a'
+            }}>
               {otherPartyName.charAt(0)}
             </span>
           </div>
         </div>
 
         {/* 중간: 이름, 프로젝트명, 마지막 메시지 */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-base truncate">{otherPartyName}</h3>
+        <div style={{
+          flex: 1,
+          minWidth: 0,
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '4px'
+          }}>
+            <h3 style={{
+              fontWeight: 600,
+              fontSize: '16px',
+              color: '#111',
+              margin: 0,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}>
+              {otherPartyName}
+            </h3>
           </div>
-          <p className="text-sm text-muted-foreground truncate mb-1">
+          <p style={{
+            fontSize: '14px',
+            color: '#666',
+            margin: '0 0 4px 0',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}>
             {conversation.projectTitle}
           </p>
-          <p className="text-sm text-muted-foreground truncate">
+          <p style={{
+            fontSize: '14px',
+            color: '#666',
+            margin: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}>
             {lastMessagePreview}
           </p>
         </div>
 
         {/* 오른쪽: 시간, 읽지 않은 뱃지 */}
-        <div className="flex-shrink-0 flex flex-col items-end gap-2">
-          <span className="text-xs text-muted-foreground whitespace-nowrap">
+        <div style={{
+          flexShrink: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          gap: '8px'
+        }}>
+          <span style={{
+            fontSize: '12px',
+            color: '#666',
+            whiteSpace: 'nowrap'
+          }}>
             {getRelativeTime(conversation.lastMessageAt)}
           </span>
           {conversation.unreadCount > 0 && (
-            <Badge className="bg-destructive text-destructive-foreground rounded-full min-w-[20px] h-5 flex items-center justify-center px-2">
+            <div style={{
+              background: '#dc2626',
+              color: '#fff',
+              borderRadius: '50%',
+              minWidth: '20px',
+              height: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0 6px',
+              fontSize: '12px',
+              fontWeight: 600
+            }}>
               {conversation.unreadCount}
-            </Badge>
+            </div>
           )}
         </div>
       </div>
-    </Card>
+    </div>
   )
 })

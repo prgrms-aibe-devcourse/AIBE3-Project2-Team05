@@ -5,12 +5,15 @@ export interface Conversation {
   projectId: number
   projectTitle: string
   freelancerId: number
+  freelancerMemberId?: number  // 프리랜서의 회원 ID (백엔드 추가 대기)
   freelancerName: string
   pmId: number
   pmName: string
   lastMessage: string
   lastMessageAt: string
   unreadCount: number
+  relatedType?: string  // 메시지 연관 타입 (예: 'PROPOSAL', 'SUBMISSION', 'PROJECT')
+  relatedId?: number    // 메시지 연관 ID (백엔드 추가 대기)
 }
 
 export function useConversations() {

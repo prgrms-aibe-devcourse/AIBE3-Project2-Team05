@@ -118,10 +118,20 @@ public class MessageService {
         var freelancerOpt = freelancerRepository.findByMemberId(member.getId());
 
         if (freelancerOpt.isPresent()) {
-            // 프리랜서가 참여한 메시지 조회
-            return messageRepository.findByFreelancerOrderByCreateDateDesc(freelancerOpt.get());
+            // PM + FREELANCER 이중 역할: 양쪽 메시지 모두 조회
+            List<Message> pmMessages = messageRepository.findByPmOrderByCreateDateDesc(member);
+            List<Message> freelancerMessages = messageRepository.findByFreelancerOrderByCreateDateDesc(freelancerOpt.get());
+
+            // 두 리스트를 합치고 중복 제거 (Set 사용)
+            Set<Message> allMessages = new HashSet<>(pmMessages);
+            allMessages.addAll(freelancerMessages);
+
+            // 날짜 내림차순 정렬하여 반환
+            return allMessages.stream()
+                    .sorted((m1, m2) -> m2.getCreateDate().compareTo(m1.getCreateDate()))
+                    .collect(Collectors.toList());
         } else {
-            // PM이 참여한 메시지 조회
+            // PM 전용: PM이 참여한 메시지 조회
             return messageRepository.findByPmOrderByCreateDateDesc(member);
         }
     }
