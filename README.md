@@ -1,32 +1,36 @@
 # FIT (Freelancer In Talent)
 
 ## 🖼 팀 로고
+
 <img width="380" height="275" alt="팀 로고 전체" src="https://github.com/user-attachments/assets/f81e15d2-b588-4aaf-bf77-5a1961ac9795" />
 
 ---
 
 ## 🎯 프로젝트 기획 의도
+
 재능 있는 프리랜서를 찾고 싶은 개인/기업과  
 자신의 역량을 뽐낼 곳을 찾는 프리랜서를 매칭해 주기 위해 기획된 서비스입니다.
 
 ---
 
 ## ⏱ 프로젝트 기간
+
 2025-09-30 ~ 2025-10-17
 
 ---
 
 ## 👥 팀 구성
 
-| 이름       | 역할                   |
-|-----------|----------------------|
-| 주권영    | 프리랜서 시스템 담당   |
-| 윤주찬    | 매칭 시스템 담당       |
-| 임창기    | 회원(인증/인가) 담당   |
-| 노현정    | 리뷰 시스템 담당       |
-| 박세웅    | 프로젝트 시스템 담당   |
+| 이름   | 역할                 |
+| ------ | -------------------- |
+| 주권영 | 프리랜서 시스템 담당 |
+| 윤주찬 | 매칭 시스템 담당     |
+| 임창기 | 회원(인증/인가) 담당 |
+| 노현정 | 리뷰 시스템 담당     |
+| 박세웅 | 프로젝트 시스템 담당 |
 
 ## 📊 ERD
+
 ![ERD](https://velog.velcdn.com/images/yjc1116/post/115eb32a-8800-48cd-a765-6a4398fd1c23/image.png)
 [🖇️프로젝트 기획서](https://docs.google.com/document/d/1PD3yM3Cr9iM2A3SR_RuV55shsZZV8VNEI8OYdJPGR-g/edit?tab=t.0)
 [🗂️요구사항 명세서](https://docs.google.com/spreadsheets/d/1OK-HBNcrST9EQMIjLO1d9hLz0GUtSQX4-IckdACsfG4/edit?gid=0#gid=0)
@@ -34,6 +38,7 @@
 ---
 
 # 메인 화면
+
 <img width="1722" height="923" alt="image" src="https://github.com/user-attachments/assets/de99b45d-e074-4713-b745-c1e570165b36" />
 
 ---
@@ -107,30 +112,30 @@ backend/src/main/java/com/back/domain/member
         ├── 🟨 JwtBlacklistService.java       # 로그아웃 시 AccessToken 블랙리스트
         ├── 🟨 MemberRoleService.java         # 권한 관련 로직
         └── 🟨 MemberService.java             # 회원 조회, 비밀번호 변경, 토큰 검증 등 핵심 로직
-        
+
 
 ```
 
 ## 🗂️프론트 디렉토리 구조
 
 ```jsx
-🟦: 상태 관리/Context  
+🟦: 상태 관리/Context
 🟩: 회원 관련 페이지(UI)
-src  
-├── app  
-│   ├── context  
-│   │   └── UserContext.tsx ― 🟦 상태 관리/Context  
-│   └── members  
-│       ├── findid  
-│       │   └── page.tsx ― 🟩 아이디 찾기 페이지  
-│       ├── login  
-│       │   └── page.tsx ― 🟩 로그인 페이지  
-│       ├── mypage  
-│       │   └── page.tsx ― 🟩 마이페이지  
-│       ├── signup  
-│       │   └── page.tsx ― 🟩 회원가입 페이지  
-│       └── updatePassword  
-│           └── page.tsx ― 🟩 비밀번호 변경 페이지  
+src
+├── app
+│   ├── context
+│   │   └── UserContext.tsx ― 🟦 상태 관리/Context
+│   └── members
+│       ├── findid
+│       │   └── page.tsx ― 🟩 아이디 찾기 페이지
+│       ├── login
+│       │   └── page.tsx ― 🟩 로그인 페이지
+│       ├── mypage
+│       │   └── page.tsx ― 🟩 마이페이지
+│       ├── signup
+│       │   └── page.tsx ― 🟩 회원가입 페이지
+│       └── updatePassword
+│           └── page.tsx ― 🟩 비밀번호 변경 페이지
 
 ```
 
@@ -160,6 +165,7 @@ src
   - 프로젝트와 포트폴리오가 모두 있는 경우 자동 부여
 - **재부여 규칙**
   - 프로젝트와 포트폴리오가 모두 없는 경우 **GENERAL**로 자동 변경
+
 ---
 
 ## 2. 아이디 찾기 / 비밀번호 재설정
@@ -180,6 +186,7 @@ src
 - 사용자가 인증 코드 입력 → 검증
 - 인증 성공 시 새로운 비밀번호 입력 → DB 업데이트
 - 인증/변경 완료 후 사용자에게 성공 메시지 반환
+
 ---
 
 ## 3. 마이페이지
@@ -194,8 +201,8 @@ src
   - 포트폴리오 버튼 클릭 → 포트폴리오 관리 마이페이지로 이동
 - PM + FREELANCER 모두 보유 시:
   - 각각의 버튼 클릭 시 해당 권한에 맞는 페이지로 매핑
----
 
+---
 
 # FIT 매칭 시스템 기능 정리
 
@@ -209,6 +216,7 @@ src
 ## 🗂️ 시스템 구조
 
 ### 백엔드
+
 ```
 domain/matching
 ├── matchScore         # 매칭 점수 계산
@@ -218,6 +226,7 @@ domain/matching
 ```
 
 ### 프론트엔드
+
 ```
 app
 ├── matching           # 매칭 대시보드
@@ -238,11 +247,11 @@ app
 
 #### 스킬 점수 (50점)
 
-| 숙련도 | 가중치 |
-|--------|--------|
-| ADVANCED | 1.0 |
-| INTERMEDIATE | 0.7 |
-| BEGINNER | 0.4 |
+| 숙련도       | 가중치 |
+| ------------ | ------ |
+| ADVANCED     | 1.0    |
+| INTERMEDIATE | 0.7    |
+| BEGINNER     | 0.4    |
 
 ```
 매칭률 = (Σ 숙련도 가중치) / 요구 기술 수
@@ -259,24 +268,26 @@ app
 
 #### 단가 점수 (20점)
 
-| 조건 | 점수 |
-|------|------|
-| 범위 내 | 20점 |
-| 최대 초과 | 15점 |
+| 조건          | 점수 |
+| ------------- | ---- |
+| 범위 내       | 20점 |
+| 최대 초과     | 15점 |
 | 최소×0.8 이상 | 10점 |
-| 최소×0.6 이상 | 5점 |
-| 미만 | 0점 |
+| 최소×0.6 이상 | 5점  |
+| 미만          | 0점  |
 
 ---
 
 ### 2️⃣ 양방향 제안 시스템
 
 #### 프리랜서 지원
+
 ```
 지원서 작성 → PENDING → PM 검토 → ACCEPTED/REJECTED
 ```
 
 #### PM 제안
+
 ```
 제안 전송 → PENDING → 프리랜서 검토 → ACCEPTED/REJECTED/CANCELLED
 ```
@@ -286,11 +297,13 @@ app
 ## 사용 흐름
 
 ### PM 흐름
+
 ```
 프로젝트 등록 → 매칭 결과 조회 → 제안/지원 받기 → 메시지 → 계약
 ```
 
 ### 프리랜서 흐름
+
 ```
 프로필 등록 → 매칭 조회 → 지원/제안 받기 → 메시지 → 프로젝트 수행
 ```
@@ -334,6 +347,7 @@ Project ─ MatchScore
 ```
 
 **핵심 테이블:**
+
 - `match_score`: 총점, 스킬, 경력, 단가 점수, 순위
 - `project_submission`: PENDING → ACCEPTED/REJECTED
 - `proposal`: PENDING → ACCEPTED/REJECTED/CANCELLED
@@ -343,14 +357,17 @@ Project ─ MatchScore
 ## 주요 문제 해결
 
 ### 🐛 Infinite Loading
+
 - **원인:** API 응답 구조 불일치
 - **해결:** UserContext의 roles 배열로 통일
 
 ### 🐛 TechLevel.EXPERT Enum 오류
+
 - **원인:** 3단계 Enum에 EXPERT(4단계) 데이터 존재
 - **해결:** EXPERT → ADVANCED 변경, 가중치 3단계로 통일
 
 ### 💡 역할 다중 보유 UX 개선
+
 - **해결:** 역할 선택 모달 + sessionStorage 저장
 
 ---
@@ -455,11 +472,11 @@ backend/src/main/java/com/back/global/util
 ### **모집 유형**
 
 - **PROJECT_CONTRACT** (프로젝트 단위 계약/외주)
-    - 프로젝트 전체를 외주로 진행
-    - 결과물 중심의 계약
+  - 프로젝트 전체를 외주로 진행
+  - 결과물 중심의 계약
 - **PERSONAL_CONTRACT** (개인 인력의 기간/시간제 계약/상주)
-    - 개인 단위 인력 채용
-    - 시간 또는 기간 기반 계약
+  - 개인 단위 인력 채용
+  - 시간 또는 기간 기반 계약
 
 ---
 
@@ -599,5 +616,157 @@ graph TD
 - `DELETE /api/projects/{id}/favorites` - 즐겨찾기 제거
 - `POST /api/projects/{id}/files` - 파일 업로드
 - `DELETE /api/projects/files/{fileId}` - 파일 삭제
+
+---
+
+# 🧑‍💻 프리랜서 기능 정리
+
+## 🗂️백엔드 디렉토리 구조
+
+```jsx
+🟦 Controller: API 요청/응답 처리
+🟩 DTO: 요청/응답 데이터 구조
+🟪 Entity: DB 테이블 매핑
+🟫 Repository: DB 접근
+🟨 Service: 비즈니스 로직
+
+backend/src/main/java/com/back/domain/freelancer
+├── career
+│   ├── controller
+│   │   └── 🟦 CareerController.java             # 경력 관련 API
+│   ├── dto
+│   │   ├── 🟩 CareerRequestDto.java             # 경력 생성/수정 요청 DTO
+│   │   └── 🟩 CareerResponseDto.java            # 경력 응답 DTO
+│   ├── entity
+│   │   └── 🟪 Career.java                       # 경력 엔티티
+│   ├── repository
+│   │   └── 🟫 CareerRepository.java             # 경력 DB 접근
+│   └── service
+│       └── 🟨 CareerService.java                # 경력 서비스
+├── freelancer
+│   ├── controller
+│   │   └── 🟦 FreelancerController.java         # 프리랜서 관련 API
+│   ├── dto
+│   │   ├── 🟩 FreelancerDetailResponseDto.java  # 프리랜서 세부 조회 응답 DTO
+│   │   ├── 🟩 FreelancerDto.java                # 프리랜서 생성 시 응답 DTO
+│   │   ├── 🟩 FreelancerListResponseDto.java    # 프리랜서 목록 조회 응답 DTO
+│   │   ├── 🟩 FreelancerSaveRequestDto.java     # 프리랜서 생성 요청 DTO
+│   │   └── 🟩 FreelancerUpdateRequestDto.java   # 프리랜서 수정 요청 DTO
+│   ├── entity
+│   │   └── 🟪 Freelancer.java                   # 프리랜서 엔티티
+│   ├── repository
+│   │   └── 🟫 FreelancerRepository.java         # 프리랜서 DB 접근
+│   └── service
+│       ├── 🟨 FreelancerFinder.java             # 프리랜서 조회 전용 서비스
+│       └── 🟨 FreelancerService.java            # 프리랜서 CRUD 서비스
+├── freelancerTech
+│   ├── controller
+│   │   └── 🟦 FreelancerTechController.java     # 기술스택 관련 API
+│   ├── dto
+│   │   ├── 🟩 FreelancerTechAddDto.java         # 기술스택 생성 요청 DTO
+│   │   ├── 🟩 FreelancerTechDto.java            # 기술스택 생성 시 응답 DTO
+│   │   └── 🟩 FreelancerTechUpdateDto.java      # 기술스택 수정 요청 DTO
+│   ├── entity
+│   │   ├── 🟪 FreelancerTech.java               # 프리랜서 기술스택 엔티티
+│   │   └── 🟪 TechLevel.java                    # 기술스택 숙련도 Enum
+│   ├── repository
+│   │   └── 🟫 FreelancerTechRepository.java     # 기술스택 DB 접근
+│   └── service
+│       └── 🟨 FreelancerTechService.java        # 기술스택 CRUD 서비스
+└── portfolio
+    ├── controller
+    │   └── 🟦 PortfolioController.java          # 포트폴리오 관련 API
+    ├── dto
+    │   ├── 🟩 PortfolioResponseDto.java         # 포트폴리오 응답 DTO
+    │   ├── 🟩 PortfolioSaveRequestDto.java      # 포트폴리오 생성 요청 DTO
+    │   └── 🟩 PortfolioUpdateRequestDto.java    # 포트폴리오 수정 요청 DTO
+    ├── entity
+    │   └── 🟪 Portfolio.java                    # 포트폴리오 엔티티
+    ├── repository
+    │   └── 🟫 PortfolioRepository.java          # 포트폴리오 DB 접근
+    └── service
+        └── 🟨 PortfolioService.java             # 포트폴리오 서비스
+
+backend/src/main/java/com/back/global/fileStorage
+├── FileStorageService.java                      # 이미지 처리 담당 서비스
+└── FileType.java                                # 이미지 구분 Enum
+```
+
+---
+
+## 🗂️프론트 디렉토리 구조
+
+```jsx
+🟦: 상태 관리/Context
+🟩: 페이지(UI)
+
+src/app/freelancers
+├── [id]
+│   ├── page.tsx            # 프리랜서 세부 페이지
+│   └── update
+│       └── page.tsx        # 프리랜서 수정 페이지
+├── mypage
+│   └── page.tsx            # 프리랜서 마이페이지
+├── page.tsx                # 프리랜서 전체 목록 페이지
+├── portfolios
+│   ├── [id]
+│   │   └── update
+│   │       └── page.tsx    # 포트폴리오 수정 페이지
+│   └── write
+│       └── page.tsx        # 포트폴리오 작성 페이지
+└── write
+    └── page.tsx            # 프리랜서 등록 페이지
+```
+
+---
+
+## 🛠️ 주요 기능
+
+### 1. 프리랜서 등록 및 관리
+
+- 인증정보를 통해 member 엔티티와 1:1 매핑
+  - 로그인 사용자만 등록 가능
+- 프리랜서 등록 : 프로필 이미지, 소개 제목, 지역, 분야, 소개글, 상주 가능여부, 월 단가 등 기입
+- 수정, 삭제 기능
+  - 삭제 시 외래키로 참조하고 있는 모든 필드(포트폴리오, 경력, 기술스택) 삭제
+- 이미지 파일 미첨부 시 null / 프론트에서 기본 이미지 로드
+
+### 2. 포트폴리오 생성 및 관리
+
+- 프리랜서와 1:N 매핑
+- 포트폴리오 등록 : 대표이미지, 설명, 기간, 기여도, 외부링크 기입
+- 수정, 삭제 기능
+
+### 3. 경력 생성 및 관리
+
+- 프리랜서와 1:N 매핑
+- 생성, 수정, 삭제 기능
+- freelancer의 CareerList로 조회
+
+### 4. 기술스택
+
+- freelancer와 tech의 N:M 매핑 테이블 생성 [FreelancerTech]
+- techLevel(Enum) 을 통한 숙련도 구분
+- 기술스택 추가 기능
+  1. tech DB에서 가용한 기능 검색
+  2. 추가할 기능 선택
+  3. techLevel 지정 후 등록
+- 삭제 기능
+
+### 5. 이미지 파일 처리
+
+- 이미지 저장, 수정, 삭제
+  - `FileStorageService` 로 Bean 등록
+  - FileType(Enum)을 통한 이미지 저장 경로 설정
+    - Type만 추가하면 어떤 이미지 처리 로직에서도 활용 가능
+- 이미지 조회
+  - `WebMvcConfigurer` 의 `addResourceHandlers` 오버라이드 함수로 DB 경로 조회
+
+### 6. 프리랜서 조회, 검색
+
+- 등록된 전체 프리랜서 조회
+- 필터링 옵션 : 유형(기획, 디자인, 개발), 지역, 상주 가능 여부
+- 검색 기능 : 유저네임, 프리랜서 타이틀, 소개, 기술스택에서 검색
+- 프로젝트 버튼 클릭 → 프로젝트 관리 페이지로 이동
 
 ---
