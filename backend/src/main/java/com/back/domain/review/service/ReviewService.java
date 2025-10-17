@@ -2,6 +2,7 @@ package com.back.domain.review.service;
 
 import com.back.domain.freelancer.freelancer.entity.Freelancer;
 import com.back.domain.freelancer.freelancer.repository.FreelancerRepository;
+import com.back.domain.freelancer.freelancer.service.FreelancerFinder;
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.repository.MemberRepository;
 import com.back.domain.review.dto.ReviewRequestDto;
@@ -25,6 +26,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final MemberRepository memberRepository;
     private final FreelancerRepository freelancerRepository;
+    private final FreelancerFinder freelancerFinder;
 
     /** 리뷰 생성 */
     public ReviewResponseDto createReview(Long authorId, ReviewRequestDto dto) {
@@ -104,6 +106,18 @@ public class ReviewService {
     /** 특정 대상자의 리뷰 목록 조회 */
     @Transactional(readOnly = true)
     public List<ReviewResponseDto> getReviewsByTarget(Long targetUserId) {
+        return reviewRepository
+                .findByTargetUser_IdAndDeletedFalseOrderByCreatedAtDesc(targetUserId)
+                .stream()
+                .map(ReviewResponseDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<ReviewResponseDto> getReviewsByFreelancerId(Long freelancerId) {
+        Freelancer freelancer = freelancerFinder.findFreelancerById(freelancerId);
+        Long targetUserId = freelancer.getMember().getId();
+
         return reviewRepository
                 .findByTargetUser_IdAndDeletedFalseOrderByCreatedAtDesc(targetUserId)
                 .stream()

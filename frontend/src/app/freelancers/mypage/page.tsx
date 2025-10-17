@@ -75,21 +75,40 @@ export default function FreelancerMyPage() {
   useEffect(() => {
     const fetchAllData = async () => {
       try {
-        const freelancerPromise = fetch(
+        const freelancerRes = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me`,
           { method: "GET", credentials: "include" }
-        ).then((res) => res.json());
+        );
+        const freelancerData = await freelancerRes.json();
+
         const portfolioPromise = fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/freelancers/me/portfolios`,
           { method: "GET", credentials: "include" }
         ).then((res) => res.json());
-        // 리뷰, 완료프로젝트 API가 있다면 여기에 추가
-        const [freelancerData, portfolioData] = await Promise.all([
-          freelancerPromise,
-          portfolioPromise,
-        ]);
+
         setFreelancer(freelancerData);
+
+        // fetch portfolios in parallel with reviews (reviews require freelancer id)
+        const [portfolioData, reviewData] = await Promise.all([
+          portfolioPromise,
+          (async () => {
+            try {
+              if (!freelancerData || !freelancerData.id) return [];
+              const res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/reviews/${freelancerData.id}`,
+                { method: "GET", credentials: "include" }
+              );
+              if (!res.ok) return [];
+              return res.json();
+            } catch (e) {
+              console.error("리뷰 불러오기 실패:", e);
+              return [];
+            }
+          })(),
+        ]);
+
         setPortfolios(portfolioData || []);
+        setReviews(reviewData || []);
       } catch (err) {
         console.error("API 호출 중 오류 발생:", err);
       }
