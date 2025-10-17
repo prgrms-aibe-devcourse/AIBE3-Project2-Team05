@@ -178,67 +178,87 @@ export default function MyPage() {
                   </div>
                   <span className="text-[#8B8577] text-lg">→</span>
                 </div>
+
+                {/* 내 리뷰 */}
+                <div
+                  className="flex items-start gap-4 border border-[#E8E3D9] rounded-[10px] hover:bg-[#FBFAF7] transition cursor-pointer"
+                  style={{ padding: "1.5rem" }}
+                  onClick={() => window.location.href = `/reviewlist/${memberId}`}
+                >
+                  <div className="w-10 h-10 bg-[#FF6B2C] rounded-lg flex items-center justify-center flex-shrink-0" style={{ marginTop: "8px", marginRight: "0.5rem" }}>
+                    <Image src="/review.png" alt="review icon" width={25} height={25} />
+                  </div>
+                  <div className="flex flex-col flex-1">
+                    <h3 className="text-[#1E1B16] font-semibold text-[13px]" style={{ marginBottom: "0.5rem" }}>
+                      내 리뷰
+                    </h3>
+                    <p className="text-[#6A6558] text-[12px] leading-snug">
+                      받은 리뷰와 평가를 확인하고 관리하세요
+                    </p>
+                  </div>
+                  <span className="text-[#8B8577] text-lg">→</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
- {/* 권한 없을 때 모달 */}
-{modalType && (
-  <div className="fixed inset-0 z-[9999] flex items-center justify-center">
-    <div
-      style={{
-        backgroundColor: "white",
-        position: "relative",
-        padding: "24px",
-        borderRadius: "12px",
-        boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
-        width: "380px",
-        textAlign: "center",
-      }}
-    >
-      {/* 닫기 X 버튼 */}
-      <button
-        onClick={() => setModalType(null)}
-        style={{
-          position: "absolute",
-          top: "10px",
-          right: "14px",
-          background: "none",
-          border: "none",
-          color: "#6b6b6b",
-          fontSize: "22px",
-          fontWeight: "bold",
-          lineHeight: "1",
-          cursor: "pointer",
-        }}
-        aria-label="닫기"
-      >
-        ×
-      </button>
+      {/* 권한 없을 때 모달 */}
+      {modalType && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+          <div
+            style={{
+              backgroundColor: "white",
+              position: "relative",
+              padding: "24px",
+              borderRadius: "12px",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+              width: "380px",
+              textAlign: "center",
+            }}
+          >
+            {/* 닫기 X 버튼 */}
+            <button
+              onClick={() => setModalType(null)}
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "14px",
+                background: "none",
+                border: "none",
+                color: "#6b6b6b",
+                fontSize: "22px",
+                fontWeight: "bold",
+                lineHeight: "1",
+                cursor: "pointer",
+              }}
+              aria-label="닫기"
+            >
+              ×
+            </button>
 
-      <p className="text-[18px] text-gray-900 mb-4 mt-2">
-  {modalType === "project" ? "아직 프로젝트가 없어요" : "아직 포트폴리오가 없어요"}
-      </p>
+            <p className="text-[18px] text-gray-900 mb-4 mt-2">
+              {modalType === "project" ? "아직 프로젝트가 없어요" : "아직 포트폴리오가 없어요"}
+            </p>
 
-       <button
-        onClick={handleModalCreate}
-        style={{
-          background: "none",
-          border: "none",
-          color: "#16a34a",
-          fontSize: "15px",
-          cursor: "pointer",
-          textDecoration: "underline",
-          padding: "8px 0",
-        }}
-      >
-        생성하러 가기
-      </button>
-    </div>
-  </div>
-)}
+            <button
+              onClick={handleModalCreate}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#16a34a",
+                fontSize: "15px",
+                cursor: "pointer",
+                textDecoration: "underline",
+                padding: "8px 0",
+              }}
+            >
+              생성하러 가기
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );

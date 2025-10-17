@@ -1866,8 +1866,6 @@ export interface components {
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
-            first?: boolean;
-            last?: boolean;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["ProjectResponse"][];
@@ -1876,6 +1874,8 @@ export interface components {
             sort?: components["schemas"]["SortObject"];
             /** Format: int32 */
             numberOfElements?: number;
+            first?: boolean;
+            last?: boolean;
             pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
@@ -1883,11 +1883,11 @@ export interface components {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
-            paged?: boolean;
             /** Format: int32 */
             pageNumber?: number;
             /** Format: int32 */
             pageSize?: number;
+            paged?: boolean;
             unpaged?: boolean;
         };
         SortObject: {

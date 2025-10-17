@@ -3,6 +3,7 @@
 import { useUser } from '@/app/context/UserContext';
 import { apiFetch } from '@/lib/backend/client';
 import { useEffect, useMemo, useState } from "react";
+import { getAllReviews } from "@/lib/reviewApi";
 
 // 이미지 처리 함수 (API에서 오는 상대 경로 또는 public 폴더 경로를 안전하게 처리)
 function fullImageUrl(url?: string) {
@@ -22,12 +23,37 @@ export default function HomePage() {
   // 회전하는 텍스트를 위한 상태 (부드러운 슬라이드로 변경)
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const rotatingTexts = ["프리랜서", "프로젝트", "전문 매칭"];
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+
 
   useEffect(() => {
       apiFetch("/api/v1/freelancers")
         .then(setFreelancers)
         .catch(e => setError("데이터를 불러오지 못했습니다."))
     }, []);
+
+    // 리뷰 데이터 가져오기
+    useEffect(() => {
+      const fetchReviews = async () => {
+        try {
+          const data = await getAllReviews();
+          // 최신 3개만 표시 (평점 높은 순으로 정렬)
+          const topReviews = data
+            .sort((a, b) => b.rating - a.rating)
+            .slice(0, 3);
+          setReviews(topReviews);
+          setReviewsLoading(false);
+        } catch (error) {
+          console.error('리뷰 로딩 실패:', error);
+          setReviews([]);
+          setReviewsLoading(false);
+        }
+      };
+
+      fetchReviews();
+    }, []);
+
 
   // 프로젝트 카드 클릭 핸들러
   const handleProjectClick = (projectId: number) => {
@@ -242,6 +268,11 @@ function FreelancerMarquee({ profiles }: { profiles: Profile[] }) {
     </div>
   );
 }
+ // 별점 렌더링 함수
+    const renderStars = (rating) => {
+      return '⭐'.repeat(rating);
+    };
+
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--background)" }}>
@@ -621,148 +652,216 @@ function FreelancerMarquee({ profiles }: { profiles: Profile[] }) {
         </section>
 
         {/* 고객 이용후기 섹션 */}
-        <section className="px-4 md:px-8 lg:px-12" style={{
-          backgroundColor: "var(--background)",
-          paddingTop: '80px',
-          paddingBottom: '80px'
-        }}>
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16" style={{ marginBottom: '64px' }}>
-              <h2 className="text-4xl font-bold text-gray-900 mb-6" style={{
-                fontSize: 'clamp(2.25rem, 4vw, 2.75rem)',
-                fontWeight: '800',
-                color: '#111827',
-                marginBottom: '24px'
-              }}>
-                고객 <span style={{
-                  color: '#16a34a',
-                  background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}>이용후기</span>
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '40px' }}>
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-500 ease-out cursor-pointer" style={{
-                backgroundColor: 'white',
-                borderRadius: '20px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                border: '1px solid #e5e7eb',
-                padding: '32px',
-                transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
-              }}>
-                <div className="mb-4" style={{ marginBottom: '16px' }}>
-                  <p className="text-gray-700 mb-4" style={{ color: '#374151', marginBottom: '16px', lineHeight: '1.6' }}>
-                    &ldquo;좋은 파트너를 만났습니다. 컨설팅 기간 동안 디자인 전체 과정을 체계적으로 습득할 수 있었고, 사업자 입장에서 알맞은 디자인 작업을 진행, 상담하며 체크사 의견도 잘 수렴 하셨습니다.&rdquo;
-                  </p>
-                  <div className="flex items-center mb-2" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                    <div className="flex text-yellow-500 mr-2" style={{ display: 'flex', color: '#eab308', marginRight: '8px' }}>
-                      ⭐⭐⭐⭐⭐
-                    </div>
-                    <span className="text-sm text-gray-600" style={{ fontSize: '14px', color: '#6b7280' }}>5.0</span>
-                  </div>
-                  <div className="text-right text-sm text-gray-500" style={{ textAlign: 'right', fontSize: '14px', color: '#6b7280' }}>
-                    벤츠로
-                  </div>
-                </div>
-                <div className="w-full h-48 bg-gray-200 rounded-lg" style={{
-                  width: '100%',
-                  height: '192px',
-                  backgroundColor: '#e5e7eb',
-                  borderRadius: '8px',
-                  backgroundImage: 'linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%)',
-                  backgroundSize: '20px 20px',
-                  backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px'                }}>
-                </div>
+          <section style={{
+            backgroundColor: '#f8f4eb',
+            paddingTop: '80px',
+            paddingBottom: '80px',
+            paddingLeft: '48px',
+            paddingRight: '48px'
+          }}>
+            <div style={{ maxWidth: '1152px', margin: '0 auto' }}>
+              <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+                <h2 style={{
+                  fontSize: 'clamp(2.25rem, 4vw, 2.75rem)',
+                  fontWeight: '800',
+                  color: '#111827',
+                  marginBottom: '24px'
+                }}>
+                  고객 <span style={{
+                    color: '#16a34a',
+                    background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
+                  }}>이용후기</span>
+                </h2>
+                <p style={{
+                  color: '#6b7280',
+                  fontSize: 'clamp(1.25rem, 2.5vw, 1.5rem)',
+                  lineHeight: '1.7'
+                }}>
+                  실제 사용자들의 생생한 후기를 확인해보세요.
+                </p>
               </div>
 
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-500 ease-out cursor-pointer" style={{
-                backgroundColor: 'white',
-                borderRadius: '20px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                border: '1px solid #e5e7eb',
-                padding: '32px',
-                transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
-              }}>
-                <div className="mb-4" style={{ marginBottom: '16px' }}>
-                  <p className="text-gray-700 mb-4" style={{ color: '#374151', marginBottom: '16px', lineHeight: '1.6' }}>
-                    &ldquo;컵찬하고 진청한 바우처 프리랜서를 만나 대화와 조우 과정이 값지고 짜임새있게 학무착했습니다. 상필적 이해관계를 더 질시 과정중에 머무르지 않고 혼시단계별로 질서정연한 참금을 할 수 있었습니다.&rdquo;
-                  </p>
-                  <div className="flex items-center mb-2" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                    <div className="flex text-yellow-500 mr-2" style={{ display: 'flex', color: '#eab308', marginRight: '8px' }}>
-                      ⭐⭐⭐⭐⭐
-                    </div>
-                    <span className="text-sm text-gray-600" style={{ fontSize: '14px', color: '#6b7280' }}>5.0</span>
-                  </div>
-                  <div className="text-right text-sm text-gray-500" style={{ textAlign: 'right', fontSize: '14px', color: '#6b7280' }}>
-                    플젤시스
-                  </div>
-                </div>
-                <div className="w-full h-48 bg-gray-200 rounded-lg" style={{
-                  width: '100%',
-                  height: '192px',
-                  backgroundColor: '#e5e7eb',
-                  borderRadius: '8px',
-                  backgroundImage: 'linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%)',
-                  backgroundSize: '20px 20px',
-                  backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px'
+              {reviewsLoading ? (
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  padding: '80px 0'
                 }}>
+                  <div style={{
+                    width: '60px',
+                    height: '60px',
+                    border: '4px solid #e5e7eb',
+                    borderTop: '4px solid #16a34a',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }}></div>
+                  <style>{`
+                    @keyframes spin {
+                      0% { transform: rotate(0deg); }
+                      100% { transform: rotate(360deg); }
+                    }
+                  `}</style>
                 </div>
-              </div>
+              ) : reviews.length === 0 ? (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '80px 0',
+                  backgroundColor: 'white',
+                  borderRadius: '20px',
+                  border: '1px solid #e5e7eb'
+                }}>
+                  <div style={{ fontSize: '80px', marginBottom: '24px' }}>📭</div>
+                  <p style={{
+                    fontSize: '20px',
+                    color: '#6b7280',
+                    fontWeight: '600'
+                  }}>
+                    아직 등록된 리뷰가 없습니다.
+                  </p>
+                </div>
+              ) : (
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+                  gap: '40px'
+                }}>
+                  {reviews.map((review) => (
+                    <div 
+                      key={review.id}
+                      style={{
+                        backgroundColor: 'white',
+                        borderRadius: '20px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                        border: '1px solid #e5e7eb',
+                        padding: '32px',
+                        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                        cursor: 'pointer'
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                        e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+                      }}
+                    >
+                      <div style={{ marginBottom: '20px' }}>
+                        {/* 별점 */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          marginBottom: '12px',
+                          gap: '8px'
+                        }}>
+                          <div style={{
+                            fontSize: '20px',
+                            color: '#eab308'
+                          }}>
+                            {renderStars(review.rating)}
+                          </div>
+                          <span style={{
+                            fontSize: '18px',
+                            fontWeight: '700',
+                            color: '#eab308'
+                          }}>
+                            {review.rating}.0
+                          </span>
+                        </div>
 
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-500 ease-out cursor-pointer" style={{
-                backgroundColor: 'white',
-                borderRadius: '20px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                border: '1px solid #e5e7eb',
-                padding: '32px',
-                transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
-              }}>
-                <div className="mb-4" style={{ marginBottom: '16px' }}>
-                  <p className="text-gray-700 mb-4" style={{ color: '#374151', marginBottom: '16px', lineHeight: '1.6' }}>
-                    &ldquo;파트너사 찾기가 쉽지 않았는데 프리모아 덕분에 좋은 업체들을 추천 받고 비교할 수 있어서 많은 도움이 되었습니다. 저희 브랜드에 가장 핏한 파트너를 찾을 수 있었습니다.&rdquo;
-                  </p>
-                  <div className="flex items-center mb-2" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                    <div className="flex text-yellow-500 mr-2" style={{ display: 'flex', color: '#eab308', marginRight: '8px' }}>
-                      ⭐⭐⭐⭐⭐
+                        {/* 제목 */}
+                        <h3 style={{
+                          fontSize: '20px',
+                          fontWeight: '700',
+                          color: '#111827',
+                          marginBottom: '16px',
+                          lineHeight: '1.4'
+                        }}>
+                          {review.title}
+                        </h3>
+
+                        {/* 내용 */}
+                        <p style={{
+                          color: '#374151',
+                          fontSize: '15px',
+                          lineHeight: '1.7',
+                          marginBottom: '20px',
+                          minHeight: '84px'
+                        }}>
+                          "{review.content}"
+                        </p>
+
+                        {/* 작성자 정보 */}
+                        <div style={{
+                          paddingTop: '16px',
+                          borderTop: '1px solid #e5e7eb',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
+                        }}>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            fontSize: '14px'
+                          }}>
+                            <span>👤</span>
+                            <span style={{
+                              fontWeight: '600',
+                              color: '#374151'
+                            }}>
+                              {review.authorNickname || `User #${review.id}`}
+                            </span>
+                          </div>
+                          <span style={{
+                            fontSize: '13px',
+                            color: '#6b7280'
+                          }}>
+                            {new Date(review.createdAt).toLocaleDateString("ko-KR")}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <span className="text-sm text-gray-600" style={{ fontSize: '14px', color: '#6b7280' }}>4.9</span>
-                  </div>
-                  <div className="text-right text-sm text-gray-500" style={{ textAlign: 'right', fontSize: '14px', color: '#6b7280' }}>
-                    디자인연구소
-                  </div>
+                  ))}
                 </div>
-                <div className="w-full h-48 bg-gray-200 rounded-lg" style={{
-                  width: '100%',
-                  height: '192px',
-                  backgroundColor: '#e5e7eb',
-                  borderRadius: '8px',
-                  backgroundImage: 'linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%)',
-                  backgroundSize: '20px 20px',
-                  backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px'
-                }}>
+              )}
+
+              {!reviewsLoading && reviews.length > 0 && (
+                <div style={{ textAlign: 'center', marginTop: '64px' }}>
+                  <button 
+                    style={{
+                      padding: '12px 24px',
+                      backgroundColor: '#16a34a',
+                      color: 'white',
+                      borderRadius: '12px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                      e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1)';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+                    }}
+                    onClick={() => window.location.href = '/reviewlist'}
+                  >
+                    전체보기 →
+                  </button>
                 </div>
-              </div>
+              )}
             </div>
-            <div className="text-center mt-16" style={{ marginTop: '64px' }}>
-              <button className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 hover:transform hover:scale-105 transition-all duration-300 ease-out shadow-lg hover:shadow-xl font-semibold text-base" style={{
-                padding: '12px 24px',
-                backgroundColor: '#16a34a',
-                color: 'white',
-                borderRadius: '12px',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                fontSize: '16px',
-                fontWeight: '600',
-                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
-              }}>
-                전체보기 →
-              </button>
-            </div>
-          </div>
-        </section>
+          </section>
+
         {/* 통계 섹션 */}
         <section className="px-4 md:px-8 lg:px-12" style={{
           backgroundColor: "var(--background)",
@@ -838,4 +937,3 @@ function setLoading(arg0: boolean): void {
 function setError(arg0: string): any {
   throw new Error('Function not implemented.');
 }
-

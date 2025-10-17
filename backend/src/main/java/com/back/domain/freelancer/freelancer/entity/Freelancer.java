@@ -42,13 +42,6 @@ public class Freelancer extends BaseEntity {
     private int favoritesCount;  //비정규화
     private int completedProjectsCount; //비정규화
 
-    // ✅ 프리랜서 평균 평점 캐싱용 필드
-    private Double averageRating = 0.0;
-
-    // ✅ 리뷰 수 (평균 계산시 분모)
-    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
-    private Integer reviewCount = 0;
-
     @OneToMany(mappedBy = "freelancer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Portfolio> portfolioList = new ArrayList<>();
 

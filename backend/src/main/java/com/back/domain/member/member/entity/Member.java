@@ -28,7 +28,12 @@ public class Member extends BaseEntity {
     @Column(unique = true)
     private String email;
 
-    @ElementCollection(fetch = FetchType.LAZY)
+    @ElementCollection(fetch = FetchType.LAZY, targetClass = Role.class)
+    @CollectionTable(
+            name = "member_roles",
+            joinColumns = @JoinColumn(name = "member_id")
+    )
+    @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     private List<Role> roles = new ArrayList<>();
 
