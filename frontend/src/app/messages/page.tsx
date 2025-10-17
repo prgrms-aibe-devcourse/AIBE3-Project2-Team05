@@ -6,6 +6,7 @@ import { useConversations } from '@/hooks/useConversations'
 import '@/styles/applications-messages.css'
 import { ConversationCard } from './_components/ConversationCard'
 import { ChatModal } from '@/components/ChatModal'
+import { RoleSelectionModal } from '@/components/RoleSelectionModal'
 
 // 인라인 LoadingSpinner 컴포넌트
 function InlineLoadingSpinner() {
@@ -38,11 +39,12 @@ function InlineLoadingSpinner() {
 }
 
 export default function MessagesPage() {
-  const { user, roles, isLoading: authLoading } = useUser()
+  const { user, selectedRole, roles, setSelectedRole, isLoading: authLoading } = useUser()
   const { conversations, isLoading, error, refetch } = useConversations()
   const [searchQuery, setSearchQuery] = useState('')
   const [showUnreadOnly, setShowUnreadOnly] = useState(false)
   const [chatModalOpen, setChatModalOpen] = useState(false)
+  const [showRoleModal, setShowRoleModal] = useState(false)
   const [selectedConversation, setSelectedConversation] = useState<{
     projectId: number
     freelancerId: number
@@ -50,16 +52,26 @@ export default function MessagesPage() {
     receiverName: string
     projectTitle: string
   } | null>(null)
-  const [isFreelancer, setIsFreelancer] = useState<boolean | null>(null)
 
-  // Freelancer 여부 확인 (roles 기반)
+  const isFreelancer = selectedRole === 'FREELANCER'
+
+  // 역할 선택 모달 표시 체크
   useEffect(() => {
-    if (authLoading || !user) return
+    console.log('[Messages Debug] Role check:', {
+      authLoading,
+      user: !!user,
+      selectedRole,
+      roles,
+      hasBothRoles: roles.includes('PM') && roles.includes('FREELANCER')
+    })
 
-    const hasFreelancerRole = roles.includes('FREELANCER')
-    setIsFreelancer(hasFreelancerRole)
-    console.log('[Messages] Freelancer role check:', { roles, hasFreelancerRole })
-  }, [user, authLoading, roles])
+    if (!authLoading && user && !selectedRole && roles.includes('PM') && roles.includes('FREELANCER')) {
+      console.log('[Messages Debug] Showing role modal')
+      setShowRoleModal(true)
+    } else {
+      setShowRoleModal(false)
+    }
+  }, [authLoading, user, selectedRole, roles])
 
   // 검색 필터링
   const filteredConversations = conversations.filter((conv) => {
@@ -74,10 +86,23 @@ export default function MessagesPage() {
   })
 
   const handleConversationClick = useCallback((conversation: typeof conversations[0]) => {
+    // receiverId: 회원 ID를 사용 (freelancerMemberId가 없으면 fallback으로 freelancerId)
+    const receiverId = isFreelancer
+      ? conversation.pmId
+      : (conversation.freelancerMemberId ?? conversation.freelancerId)
+
+    console.log('[Messages Debug] Opening chat:', {
+      isFreelancer,
+      pmId: conversation.pmId,
+      freelancerId: conversation.freelancerId,
+      freelancerMemberId: conversation.freelancerMemberId,
+      receiverId
+    })
+
     setSelectedConversation({
       projectId: conversation.projectId,
       freelancerId: conversation.freelancerId,
-      receiverId: isFreelancer ? conversation.pmId : conversation.freelancerId,
+      receiverId: receiverId,
       receiverName: isFreelancer ? conversation.pmName : conversation.freelancerName,
       projectTitle: conversation.projectTitle
     })
@@ -92,7 +117,7 @@ export default function MessagesPage() {
     }, 500)
   }, [refetch])
 
-  if (authLoading || isLoading || isFreelancer === null || isFreelancer === undefined) {
+  if (authLoading || isLoading || !selectedRole) {
     return (
       <div style={{
         maxWidth: '1200px',
@@ -282,6 +307,16 @@ export default function MessagesPage() {
           projectTitle={selectedConversation.projectTitle}
         />
       )}
+
+      {/* Role Selection Modal */}
+      <RoleSelectionModal
+        open={showRoleModal}
+        onSelect={(role) => {
+          console.log('[Messages Debug] Role selected:', role)
+          setSelectedRole(role)
+          setShowRoleModal(false)
+        }}
+      />
     </div>
   )
 }

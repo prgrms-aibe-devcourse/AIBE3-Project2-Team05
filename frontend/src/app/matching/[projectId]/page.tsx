@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { FreelancerCard } from './_components/FreelancerCard'
 import { FreelancerProfileModal } from './_components/FreelancerProfileModal'
 import { ProposalMessageModal } from './_components/ProposalMessageModal'
+import { RoleSelectionModal } from '@/components/RoleSelectionModal'
 import { apiClient } from '@/lib/backend/client'
 import { useUser } from '@/app/context/UserContext'
 import type { RecommendationResponseDto, FreelancerRecommendationDto } from '@/lib/backend/apiV1/types'
@@ -43,7 +44,7 @@ export default function MatchingPage() {
   const params = useParams()
   const projectId = params.projectId as string
   const router = useRouter()
-  const { user, roles, isLoading: authLoading } = useUser()
+  const { user, selectedRole, roles, setSelectedRole, isLoading: authLoading } = useUser()
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -52,18 +53,10 @@ export default function MatchingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isProposalModalOpen, setIsProposalModalOpen] = useState(false)
   const [proposalTargetFreelancer, setProposalTargetFreelancer] = useState<{ id: number; name: string } | null>(null)
-  const [isFreelancer, setIsFreelancer] = useState<boolean | null>(null)
+  const [showRoleModal, setShowRoleModal] = useState(false)
 
-  const isPm = isFreelancer === false
-
-  // 역할 확인 (roles 기반)
-  useEffect(() => {
-    if (authLoading || !user) return
-
-    const hasFreelancerRole = roles.includes('FREELANCER')
-    setIsFreelancer(hasFreelancerRole)
-    console.log('[MatchingDetail] Freelancer role check:', { roles, hasFreelancerRole })
-  }, [user, authLoading, roles])
+  const isFreelancer = selectedRole === 'FREELANCER'
+  const isPm = selectedRole === 'PM'
 
   // 로그인 체크
   useEffect(() => {
@@ -73,11 +66,29 @@ export default function MatchingPage() {
     }
   }, [authLoading, user, router])
 
+  // 역할 선택 모달 표시 체크
   useEffect(() => {
-    if (user && isFreelancer !== null) {
-      fetchRecommendations(isPm)
+    console.log('[Matching Debug] Role check:', {
+      authLoading,
+      user: !!user,
+      selectedRole,
+      roles,
+      hasBothRoles: roles.includes('PM') && roles.includes('FREELANCER')
+    })
+
+    if (!authLoading && user && !selectedRole && roles.includes('PM') && roles.includes('FREELANCER')) {
+      console.log('[Matching Debug] Showing role modal')
+      setShowRoleModal(true)
+    } else {
+      setShowRoleModal(false)
     }
-  }, [projectId, user, isFreelancer])
+  }, [authLoading, user, selectedRole, roles])
+
+  useEffect(() => {
+    if (user && selectedRole) {
+      fetchRecommendations()
+    }
+  }, [projectId, user, selectedRole])
 
   const fetchRecommendations = async (autoRecalculate = false) => {
     try {
@@ -148,7 +159,7 @@ export default function MatchingPage() {
     setIsModalOpen(true)
   }
 
-  if (authLoading || loading || isFreelancer === null) {
+  if (authLoading || loading || !selectedRole) {
     return (
       <div style={{
         minHeight: '100vh',
@@ -494,6 +505,16 @@ export default function MatchingPage() {
             onSubmit={handleProposalSubmit}
           />
         )}
+
+        {/* Role Selection Modal */}
+        <RoleSelectionModal
+          open={showRoleModal}
+          onSelect={(role) => {
+            console.log('[Matching Debug] Role selected:', role)
+            setSelectedRole(role)
+            setShowRoleModal(false)
+          }}
+        />
       </div>
     </div>
   )

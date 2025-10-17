@@ -23,6 +23,7 @@ export interface FreelancerRecommendationDto {
   matchingReasons: Record<string, unknown>;
   skills: FreelancerTechDto[];
   completedProjects: number;
+  alreadyProposed?: boolean;
 }
 
 export interface RecommendationResponseDto {

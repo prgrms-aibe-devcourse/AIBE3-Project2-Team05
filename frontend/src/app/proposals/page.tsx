@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { ProposalCard } from './_components/ProposalCard'
 import { AcceptRejectModal } from './_components/AcceptRejectModal'
 import { ChatModal } from '@/components/ChatModal'
+import { RoleSelectionModal } from '@/components/RoleSelectionModal'
 
 interface Proposal {
   id: number
@@ -15,6 +16,7 @@ interface Proposal {
   pmId: number
   pmName: string
   freelancerId: number
+  freelancerMemberId?: number  // 프리랜서의 회원 ID (백엔드 추가 대기)
   freelancerName: string
   message: string
   status: string
@@ -105,7 +107,7 @@ function InlineEmptyState({
 }
 
 export default function ProposalsPage() {
-  const { user, roles, isLoading: authLoading } = useUser()
+  const { user, selectedRole, roles, setSelectedRole, isLoading: authLoading } = useUser()
   const router = useRouter()
   const [proposals, setProposals] = useState<Proposal[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -113,6 +115,7 @@ export default function ProposalsPage() {
   const [modalType, setModalType] = useState<'accept' | 'reject'>('accept')
   const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(null)
   const [chatModalOpen, setChatModalOpen] = useState(false)
+  const [showRoleModal, setShowRoleModal] = useState(false)
   const [chatTarget, setChatTarget] = useState<{
     freelancerId: number
     receiverId: number
@@ -120,17 +123,27 @@ export default function ProposalsPage() {
     projectId: number
     projectTitle: string
   } | null>(null)
-  const [isFreelancer, setIsFreelancer] = useState<boolean | null>(null)
 
-  const isPm = isFreelancer === false
+  const isFreelancer = selectedRole === 'FREELANCER'
+  const isPm = selectedRole === 'PM'
 
+  // 역할 선택 모달 표시 체크
   useEffect(() => {
-    if (authLoading || !user) return
+    console.log('[Proposals Debug] Role check:', {
+      authLoading,
+      user: !!user,
+      selectedRole,
+      roles,
+      hasBothRoles: roles.includes('PM') && roles.includes('FREELANCER')
+    })
 
-    const hasFreelancerRole = roles.includes('FREELANCER')
-    setIsFreelancer(hasFreelancerRole)
-    console.log('[Proposals] Freelancer role check:', { roles, hasFreelancerRole })
-  }, [user, authLoading, roles])
+    if (!authLoading && user && !selectedRole && roles.includes('PM') && roles.includes('FREELANCER')) {
+      console.log('[Proposals Debug] Showing role modal')
+      setShowRoleModal(true)
+    } else {
+      setShowRoleModal(false)
+    }
+  }, [authLoading, user, selectedRole, roles])
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -139,14 +152,14 @@ export default function ProposalsPage() {
       return
     }
 
-    if (isFreelancer === null) {
+    if (!selectedRole) {
       return
     }
 
     if (!authLoading && user) {
       loadProposals()
     }
-  }, [user, authLoading, isFreelancer, router])
+  }, [user, authLoading, selectedRole, router])
 
   useEffect(() => {
     if (proposals.length > 0) {
@@ -303,13 +316,28 @@ export default function ProposalsPage() {
                   onAccept={handleAccept}
                   onReject={handleReject}
                   onCancel={handleCancel}
-                  onSendMessage={() => handleSendMessage(
-                    proposal.freelancerId,
-                    isPm ? proposal.freelancerId : proposal.pmId,
-                    isPm ? proposal.freelancerName : proposal.pmName,
-                    proposal.projectId,
-                    proposal.projectTitle
-                  )}
+                  onSendMessage={() => {
+                    // receiverId: 회원 ID를 사용 (freelancerMemberId가 없으면 fallback으로 freelancerId)
+                    const receiverId = isPm
+                      ? (proposal.freelancerMemberId ?? proposal.freelancerId)
+                      : proposal.pmId
+
+                    console.log('[Proposals Debug] Opening chat:', {
+                      isPm,
+                      pmId: proposal.pmId,
+                      freelancerId: proposal.freelancerId,
+                      freelancerMemberId: proposal.freelancerMemberId,
+                      receiverId
+                    })
+
+                    handleSendMessage(
+                      proposal.freelancerId,
+                      receiverId,
+                      isPm ? proposal.freelancerName : proposal.pmName,
+                      proposal.projectId,
+                      proposal.projectTitle
+                    )
+                  }}
                 />
               </div>
             ))}
@@ -342,6 +370,16 @@ export default function ProposalsPage() {
             projectTitle={chatTarget.projectTitle}
           />
         )}
+
+        {/* Role Selection Modal */}
+        <RoleSelectionModal
+          open={showRoleModal}
+          onSelect={(role) => {
+            console.log('[Proposals Debug] Role selected:', role)
+            setSelectedRole(role)
+            setShowRoleModal(false)
+          }}
+        />
       </div>
     </div>
   )

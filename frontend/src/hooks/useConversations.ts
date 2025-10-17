@@ -5,6 +5,7 @@ export interface Conversation {
   projectId: number
   projectTitle: string
   freelancerId: number
+  freelancerMemberId?: number  // 프리랜서의 회원 ID (백엔드 추가 대기)
   freelancerName: string
   pmId: number
   pmName: string
